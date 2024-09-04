@@ -1,0 +1,62 @@
+/* Navbar.css */
+
+
+
+.navbar {
+    
+    position: fixed;
+    top: 10%;
+    right: 0%;
+    width: 100vw;
+    background-color: #00000000;  /* Rustic brown color */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 60px; /* Adjust the height to make it look like a banner */
+    
+}
+
+.nav-list:hover {
+    background-color: #2d2d2d;
+    border-color: rgba(0, 0, 0, 0.562);
+    border: solid 1.5px;
+
+}
+
+.nav-list {
+    list-style: none;
+    display: flex;
+    flex-direction: row;  /* Ensure the items are in a row */
+    padding: 0;
+    margin: 0;
+    border: solid 1px;
+    box-shadow: 0 10px 50px rgb(0, 0, 0);
+    border-color: #dddddd54;
+    
+    background-color: rgb(0, 0, 0);
+    border-radius: 5px;
+    transition: background-color 0.3s ease-in-out;
+    transition: border 1s ease-in-out;
+}
+
+.nav-item {
+    margin: 0 15px;
+}
+
+.nav-item a {
+    text-decoration: none;
+    
+    color: #ffffff80; 
+    font-size: 1.2em;
+    padding: 15px 0;
+    display: block;
+}
+
+.nav-item a:hover {
+      /* Golden color for hover effect */
+    transition: color 0.3s;
+    color: #ffffff;
+}
+

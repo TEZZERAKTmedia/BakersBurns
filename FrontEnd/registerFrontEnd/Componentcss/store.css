@@ -1,0 +1,30 @@
+.store-container {
+  position: relative; /* Ensure the container is the positioning context */
+  width: 100vw;
+  height: 100vh;
+  padding: 20px;
+  margin-top: 300px;
+}
+
+.cover-up {
+  position: fixed; /* Position the cover-up relative to its parent */
+  height: 250px;
+  width: 100%;
+  background-color: rgb(70, 71, 71);
+  color: black; /* Changed to make the text visible */
+  z-index: 10;
+  margin-top: -50%;
+  left: 0;
+}
+
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+
+.note {
+  margin-top: 35%;
+  font-size: 1.5rem;
+}

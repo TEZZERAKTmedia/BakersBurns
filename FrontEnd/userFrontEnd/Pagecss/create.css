@@ -1,0 +1,125 @@
+/* General Page Styling */
+.create-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background-color: #000000d3; /* Semi-transparent background color */
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-top: 25%;
+    
+    transition: background-color 0.3s ease; /* Add transition for smooth background color change */
+}
+
+.create-page:hover {
+    background-color: #000000a7; /* Solid background color on hover */
+}
+
+
+.create-page h1 {
+    font-family: 'Arial', sans-serif;
+    font-size: 2rem;
+    color: white;
+    margin-bottom: 20px;
+    padding: 3%;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.8);
+}
+
+.create-page label {
+    font-family: 'Arial', sans-serif;
+    font-size: 1rem;
+    color: white;
+    margin-top: 10px;
+    padding: 2%;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.8);
+    background-color: rgba(255, 255, 255, 0.563);
+    border-radius: 20px;
+}
+
+.create-page select, .create-page input[type="file"] {
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+.create-page input[type="range"] {
+    width: 100%;
+    margin-top: 10px;
+    
+    
+}
+
+.create-page button {
+    margin-top: 20px;
+    padding: 10px 20px;
+    font-size: 1rem;
+    border-radius: 5px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.create-page button:hover {
+    background-color: #0056b3;
+}
+
+.note {
+    font-size: 0.9rem;
+    color: #666;
+    margin-top: 20px;
+    text-align: center;
+    width: 80%;
+    color: rgb(0, 0, 0);
+    background-color: rgba(255, 255, 255, 0.563);
+    border-radius: 10px;
+
+}
+
+/* Image Preview Styling */
+.create-image-preview {
+    max-height: 200px;
+    margin-top: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+
+
+#controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 20px;
+    width: 80%;
+}
+
+#controls label {
+    width: 100%;
+    margin-top: 10px;
+}
+
+#controls input[type="range"] {
+    width: 100%;
+}
+
+.create-page-note {
+    background-color: aliceblue;
+    
+    color: black;
+    border-radius: 20px;
+    margin: 20px;
+    padding: 20px;
+}
+.create-page-note-outer {
+    background-color: rgba(240, 248, 255, 0.557);
+    max-width: 90%;
+    margin-left: 2.5%;
+    color: black;
+    border-radius: 20px;
+    padding: 2%;
+}
