@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import '../Pagecss/Home.css'; // Import the CSS file for styling
-import bakersburnsImage from '../assets/BakersBurns.png'; // Import the BakersBurns image
+ // Import the BakersBurns image
 import { Link } from 'react-router-dom';
 
 const Home = () => {

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import '../Componentcss/navbar.css'; // Import the CSS file for styling
-import Logo from '../assets/LogoTP.png'; // Adjust the path to your logo image
+ // Adjust the path to your logo image
 
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);

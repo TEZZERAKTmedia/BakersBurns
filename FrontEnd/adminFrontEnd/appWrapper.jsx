@@ -13,7 +13,6 @@ import Scanner from './Components/scanner';
 
 const AppWrapper = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [loading, setLoading] = useState(true); // Start with true to show the loading state initially
   const [userRole, setUserRole] = useState(null);
 
   useEffect(() => {
@@ -22,22 +21,17 @@ const AppWrapper = () => {
         const response = await axios.get('/auth/check-auth', {
           withCredentials: true,
         });
-
+        console.log('Auth response:', response); // Log the response
         setUserRole(response.data.role);
         setIsAuthenticated(true);
       } catch (error) {
+        console.error('Auth check failed:', error); // Log the error
         setIsAuthenticated(false);
-      } finally {
-        setLoading(false);
       }
     };
 
     checkAuth();
   }, []);
-
-  if (loading) {
-    return <div>Loading...</div>; // Display a loading state while checking authentication
-  }
 
   return (
     <ScannerProvider>
@@ -45,6 +39,8 @@ const AppWrapper = () => {
       <Scannable>
         <Routes>
           <Route path="/" element={<Home />} />
+
+          {/* Protected admin routes */}
           {isAuthenticated && userRole === 'admin' ? (
             <>
               <Route path="/admin" element={<Home />} />
@@ -53,6 +49,7 @@ const AppWrapper = () => {
               <Route path="/admin/product-manager" element={<ProductManagement />} />
             </>
           ) : (
+            // Redirect non-admin or unauthenticated users to home
             <Route path="*" element={<Navigate to="/" />} />
           )}
         </Routes>
