@@ -10,28 +10,41 @@ import ProductManagement from './Pages/ProductManagement';
 import './App.css';
 import { ScannerProvider } from './context/scannerContext';
 import Scanner from './Components/scanner';
+import LoginForm from './Components/loginForm'; // Use the same login form here
 
 const AppWrapper = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userRole, setUserRole] = useState(null);
+  const [loading, setLoading] = useState(true);
 
+  // Check for authentication status
   useEffect(() => {
     const checkAuth = async () => {
       try {
         const response = await axios.get('/auth/check-auth', {
           withCredentials: true,
         });
-        console.log('Auth response:', response); // Log the response
         setUserRole(response.data.role);
         setIsAuthenticated(true);
       } catch (error) {
-        console.error('Auth check failed:', error); // Log the error
+        console.error('Auth check failed:', error);
         setIsAuthenticated(false);
+      } finally {
+        setLoading(false);
       }
     };
 
     checkAuth();
   }, []);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  // If not authenticated, show login form
+  if (!isAuthenticated) {
+    return <LoginForm />;
+  }
 
   return (
     <ScannerProvider>

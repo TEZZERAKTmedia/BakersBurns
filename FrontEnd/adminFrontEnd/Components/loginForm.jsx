@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
 import axios from 'axios';
-import '../Componentcss/login.css';
 
-const LoginForm = () => {
+const AdminLoginForm = ({ onLoginSuccess }) => {
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
@@ -11,15 +9,12 @@ const LoginForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:3450/auth/login', { identifier, password });
+      const response = await axios.post('http://localhost:5010/auth/admin-login', { identifier, password }, {
+        withCredentials: true, // This will ensure the cookie is stored in the browser
+      });
 
-      // Log the response for debugging purposes
-      console.log('Response data:', response.data);
-
-      const { redirectUrl } = response.data;
-
-      // Redirect based on user role
-      window.location.href = redirectUrl;
+      // If login is successful, trigger the login success callback
+      onLoginSuccess(response.data.role); // Pass the user role to parent component
     } catch (error) {
       console.error('Login error:', error);
       setMessage('Error logging in: ' + (error.response ? error.response.data.message : error.message));
@@ -28,7 +23,7 @@ const LoginForm = () => {
 
   return (
     <div className="container">
-      <h2>Login</h2>
+      <h2>Admin Login</h2>
       <form onSubmit={handleSubmit}>
         <input
           type="text"
@@ -46,10 +41,9 @@ const LoginForm = () => {
         />
         <button type="submit">Login</button>
       </form>
-      <Link to="/forgotpassword">Forgot Password?</Link>
       {message && <p>{message}</p>}
     </div>
   );
 };
 
-export default LoginForm;
+export default AdminLoginForm;
