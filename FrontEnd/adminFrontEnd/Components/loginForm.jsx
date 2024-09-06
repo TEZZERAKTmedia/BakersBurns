@@ -9,7 +9,7 @@ const AdminLoginForm = ({ onLoginSuccess }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:5010/auth/admin-login', { identifier, password }, {
+      const response = await axios.post('http://localhost:3450/auth/admin-login', { identifier, password }, {
         withCredentials: true, // This will ensure the cookie is stored in the browser
       });
 
@@ -31,6 +31,7 @@ const AdminLoginForm = ({ onLoginSuccess }) => {
           onChange={(e) => setIdentifier(e.target.value)}
           placeholder="Enter your username or email"
           required
+          style={{ padding: '10px' }}
         />
         <input
           type="password"
@@ -38,6 +39,7 @@ const AdminLoginForm = ({ onLoginSuccess }) => {
           onChange={(e) => setPassword(e.target.value)}
           placeholder="Enter your password"
           required
+          style={{ padding: '10px' }}
         />
         <button type="submit">Login</button>
       </form>

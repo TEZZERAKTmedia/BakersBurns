@@ -10,9 +10,9 @@ const Navbar = () => {
         <nav className="navbar">
             <ul className="nav-list">
                 <li className="nav-item"><Link to="/">Home</Link></li>
-                <li className="nav-item"><Link to="/admin/gallery">Gallery</Link></li> {/* Updated path */}
-                <li className="nav-item"><Link to="/admin/product-manager">Product Manager</Link></li> {/* Updated path */}
-                <li className="nav-item"><Link to="/admin/layout">User Preview</Link></li> {/* Updated path */}
+                <li className="nav-item"><Link to="/gallery">Gallery</Link></li> {/* Updated path */}
+                <li className="nav-item"><Link to="/product-manager">Product Manager</Link></li> {/* Updated path */}
+                <li className="nav-item"><Link to="/layout">User Preview</Link></li> {/* Updated path */}
                 <button ref={toggleButtonRef} onClick={toggleScanner} className="scanner-toggle-button">
                     {isScanning ? 'Stop Scanning' : 'Start Scanning'}
                 </button>

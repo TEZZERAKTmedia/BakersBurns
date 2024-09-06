@@ -11,7 +11,7 @@ const Home = () => {
         <p>Select a section to manage:</p>
         <ul className="home-app-tiles">
           <li className="home-tile">
-            <Link to="/admin/gallery">
+            <Link to="/gallery">
               <div className="tile-content">
                 <h3>Gallery</h3>
                 <p>Manage your gallery here</p>
@@ -19,7 +19,7 @@ const Home = () => {
             </Link>
           </li>
           <li className="home-tile">
-            <Link to="/admin/product-manager">
+            <Link to="/product-manager">
               <div className="tile-content">
                 <h3>Product Manager</h3>
                 <p>Manage products and inventory</p>
@@ -27,7 +27,7 @@ const Home = () => {
             </Link>
           </li>
           <li className="home-tile">
-            <Link to="/admin/layout">
+            <Link to="/layout">
               <div className="tile-content">
                 <h3>User Preview</h3>
                 <p>Preview the user layout</p>

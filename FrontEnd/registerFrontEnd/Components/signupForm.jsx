@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axiosInstance from '../config/signupAxiosConfig'; // Import the configured axios instance
 import '../Componentcss/sign_up_form.css';
 import { Link } from 'react-router-dom';
+import ReCAPTCHA from 'react-google-recaptcha';
 
 const SignUpForm = () => {
     const [formData, setFormData] = useState({
@@ -12,14 +13,38 @@ const SignUpForm = () => {
         phoneNumber: ''
     });
 
+    const [captchaToken, setCaptchaToken] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
+    const [userNameError, setUserNameError] = useState('');
     const [requirements, setRequirements] = useState({
         length: false,
         upperLowerCase: false,
         specialChar: false,
         digit: false
     });
+
+    //Captcha onchange callback
+
+    const handleCaptchaChange = (token) => {
+        setCaptchaToken(token);
+    }
+
+    const checkUserName = async () => {
+        try {
+            const response = await axiosInstance.post('/auth/check-username', { userName: formData.userName });
+            setUserNameError('')
+        } catch (error) {
+            if (error.response && error.response.status === 400) {
+                setUserNameError('Username is already taken')
+                
+            } else {
+                setUserNameError('Error checking username');
+            }
+            
+        }
+    }
     const [passwordsMatch, setPasswordsMatch] = useState(false);
+
 
     const handleChange = (e) => {
         setFormData({
@@ -68,12 +93,19 @@ const SignUpForm = () => {
             return;
         }
 
+        //Captcha
+        if (!captchaToken) {
+            setErrorMessage("Please conplete the Captcha");
+            return;
+        }
+
         try {
             const response = await axiosInstance.post('/auth/signup', {
                 userName: formData.userName,
                 email: formData.email,
                 password: formData.password,
-                phoneNumber: formData.phoneNumber
+                phoneNumber: formData.phoneNumber,
+                captchaToken
                 
             });
             
@@ -92,13 +124,14 @@ const SignUpForm = () => {
     };
 
     const resetForm = () => {
-        SignUpForm({
-            userName: '',
-            email: '',
-            password: '',
-            confirmPassword: '',
-            phoneNumber: ''
+        setFormData({
+            userName:'',
+            email:'',
+            password:'',
+            confirmPassword:'',
+            phoneNumber:''
         });
+        setCaptchaToken(''); //reset captcha
     };
 
     return (
@@ -110,10 +143,11 @@ const SignUpForm = () => {
                 name="userName" 
                 value={formData.userName} 
                 onChange={handleChange}
+                onBlur={checkUserName}
                 placeholder="Username" 
                 required />
             </label>
-
+                {userNameError && <div className="error-message">{userNameError}</div>}
             <label>
                 <input 
                 type="email" 
@@ -169,7 +203,11 @@ const SignUpForm = () => {
                 placeholder="Phone Number"
                 required />
             </label>
-            <button ><Link to="/login">Already have an account? Click here to log in</Link></button>
+            <ReCAPTCHA 
+                sitekey=""
+                onChange={handleCaptchaChange}
+            />
+            <button style={{margin: '5px'}} ><Link to="/login">Already have an account? Click here to log in</Link></button>
             <button type="submit" onClick={resetForm}>Sign Up</button>
         </form>
     );

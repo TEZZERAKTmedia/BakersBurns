@@ -19,7 +19,7 @@ const loginAdmin = async (req, res) => {
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
             console.log('Password is invalid');
-            return res.status(401),json({ message: 'Invalid admin credentials'});
+            return res.status(401).json({ message: 'Invalid admin credentials'});
         }
 
         //Generate a JWT token
@@ -29,7 +29,7 @@ const loginAdmin = async (req, res) => {
             {expiresIn: '1h'}
         );
 
-        console.log('Generated toke for admin:', token);
+        console.log('Generated token for admin:', token);
 
 
         //Set cookie for admin app

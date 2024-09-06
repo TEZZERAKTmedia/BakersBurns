@@ -27,6 +27,7 @@
     "jwt-decode": "^4.0.0",
     "postman": "^0.2.0",
     "react-calendar": "^5.0.0",
+    "react-google-recaptcha": "^3.1.0",
     "three": "^0.166.1"
   }
 }
