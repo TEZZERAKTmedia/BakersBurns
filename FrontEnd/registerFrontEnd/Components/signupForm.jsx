@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axiosInstance from '../config/signupAxiosConfig'; // Import the configured axios instance
+import { registerApi } from '../config/axios'; // Import the configured axios instance
 import '../Componentcss/sign_up_form.css';
 import { Link } from 'react-router-dom';
 import ReCAPTCHA from 'react-google-recaptcha';
@@ -23,28 +23,25 @@ const SignUpForm = () => {
         digit: false
     });
 
-    //Captcha onchange callback
-
+    // Captcha onchange callback
     const handleCaptchaChange = (token) => {
         setCaptchaToken(token);
-    }
+    };
 
     const checkUserName = async () => {
         try {
-            const response = await axiosInstance.post('/auth/check-username', { userName: formData.userName });
-            setUserNameError('')
+            const response = await registerApi.post('/auth/check-username', { userName: formData.userName });
+            setUserNameError('');
         } catch (error) {
             if (error.response && error.response.status === 400) {
-                setUserNameError('Username is already taken')
-                
+                setUserNameError('Username is already taken');
             } else {
                 setUserNameError('Error checking username');
             }
-            
         }
-    }
-    const [passwordsMatch, setPasswordsMatch] = useState(false);
+    };
 
+    const [passwordsMatch, setPasswordsMatch] = useState(false);
 
     const handleChange = (e) => {
         setFormData({
@@ -78,7 +75,6 @@ const SignUpForm = () => {
         
         if (formData.password !== formData.confirmPassword) {
             setErrorMessage("Passwords do not match");
-            
             return; 
         }
 
@@ -93,22 +89,19 @@ const SignUpForm = () => {
             return;
         }
 
-        //Captcha
         if (!captchaToken) {
-            setErrorMessage("Please conplete the Captcha");
+            setErrorMessage("Please complete the Captcha");
             return;
         }
 
         try {
-            const response = await axiosInstance.post('/auth/signup', {
+            const response = await registerApi.post('/auth/signup', {
                 userName: formData.userName,
                 email: formData.email,
                 password: formData.password,
                 phoneNumber: formData.phoneNumber,
                 captchaToken
-                
             });
-            
             
             alert(response.data.message);
             setErrorMessage(''); // Clear error message on success
@@ -118,7 +111,6 @@ const SignUpForm = () => {
                 setErrorMessage(error.response.data.message || "Error signing up");
             } else {
                 setErrorMessage("Error signing up");
-                
             }
         }
     };
@@ -131,7 +123,7 @@ const SignUpForm = () => {
             confirmPassword:'',
             phoneNumber:''
         });
-        setCaptchaToken(''); //reset captcha
+        setCaptchaToken(''); // Reset captcha
     };
 
     return (
@@ -147,7 +139,7 @@ const SignUpForm = () => {
                 placeholder="Username" 
                 required />
             </label>
-                {userNameError && <div className="error-message">{userNameError}</div>}
+            {userNameError && <div className="error-message">{userNameError}</div>}
             <label>
                 <input 
                 type="email" 
@@ -203,10 +195,7 @@ const SignUpForm = () => {
                 placeholder="Phone Number"
                 required />
             </label>
-            <ReCAPTCHA 
-                sitekey=""
-                onChange={handleCaptchaChange}
-            />
+           
             <button style={{margin: '5px'}} ><Link to="/login">Already have an account? Click here to log in</Link></button>
             <button type="submit" onClick={resetForm}>Sign Up</button>
         </form>

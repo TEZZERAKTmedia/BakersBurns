@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Create an Axios instance
-const userApi = axios.create({
+const adminApi = axios.create({
   baseURL: import.meta.env.VITE_DEVELOPMENT,  // Automatically loaded from .env file
   headers: {
     'Content-Type': 'application/json',
@@ -10,4 +10,4 @@ const userApi = axios.create({
 
 console.log("Base URL is: ", import.meta.env.VITE_DEVELOPMENT);  // Log the base URL
 
-export { userApi };
+export { adminApi };

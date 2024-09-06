@@ -1,14 +1,14 @@
 // UserApp/src/pages/Checkout.jsx
 import React, { useEffect } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
-import axios from 'axios';
+import { userApi } from 'axios';
 
 const stripePromise = loadStripe('your-publishable-key-here');
 
 const Checkout = () => {
   useEffect(() => {
     const createCheckoutSession = async () => {
-      const response = await axios.post('/api/payment/create-checkout-session', {
+      const response = await userApi.post('/api/payment/create-checkout-session', {
         cartItems: [
           // Example cart items
           { name: 'Product 1', price: 1000, quantity: 1 },

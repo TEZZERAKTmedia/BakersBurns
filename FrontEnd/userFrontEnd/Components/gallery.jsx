@@ -1,6 +1,6 @@
 import React from "react";
 import { useEffect, useState } from "react";
-import { shopApi } from "../config/axios";
+import { userApi } from "../config/axios";
 
 const Gallery = () => {
     const [gallery, setgallery] = useState ([]);
@@ -12,7 +12,7 @@ const Gallery = () => {
 
 const fetchGallery = async () => {
     try {
-        const response = await shopApi.get('/api/gallery')
+        const response = await userApi.get('/api/gallery')
         setgallery(response.data);
     } catch (error) {
         console.error('unable to display gallery!', error)

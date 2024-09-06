@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
-import { shopApi } from '../config/axios';
+import { userApi } from '../config/axios';
 import { AuthContext } from '../authProvider'; // Import the AuthContext
 import '../Componentcss/cart.css'; // Import the CSS file for styling
 
@@ -22,7 +22,7 @@ const Cart = () => {
         console.error('User not authenticated');
         return;
       }
-      const response = await shopApi.get(`/api/cart/${userId}`, {
+      const response = await userApi.get(`/api/cart/${userId}`, {
         headers: {
           'Authorization': `Bearer ${token}` // Correct use of template literals
         }
@@ -40,7 +40,7 @@ const Cart = () => {
         console.error('User not authenticated');
         return;
       }
-      await shopApi.delete(`/api/cart/${userId}/${productId}`, {
+      await userApi.delete(`/api/cart/${userId}/${productId}`, {
         headers: {
           'Authorization': `Bearer ${token}` // Correct use of template literals
         }
@@ -58,7 +58,7 @@ const Cart = () => {
         console.error('User not authenticated');
         return;
       }
-      const response = await shopApi.post('/api/payment/create-checkout-session', { cartItems }, {
+      const response = await userApi.post('/api/payment/create-checkout-session', { cartItems }, {
         headers: {
           'Authorization': `Bearer ${token}` // Correct use of template literals
         }

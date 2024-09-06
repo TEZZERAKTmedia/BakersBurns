@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import '../Componentcss/store.css'; // Import the CSS file
-import { shopApi } from '../config/axios'; // Import shopApi and userApi correctly
+import { userApi } from '../config/axios'; // Import shopApi and userApi correctly
 import { AuthContext } from '../authProvider';
 
 
@@ -14,7 +14,7 @@ const Store = () => {
 
   const fetchProducts = async () => {
     try {
-      const response = await shopApi.get('/api/products');
+      const response = await userApi.get('/api/products');
       setProducts(response.data);
     } catch (error) {
       console.error('Error fetching products:', error);
@@ -28,7 +28,7 @@ const Store = () => {
     }
 
     try {
-      await shopApi.post('/api/cart', { userId, productId, quantity:1 }, {
+      await userApi.post('/api/cart', { userId, productId, quantity:1 }, {
         headers: {
           'Authorization': `Bearer ${token}` // Include the token in the Authorization header
         }
