@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { registerApi } from '../config/axios'; // Import the configured axios instance
 import '../Componentcss/sign_up_form.css';
-import { Link } from 'react-router-dom';
-import ReCAPTCHA from 'react-google-recaptcha';
+import { Link, useNavigate } from 'react-router-dom';
 
 const SignUpForm = () => {
     const [formData, setFormData] = useState({
@@ -13,8 +12,8 @@ const SignUpForm = () => {
         phoneNumber: ''
     });
 
-    const [captchaToken, setCaptchaToken] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
+    const [emailSent, setEmailSent] = useState(false);  // State to track email confirmation
     const [userNameError, setUserNameError] = useState('');
     const [requirements, setRequirements] = useState({
         length: false,
@@ -23,10 +22,7 @@ const SignUpForm = () => {
         digit: false
     });
 
-    // Captcha onchange callback
-    const handleCaptchaChange = (token) => {
-        setCaptchaToken(token);
-    };
+    const navigate = useNavigate(); // To navigate between pages
 
     const checkUserName = async () => {
         try {
@@ -70,41 +66,49 @@ const SignUpForm = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
+    
         const passwordRequirements = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-        
+    
         if (formData.password !== formData.confirmPassword) {
             setErrorMessage("Passwords do not match");
             return; 
         }
-
+    
         if (!passwordRequirements.test(formData.password)) {
             setErrorMessage("Password must be at least 8 characters long, contain one uppercase letter, one lowercase letter, one number, and one special character.");
             return;
         }
-
+    
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(formData.email)) {
             setErrorMessage("Please enter a valid email address");
             return;
         }
 
-        if (!captchaToken) {
-            setErrorMessage("Please complete the Captcha");
-            return;
-        }
-
         try {
+            // Step 1: Send registration data
             const response = await registerApi.post('/auth/signup', {
                 userName: formData.userName,
                 email: formData.email,
                 password: formData.password,
-                phoneNumber: formData.phoneNumber,
-                captchaToken
+                phoneNumber: formData.phoneNumber
             });
-            
-            alert(response.data.message);
-            setErrorMessage(''); // Clear error message on success
+    
+            if (response.status === 200) {
+                // Step 2: Send verification email
+                const emailResponse = await registerApi.post('/auth/send-verification-email', {
+                    email: formData.email
+                });
+    
+                if (emailResponse.status === 200) {
+                    setEmailSent(true); // Update state to indicate email was sent
+                    resetForm(); // Reset the form after successful registration
+                } else {
+                    setErrorMessage('Error sending verification email. Please try again.');
+                }
+            } else {
+                setErrorMessage(response.data.message || 'Error during registration.');
+            }
         } catch (error) {
             console.error("There was an error signing up!", error);
             if (error.response) {
@@ -123,82 +127,89 @@ const SignUpForm = () => {
             confirmPassword:'',
             phoneNumber:''
         });
-        setCaptchaToken(''); // Reset captcha
     };
 
     return (
-        <form onSubmit={handleSubmit}>
-            {errorMessage && <div className="error-message">{errorMessage}</div>} {/* Display error message */}
-            <label>
-                <input 
-                type="text" 
-                name="userName" 
-                value={formData.userName} 
-                onChange={handleChange}
-                onBlur={checkUserName}
-                placeholder="Username" 
-                required />
-            </label>
-            {userNameError && <div className="error-message">{userNameError}</div>}
-            <label>
-                <input 
-                type="email" 
-                name="email" 
-                value={formData.email} 
-                onChange={handleChange}
-                placeholder="Email" 
-                required />
-            </label>
-            <label>
-                <input 
-                type="password" 
-                name="password" 
-                value={formData.password} 
-                onChange={handleChange} 
-                placeholder="Password"
-                required />
-            </label>
-            <ul>
-                <li className={requirements.length ? 'valid' : 'invalid'}>
-                    Password must be at least 8 characters long
-                </li>
-                <li className={requirements.upperLowerCase ? 'valid' : 'invalid'}>
-                    Requires at least one uppercase letter & one lowercase letter
-                </li>
-                <li className={requirements.specialChar ? 'valid' : 'invalid'}>
-                    Requires at least one special character
-                </li>
-                <li className={requirements.digit ? 'valid' : 'invalid'}>
-                    Requires at least one digit
-                </li>
-            </ul>
-            <label>
-                <input 
-                type="password" 
-                name="confirmPassword" 
-                value={formData.confirmPassword} 
-                onChange={handleChange} 
-                placeholder="Confirm Password"
-                required />
-            </label>
-            <ul>
-                <li className={passwordsMatch ? 'valid' : 'invalid'}>
-                    {passwordsMatch ? 'Passwords match' : 'Passwords do not match'}
-                </li>
-            </ul>
-            <label>
-                <input 
-                type="text" 
-                name="phoneNumber" 
-                value={formData.phoneNumber} 
-                onChange={handleChange} 
-                placeholder="Phone Number"
-                required />
-            </label>
-           
-            <button style={{margin: '5px'}} ><Link to="/login">Already have an account? Click here to log in</Link></button>
-            <button type="submit" onClick={resetForm}>Sign Up</button>
-        </form>
+        <div>
+            {emailSent ? (
+                <div className="success-message">
+                    Registration successful! A verification email has been sent to {formData.email}. Please check your inbox to verify your account.
+                </div>
+            ) : (
+                <form onSubmit={handleSubmit}>
+                    {errorMessage && <div className="error-message">{errorMessage}</div>} {/* Display error message */}
+                    <label>
+                        <input 
+                        type="text" 
+                        name="userName" 
+                        value={formData.userName} 
+                        onChange={handleChange}
+                        onBlur={checkUserName}
+                        placeholder="Username" 
+                        required />
+                    </label>
+                    {userNameError && <div className="error-message">{userNameError}</div>}
+                    <label>
+                        <input 
+                        type="email" 
+                        name="email" 
+                        value={formData.email} 
+                        onChange={handleChange}
+                        placeholder="Email" 
+                        required />
+                    </label>
+                    <label>
+                        <input 
+                        type="password" 
+                        name="password" 
+                        value={formData.password} 
+                        onChange={handleChange} 
+                        placeholder="Password"
+                        required />
+                    </label>
+                    <ul>
+                        <li className={requirements.length ? 'valid' : 'invalid'}>
+                            Password must be at least 8 characters long
+                        </li>
+                        <li className={requirements.upperLowerCase ? 'valid' : 'invalid'}>
+                            Requires at least one uppercase letter & one lowercase letter
+                        </li>
+                        <li className={requirements.specialChar ? 'valid' : 'invalid'}>
+                            Requires at least one special character
+                        </li>
+                        <li className={requirements.digit ? 'valid' : 'invalid'}>
+                            Requires at least one digit
+                        </li>
+                    </ul>
+                    <label>
+                        <input 
+                        type="password" 
+                        name="confirmPassword" 
+                        value={formData.confirmPassword} 
+                        onChange={handleChange} 
+                        placeholder="Confirm Password"
+                        required />
+                    </label>
+                    <ul>
+                        <li className={passwordsMatch ? 'valid' : 'invalid'}>
+                            {passwordsMatch ? 'Passwords match' : 'Passwords do not match'}
+                        </li>
+                    </ul>
+                    <label>
+                        <input 
+                        type="text" 
+                        name="phoneNumber" 
+                        value={formData.phoneNumber} 
+                        onChange={handleChange} 
+                        placeholder="Phone Number"
+                        required />
+                    </label>
+                
+                    <button style={{margin: '5px'}} ><Link to="/login">Already have an account? Click here to log in</Link></button>
+                    <button type="submit">Sign Up</button>
+                </form>
+            )}
+        </div>
     );
 };
 

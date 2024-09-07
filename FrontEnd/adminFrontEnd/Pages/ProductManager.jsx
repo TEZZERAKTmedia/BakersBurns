@@ -10,7 +10,7 @@ const AdminDashboard = () => {
     const fetchProducts = async () => {
       const token = localStorage.getItem('token');
       try {
-        const response = await adminApi.get('http://localhost:5000/api/admin/products', {
+        const response = await adminApi.get('/api/admin/products', {
           headers: { Authorization: `Bearer ${token}` },
         });
         setProducts(response.data);
@@ -25,7 +25,7 @@ const AdminDashboard = () => {
   const handleAddProduct = async () => {
     const token = localStorage.getItem('token');
     try {
-      const response = await adminApi.post('http://localhost:5000/api/admin/product', { name: newProduct }, {
+      const response = await adminApi.post('/api/admin/product', { name: newProduct }, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setProducts([...products, response.data]);
@@ -40,7 +40,7 @@ const AdminDashboard = () => {
   const handleRemoveProduct = async (id) => {
     const token = localStorage.getItem('token');
     try {
-      await axios.delete(`http://localhost:5000/api/admin/product/${id}`, {
+      await axios.delete(`/api/admin/product/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setProducts(products.filter(product => product.id !== id));

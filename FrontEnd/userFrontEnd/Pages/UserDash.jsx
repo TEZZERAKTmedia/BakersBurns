@@ -1,36 +1,73 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import { userApi } from '../config/axios';
 
 const UserDashboard = () => {
   const [userData, setUserData] = useState(null);
+  const [userOrders,setUserOrders] = useState([]);
 
   useEffect(() => {
     const fetchUserData = async () => {
       const token = localStorage.getItem('token');
       try {
-        const response = await axios.get('http://localhost:3000', {
-          headers: { Authorization: `Bearer ${token}` },
+
+        //fetch user data
+        const response = await userApi.get('/api/user-dash', {
+          header: {Authorization: 'Bearer ${token}' },
         });
-        setUserData(response.data);
+        setUserData(response.data.user);
+
+          //fetch user orders
+        const ordersResponse = await userApi.get('/user/orders/${response.data.user.id}', {
+          header: {Authorization: 'Bearer ${token}'},
+        });
+        setUserOrders(orders.response.data.orders);
       } catch (error) {
-        console.error('Error fetching user data', error);
+        console.error('Error fetching user data or orders', error);
       }
     };
 
     fetchUserData();
   }, []);
 
-  if (!userData) return <p>Loading...</p>;
+  if (!userData) return <p>Loading...</p>
 
   return (
     <div>
       <h2>User Dashboard</h2>
       <p>Welcome, {userData.username}</p>
-      <p>Your Email: {userData.email}</p>
-    
-      {/* Display other user-specific data */}
+      
+
+      <h3>Orders</h3>
+      <div>
+        <h4>Active Orders</h4>
+        {userOrders.filter(order => order.order_status === 'active').length > 0 ? (
+          userOrders.filter(order => order.order_status === 'active').map(order => (
+            <div key={order.id}>
+              <p>Order #{order.id} - Total: ${order.order_total}</p>
+              <p>Tracking Number: {order.tracking_number || 'N/A'}</p>
+            </div>
+          ))
+        ) : (
+          <p>No active orders</p>
+        )}
+      </div>
+
+      <div>
+        <h4>Completed Orders</h4>
+        {userOrders.filter(order => order.order_status === 'completed').length > 0 ? (
+          userOrder.filter(order => order.order_status === 'completed').map(order => (
+            <div key={order.id}>
+              <p>Order #{order.id} - Total: ${order.order_total}</p>
+              <p>Tracking Number: {order.tracking_number || 'N/A'}</p>
+            </div>
+          ))
+        ) : (
+          <p>No Completed orders</p>
+        )}
+      </div>
     </div>
-  );
-};
+
+  )
+}
 
 export default UserDashboard;

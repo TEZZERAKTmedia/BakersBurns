@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 // Create a separate CSS file for styling the Events page
-import { shopApi } from '../config/axios';
+import { userApi } from '../config/axios';
 
 const Events = () => {
   const [date, setDate] = useState(new Date());
@@ -14,7 +14,7 @@ const Events = () => {
 
   const fetchEvents = async () => {
     try {
-      const response = await shopApi.get('/api/events');
+      const response = await userApi.get('/api/events');
       setEvents(response.data);
     } catch (error) {
       console.error('There was an error fetching the events!', error);

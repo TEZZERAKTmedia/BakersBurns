@@ -6,7 +6,7 @@ exports.checkUsernameAvailability = async (req, res) => {
 
     try {
         // Check if the username exists in the database
-        const userExists = await User.findOne({ userName });
+        const userExists = await User.findOne({ where: { username: userName } }); // Corrected query
         if (userExists) {
             return res.status(400).json({ message: 'Username is already taken' });
         }

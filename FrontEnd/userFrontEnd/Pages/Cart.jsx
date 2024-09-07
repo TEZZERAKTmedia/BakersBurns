@@ -16,6 +16,7 @@ const Cart = () => {
     }
   }, [userId]);
 
+  // Fetch cart items from the backend
   const fetchCartItems = async () => {
     try {
       if (!userId || !token) {
@@ -34,6 +35,7 @@ const Cart = () => {
     }
   };
 
+  // Handle removing an item from the cart
   const handleRemoveFromCart = async (productId) => {
     try {
       if (!userId || !token) {
@@ -51,14 +53,21 @@ const Cart = () => {
     }
   };
 
-  const handleCheckout = async (cartItems) => {
+  // Handle Stripe Checkout with only available items
+  const handleCheckout = async () => {
+    const availableItems = cartItems.filter(item => item.product.isAvailable); // Only include available items
+    if (availableItems.length === 0) {
+      console.error('No items available for checkout');
+      return;
+    }
+
     try {
       const stripe = await stripePromise;
       if (!userId || !token) {
         console.error('User not authenticated');
         return;
       }
-      const response = await userApi.post('/api/payment/create-checkout-session', { cartItems }, {
+      const response = await userApi.post('/api/checkout/create-checkout-session', { cartItems: availableItems }, {
         headers: {
           'Authorization': `Bearer ${token}` // Correct use of template literals
         }
@@ -78,21 +87,29 @@ const Cart = () => {
       <h2>Cart</h2>
       <div className="cart-grid">
         {Array.isArray(cartItems) && cartItems.map(item => (
-          <div key={item.id} className="cart-item">
+          <div key={item.id} className={`cart-item ${!item.product.isAvailable ? 'unavailable' : ''}`}>
             <div className="cart-item-details">
               <h3>{item.product.name}</h3>
               <div className="image-container">
-              <img src={`http://localhost:3450/uploads/${item.product.image}`} alt={item.product.name} />
+                <img src={`http://localhost:3450/uploads/${item.product.image}`} alt={item.product.name} />
               </div>
               <p className="cart-text">Quantity: {item.quantity}</p>
               <p className="cart-text">Price: ${item.product.price}</p>
-              
+              {!item.product.isAvailable && (
+                <p className="unavailable-message">Sorry, this item has just been purchased</p>
+              )}
             </div>
-            <button onClick={() => handleRemoveFromCart(item.productId)} className="cart-item-remove"> Remove </button>
+            <button 
+              onClick={() => handleRemoveFromCart(item.productId)} 
+              className="cart-item-remove" 
+              disabled={!item.product.isAvailable} // Disable the button for unavailable items
+            >
+              Remove
+            </button>
           </div>
         ))}
       </div>
-      <button onClick={() => handleCheckout(cartItems)} className="cart-checkout">Checkout</button>
+      <button onClick={handleCheckout} className="cart-checkout">Checkout</button>
     </div>
   );
 };

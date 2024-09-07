@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import { adminApi } from '../config/axios';
 
 const AdminLoginForm = ({ onLoginSuccess }) => {
   const [identifier, setIdentifier] = useState('');
@@ -9,7 +9,7 @@ const AdminLoginForm = ({ onLoginSuccess }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:3450/auth/admin-login', { identifier, password }, {
+      const response = await adminApi.post('/auth/admin-login', { identifier, password }, {
         withCredentials: true, // This will ensure the cookie is stored in the browser
       });
 

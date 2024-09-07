@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { shopApi } from '../config/axiosConfig';
+import { adminApi } from '../config/axios';
 import Cropper from 'react-easy-crop';
 import 'react-easy-crop/react-easy-crop.css';
 import '../Componentcss/product_management.css';
@@ -19,7 +19,7 @@ const ProductManagement = () => {
   }, []);
 
   const fetchProducts = async () => {
-    const response = await shopApi.get('/api/products/');
+    const response = await adminApi.get('/api/products/');
     setProducts(response.data);
   };
 

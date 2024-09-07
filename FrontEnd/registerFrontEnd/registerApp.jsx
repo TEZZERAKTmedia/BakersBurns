@@ -4,7 +4,7 @@ import Navbar from './Components/navbar';
 import Home from './Pages/Home';
 import Store from './Pages/Store';
 import About from './Pages/About';
-import Profile from './Pages/Profile';
+
 import Signup from './Pages/SignUp';
 import Login from './Pages/Login';
 import ForgotPassword from './Components/resetPassword';
@@ -23,7 +23,7 @@ function App() {
                     <Route path="/" element={<Home />} />
                     <Route path="/store" element={<Store />} />
                     <Route path="/about" element={<About />} />
-                    <Route path="/profile" element={<Profile />} />
+                    
                     <Route path="/signup" element={<Signup />} />
                     <Route path ="/login" element={<Login />} />
                     <Route path ="/forgotpassword" element={<ForgotPassword />} />

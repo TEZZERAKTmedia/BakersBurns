@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { shopApi } from '../config/axiosConfig';
+import { adminApi } from '../config/axios';
 
 const GalleryManagement = () => {
   const [images, setImages] = useState([]);
@@ -12,7 +12,7 @@ const GalleryManagement = () => {
 
   const fetchGalleryImages = async () => {
     try {
-      const response = await shopApi.get('/api/gallery'); // Ensure this matches the backend route
+      const response = await adminApi.get('/api/gallery'); // Ensure this matches the backend route
       setImages(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
       console.error('Error fetching gallery images:', error);
@@ -41,7 +41,7 @@ const GalleryManagement = () => {
     formData.append('image', newImage);
 
     try {
-      await shopApi.post('/api/gallery', formData, {
+      await adminApi.post('/api/gallery', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

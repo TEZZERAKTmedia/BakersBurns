@@ -10,12 +10,13 @@ const cookieParser = require('cookie-parser');
 const authRoutes = require('./routes/authRoutes');
 const passwordResetRoutes = require('./routes/passwordResetRoutes');
 const cartRoutes = require('./routes/cartRoutes');
-const orderRoutes = require('./routes/orderRoutes');
+const emailVerificationRoutes = require('./routes/emailVerificationRoute');
 const productRoutes = require('./routes/productRoutes');
-const paymentRoutes = require('./routes/paymentRoutes');
+
 const userRoutes = require('./routes/userRoutes');
 const adminRoutes = require('./routes/adminRoute');
 const galleryRoutes = require('./routes/galleryRoutes');
+const checkoutRoutes = require('./routes/checkoutRoute'); 
 
 // Initialize Express app
 const app = express();
@@ -43,11 +44,12 @@ app.use('/gallery', express.static(path.join(__dirname, 'gallery')));
 
 // Use routes
 app.use('/auth', authRoutes);
+app.use('/auth', emailVerificationRoutes); 
 app.use('/prp', passwordResetRoutes);
 app.use('/api/cart', cartRoutes);
-app.use('/api/orders', orderRoutes);
+
 app.use('/api/products', productRoutes);
-app.use('/api/payment', paymentRoutes);
+app.use('/api/checkout', checkoutRoutes);
 app.use('/user', userRoutes);
 app.use('/admin', adminRoutes);
 app.use('/api', galleryRoutes);
