@@ -1,295 +1,206 @@
-/* Import Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Open+Sans:wght@300;400&display=swap');
-
-/* Base Styles */
-body {
-  font-family: 'Open Sans', sans-serif;
+/* Basic reset */
+* {
   margin: 0;
   padding: 0;
-  background: #12121200;
-  color: #000000;
+  box-sizing: border-box;
 }
 
-h1, h2 {
-  font-family: 'Montserrat', sans-serif;
-}
-
-.bakersburns-container {
-  width: 100%;
-  text-align: center;
-  overflow: hidden; /* Hide the overflow to ensure smooth animation */
-  position: relative;
-}
-
-.bakersburns-image {
-  width: 100%; /* Make the image span the full width */
-  height: auto;
-  position: absolute;
-  top: 0;
-  left: -100%; /* Start the image outside the left edge */
-  animation: slideIn 20s linear infinite; /* Animation settings */
-}
-
-@keyframes slideIn {
-  0% {
-    left: -100%;
-  }
-  100% {
-    left: 100%;
-  }
-}
-
+/* Home container */
 .home-container {
-  margin-top: 50%;
-  position: relative;
-  width: 100%;
-  height: 100vh;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  animation: fadeIn 1s ease-in-out;
-  background-color: black;
-  height: 400vh;
+  font-family: 'Arial', sans-serif;
+  background-color: #f5f5f5;
 }
 
-.background-image {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+/* Hero Section */
+.hero-section {
+  height: 100vh;
+  background-image: url('path/to/hero-image.jpg');
   background-size: cover;
   background-position: center;
-  background-repeat: no-repeat;
-  z-index: -1;
-}
-
-.events-header-home {
-  margin-top: 20%;
-  background-color: #ffffff;
-  padding: 20px;
-  font-size: 3rem;
-  margin-bottom: 50%;
-}
-.user-container {
-  width: 100%;
-  height: 400vh;
-}
-
-.content {
-  position: relative;
-  z-index: 1;
-  text-align: center;
-  animation: slideInFromTop 1s ease-in-out;
-}
-
-.page-header {
-  background-color: #121212;
-  height: 100%;
-}
-
-.calendar-container {
-  margin-top: 10%;
   display: flex;
-  justify-content: space-around;
-  background-color: #121212;
-  flex-wrap: wrap;
-  padding: 10px;
-  animation: fadeIn 2s ease-in-out;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: #fff;
 }
 
-.calendar-day {
-  background-size: 700%; /* Ensures the background image is large enough */
-  height: 100px; /* Adjust height as needed */
-  margin: 5px;
-  padding: 10px;
+.hero-content {
+  background: rgba(0, 0, 0, 0.5);
+  padding: 50px;
   border-radius: 10px;
-  text-align: left;
-  position: relative;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s ease-in-out, background-color 0.3s ease;
 }
 
-.date-background {
-  background-color: rgba(255, 255, 255, 0.8); /* Background color for the date */
-  border-radius: 5px; /* Adjust as needed */
-  padding: 5px; /* Adjust padding as needed */
-  display: inline-block;
-}
-
-.date-label {
-  font-weight: bold;
-}
-
-.calendar-day:hover {
-  transform: scale(1.05);
-  background-color: rgba(232, 232, 232, 1);
-}
-
-.events-list {
-  margin-top: 10px;
-}
-
-.event-item {
-  background-color: #3f51b5;
-  color: white;
-  padding: 5px;
-  border-radius: 3px;
-  margin-bottom: 5px;
-}
-
-.highlight {
-  background-color: rgba(179, 179, 179, 0.65); /* Highlight color for the current week */
-}
-
-.event-form {
-  margin-top: 20px;
-  text-align: left;
-  width: 80%;
-}
-
-.event-form h2 {
-  font-family: 'Montserrat', sans-serif;
-  font-weight: 400;
-}
-
-.event-form form {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-}
-
-.event-form input,
-.event-form select {
-  margin-bottom: 10px;
-  padding: 10px;
-  width: 100%;
-  box-sizing: border-box;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  transition: border-color 0.3s ease;
-}
-
-.event-form input:focus,
-.event-form select:focus {
-  border-color: #3f51b5;
-}
-
-.event-form .day-selector {
-  display: flex;
-  flex-wrap: wrap;
-}
-
-.event-form .day-selector-label {
-  margin-right: 10px;
-  margin-bottom: 10px;
-}
-
-.event-form button {
-  padding: 10px 20px;
-  background-color: #3f51b5;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease-in-out;
-}
-
-.event-form button:hover {
-  background-color: #2c3e9e;
-  transform: scale(1.05);
-}
-
-/* Animations */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes slideInFromTop {
-  from {
-    transform: translateY(-100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-.background-video-container {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  z-index: -1; /* Ensure the video is behind all content */
-}
-
-.background-video {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 100%;
-  height: 100%;
-  object-fit: cover; /* This ensures the video covers the container without distortion */
-  transform: translate(-50%, -50%);
-}
-
-.content {
-  position: relative;
-  z-index: 1; /* Ensure content is above the video */
-}
-
-.featured-items-container {
-  padding: 50px 20px;
-  background-color: #f8f8f8;
-}
-
-.featured-items-header {
-  text-align: center;
+.hero-title {
+  font-size: 4rem;
+  letter-spacing: 2px;
   margin-bottom: 20px;
-  font-size: 2em;
+}
+
+.hero-description {
+  font-size: 1.5rem;
+  margin-bottom: 30px;
+}
+
+.hero-btn {
+  padding: 15px 40px;
+  background-color: #ff6347;
+  color: #fff;
+  text-decoration: none;
+  font-size: 1.2rem;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+}
+
+.hero-btn:hover {
+  background-color: #e53e3e;
+}
+
+/* About Section */
+.about-section {
+  padding: 100px 20px;
+  text-align: center;
+  background-color: #fff;
   color: #333;
 }
 
-.featured-items {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-around;
+.about-content h2 {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+  color: #555;
 }
 
-.featured-item {
-  background-color: white;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 20px;
-  margin: 10px;
-  width: calc(33% - 40px);
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+.about-content p {
+  font-size: 1.2rem;
+  margin-bottom: 30px;
+  line-height: 1.8;
+}
+
+.about-btn {
+  padding: 10px 30px;
+  background-color: #ff6347;
+  color: #fff;
+  text-decoration: none;
+  font-size: 1.2rem;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+}
+
+.about-btn:hover {
+  background-color: #e53e3e;
+}
+
+/* Featured Products Section */
+.featured-products-section {
+  background-color: #f5f5f5;
+  padding: 100px 20px;
   text-align: center;
 }
 
-.featured-item-image {
-  max-width: 100%;
-  height: auto;
-  border-radius: 8px;
+.featured-products-title {
+  font-size: 2.5rem;
+  margin-bottom: 40px;
 }
 
-.featured-item-name {
-  margin: 10px 0;
-  font-size: 1.5em;
+.products-gallery {
+  display: flex;
+  justify-content: space-around;
+  gap: 20px;
+}
+
+.product-card {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s, box-shadow 0.3s;
+  width: 30%;
+  text-align: center;
+}
+
+.product-card img {
+  width: 100%;
+  border-radius: 10px;
+  margin-bottom: 15px;
+}
+
+.product-card h3 {
+  font-size: 1.5rem;
+  margin-bottom: 10px;
   color: #333;
 }
 
-.featured-item-description {
-  font-size: 1em;
-  color: #666;
+.product-card p {
+  font-size: 1.2rem;
+  margin-bottom: 15px;
+}
+
+.product-btn {
+  padding: 10px 25px;
+  background-color: #ff6347;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+}
+
+.product-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.product-btn:hover {
+  background-color: #e53e3e;
+}
+
+/* Contact Section */
+.contact-section {
+  background-color: #fff;
+  padding: 100px 20px;
+  text-align: center;
+}
+
+.contact-section h2 {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+}
+
+.contact-section p {
+  font-size: 1.2rem;
+  margin-bottom: 30px;
+  line-height: 1.8;
+}
+
+.contact-btn {
+  padding: 10px 30px;
+  background-color: #ff6347;
+  color: #fff;
+  text-decoration: none;
+  font-size: 1.2rem;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+}
+
+.contact-btn:hover {
+  background-color: #e53e3e;
+}
+
+/* Media Queries for responsiveness */
+@media (max-width: 768px) {
+  .products-gallery {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .product-card {
+    width: 80%;
+    margin-bottom: 30px;
+  }
+
+  .hero-title {
+    font-size: 3rem;
+  }
+
+  .hero-description {
+    font-size: 1.2rem;
+  }
 }

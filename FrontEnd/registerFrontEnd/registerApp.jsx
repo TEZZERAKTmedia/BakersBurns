@@ -4,11 +4,11 @@ import Navbar from './Components/navbar';
 import Home from './Pages/Home';
 import Store from './Pages/Store';
 import About from './Pages/About';
-
+import VerifyEmail from './Components/verification/verifyEmail';
 import Signup from './Pages/SignUp';
 import Login from './Pages/Login';
-import ForgotPassword from './Components/resetPassword';
-import PasswordReset from './Components/passwordResetForm';
+import PasswordResetForm from './Components/verification/passwordReset';
+import ForgotPassword from './Components/passwordForgot';
 import './App.css';
 
 
@@ -23,11 +23,12 @@ function App() {
                     <Route path="/" element={<Home />} />
                     <Route path="/store" element={<Store />} />
                     <Route path="/about" element={<About />} />
-                    
+                    <Route path='/verifyemail' element={<VerifyEmail/>} />
                     <Route path="/signup" element={<Signup />} />
                     <Route path ="/login" element={<Login />} />
+                    <Route path ="/passwordreset" element={<PasswordResetForm />} />
                     <Route path ="/forgotpassword" element={<ForgotPassword />} />
-                    <Route path="/resetpassword" element={<PasswordReset />} />
+                    
                 </Routes>
             </div>
         </Router>

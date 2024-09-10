@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import '../Componentcss/background.css';
 
+
 const ScrollVideoBackground = () => {
   useEffect(() => {
     const totalSegments = 5; // Total number of video segments
@@ -49,7 +50,7 @@ const ScrollVideoBackground = () => {
   return (
     <div id="background-container">
       <div id="video-wrapper">
-        <video id="video-1" className="video-segment" src="./assets/page1.mp4" muted />
+        <video id="video-1" className="video-segment" src="../../../../media/page1.mp4" muted />
         <video id="video-2" className="video-segment" src="./assets/page2.mp4" muted />
         <video id="video-3" className="video-segment" src="./assets/page3.mp4" muted />
         <video id="video-4" className="video-segment" src="./assets/page4.mp4" muted />

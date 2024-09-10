@@ -40,7 +40,7 @@ const AdminDashboard = () => {
   const handleRemoveProduct = async (id) => {
     const token = localStorage.getItem('token');
     try {
-      await axios.delete(`/api/admin/product/${id}`, {
+      await adminApi.delete(`/api/admin/product/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setProducts(products.filter(product => product.id !== id));

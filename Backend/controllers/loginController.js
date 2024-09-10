@@ -25,7 +25,7 @@ const loginUser = async (req, res) => {
 
     const token = jwt.sign(
       { id: user.id, username: user.username, email: user.email, role: user.role },
-      process.env.JWT_SECRET,
+      process.env.JWT_SECRET,  // JWT secret from .env
       { expiresIn: '1h' }
     );
 
@@ -34,28 +34,23 @@ const loginUser = async (req, res) => {
 
     let redirectUrl;
     if (user.role === 'admin') {
-      redirectUrl = `http://localhost:5010/admin`; // Full URL to admin app
+      redirectUrl = process.env.DEV_ADMIN_URL; // Admin app URL from .env
     } else {
-      redirectUrl = `http://localhost:4001/user`; // Full URL to user app
+      redirectUrl = process.env.DEV_USER_URL; // User app URL from .env
     }
-
-    
 
     console.log('Redirect URL:', redirectUrl);
 
+    // Set the authentication token as a cookie
     res.cookie('authToken', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 60 * 60 * 1000,
+      secure: process.env.NODE_ENV === 'production', // Secure cookie only in production
+      maxAge: 60 * 60 * 1000, // 1 hour
       sameSite: 'Strict',
-
     });
 
-
+    // Send the redirect URL in the response
     res.json({ redirectUrl });
-
- 
-
 
   } catch (error) {
     console.error('Server error:', error.message);

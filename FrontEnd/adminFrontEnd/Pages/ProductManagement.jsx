@@ -34,7 +34,7 @@ const ProductManagement = () => {
     formData.append('price', newProduct.price);
     formData.append('image', newProduct.image);
 
-    await shopApi.post('/api/products', formData, {
+    await adminApi.post('/api/products', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -44,7 +44,7 @@ const ProductManagement = () => {
   };
 
   const handleDeleteProduct = async (id) => {
-    await shopApi.delete(`/api/products/${id}`);
+    await adminApi.delete(`/api/products/${id}`);
     fetchProducts();
   };
 

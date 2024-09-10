@@ -7,16 +7,15 @@ const session = require('express-session');
 const cookieParser = require('cookie-parser');
 
 // Import routes
-const authRoutes = require('./routes/authRoutes');
-const passwordResetRoutes = require('./routes/passwordResetRoutes');
-const cartRoutes = require('./routes/cartRoutes');
-const emailVerificationRoutes = require('./routes/emailVerificationRoute');
-const productRoutes = require('./routes/productRoutes');
 
+const cartRoutes = require('./routes/cartRoutes');
+const emailVerificationRoutes = require('./routes/verificationRoutes');
+const productRoutes = require('./routes/productRoutes');
 const userRoutes = require('./routes/userRoutes');
-const adminRoutes = require('./routes/adminRoute');
+const accountSettingsRoutes = require('./routes/accountSettingsRoutes');
 const galleryRoutes = require('./routes/galleryRoutes');
-const checkoutRoutes = require('./routes/checkoutRoute'); 
+const authRoutes = require('./routes/authRoutes');
+const storeRoutes = require('./routes/storeRoutes');
 
 // Initialize Express app
 const app = express();
@@ -44,23 +43,21 @@ app.use('/gallery', express.static(path.join(__dirname, 'gallery')));
 
 // Use routes
 app.use('/auth', authRoutes);
-app.use('/auth', emailVerificationRoutes); 
-app.use('/prp', passwordResetRoutes);
+app.use('/verification', emailVerificationRoutes); 
+app.use('/account-settings', accountSettingsRoutes); 
 app.use('/api/cart', cartRoutes);
 
 app.use('/api/products', productRoutes);
-app.use('/api/checkout', checkoutRoutes);
+app.use('/store', storeRoutes);
 app.use('/user', userRoutes);
-app.use('/admin', adminRoutes);
+
 app.use('/api', galleryRoutes);
 
 // Temporarily comment these to test without them
-// app.use('/user', userAuthMiddleware(), userRoutes);
-// app.use('/admin', adminAuthMiddleware('admin'), adminRoutes);
+//app.use('/user', userAuthMiddleware(), userRoutes);
+//app.use('/admin', adminAuthMiddleware('admin'), adminRoutes);
 
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
+
 
 app.use((err, req, res, next) => {
   console.error('Error:', err);

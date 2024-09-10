@@ -51,31 +51,31 @@ const SignUpForm = () => {
         const upperLowerCase = /(?=.*[a-z])(?=.*[A-Z])/.test(formData.password);
         const specialChar = /(?=.*[@$!%*?&])/.test(formData.password);
         const digit = /(?=.*\d)/.test(formData.password);
-
+    
+        const isValidAppleStylePassword = formData.password.length >= 16;
+    
         setRequirements({
             length,
-            upperLowerCase,
-            specialChar,
-            digit
+            upperLowerCase: upperLowerCase || isValidAppleStylePassword,
+            specialChar: specialChar || isValidAppleStylePassword,
+            digit: digit || isValidAppleStylePassword
         });
     }, [formData.password]);
-
-    useEffect(() => {
-        setPasswordsMatch(formData.password !== '' && formData.password === formData.confirmPassword);
-    }, [formData.password, formData.confirmPassword]);
-
+    
     const handleSubmit = async (e) => {
         e.preventDefault();
     
-        const passwordRequirements = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        const isValidAppleStylePassword = formData.password.length >= 16;
+    
+        const passwordRequirements = isValidAppleStylePassword || /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
     
         if (formData.password !== formData.confirmPassword) {
             setErrorMessage("Passwords do not match");
             return; 
         }
     
-        if (!passwordRequirements.test(formData.password)) {
-            setErrorMessage("Password must be at least 8 characters long, contain one uppercase letter, one lowercase letter, one number, and one special character.");
+        if (!passwordRequirements) {
+            setErrorMessage("Password must be at least 8 characters long, contain one uppercase letter, one lowercase letter, one number, and one special character, OR be at least 16 characters long.");
             return;
         }
     
@@ -84,7 +84,7 @@ const SignUpForm = () => {
             setErrorMessage("Please enter a valid email address");
             return;
         }
-
+    
         try {
             // Step 1: Send registration data
             const response = await registerApi.post('/auth/signup', {
@@ -118,6 +118,7 @@ const SignUpForm = () => {
             }
         }
     };
+    
 
     const resetForm = () => {
         setFormData({

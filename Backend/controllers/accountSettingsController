@@ -1,0 +1,48 @@
+const bcrypt = require('bcryptjs');
+const User = require('../models/user'); // Sequelize User model
+
+// Reset Password Controller using the shared verificationToken
+module.exports.resetPassword = async (req, res) => {
+    const { token, password } = req.body;  // Token and new password from the request body
+    console.log(`Received password reset with token: ${token}`);
+
+    if (!token) {
+        return res.status(400).json({ message: 'Invalid or missing token' });
+    }
+
+    try {
+        // Find the user by the shared verificationToken (token)
+        const user = await User.findOne({
+            where: {
+                verificationToken: token // Use verificationToken instead of token
+            }
+        });
+
+        // Check if the user exists with the provided token
+        if (!user) {
+            return res.status(400).json({ message: 'Invalid or expired token' });
+        }
+
+        const now = new Date();
+
+        // Check if the token has an expiration date (optional)
+        if (user.tokenExpires && now > new Date(user.tokenExpires)) {
+            return res.status(400).json({ message: 'Token expired' });
+        }
+
+        // Hash the new password
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Update the user's password and clear the token (since it's used once)
+        await user.update({
+            password: hashedPassword,
+            verificationToken: null, // Clear the token after use
+            tokenExpires: null // Clear token expiration after use
+        });
+
+        res.json({ message: 'Password reset successfully' });
+    } catch (error) {
+        console.error('Error resetting password:', error);
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};

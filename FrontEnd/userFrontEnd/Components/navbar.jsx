@@ -10,6 +10,10 @@ const Navbar = () => {
     setMenuOpen(!menuOpen);
   };
 
+  const closeMenu = () => {
+    setMenuOpen(false);
+  }
+
   return (
     <nav className="navbar">
       {/*<img src={Logo} alt="Logo" className="navbar-logo" />*/}
@@ -19,13 +23,13 @@ const Navbar = () => {
         <div className="bar3"></div>
       </div>
       <ul className={`nav-list ${menuOpen ? 'show' : ''}`}>
-        <li className="nav-item"><Link to="/">Home</Link></li>
-        <li className="nav-item"><Link to="/store">Store</Link></li>
-        <li className="nav-item"><Link to="/events">Events</Link></li>
-        <li className="nav-item"><Link to="/create">Create</Link></li>
-        <li className="nav-item"><Link to="/about">About</Link></li>
-        <li className="nav-item"><Link to="/userDashBoard">User DashBoard</Link></li>
-        <li className="nav-item"><Link to="/cart">C</Link></li>
+        <li className="nav-item" onClick={closeMenu}><Link to="/">Home</Link></li>
+        <li className="nav-item" onClick={closeMenu}><Link to="/store">Store</Link></li>
+        <li className="nav-item" onClick={closeMenu}><Link to="/events">Events</Link></li>
+        <li className="nav-item" onClick={closeMenu}><Link to="/create">Create</Link></li>
+        <li className="nav-item" onClick={closeMenu}><Link to="/about">About</Link></li>
+        <li className="nav-item" onClick={closeMenu}><Link to="/userDashBoard">Profile</Link></li>
+        <li className="nav-item" onClick={closeMenu}><Link to="/cart">Cart</Link></li>
       </ul>
     </nav>
   );

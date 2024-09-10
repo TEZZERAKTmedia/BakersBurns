@@ -18,13 +18,18 @@ const LoginForm = () => {
 
       const { redirectUrl } = response.data;
 
-      // Redirect based on user role
-      window.location.href = redirectUrl;
+      if (redirectUrl) {
+        // Redirect based on user role
+        window.location.href = redirectUrl;
+      } else {
+        setMessage('Login successful, but no redirection URL was provided.');
+      }
     } catch (error) {
       console.error('Login error:', error);
       setMessage('Error logging in: ' + (error.response ? error.response.data.message : error.message));
     }
   };
+
 
   return (
     <div className="container">

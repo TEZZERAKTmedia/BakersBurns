@@ -24,7 +24,8 @@ const User = sequelize.define('User', {
     isVerified: {
         type: DataTypes.BOOLEAN,
         defaultValue: false
-    }
+    },
+
 });
 
 module.exports = User;

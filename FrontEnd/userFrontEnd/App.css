@@ -1,8 +1,15 @@
 #root {
-  max-width: 1280px;
+  
   margin: 0 auto;
   
   text-align: center;
+}
+
+.app-container {
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
 }
 
 .logo {

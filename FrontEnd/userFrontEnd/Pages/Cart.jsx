@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 import { userApi } from '../config/axios';
-import { AuthContext } from '../authProvider'; // Import the AuthContext
+ // Import the AuthContext
 import '../Componentcss/cart.css'; // Import the CSS file for styling
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
 const Cart = () => {
   const [cartItems, setCartItems] = useState([]); // array destructuring
-  const { userId, token } = useContext(AuthContext); // object destructuring
+  // object destructuring
 
   useEffect(() => {
     if (userId) {

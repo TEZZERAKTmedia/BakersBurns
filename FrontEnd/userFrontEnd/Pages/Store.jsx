@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useContext } from 'react';
 import '../Componentcss/store.css'; // Import the CSS file
 import { userApi } from '../config/axios'; // Import shopApi and userApi correctly
-import { AuthContext } from '../authProvider';
+
 
 
 const Store = () => {
   const [products, setProducts] = useState([]);
-  const { token, userId } = useContext(AuthContext); // Access token and userId from AuthContext
+  // Access token and userId from AuthContext
 
   useEffect(() => {
     fetchProducts();
