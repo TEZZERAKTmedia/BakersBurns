@@ -37,8 +37,6 @@ const SignUpForm = () => {
         }
     };
 
-    const [passwordsMatch, setPasswordsMatch] = useState(false);
-
     const handleChange = (e) => {
         setFormData({
             ...formData,
@@ -46,45 +44,43 @@ const SignUpForm = () => {
         });
     };
 
+    // Simplified password validation without Apple-style rules
     useEffect(() => {
         const length = formData.password.length >= 8;
         const upperLowerCase = /(?=.*[a-z])(?=.*[A-Z])/.test(formData.password);
-        const specialChar = /(?=.*[@$!%*?&])/.test(formData.password);
+        const specialChar = /(?=.*[@$!%*?&-])/.test(formData.password); // Add `-` to special char check
         const digit = /(?=.*\d)/.test(formData.password);
-    
-        const isValidAppleStylePassword = formData.password.length >= 16;
-    
+
         setRequirements({
             length,
-            upperLowerCase: upperLowerCase || isValidAppleStylePassword,
-            specialChar: specialChar || isValidAppleStylePassword,
-            digit: digit || isValidAppleStylePassword
+            upperLowerCase,
+            specialChar,
+            digit
         });
     }, [formData.password]);
-    
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-    
-        const isValidAppleStylePassword = formData.password.length >= 16;
-    
-        const passwordRequirements = isValidAppleStylePassword || /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-    
+
+        // Check if passwords match
         if (formData.password !== formData.confirmPassword) {
             setErrorMessage("Passwords do not match");
-            return; 
-        }
-    
-        if (!passwordRequirements) {
-            setErrorMessage("Password must be at least 8 characters long, contain one uppercase letter, one lowercase letter, one number, and one special character, OR be at least 16 characters long.");
             return;
         }
-    
+
+        // Ensure password meets requirements
+        const passwordValid = requirements.length && requirements.upperLowerCase && requirements.specialChar && requirements.digit;
+        if (!passwordValid) {
+            setErrorMessage("Password must be at least 8 characters long, contain one uppercase letter, one lowercase letter, one number, and one special character (including dash '-').");
+            return;
+        }
+
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(formData.email)) {
             setErrorMessage("Please enter a valid email address");
             return;
         }
-    
+
         try {
             // Step 1: Send registration data
             const response = await registerApi.post('/auth/signup', {
@@ -93,13 +89,13 @@ const SignUpForm = () => {
                 password: formData.password,
                 phoneNumber: formData.phoneNumber
             });
-    
+
             if (response.status === 200) {
                 // Step 2: Send verification email
                 const emailResponse = await registerApi.post('/auth/send-verification-email', {
                     email: formData.email
                 });
-    
+
                 if (emailResponse.status === 200) {
                     setEmailSent(true); // Update state to indicate email was sent
                     resetForm(); // Reset the form after successful registration
@@ -118,7 +114,6 @@ const SignUpForm = () => {
             }
         }
     };
-    
 
     const resetForm = () => {
         setFormData({
@@ -176,7 +171,7 @@ const SignUpForm = () => {
                             Requires at least one uppercase letter & one lowercase letter
                         </li>
                         <li className={requirements.specialChar ? 'valid' : 'invalid'}>
-                            Requires at least one special character
+                            Requires at least one special character (including '-')
                         </li>
                         <li className={requirements.digit ? 'valid' : 'invalid'}>
                             Requires at least one digit
@@ -191,11 +186,6 @@ const SignUpForm = () => {
                         placeholder="Confirm Password"
                         required />
                     </label>
-                    <ul>
-                        <li className={passwordsMatch ? 'valid' : 'invalid'}>
-                            {passwordsMatch ? 'Passwords match' : 'Passwords do not match'}
-                        </li>
-                    </ul>
                     <label>
                         <input 
                         type="text" 

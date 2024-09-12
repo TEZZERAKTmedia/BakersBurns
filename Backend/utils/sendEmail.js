@@ -32,8 +32,15 @@ const buildEmailContent = (actionType, to, token) => {
       subject = 'Confirm Account Settings Change';
       message = 'You requested to change your account settings. Please click the button below to confirm:';
       buttonText = 'Confirm Settings Change';
-      verificationLink = `${process.env.DEV_REGISTER_URL}/settings-change?email=${to}&token=${token}`;
+      verificationLink = `${process.env.DEV_USER_URL}/userDashboard?email=${to}&token=${token}`;
       break;
+
+      case 'verification-code':
+      subject = 'Your Email Verification Code';
+      message = `Please use the following 6-digit code to verify your email address: ${token}`;
+      buttonText = '';  // No button needed for code verification
+      verificationLink = '';  // No link needed for code verification
+      break;  
 
     default:
       throw new Error('Invalid action type');

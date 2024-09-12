@@ -4,7 +4,7 @@ const emailVerificationController = require('../controllers/emailVerificationCon
 
 // Email verification route
 router.post('/email', emailVerificationController.sendEmailVerification);
-
+router.get('/code-verification', emailVerificationController.verificationCode); // Route for code verification
 // Token verification route
 router.get('/verify', emailVerificationController.verifyToken);
 

@@ -16,6 +16,7 @@ const accountSettingsRoutes = require('./routes/accountSettingsRoutes');
 const galleryRoutes = require('./routes/galleryRoutes');
 const authRoutes = require('./routes/authRoutes');
 const storeRoutes = require('./routes/storeRoutes');
+const verifiedRoutes = require('./routes/verifiedRoutes')
 
 // Initialize Express app
 const app = express();
@@ -43,7 +44,8 @@ app.use('/gallery', express.static(path.join(__dirname, 'gallery')));
 
 // Use routes
 app.use('/auth', authRoutes);
-app.use('/verification', emailVerificationRoutes); 
+app.use('/verification', emailVerificationRoutes);
+app.use('/verified' , verifiedRoutes)
 app.use('/account-settings', accountSettingsRoutes); 
 app.use('/api/cart', cartRoutes);
 

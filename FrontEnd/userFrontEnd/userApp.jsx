@@ -1,5 +1,5 @@
-import React, { useContext, useEffect } from 'react';
-import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
+import React from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Navbar from './Components/navbar';
 import Home from './Pages/Home';
 import Store from './Pages/Store';
@@ -9,14 +9,13 @@ import UserDashboard from './Pages/Profile';
 import Cart from './Pages/Cart';
 import Settings from './Pages/Settings';
 import './App.css';
-// Ensure correct import
+import VerificationWrapper from './Components/verification/codeVerification';
 import ScrollVideoBackground from './Components/Background'; // Import the ScrollVideoBackground component
-
 
 function UserApp() {
   return (
-    <div className="app-container" >
-      <ScrollVideoBackground /> {/* Add the ScrollVideoBackground component */}
+    <div className="app-container">
+      <ScrollVideoBackground />
       <Navbar />
       
       <Routes>
@@ -26,7 +25,15 @@ function UserApp() {
         <Route path="/about" element={<About />} />
         <Route path="/userDashboard" element={<UserDashboard />} />
         <Route path="/cart" element={<Cart />} />
-        <Route path="/settings" element={<Settings />} />
+        {/* Wrap Settings route in VerificationWrapper */}
+        <Route 
+          path="/settings" 
+          element={
+            <VerificationWrapper>
+              <Settings />
+            </VerificationWrapper>
+          }
+        />
       </Routes>
     </div>
   );

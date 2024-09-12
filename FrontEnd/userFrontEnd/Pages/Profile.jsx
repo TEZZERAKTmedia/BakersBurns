@@ -1,27 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { userApi } from '../config/axios';
-import Settings from './Settings';
-import '../Pagecss/Profile.css'
+import { Link } from 'react-router-dom'; // Import Link for navigation
+import '../Pagecss/Profile.css';
+
 const UserDashboard = () => {
   const [userData, setUserData] = useState('');
-  const [userOrders,setUserOrders] = useState([]);
+  const [userOrders, setUserOrders] = useState([]);
 
   useEffect(() => {
     const fetchUserData = async () => {
       const token = localStorage.getItem('token');
       try {
-
-        //fetch user data
+        // Fetch user data
         const response = await userApi.get('/api/user-dash', {
-          header: {Authorization: 'Bearer ${token}' },
+          headers: { Authorization: `Bearer ${token}` },
         });
         setUserData(response.data.user);
 
-          //fetch user orders
-        const ordersResponse = await userApi.get('/user/orders/${response.data.user.id}', {
-          header: {Authorization: 'Bearer ${token}'},
+        // Fetch user orders
+        const ordersResponse = await userApi.get(`/user/orders/${response.data.user.id}`, {
+          headers: { Authorization: `Bearer ${token}` },
         });
-        setUserOrders(orders.response.data.orders);
+        setUserOrders(ordersResponse.data.orders);
       } catch (error) {
         console.error('Error fetching user data or orders', error);
       }
@@ -30,13 +30,10 @@ const UserDashboard = () => {
     fetchUserData();
   }, []);
 
-  
-
   return (
-    <div style={{marginTop:'10%', color:'white'}} >
+    <div style={{ marginTop: '10%', color: 'white' }}>
       <h2>User Dashboard</h2>
       <p>Welcome, {userData.username}</p>
-      
 
       <h3>Orders</h3>
       <div>
@@ -56,20 +53,25 @@ const UserDashboard = () => {
       <div>
         <h3>Completed Orders</h3>
         {userOrders.filter(order => order.order_status === 'completed').length > 0 ? (
-          userOrder.filter(order => order.order_status === 'completed').map(order => (
+          userOrders.filter(order => order.order_status === 'completed').map(order => (
             <div key={order.id}>
               <p>Order #{order.id} - Total: ${order.order_total}</p>
               <p>Tracking Number: {order.tracking_number || 'N/A'}</p>
             </div>
           ))
         ) : (
-          <p>No Completed orders</p>
+          <p>No completed orders</p>
         )}
       </div>
-      <Settings />
-    </div>
 
-  )
-}
+      {/* Link to settings page */}
+      <div>
+        <Link to="/settings" className="settings-link">
+          Go to Settings
+        </Link>
+      </div>
+    </div>
+  );
+};
 
 export default UserDashboard;
