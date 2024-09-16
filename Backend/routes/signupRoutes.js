@@ -6,7 +6,7 @@ const signupController = require('../controllers/verification/signupController')
 router.post('/', signupController.signup); // Use just '/' since this route is mounted as '/sign-up'
 
 // GET request for verifying the user's email
-router.get('/verify-email', signupController.verifyEmail);
+router.get('/resend-verifictation-email', signupController.resendVerificationEmail);
 
 // GET request for verifying the user's email and moving them from PendingUsers to Users table
 router.get('/verify-and-move', signupController.verifyAndMove); 

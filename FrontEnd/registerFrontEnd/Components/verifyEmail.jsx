@@ -23,38 +23,25 @@ const VerifyEmail = () => {
 
     // Check if email and token exist
     if (email && token) {
-      // Send verification request to backend to generate cookie
+      // Send verification request to backend to verify and move the user
       const verifyEmail = async () => {
         try {
-          // Step 1: Verify email and generate cookie
-          const verifyResponse = await registerApi.get(`/sign-up/verify-email`, {
-            params: { email, token }, // This route verifies the user and generates the cookie
-            withCredentials: true,    // Ensure the cookie is sent
+          const response = await registerApi.get(`/sign-up/verify-and-move`, {
+            params: { email, token },
           });
 
-          if (verifyResponse.status === 200 && verifyResponse.data.verified) {
-            // Step 2: Now that the cookie is set, call the protected route to move the user
-            const response = await registerApi.get(`/sign-up/verify-and-move`, {
-              params: { email, token },
-              withCredentials: true,  // Include credentials/cookies
-            });
+          if (response.status === 200 && response.data.verified) {
+            setVerificationStatus('success');
+            setMessage('Verification successful, user moved to permanent table.');
 
-            if (response.status === 200 && response.data.verified) {
-              setVerificationStatus('success');
-              setMessage('Verification successful, user moved to permanent table.');
-
-              // Redirect to DEV_USER_URL
-              const redirectUrl = import.meta.env.VITE_DEV_USER_URL || 'http://localhost:4001';
-              setTimeout(() => {
-                window.location.href = redirectUrl; // Redirect to user dashboard after 2 seconds
-              }, 2000);
-            } else {
-              setVerificationStatus('failed');
-              setMessage(response.data.message || 'Verification failed.');
-            }
+            // Redirect to DEV_USER_URL
+            const redirectUrl = import.meta.env.VITE_DEV_USER_URL || 'http://localhost:4001';
+            setTimeout(() => {
+              window.location.href = redirectUrl; // Redirect to user dashboard after 2 seconds
+            }, 2000);
           } else {
             setVerificationStatus('failed');
-            setMessage(verifyResponse.data.message || 'Verification failed.');
+            setMessage(response.data.message || 'Verification failed.');
           }
         } catch (error) {
           setVerificationStatus('error');

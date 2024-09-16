@@ -93,26 +93,6 @@ const verifyAndMove = async (req, res) => {
     // Delete the pending user entry from PendingUsers table
     await PendingUser.destroy({ where: { email } });
 
-    // Generate an authentication token (JWT) for the verified user
-    const authToken = jwt.sign({ id: newUser.id, email: newUser.email }, process.env.JWT_SECRET, { expiresIn: '1h' });
-
-    // Set cookies for both the User and Register apps
-    res.cookie('authToken', authToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      domain: process.env.DEV_REGISTER_URL,  // Domain for User app
-      maxAge: 60 * 60 * 1000,  // 1-hour expiration
-      sameSite: 'Lax',
-    });
-
-    res.cookie('authToken', authToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      domain: process.env.DEV_USER_URL,  // Domain for Register app
-      maxAge: 60 * 60 * 1000,  // 1-hour expiration
-      sameSite: 'Lax',
-    });
-
     // Respond with success message
     return res.status(200).json({ message: 'User verified and moved to Users table.', verified: true });
   } catch (error) {
@@ -120,6 +100,7 @@ const verifyAndMove = async (req, res) => {
     return res.status(400).json({ message: 'Invalid or expired token.' });
   }
 };
+
 
 // Resend verification email controller
 const resendVerificationEmail = async (req, res) => {
@@ -147,8 +128,11 @@ const resendVerificationEmail = async (req, res) => {
   }
 };
 
+
 module.exports = {
   signup,
   resendVerificationEmail,
   verifyAndMove,
+  
 };
+
