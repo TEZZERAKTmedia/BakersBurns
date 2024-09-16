@@ -13,9 +13,9 @@ const Navbar = () => {
                 <li className="nav-item"><Link to="/gallery">Gallery</Link></li> {/* Updated path */}
                 <li className="nav-item"><Link to="/product-manager">Product Manager</Link></li> {/* Updated path */}
                 <li className="nav-item"><Link to="/layout">User Preview</Link></li> {/* Updated path */}
-                <button ref={toggleButtonRef} onClick={toggleScanner} className="scanner-toggle-button">
+                {/*<button ref={toggleButtonRef} onClick={toggleScanner} className="scanner-toggle-button">
                     {isScanning ? 'Stop Scanning' : 'Start Scanning'}
-                </button>
+                </button>*/}
             </ul>
         </nav>
     );

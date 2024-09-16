@@ -18,7 +18,7 @@ const buildEmailContent = (actionType, to, token) => {
       subject = 'Email Verification';
       message = 'Thank you for registering with BakerBurns. Please verify your email address by clicking the button below:';
       buttonText = 'Verify Your Email';
-      verificationLink = `${process.env.DEV_REGISTER_URL}/verify-email?email=${to}&token=${token}`;
+      verificationLink = `${process.env.DEV_REGISTER_URL}/verify?email=${to}&token=${token}`;
       break;
 
     case 'password-reset':

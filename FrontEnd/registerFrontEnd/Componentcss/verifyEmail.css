@@ -1,0 +1,22 @@
+.verify-email-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 2rem;
+    text-align: center;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .success-message {
+    color: #4caf50;
+  }
+  
+  .error-message {
+    color: #f44336;
+  }
+  
+  .loading-message {
+    color: #333;
+  }
+  

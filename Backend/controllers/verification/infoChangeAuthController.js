@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
-const User = require('../models/user');
-const { sendVerificationEmail } = require('../utils/sendEmail');
+const User = require('../../models/user');
+const { sendVerificationEmail } = require('../../utils/buildEmail');
 
 exports.requestChange = async (req, res) => {
   const { userId } = req.user;

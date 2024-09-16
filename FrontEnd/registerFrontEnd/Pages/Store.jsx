@@ -14,7 +14,7 @@ const Store = () => {
 
   const fetchProducts = async () => {
     try {
-      const response = await registerApi.get('/api/products');
+      const response = await registerApi.get('/products/');
       setProducts(response.data);
     } catch (error) {
       console.error('Error fetching products:', error);

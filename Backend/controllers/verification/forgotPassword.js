@@ -1,5 +1,5 @@
-const { sendPasswordResetEmail } = require('../utils/prEmail');
-const { findUserByEmail, createPasswordResetToken } = require('../models/user');
+const { sendPasswordResetEmail } = require('../../utils/prEmail');
+const { findUserByEmail, createPasswordResetToken } = require('../../models/user');
 
 exports.forgotPassword = async (req, res) => {
     const { email } = req.body;

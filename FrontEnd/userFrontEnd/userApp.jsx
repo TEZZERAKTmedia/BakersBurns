@@ -9,7 +9,7 @@ import UserDashboard from './Pages/Profile';
 import Cart from './Pages/Cart';
 import Settings from './Pages/Settings';
 import './App.css';
-import VerificationWrapper from './Components/verification/codeVerification';
+import VerificationWrapper from './Components/verification/verificationWrapper';
 import ScrollVideoBackground from './Components/Background'; // Import the ScrollVideoBackground component
 
 function UserApp() {

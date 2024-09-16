@@ -1,6 +1,6 @@
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-const Product = require('../models/product');
-const Cart = require('../models/cart');
+const Product = require('../../models/product');
+const Cart = require('../../models/cart');
 
 // Function to create a Stripe checkout session
 const createCheckoutSession = async (req, res) => {

@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs');
-const User = require('../models/user'); // Sequelize User model
+const User = require('../../models/user'); // Sequelize User model
 
 // Reset Password Controller using the shared verificationToken
 module.exports.resetPassword = async (req, res) => {

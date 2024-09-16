@@ -23,7 +23,7 @@ const AdminLoginForm = ({ onLoginSuccess }) => {
 
   return (
     <div className="container">
-      <h2>Admin Login</h2>
+      <h2 style={{color: 'black'}}>Admin Login</h2>
       <form onSubmit={handleSubmit}>
         <input
           type="text"

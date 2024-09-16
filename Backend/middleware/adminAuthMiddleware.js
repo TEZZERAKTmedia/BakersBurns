@@ -1,5 +1,4 @@
 const jwt = require('jsonwebtoken');
-const User = require('../models/user');
 
 const adminAuthMiddleware = (roles = []) => {
   if (typeof roles === 'string') {
@@ -7,32 +6,33 @@ const adminAuthMiddleware = (roles = []) => {
   }
 
   return async (req, res, next) => {
-    const authHeader = req.headers['authorization'];
+    // Debugging: Log the cookies received in the request
+    console.log('Cookies received:', req.cookies);
 
-    if (!authHeader) {
-      return res.status(401).json({ message: 'Access Denied. No token provided.' });
-    }
-
-    const token = authHeader.split(' ')[1]; // Extract token from "Bearer <token>"
+    // Check if the token is available in the cookie
+    const token = req.cookies && req.cookies.adminAuthToken;
 
     if (!token) {
+      console.log('No token provided in cookies, access denied');
       return res.status(401).json({ message: 'Access Denied. No token provided.' });
     }
 
     try {
+      // Verify the token
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      req.user = decoded;
+      console.log('Decoded token:', decoded);  // Log decoded token for debugging
 
-      // Fetch user from database
-      const user = await User.findByPk(decoded.id);
-
-      if (!user || (roles.length && !roles.includes(user.role))) {
+      // Check if the user's role matches
+      if (roles.length && !roles.includes(decoded.role)) {
         return res.status(403).json({ message: 'Access Denied. Insufficient permissions.' });
       }
 
+      // Attach the decoded user information to the request
+      req.user = decoded;
       next();
-    } catch (ex) {
-      res.status(400).json({ message: 'Invalid token.' });
+    } catch (error) {
+      console.log('Invalid token:', error.message);
+      return res.status(401).json({ message: 'Invalid token' });
     }
   };
 };

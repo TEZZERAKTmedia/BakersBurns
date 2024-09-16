@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const {productUpload} = require('../config/multer'); // Add multer config
-const { getProducts, addProduct, updateProduct, deleteProduct } = require('../controllers/productController');
+const { getProducts, addProduct, updateProduct, deleteProduct } = require('../controllers/admin/productController');
 
 router.get('/', getProducts);
 router.post('/', productUpload.single('image'), addProduct); // Handle single image upload

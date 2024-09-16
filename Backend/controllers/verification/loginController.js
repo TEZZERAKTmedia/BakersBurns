@@ -1,6 +1,9 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { findUserByUsername, findUserByEmail } = require('../models/loginUser');
+const { findUserByUsername, findUserByEmail } = require('../../models/loginUser');
+
+// Allowed sameSite values from environment variables
+const allowedSameSiteValues = ['Strict', 'Lax', 'None'];
 
 const loginUser = async (req, res) => {
   const { identifier, password } = req.body;
@@ -41,16 +44,23 @@ const loginUser = async (req, res) => {
 
     console.log('Redirect URL:', redirectUrl);
 
-    // Set the authentication token as a cookie
+    // Ensure that the sameSite value comes from the allowed set
+    let sameSiteSetting = process.env.SAMESITE_COOKIE;
+    if (!allowedSameSiteValues.includes(sameSiteSetting)) {
+      console.warn(`Invalid sameSite value: ${sameSiteSetting}. Defaulting to 'Strict'.`);
+      sameSiteSetting = 'Strict';  // Default to 'Strict' if not set or invalid
+    }
+
+    // Set the authentication token as a cookie for server-side usage (optional)
     res.cookie('authToken', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production', // Secure cookie only in production
       maxAge: 60 * 60 * 1000, // 1 hour
-      sameSite: 'Strict',
+      sameSite: sameSiteSetting, // Use the validated sameSite value
     });
 
-    // Send the redirect URL in the response
-    res.json({ redirectUrl });
+    // Send the token and the redirect URL in the response body
+    res.json({ token, redirectUrl });
 
   } catch (error) {
     console.error('Server error:', error.message);

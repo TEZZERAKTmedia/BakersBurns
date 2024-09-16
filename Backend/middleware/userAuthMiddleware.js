@@ -1,30 +1,41 @@
 const jwt = require('jsonwebtoken');
+const User = require('../models/user'); // Assuming you need to check the user's role
 
+const userAuthMiddleware = (roles = []) => {
+  if (typeof roles === 'string') {
+    roles = [roles];
+  }
 
-// Middleware to extract token from query parameters and set it in headers and verify JWT token
-const userAuthMiddleware = (requiredRole) => {
-  return (req, res, next) => {
-    const tokenFromQuery = req.query.token;
-    if (tokenFromQuery) {
-      req.headers['authorization'] = `Bearer ${tokenFromQuery}`;
-    }
+  return async (req, res, next) => {
+    try {
+      // Check if the token is available in the cookie
+      const token = req.cookies.userAuthToken;
 
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
-
-    if (!token) return res.status(401).json({ message: 'Access denied. No token provided.' });
-
-    jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-      if (err) return res.status(403).json({ message: 'Invalid token.' });
-
-      // Check if the user has the required role
-      if (requiredRole && user.role !== requiredRole) {
-        return res.status(403).json({ message: 'Access denied. Insufficient permissions.' });
+      if (!token) {
+        console.log('No token provided, access denied');
+        return res.status(401).json({ message: 'Access Denied. No token provided.' });
       }
 
-      req.user = user; // Attach user info to the request
+      console.log('Token extracted from cookie:', token);
+
+      // Verify the token
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      console.log('Decoded token:', decoded);  // Log decoded token for debugging
+
+      // Optionally, check the user's role (if specific roles are required)
+      const user = await User.findByPk(decoded.id);
+      if (!user || (roles.length && !roles.includes(user.role))) {
+        console.log('User does not have sufficient permissions');
+        return res.status(403).json({ message: 'Access Denied. Insufficient permissions.' });
+      }
+
+      // Attach the user info to the request object for later use in routes
+      req.user = decoded;
       next();
-    });
+    } catch (error) {
+      console.log('Invalid token:', error.message);
+      return res.status(401).json({ message: 'Invalid token' });
+    }
   };
 };
 

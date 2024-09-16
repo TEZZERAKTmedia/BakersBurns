@@ -1,7 +1,7 @@
 const crypto = require('crypto');
-const sendVerificationEmail = require('../utils/sendEmail'); // This is the email utility function that sends emails
-const User = require('../models/user'); // Assuming you're using Sequelize or another ORM
-
+const sendVerificationEmail = require('../../utils/buildEmail.js'); // This is the email utility function that sends emails
+const User = require('../../models/user.js'); // Assuming you're using Sequelize or another ORM
+const PendingUser = require('../../models/pendingUser.js');
 // Generate a 6-digit verification code
 const generateVerificationCode = () => {
   return Math.floor(100000 + Math.random() * 900000).toString(); // Generate a random 6-digit code
@@ -19,7 +19,7 @@ const sendEmailVerification = async (req, res) => {
   try {
     console.log('Received email:', email, 'and actionType:', actionType);
 
-    // Check if the user exists
+    // Check if the usnmer exists
     const user = await User.findOne({ where: { email } });
     if (!user) {
       console.log('User not found for email:', email);
@@ -152,10 +152,69 @@ const verificationCode = async (req, res) => {
   }
 };
 
+const moveUserToMainTable = async (email) => {
+  try {
+    // Find the pending user by email
+    const pendingUser = await PendingUser.findOne({ where: { email } });
+
+    if (!pendingUser) {
+      console.log('Pending user not found for email:', email);
+      return { success: false, message: 'Pending user not found.' };
+    }
+
+    // Create a new user in the main Users table
+    await User.create({
+      username: pendingUser.userName,  // Mapping 'userName' from PendingUsers to 'username' in Users
+      email: pendingUser.email,
+      password: pendingUser.password, // Ensure password is already hashed in pendingUser
+      phoneNumber: pendingUser.phoneNumber,
+      isVerified: true,  // Mark user as verified
+    });
+
+    // Delete the pending user entry after moving to the main table
+    await pendingUser.destroy();
+
+    return { success: true, message: 'User moved to main table successfully.' };
+  } catch (error) {
+    console.error('Error moving user to main table:', error.message);
+    return { success: false, message: 'Error moving user to main table.' };
+  }
+};
+
+
+// Function to handle the email verification
+const verifyAndMoveUser = async (req, res) => {
+  const { email, token } = req.query;
+
+  try {
+    // Find the pending user by email and token
+    const pendingUser = await PendingUser.findOne({ where: { email, verificationToken: token } });
+
+    if (!pendingUser) {
+      return res.status(400).json({ message: 'Invalid or expired token.', verified: false });
+    }
+
+    // Verify the token and move user to main table
+    const result = await moveUserToMainTable(email);
+    if (result.success) {
+      return res.status(200).json({
+        message: 'User successfully verified and moved to main table!',
+        verified: true,
+        redirectUrl: `${process.env.DEV_USER_URL}/login`, // Redirect user after verification
+      });
+    } else {
+      return res.status(500).json({ message: result.message });
+    }
+  } catch (error) {
+    return res.status(500).json({ message: 'Error verifying token.', error: error.message, verified: false });
+  }
+};
+
 
 // Exporting the controller functions
 module.exports = {
   sendEmailVerification,
   verifyToken,
-  verificationCode
+  verificationCode,
+  verifyAndMoveUser
 };

@@ -1,7 +1,7 @@
 // user/userBackEnd/routes/userRoutes.js
 const express = require('express');
 const router = express.Router();
-const { requestChange, verifyChange, updateInfo, verifyEmail } = require('../controllers/infoChangeAuthController');
+const { requestChange, verifyChange, updateInfo, verifyEmail } = require('../controllers/verification/infoChangeAuthController');
 
 router.post('/request-change', requestChange);
 router.get('/verify-change/:token', verifyChange);

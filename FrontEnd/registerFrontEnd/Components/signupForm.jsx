@@ -61,47 +61,39 @@ const SignUpForm = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
+    
         // Check if passwords match
         if (formData.password !== formData.confirmPassword) {
             setErrorMessage("Passwords do not match");
             return;
         }
-
+    
         // Ensure password meets requirements
         const passwordValid = requirements.length && requirements.upperLowerCase && requirements.specialChar && requirements.digit;
         if (!passwordValid) {
             setErrorMessage("Password must be at least 8 characters long, contain one uppercase letter, one lowercase letter, one number, and one special character (including dash '-').");
             return;
         }
-
+    
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(formData.email)) {
             setErrorMessage("Please enter a valid email address");
             return;
         }
-
+    
         try {
-            // Step 1: Send registration data
-            const response = await registerApi.post('/auth/signup', {
+            // Step 1: Send registration data, which includes sending the verification email
+            const response = await registerApi.post('/sign-up', {
                 userName: formData.userName,
                 email: formData.email,
                 password: formData.password,
-                phoneNumber: formData.phoneNumber
+                phoneNumber: formData.phoneNumber,
+                actionType: 'sign-up' // Pass actionType for email verification
             });
-
+    
             if (response.status === 200) {
-                // Step 2: Send verification email
-                const emailResponse = await registerApi.post('/auth/send-verification-email', {
-                    email: formData.email
-                });
-
-                if (emailResponse.status === 200) {
-                    setEmailSent(true); // Update state to indicate email was sent
-                    resetForm(); // Reset the form after successful registration
-                } else {
-                    setErrorMessage('Error sending verification email. Please try again.');
-                }
+                setEmailSent(true); // Indicate that the email was sent successfully
+                resetForm(); // Reset the form after successful registration
             } else {
                 setErrorMessage(response.data.message || 'Error during registration.');
             }
@@ -114,6 +106,7 @@ const SignUpForm = () => {
             }
         }
     };
+    
 
     const resetForm = () => {
         setFormData({

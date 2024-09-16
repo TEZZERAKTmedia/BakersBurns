@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
+import { registerApi } from '../config/axios';
 import '../Componentcss/login.css';
 
 const LoginForm = () => {
@@ -11,12 +11,18 @@ const LoginForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:3450/auth/login', { identifier, password });
+      const response = await registerApi.post('/auth/login', { identifier, password });
 
       // Log the response for debugging purposes
       console.log('Response data:', response.data);
 
-      const { redirectUrl } = response.data;
+      // Extract token and redirectUrl from response
+      const { token, redirectUrl } = response.data;
+
+      if (token) {
+        // Store the token in localStorage
+        localStorage.setItem('authToken', token);
+      }
 
       if (redirectUrl) {
         // Redirect based on user role
@@ -30,10 +36,9 @@ const LoginForm = () => {
     }
   };
 
-
   return (
     <div className="container">
-      <h2>Login</h2>
+      <h2 style={{color: 'black'}}>Login</h2>
       <form onSubmit={handleSubmit}>
         <input
           type="text"

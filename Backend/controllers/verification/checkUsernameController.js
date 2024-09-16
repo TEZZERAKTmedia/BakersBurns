@@ -1,4 +1,4 @@
-const User = require('../models/user'); // Assuming you're using a User model
+const User = require('../../models/user'); // Assuming you're using a User model
 
 // Controller function to check if a username is already taken
 exports.checkUsernameAvailability = async (req, res) => {

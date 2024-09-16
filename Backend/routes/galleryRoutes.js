@@ -1,28 +1,14 @@
 const express = require('express');
-const fs = require('fs');
-const path = require('path');
 const router = express.Router();
-const { galleryUpload } = require('../config/multer'); // Import galleryUpload
-const adminAuthMiddleware = require('../middleware/adminAuthMiddleware');
-
-// Route to handle gallery image upload
-router.post('/gallery', adminAuthMiddleware('admin'), galleryUpload.single('image'), (req, res) => {
-  try {
-    res.status(200).json({ message: 'Gallery image uploaded successfully', imagePath: `/gallery/${req.file.filename}` });
-  } catch (error) {
-    res.status(500).json({ message: 'Image upload failed', error: error.message });
-  }
-});
-
-// Route to fetch image filenames
-router.get('/gallery', (req, res) => {
-  const directoryPath = path.join(__dirname, '..', 'gallery');
-  fs.readdir(directoryPath, (err, files) => {
-    if (err) {
-      return res.status(500).json({ message: 'Unable to scan files', error: err });
-    }
-    res.json(files);
-  });
-});
+const { galleryUpload } = require('../config/multer');
+const { getGalleryItems, addGalleryItem, updateGalleryItem, deleteGalleryItem } = require('../controllers/admin/galleryController');
+//Get all gallery items
+router.get('/gallery', getGalleryItems);
+//Add a new gallery item
+router.post('/gallery', galleryUpload.single('image'), addGalleryItem);
+//Update an exisiting gallery item
+router.put('/gallery/:id', updateGalleryItem);
+//Delete a gallery item
+router.delete('/gallery/:id', deleteGalleryItem);
 
 module.exports = router;
