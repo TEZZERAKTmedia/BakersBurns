@@ -93,13 +93,32 @@ const verifyAndMove = async (req, res) => {
     // Delete the pending user entry from PendingUsers table
     await PendingUser.destroy({ where: { email } });
 
-    // Respond with success message
-    return res.status(200).json({ message: 'User verified and moved to Users table.', verified: true });
+    // Generate an authentication token (JWT) for the verified user
+    const authToken = jwt.sign({ id: newUser.id, email: newUser.email }, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+    // Set a secure cookie for protecting future routes
+    res.cookie('authToken', authToken, {
+      httpOnly: true,             // Prevent client-side access to cookie
+      secure: process.env.NODE_ENV === 'production',  // Set to true in production (HTTPS)
+      domain: process.env.COOKIE_DOMAIN || 'localhost',  // Cross-subdomain, if needed
+      maxAge: 60 * 60 * 1000,     // 1-hour expiration
+      sameSite: 'Lax',            // Prevent CSRF attacks
+    });
+
+    // Respond with success and redirect URL
+    return res.status(200).json({
+      message: 'User verified and moved to Users table.',
+      verified: true,
+      redirectUrl: process.env.DEV_USER_URL || 'http://localhost:4001',  // Redirect to user dashboard
+    });
+
   } catch (error) {
     console.error('Verification error:', error);
     return res.status(400).json({ message: 'Invalid or expired token.' });
   }
 };
+
+
 
 
 // Resend verification email controller

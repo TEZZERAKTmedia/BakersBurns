@@ -25,7 +25,11 @@ const User = sequelize.define('User', {
   isVerified: {
     type: DataTypes.BOOLEAN,
     defaultValue: false
-  }
+  },
+  isOptedInForMessaging: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+  },
 }, {
   hooks: {
     beforeValidate: (user) => {

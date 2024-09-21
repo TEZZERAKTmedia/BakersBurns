@@ -47,17 +47,21 @@ const loginUser = async (req, res) => {
     // Ensure that the sameSite value comes from the allowed set
     let sameSiteSetting = process.env.SAMESITE_COOKIE;
     if (!allowedSameSiteValues.includes(sameSiteSetting)) {
-      console.warn(`Invalid sameSite value: ${sameSiteSetting}. Defaulting to 'Strict'.`);
-      sameSiteSetting = 'Strict';  // Default to 'Strict' if not set or invalid
+      console.warn(`Invalid sameSite value: ${sameSiteSetting}. Defaulting to 'Lax'.`);
+      sameSiteSetting = 'Lax';  // Default to 'Lax' if not set or invalid for cross-domain
     }
 
-    // Set the authentication token as a cookie for server-side usage (optional)
+    // Set a single cookie with cross-subdomain access
     res.cookie('authToken', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production', // Secure cookie only in production
+      httpOnly: true, // Prevent JavaScript access
+      secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
       maxAge: 60 * 60 * 1000, // 1 hour
-      sameSite: sameSiteSetting, // Use the validated sameSite value
+      sameSite: sameSiteSetting, // Use the SameSite value
+      domain: process.env.NODE_ENV === 'production' ? '.bakersburns.com' : 'localhost', // Shared across subdomains in production
     });
+
+    // Log the cookie information for debugging purposes
+    console.log(`Cookie generated: authToken, domain: ${process.env.NODE_ENV === 'production' ? '.bakersburns.com' : 'localhost'}, sameSite: ${sameSiteSetting}, secure: ${process.env.NODE_ENV === 'production'}`);
 
     // Send the token and the redirect URL in the response body
     res.json({ token, redirectUrl });

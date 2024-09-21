@@ -4,7 +4,10 @@ import axios from 'axios';
 import Navbar from './Components/navbar';
 import Home from './Pages/Home';
 import GalleryManagement from './Pages/GalleryManager';
+import Messaging from './Pages/Messaging';
+import Email from './Pages/Email';
 import Layout from './Pages/Layout';
+import Orders from './Pages/Orders';
 import ProductManagement from './Pages/ProductManagement';
 import { ScannerProvider } from './context/scannerContext';
 import AdminLoginForm from './Components/loginForm';
@@ -57,7 +60,11 @@ const AdminApp = () => {
           <Route path="/gallery" element={<GalleryManagement />} />
           <Route path="/layout" element={<Layout />} />
           <Route path="/product-manager" element={<ProductManagement />} />
+          <Route path="/messaging" element={<Messaging />} />
+          <Route path="/email" element={<Email />} />
+          <Route path="/orders" element={<Orders />} />
           <Route path="*" element={<Navigate to="/" />} />
+
         </Routes>
       </Router>
     </ScannerProvider>

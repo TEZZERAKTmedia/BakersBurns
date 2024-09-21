@@ -21,6 +21,8 @@ const authRoutes = require('./routes/authRoutes');
 const storeRoutes = require('./routes/storeRoutes');
 const verifiedRoutes = require('./routes/verifiedRoutes');
 const signupRoutes = require('./routes/signupRoutes');
+const messageRoutes = require('./routes/messageRoutes');
+const adminEmailRoutes = require('./routes/adminEmailRoutes');
 
 // Initialize Express app
 const app = express();
@@ -34,7 +36,7 @@ app.use(bodyParser.json());
 app.use(cookieParser());
 
 const adminAuthMiddleware = require('./middleware/adminAuthMiddleware'); // Add the middleware
-const userAuthMiddleware = require('./middleware/userAuthMiddleware')
+const userAuthMiddleware = require('./middleware/userAuthMiddleware');
 
 app.use(session({
   secret: process.env.SESSION_SECRET,
@@ -69,18 +71,22 @@ app.use('/api/cart',userAuthMiddleware('user'), cartRoutes);
 app.use('/user',userAuthMiddleware('user'), userRoutes);
 app.use('/store',userAuthMiddleware('user'), storeRoutes);
 
+
 // Admin routes (protected by adminAuthMiddleware)
 app.use('/api/products', adminAuthMiddleware('admin'), productRoutes);  // Protect product management routes
 app.use('/gallery-manager', adminAuthMiddleware('admin'), galleryRoutes);  // Protect gallery management routes
+app.use('/messages', adminAuthMiddleware('admin'), messageRoutes);
+app.use('/admin-mail', adminAuthMiddleware('admin'), adminEmailRoutes);
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/gallery', express.static(path.join(__dirname, 'gallery')));
 app.use('/admin', express.static(path.join(__dirname, 'public/admin')));
+
 
 // Remove the old /admincookies/verify route, since the middleware now handles this
 
 // Error handling
 app.use((err, req, res, next) => {
-  console.error('Error:', err);
+  console.error('Error:', err);messages
   res.status(500).json({ message: 'Internal Server Error', error: err.message });
 });
 

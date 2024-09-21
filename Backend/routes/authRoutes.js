@@ -10,6 +10,7 @@ const router = express.Router();
 router.post('/signup', signup);
 
 router.get('/verify', verifyEmail);
+
 router.post('/login', loginUser);
 
 router.post('/check-username', checkUsernameAvailability)

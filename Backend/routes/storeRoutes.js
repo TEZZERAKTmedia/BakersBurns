@@ -7,9 +7,9 @@ const { getCart } = require('../controllers/user/cartController')
 router.get('/', getProducts);  // Get all products
 
 // User routes
-router.get('/:userId/', getCart);  // Get user's cart
-router.post('/', addToCart);  // Add product to cart
-router.delete('/:userId/:productId', removeFromCart);  // Remove product from cart
+router.get('/get-cart', getCart);  // Get user's cart
+router.post('/add-to-cart', addToCart);  // Add product to cart
+router.delete('/remove-from-cart', removeFromCart);  // Remove product from cart
 router.post('/create-checkout-session', createCheckoutSession);  // Create Stripe checkout session
 
 // Route for handling Stripe webhook events
