@@ -29,9 +29,10 @@ const Cart = sequelize.define('Cart', {
   tableName: 'Cart', // Specify the exact table name to avoid pluralization
   hooks: {
     beforeValidate: (cart) => {
-      // Sanitize productId and userId before validation
+      console.log('Before sanitization:', cart.productId, cart.userId);
       cart.productId = xss(cart.productId.toString());
       cart.userId = xss(cart.userId.toString());
+      console.log('After sanitization:', cart.productId, cart.userId);
     }
   }
 });

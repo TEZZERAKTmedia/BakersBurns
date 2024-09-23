@@ -1,17 +1,15 @@
-/* Navbar.css */
-
 /* General Navbar Styling */
 .navbar {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
-  background-color: #00000000; /* Rustic brown color */
+  background-color: rgba(0, 0, 0, 0.8); /* Slight transparency for visibility */
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   z-index: 1000;
   display: flex;
-  justify-content: center;  /* Center the navbar content horizontally */
-  align-items: center;      /* Center the navbar content vertically */
+  justify-content: space-between;
+  align-items: center;
   padding: 10px 20px;
 }
 
@@ -37,41 +35,39 @@
 }
 
 .hamburger-menu.open .bar1 {
-  transform: rotate(45deg) translate(6px, 11px);  /* Adjusted translation for centering */
+  transform: rotate(45deg) translate(6px, 11px);
 }
 
 .hamburger-menu.open .bar2 {
-  opacity: 0; /* Hide middle bar when open */
+  opacity: 0;
 }
 
 .hamburger-menu.open .bar3 {
-  transform: rotate(-45deg) translate(5px, -10px);  /* Adjusted translation for centering */
+  transform: rotate(-45deg) translate(5px, -10px);
 }
-
-
 
 /* Navigation List (Mobile Dropdown) */
 .nav-list {
   list-style: none;
   display: flex;
   flex-direction: column;
-  justify-content: center; /* Center links vertically */
-  align-items: center;     /* Center links horizontally */
+  justify-content: center;
+  align-items: center;
   position: fixed;
   top: 60px;
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(0, 0, 0, 0.9); /* Background color with transparency */
+  background-color: rgba(0, 0, 0, 0.9);
   margin: 0;
   padding: 0;
-  display: none; /* Hidden by default */
+  display: none;
   z-index: 1000;
   transition: all 0.3s ease-in-out;
 }
 
 .nav-list.show {
-  display: flex; /* Show menu when hamburger is clicked */
+  display: flex;
 }
 
 /* Nav Item Styling */
@@ -81,7 +77,7 @@
 
 .nav-item a {
   text-decoration: none;
-  color: white; 
+  color: white;
   font-size: 1.5em;
   padding: 15px 30px;
   display: inline-block;
@@ -102,12 +98,10 @@
     justify-content: space-between;
   }
 
-  .hamburger-menu {
-    display: none; /* Hide hamburger menu on larger screens */
-  }
+  
 
   .nav-list {
-    flex-direction: row; /* Align items in a row */
+    flex-direction: row;
     position: static;
     width: auto;
     height: auto;
@@ -121,7 +115,7 @@
 
   .nav-item a {
     background: transparent;
-    color: black;
+    color: white;
     padding: 10px 15px;
     font-size: 1.2em;
   }

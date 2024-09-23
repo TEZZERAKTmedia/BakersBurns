@@ -1,10 +1,11 @@
-// routes/cartRoutes.js
 const express = require('express');
 const router = express.Router();
-const { getCart, addToCart, removeFromCart } = require('../controllers/user/cartController');
+const cartController = require('../controllers/user/cartController');
+const userAuthMiddleware = require('../middleware/userAuthMiddleware');
 
-router.get('/:userId/', getCart);
-router.post('/', addToCart);
-router.delete('/:userId/:productId', removeFromCart);
+// Protect routes with authentication middleware
+router.get('/', userAuthMiddleware(), cartController.getCart); // Use middleware to get user ID from the token
+router.post('/add-to-cart', userAuthMiddleware(), cartController.addToCart);
+router.delete('/:productId', userAuthMiddleware(), cartController.removeFromCart);
 
 module.exports = router;

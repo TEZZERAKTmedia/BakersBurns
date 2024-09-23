@@ -19,6 +19,7 @@ function UserApp() {
       <Navbar />
       
       <Routes>
+        
         <Route path="/" element={<Home />} />
         <Route path="/store" element={<Store />} />
         <Route path="/create" element={<Create />} />

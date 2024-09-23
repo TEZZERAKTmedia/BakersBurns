@@ -7,6 +7,7 @@ const Store = () => {
   const [products, setProducts] = useState([]);
   const [authError, setAuthError] = useState(false); // To track authentication errors
   const [errorMessage, setErrorMessage] = useState(''); // Error message for the user
+  const [cartMessage, setCartMessage] = useState(''); // Message for cart-related actions
 
   useEffect(() => {
     fetchProducts();
@@ -38,24 +39,43 @@ const Store = () => {
     }
 
     try {
-      await userApi.post('/store/add-to-cart', { userId, productId, quantity: 1 }, {
+      const response = await userApi.post('/cart/add-to-cart', { userId, productId, quantity: 1 }, {
         headers: {
           'Authorization': `Bearer ${token}` // Include the token in the Authorization header
         }
       });
       console.log('Product added to cart');
+      setCartMessage('Product added to cart successfully.');
     } catch (error) {
       console.error('Error adding to cart:', error);
-      if (error.response && error.response.status === 401) {
+      
+      // Check if the error is due to the product already being in the cart
+      if (error.response && error.response.status === 400 && error.response.data.message === 'Item already in cart') {
+        setCartMessage('Item is already in the cart.');
+      } else if (error.response && error.response.status === 401) {
         setAuthError(true);
         setErrorMessage("Your session may have expired or you may not have an account with us. Please click here to register or login.");
+      } else {
+        setCartMessage('An error occurred while adding the product to the cart.');
       }
     }
   };
 
+  // Optionally clear the cart message after a few seconds
+  useEffect(() => {
+    if (cartMessage) {
+      const timer = setTimeout(() => {
+        setCartMessage('');
+      }, 3000); // Clear message after 3 seconds
+      return () => clearTimeout(timer); // Cleanup the timer
+    }
+  }, [cartMessage]);
+
   return (
     <div className="store-container">
+      
       <h2>Store</h2>
+
       {/* If there is an authentication error, show the message and link */}
       {authError ? (
         <div className="auth-error">
@@ -64,6 +84,7 @@ const Store = () => {
         </div>
       ) : (
         <div className="product-grid">
+          
           {products.map(product => (
             <div className="product-tile" key={product.id}>
               <div className="product-image">
@@ -79,6 +100,13 @@ const Store = () => {
               </div>
             </div>
           ))}
+
+          {/* Display cart message if there is one */}
+          {cartMessage && (
+            <div className="cart-message">
+              <p>{cartMessage}</p>
+            </div>
+          )}
         </div>
       )}
     </div>

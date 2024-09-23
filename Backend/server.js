@@ -23,6 +23,8 @@ const verifiedRoutes = require('./routes/verifiedRoutes');
 const signupRoutes = require('./routes/signupRoutes');
 const messageRoutes = require('./routes/messageRoutes');
 const adminEmailRoutes = require('./routes/adminEmailRoutes');
+const ordersRoutes = require('./routes/ordersRoutes');
+const stripeRoutes = require('./routes/stripeRoutes');
 
 // Initialize Express app
 const app = express();
@@ -67,9 +69,12 @@ app.use('/auth', authRoutes);
 app.use('/verification',emailVerificationRoutes);
 app.use('/verified', userAuthMiddleware('user'),verifiedRoutes);
 app.use('/account-settings', accountSettingsRoutes);
-app.use('/api/cart',userAuthMiddleware('user'), cartRoutes);
+app.use('/cart',userAuthMiddleware('user'), cartRoutes);
 app.use('/user',userAuthMiddleware('user'), userRoutes);
 app.use('/store',userAuthMiddleware('user'), storeRoutes);
+
+//Middle Routes
+app.use('/stripe', stripeRoutes); 
 
 
 // Admin routes (protected by adminAuthMiddleware)
@@ -77,12 +82,13 @@ app.use('/api/products', adminAuthMiddleware('admin'), productRoutes);  // Prote
 app.use('/gallery-manager', adminAuthMiddleware('admin'), galleryRoutes);  // Protect gallery management routes
 app.use('/messages', adminAuthMiddleware('admin'), messageRoutes);
 app.use('/admin-mail', adminAuthMiddleware('admin'), adminEmailRoutes);
+app.use('/orders', ordersRoutes);
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/gallery', express.static(path.join(__dirname, 'gallery')));
 app.use('/admin', express.static(path.join(__dirname, 'public/admin')));
 
 
-// Remove the old /admincookies/verify route, since the middleware now handles this
+
 
 // Error handling
 app.use((err, req, res, next) => {
