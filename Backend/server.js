@@ -11,20 +11,21 @@ const jwt = require('jsonwebtoken'); // Assuming JWT is used for auth
 
 
 // Import routes
-const cartRoutes = require('./routes/cartRoutes');
+const cartRoutes = require('./routes/user/cartRoutes');
 const emailVerificationRoutes = require('./routes/verificationRoutes');
 const productRoutes = require('./routes/productRoutes');
-const userRoutes = require('./routes/userRoutes');
+const userRoutes = require('./routes/user/userRoutes');
 const accountSettingsRoutes = require('./routes/accountSettingsRoutes');
 const galleryRoutes = require('./routes/galleryRoutes');
 const authRoutes = require('./routes/authRoutes');
 const storeRoutes = require('./routes/storeRoutes');
 const verifiedRoutes = require('./routes/verifiedRoutes');
 const signupRoutes = require('./routes/signupRoutes');
-const messageRoutes = require('./routes/messageRoutes');
-const adminEmailRoutes = require('./routes/adminEmailRoutes');
-const ordersRoutes = require('./routes/ordersRoutes');
-const stripeRoutes = require('./routes/stripeRoutes');
+const adminMessagingRoutes = require('./routes/admin/adminMessageRoutes');
+const userMessagingRoutes = require('./routes/user/userMessagingRoutes');
+const adminEmailRoutes = require('./routes/admin/adminEmailRoutes');
+const ordersRoutes = require('./routes/admin/ordersRoutes');
+const stripeRoutes = require('./routes/user/stripeRoutes');
 
 // Initialize Express app
 const app = express();
@@ -72,20 +73,24 @@ app.use('/account-settings', accountSettingsRoutes);
 app.use('/cart',userAuthMiddleware('user'), cartRoutes);
 app.use('/user',userAuthMiddleware('user'), userRoutes);
 app.use('/store',userAuthMiddleware('user'), storeRoutes);
+app.use('/user-message-routes', userAuthMiddleware('user'), userMessagingRoutes);
+
+
 
 //Middle Routes
 app.use('/stripe', stripeRoutes); 
 
 
+
 // Admin routes (protected by adminAuthMiddleware)
 app.use('/api/products', adminAuthMiddleware('admin'), productRoutes);  // Protect product management routes
 app.use('/gallery-manager', adminAuthMiddleware('admin'), galleryRoutes);  // Protect gallery management routes
-app.use('/messages', adminAuthMiddleware('admin'), messageRoutes);
 app.use('/admin-mail', adminAuthMiddleware('admin'), adminEmailRoutes);
 app.use('/orders', ordersRoutes);
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/gallery', express.static(path.join(__dirname, 'gallery')));
 app.use('/admin', express.static(path.join(__dirname, 'public/admin')));
+app.use('/admin-message-routes', adminAuthMiddleware('admin'), adminMessagingRoutes);
 
 
 

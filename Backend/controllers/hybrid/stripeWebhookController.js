@@ -1,5 +1,7 @@
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const Order = require('../../models/order');
+const Product = require('../../models/product');
+const Cart = require('../../models/cart');
 
 // Handle Stripe Webhooks
 const handleWebhook = async (req, res) => {
@@ -18,39 +20,37 @@ const handleWebhook = async (req, res) => {
       const paymentIntent = event.data.object;
       const { orderId, userId } = paymentIntent.metadata;
 
-      // Update the order status to 'Processing'
       try {
+        // 1. Update the order status to 'Processing'
         const order = await Order.findByPk(orderId);
         if (order) {
           order.status = 'Processing';
           await order.save();
           console.log(`Order ${orderId} updated to Processing for user ${userId}`);
         }
-      } catch (error) {
-        console.error('Error updating order to Processing:', error);
-        return res.status(500).json({ message: 'Error updating order to Processing', error });
-      }
-      break;
-    }
-    case 'payment_intent.payment_failed': {
-      const paymentIntent = event.data.object;
-      const { orderId, userId } = paymentIntent.metadata;
 
-      // Update the order status to 'Failed'
-      try {
-        const order = await Order.findByPk(orderId);
-        if (order) {
-          order.status = 'Failed';
-          await order.save();
-          console.log(`Order ${orderId} updated to Failed for user ${userId}`);
+        // 2. Mark product as unavailable
+        const cartItems = await Cart.findAll({ where: { userId } });
+        for (let item of cartItems) {
+          const product = await Product.findByPk(item.productId);
+          if (product && product.isAvailable) {
+            product.isAvailable = 0; // Mark the product as unavailable
+            await product.save();
+            console.log(`Product ${product.id} marked as unavailable`);
+          }
         }
+
+        // 3. Remove cart items for the purchased products
+        await Cart.destroy({ where: { userId } });
+        console.log(`Cart items for user ${userId} have been removed`);
+
       } catch (error) {
-        console.error('Error updating order to Failed:', error);
-        return res.status(500).json({ message: 'Error updating order to Failed', error });
+        console.error('Error processing order and updating product/cart:', error);
+        return res.status(500).json({ message: 'Error processing order', error });
       }
       break;
     }
-    // Handle other Stripe events as needed
+    // Handle other Stripe events if necessary
     default:
       console.log(`Unhandled event type ${event.type}`);
   }

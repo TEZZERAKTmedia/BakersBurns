@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const emailController = require('../controllers/admin/adminEmailController');
+const emailController = require('../../controllers/admin/adminEmailController');
 
 // Route to send an email to a specific user
 router.post('/send-to-user', emailController.sendEmailToUser);

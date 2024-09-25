@@ -2,7 +2,7 @@
 
 const express = require('express');
 const router = express.Router();
-const ordersController = require('../controllers/admin/adminOrdersController');
+const ordersController = require('../../controllers/admin/adminOrdersController');
 
 // Route to get all active orders
 router.get('/', ordersController.getOrders);

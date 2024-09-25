@@ -28,8 +28,9 @@ const Navbar = () => {
         <li className="nav-item" onClick={closeMenu}><Link to="/events">Events</Link></li>
         <li className="nav-item" onClick={closeMenu}><Link to="/create">Create</Link></li>
         <li className="nav-item" onClick={closeMenu}><Link to="/about">About</Link></li>
-        <li className="nav-item" onClick={closeMenu}><Link to="/userDashBoard">Profile</Link></li>
+        <li className="nav-item" onClick={closeMenu}><Link to="/userDashBoard">User DashBoard</Link></li>
         <li className="nav-item" onClick={closeMenu}><Link to="/cart">Cart</Link></li>
+        <li className="nav-item" onClick={closeMenu}><Link to="/in-app-messaging">Messages</Link></li>
       </ul>
     </nav>
   );

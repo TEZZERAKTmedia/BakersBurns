@@ -37,7 +37,11 @@ const Cart = sequelize.define('Cart', {
   }
 });
 
-// Define associations
-Cart.belongsTo(Product, { foreignKey: 'productId', as: 'product' });
+// Define association with Product and enable cascade delete
+Cart.belongsTo(Product, { 
+  foreignKey: 'productId',
+  as: 'product',
+  onDelete: 'CASCADE' // This enables cascade delete
+});
 
 module.exports = Cart;
