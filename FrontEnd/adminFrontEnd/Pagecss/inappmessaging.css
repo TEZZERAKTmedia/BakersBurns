@@ -1,0 +1,139 @@
+/* Main container for the messaging system */
+.messaging-app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: Arial, sans-serif;
+  color: #333;
+}
+
+/* Recipient form styling */
+.recipient-form {
+  margin-bottom: 20px;
+}
+
+.recipient-form input {
+  padding: 10px;
+  width: 100%;
+  max-width: 300px;
+  margin-right: 10px;
+}
+
+.recipient-form button {
+  padding: 10px;
+}
+
+.search-results {
+  margin-top: 10px;
+  list-style: none;
+  padding: 0;
+}
+
+.search-results li {
+  padding: 10px;
+  background-color: #f4f4f4;
+  cursor: pointer;
+}
+
+.selected-recipient {
+  margin-top: 10px;
+}
+
+/* Chat window */
+.chat-window {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 20px;
+  background-color: #fff;
+}
+
+.chat-header {
+  background-color: #f4f4f4;
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+.chat-messages {
+  flex-grow: 1;
+  overflow-y: auto;
+  margin-top: 20px;
+  padding-right: 20px;
+}
+
+.message-item {
+  margin-bottom: 15px;
+  padding: 10px;
+  border-radius: 8px;
+  max-width: 70%;
+}
+
+.admin-message {
+  background-color: #d1e7dd;
+  align-self: flex-end;
+}
+
+.user-message {
+  background-color: #f8d7da;
+  align-self: flex-start;
+}
+
+.message-item p {
+  margin: 0;
+}
+
+.message-item small {
+  display: block;
+  margin-top: 5px;
+  color: #888;
+}
+
+/* Message input */
+.chat-input {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  background-color: #f9f9f9;
+  border-top: 1px solid #ddd;
+}
+
+.chat-input input {
+  flex-grow: 1;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+.chat-input button {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.chat-input button:hover {
+  background-color: #0056b3;
+}
+
+/* Placeholder message */
+.chat-placeholder {
+  flex-grow: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.2em;
+  color: #888;
+}
+
+/* Error message */
+.error {
+  color: red;
+  margin-top: 20px;
+}

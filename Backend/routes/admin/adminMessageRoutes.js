@@ -1,19 +1,41 @@
 const express = require('express');
 const router = express.Router();
-const { sendMessage, getMessages, updatePreferences } = require('../../controllers/admin/messagingController');
-const { sendMessageInApp, getMessagesInApp, updatePreferencesInApp } = require('../../controllers/admin/inAppMessagingController');
+const adminAuthMiddleware = require('../../middleware/adminAuthMiddleware');
+const { 
+  sendMessage,       // In-app and email messaging
+  getMessages        // In-app and email messaging
+} = require('../../controllers/admin/messagingController');
+const { 
+    searchInAppUsers,  // Search users by username/email
+    sendInAppMessage,       // In-app and email messaging 
+    getOrCreateThreadId,       // In-app and email messaging
+    fetchAllThreadIds,
+    fetchMessagesByThreadId,
+
+  } = require('../../controllers/admin/inAppMessagingController');
+
+// In-app messaging routes
+
+// Route to search for users in-app by username or email
+router.get('/search', searchInAppUsers);
+
+// Route to send a message to a user in-app
+router.post('/messages/send', adminAuthMiddleware(), sendInAppMessage);
+
+// Route to get all messages for the logged-in user (admin or user)
+router.get('/fetch-all-threads', adminAuthMiddleware(), fetchAllThreadIds);
 
 
+router.get('/fetch-messages-by-thread',adminAuthMiddleware(), fetchMessagesByThreadId);
 
+router.get('/threads', adminAuthMiddleware(), getOrCreateThreadId);
 
+// Email messaging routes
 
-//In app ADMIN messaging routes
-router.post('/in-app/send',  sendMessageInApp);  // Endpoint for sending messages
-router.get('/in-app/:userId', getMessagesInApp);  // Get messages for a specific user
-router.put('/in-app/preferences/:userId', updatePreferencesInApp);  // Update messaging preferences
-router.post('/send', sendMessage);
-router.get('/:userId', getMessages);
-router.put('/preferences/:userId', updatePreferences);
-//In app USER messaging routes
+// Route to send an email message to a user
+router.post('/email/send', adminAuthMiddleware(), sendMessage);
+
+// Route to get email messages for a specific user
+router.get('/email/messages', adminAuthMiddleware(), getMessages);
 
 module.exports = router;

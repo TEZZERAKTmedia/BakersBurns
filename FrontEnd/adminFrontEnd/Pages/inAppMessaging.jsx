@@ -1,91 +1,149 @@
 import React, { useState, useEffect } from 'react';
-import { adminApi } from '../config/axios'; // Axios instance configured for admin routes
+import { adminApi } from '../config/axios';
 
 const InAppMessaging = () => {
-  const [users, setUsers] = useState([]);  // Users list for search
-  const [selectedUsers, setSelectedUsers] = useState([]);  // List of selected users to message
-  const [message, setMessage] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [threads, setThreads] = useState([]);
+  const [selectedThreadId, setSelectedThreadId] = useState(null);
+  const [messages, setMessages] = useState([]);
+  const [messageBody, setMessageBody] = useState('');
+  const [selectedUser, setSelectedUser] = useState(null);
 
-  // Search users based on input
+  // Handle user search
   const handleSearch = async () => {
+    if (!searchTerm.trim()) {
+      console.error('Search term is empty');
+      return;
+    }
+
     try {
-      const response = await adminApi.get('/admin-mail/search-users', {
-        params: { searchTerm },
-      });
-      setUsers(response.data.users);
+      const { data } = await adminApi.get(`/admin-message-routes/search?searchTerm=${searchTerm}`);
+      setSearchResults(data.users);
     } catch (error) {
       console.error('Error searching users:', error);
     }
   };
 
+  // Fetch all thread IDs when component mounts
+  useEffect(() => {
+    const fetchThreads = async () => {
+      try {
+        const { data } = await adminApi.get('/admin-message-routes/fetch-all-threads');
+        setThreads(data.threads); // Store thread IDs in the state
+      } catch (error) {
+        console.error('Error fetching threads:', error);
+      }
+    };
+    fetchThreads();
+  }, []);
 
-  // Add or remove users from the selected list
-  const handleSelectUser = (user) => {
-    if (selectedUsers.find((u) => u.id === user.id)) {
-      // If user is already selected, remove them
-      setSelectedUsers(selectedUsers.filter((u) => u.id !== user.id));
-    } else {
-      // Otherwise, add them to the list
-      setSelectedUsers([...selectedUsers, user]);
+  // Fetch messages when a thread is selected
+  useEffect(() => {
+    if (selectedThreadId) {
+      const fetchMessages = async () => {
+        try {
+          const { data } = await adminApi.get(`/admin-message-routes/fetch-messages-by-thread?threadId=${selectedThreadId}`);
+          setMessages(data.messages);
+        } catch (error) {
+          console.error('Error fetching messages:', error);
+        }
+      };
+      fetchMessages();
     }
+  }, [selectedThreadId]);
+
+  // Handle user selection from search
+  const handleUserSelected = (user) => {
+    setSelectedUser(user);
+    setSelectedThreadId(null); // Clear selected thread when selecting a user
+    setMessages([]); // Clear message window for new user
   };
 
-  // Send message to all selected users
-  const handleSendMessage = async () => {
-    const messageData = {
-      messageBody: message,
-      recipientIds: selectedUsers.map(user => user.id)  // Send message to all selected users
-    };
+  // Handle thread selection from thread preview
+  const handleThreadSelected = (threadId) => {
+    setSelectedThreadId(threadId);
+    setSelectedUser(null); // Clear selected user when selecting a thread
+  };
 
+  // Handle sending a message
+  const sendMessage = async () => {
     try {
-      await adminApi.post('/messages/in-app/send', messageData);  // API endpoint to send messages
-      console.log('Messages sent successfully');
+      await adminApi.post('/admin-message-routes/messages/send', {
+        messageBody,
+        recipientId: selectedUser?.id,
+        recipientUsername: selectedUser?.username,
+      });
+      setMessageBody(''); // Clear input field
+      // Re-fetch messages after sending
+      if (selectedThreadId) {
+        const { data } = await adminApi.get(`/admin-message-routes/fetch-messages-by-thread?threadId=${selectedThreadId}`);
+        setMessages(data.messages);
+      }
     } catch (error) {
-      console.error('Error sending messages:', error);
+      console.error('Error sending message:', error);
     }
   };
 
   return (
-    <div>
-      <h2>Admin In-App Messaging System</h2>
-
-      {/* Search Bar */}
-      <input
-        type="text"
-        placeholder="Search users by username or email"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-      />
-      <button onClick={handleSearch}>Search</button>
-
-      {/* Display list of users */}
-      {users.length > 0 && (
+    <div className="messaging-interface">
+      {/* Search bar */}
+      <div className="search-bar">
+        <input 
+          type="text" 
+          value={searchTerm} 
+          onChange={(e) => setSearchTerm(e.target.value)} 
+          placeholder="Search users by username or email" 
+        />
+        <button onClick={handleSearch}>Search</button>
         <ul>
-          {users.map((user) => (
-            <li key={user.id}>
-              <input
-                type="checkbox"
-                checked={selectedUsers.find((u) => u.id === user.id) ? true : false}
-                onChange={() => handleSelectUser(user)}
-              />
+          {searchResults.map(user => (
+            <li key={user.id} onClick={() => handleUserSelected(user)}>
               {user.username} ({user.email})
             </li>
           ))}
         </ul>
-      )}
+      </div>
 
-      {/* Message Input */}
-      <textarea
-        placeholder={`Message selected users (${selectedUsers.length})`}
-        value={message}
-        onChange={(e) => setMessage(e.target.value)}
-      ></textarea>
+      {/* Thread preview */}
+      <div className="thread-preview">
+        <h3>Message Threads</h3>
+        <ul>
+          {threads.map(thread => (
+            <li key={thread.threadId} onClick={() => handleThreadSelected(thread.threadId)}>
+              <h3>{thread.receiverUsername}</h3>
+              <p>{thread.lastMessageTime || 'No messages yet'}</p> {/* Display the most recent message */}
+            </li>
+          ))}
+        </ul>
+      </div>
 
-      {/* Send Message Button */}
-      <button onClick={handleSendMessage} disabled={selectedUsers.length === 0}>
-        Send Message to {selectedUsers.length > 0 ? `${selectedUsers.length} selected users` : 'all opted-in users'}
-      </button>
+      {/* Messaging window */}
+      <div className="messaging-window">
+        <h3>Messages</h3>
+        {selectedThreadId && messages.length > 0 ? (
+          <ul>
+            {messages.map((message, index) => (
+              <li key={index}>
+                <strong>{message.senderUsername}</strong>: {message.messageBody} <em>{new Date(message.createdAt).toLocaleString()}</em>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>Select a thread to view messages</p>
+        )}
+        {selectedUser && (
+          <>
+            <input 
+              type="text" 
+              value={messageBody} 
+              onChange={(e) => setMessageBody(e.target.value)} 
+              placeholder="Type a message" 
+            />
+            <button onClick={sendMessage}>Send</button>
+          </>
+        )}
+      </div>
     </div>
   );
 };
