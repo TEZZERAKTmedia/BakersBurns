@@ -216,3 +216,37 @@ exports.getUsernamesByThreadId = async (req, res) => {
   }
 };
 
+exports.checkThread = async (req, res) => {
+  const { receiverUsername } = req.query; // Get receiver's username from query parameters
+  const senderUsername = req.user.username; // Assuming the middleware attaches user info (admin)
+
+  try {
+    // Check if the receiver exists
+    const receiver = await User.findOne({ where: { username: receiverUsername } });
+    if (!receiver) {
+      return res.status(404).json({ message: 'Receiver not found' });
+    }
+
+    // Check if a thread exists between the sender (admin) and receiver (user)
+    let thread = await Message.findOne({
+      where: {
+        senderUsername,
+        receiverUsername
+      }
+    });
+
+    // If no thread exists, create a new one
+    if (!thread) {
+      thread = await Message.create({
+        senderUsername,
+        receiverUsername
+      });
+    }
+
+    // Return thread ID
+    return res.json({ threadId: thread.id });
+  } catch (error) {
+    console.error('Error checking or creating thread:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};

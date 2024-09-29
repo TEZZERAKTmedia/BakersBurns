@@ -19,6 +19,7 @@ const InAppMessaging = () => {
   const [senderRole, setSenderRole] = useState('');
   const [receiverRole, setReceiverRole] = useState('');
 
+  // Search users
   const handleSearch = async () => {
     if (!searchTerm.trim()) {
       console.error('Search term is empty');
@@ -43,7 +44,6 @@ const InAppMessaging = () => {
     }
   };
 
-  // Call fetchThreads only when the component mounts
   useEffect(() => {
     fetchThreads();
   }, []);
@@ -69,7 +69,7 @@ const InAppMessaging = () => {
     }
   }, [selectedThreadId]);
 
-  // Handle user selection from search
+  // Handle thread selection from the preview
   const handleThreadSelected = async (threadId) => {
     setSelectedThreadId(threadId); // Set the selected thread ID
    
@@ -79,29 +79,43 @@ const InAppMessaging = () => {
      
       // Set the sender and receiver usernames and roles
       setSenderUsername(data.senderUsername);
-      setReceiverUsername(data.receiverUsername); // <-- Add a log here
+      setReceiverUsername(data.receiverUsername);
       console.log("Receiver Username after thread selection:", data.receiverUsername);
     } catch (error) {
       console.error('Error fetching roles or user:', error);
     }
   };
   
-  const handleUserSelected = (user) => {
+  // Handle user selection from search
+  const handleUserSelected = async (user) => {
     setSelectedUser(user);
     setReceiverUsername(user.username); // Set receiver username here
-    console.log("Receiver Username after user selection:", user.username);
-    setSelectedThreadId(null); // Clear selected thread when selecting a user
     setMessages([]); // Clear message window for new user
+    setSearchTerm(''); // Clear the search term to reset the search bar
+    setSearchResults([]); // Optionally clear search results too
+
+    // Check if a thread exists for the selected user
+    try {
+      const { data } = await adminApi.get(`/admin-message-routes/check-thread?receiverUsername=${user.username}`);
+      
+      if (data.threadId) {
+        // If a thread exists, open it using handleThreadSelected
+        handleThreadSelected(data.threadId);
+      } else {
+        // No thread exists, clear selectedThreadId
+        setSelectedThreadId(null);
+        console.log("No existing thread found. You can start a new conversation.");
+      }
+    } catch (error) {
+      console.error('Error checking if thread exists for user:', error);
+    }
   };
   
-  
-  
-
   const sendMessageToExistingThread = async () => {
     console.log("Send message to existing thread function is being used.");
     console.log("Message Body:", messageBody);
-    console.log("Receiver Username:", receiverUsername);  // Add this log to verify
-    console.log("Selected Thread ID:", selectedThreadId); // Add this log to verify
+    console.log("Receiver Username:", receiverUsername);
+    console.log("Selected Thread ID:", selectedThreadId);
   
     if (!messageBody || !receiverUsername || !selectedThreadId) {
       console.error("Message body, receiverUsername, and selectedThreadId cannot be empty");
@@ -125,49 +139,39 @@ const InAppMessaging = () => {
     }
   };
   
-  
-  
+  const sendMessageToSearchedUser = async () => {
+    console.log("Send message to searched user function is being used");
+    console.log("Message Body:", messageBody);
+    console.log("Receiver Username:", receiverUsername);
 
-  // Handle sending a message
-// Handle sending a message
-// Handle sending a message
-const sendMessageToSearchedUser = async () => {
-  console.log("Send message to searched user function is being used");
-  console.log("Message Body:", messageBody);
-  console.log("Receiver Username:", receiverUsername);
-
-  if (!messageBody || !receiverUsername) {
-    console.error("Message body and receiverUsername cannot be empty");
-    return;
-  }
-
-  try {
-    await adminApi.post('/admin-message-routes/messages/send', {
-      messageBody,
-      receiverUsername,   // Send receiver username from the frontend
-      // The backend will handle the senderUsername based on the authenticated admin user
-    });
-
-    setMessageBody(''); // Clear input field
-
-    // Re-fetch messages after sending
-    if (selectedThreadId) {
-      const { data } = await adminApi.get(`/admin-message-routes/fetch-messages-by-thread?threadId=${selectedThreadId}`);
-      setMessages(data.messages);
+    if (!messageBody || !receiverUsername) {
+      console.error("Message body and receiverUsername cannot be empty");
+      return;
     }
-  } catch (error) {
-    console.error('Error sending message:', error);
-  }
-};
 
+    try {
+      await adminApi.post('/admin-message-routes/messages/send', {
+        messageBody,
+        receiverUsername,   // Send receiver username from the frontend
+        // The backend will handle the senderUsername based on the authenticated admin user
+      });
 
+      setMessageBody(''); // Clear input field
 
+      // Re-fetch messages after sending
+      if (selectedThreadId) {
+        const { data } = await adminApi.get(`/admin-message-routes/fetch-messages-by-thread?threadId=${selectedThreadId}`);
+        setMessages(data.messages);
+      }
+    } catch (error) {
+      console.error('Error sending message:', error);
+    }
+  };
 
-  // Fetch roles for the given threadId
   const fetchUserRole = async (threadId) => {
     try {
       const { data } = await adminApi.get(`/admin-message-routes/get-roles-thread/${threadId}`);
-      console.log('Roles fetched:', data); // Inspect the fetched data
+      console.log('Roles fetched:', data);
       return {
         senderRole: data.senderRole,
         receiverRole: data.receiverRole,
@@ -253,7 +257,10 @@ const sendMessageToSearchedUser = async () => {
               <ul>
                 {messages.map((message, index) => (
                   <li key={index}>
-                    <strong>{message.senderUsername}</strong>: {message.messageBody}
+                    <strong>{message.senderUsername}</strong>:
+                    <div style={{color:'black'}}>
+                        {message.messageBody}
+                    </div> 
                   </li>
                 ))}
               </ul>
@@ -275,8 +282,8 @@ const sendMessageToSearchedUser = async () => {
                     onChange={(e) => setMessageBody(e.target.value)}
                     placeholder={`Type a message to ${receiverUsername}`} // Show receiver's name
                   />
-                  <button type="submit">Send to Thread</button>
-                </form>
+                  <button type="submit">Send</button>
+              </form>
 
             ) : (
               // If no thread is selected but a user is selected via search, show input field for sending a message to the searched user
@@ -295,8 +302,6 @@ const sendMessageToSearchedUser = async () => {
               )
             )}
           </div>
-
-
       </div>
     </div>
   );

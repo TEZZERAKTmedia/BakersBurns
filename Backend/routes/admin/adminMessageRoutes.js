@@ -13,6 +13,7 @@ const {
     fetchMessagesByThreadId,
     getRolesByThreadId,
     getUsernamesByThreadId,
+    checkThread,
 
   } = require('../../controllers/admin/inAppMessagingController');
 
@@ -37,6 +38,7 @@ router.get('/get-roles-thread/:threadId', adminAuthMiddleware(), getRolesByThrea
 // Define a route to get usernames by thread ID
 router.get('/get-usernames-by-thread/:threadId', adminAuthMiddleware(), getUsernamesByThreadId);
 
+router.get('/check-thread', adminAuthMiddleware(), checkThread);
 
 // Email messaging routes
 
