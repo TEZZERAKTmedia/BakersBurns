@@ -1,4 +1,4 @@
-const { v4: uuidv4 } = require('uuid');
+
 const Message = require('../../models/messages');
 const User = require('../../models/user');
 const { Op } = require('sequelize');
@@ -79,31 +79,26 @@ exports.searchInAppUsers = async (req, res) => {
 
 // Get all messages related to the logged-in user (from the decoded token via middleware)
 exports.sendInAppMessage = async (req, res) => {
-  const { messageBody, recipientId, recipientUsername } = req.body;
+  const { messageBody, receiverUsername } = req.body;
 
-  if (!messageBody || !recipientId || !recipientUsername) {
-    return res.status(400).json({ error: 'Message body, recipientId, and recipientUsername cannot be empty' });
+  if (!messageBody || !receiverUsername) {
+    return res.status(400).json({ error: 'Message body and receiverUsername cannot be empty' });
   }
 
   try {
-    // Find the recipient by recipientId
-    const recipient = await User.findOne({ where: { id: recipientId } });
-
-    if (!recipient) {
-      return res.status(404).json({ error: 'Recipient not found' });
-    }
+    const senderUsername = req.user.username; // Extract sender username from authenticated user via middleware
 
     // Use getOrCreateThreadId to check if a thread exists or create a new one
-    const threadId = await exports.getOrCreateThreadId(req.user.username, recipientUsername);
+    const threadId = await exports.getOrCreateThreadId(senderUsername, receiverUsername);
 
     // Create the new message
     await Message.create({
-      senderUsername: req.user.username,  // Sender's username
-      receiverUsername: recipientUsername, // Receiver's username
-      messageBody,                         // Message content
-      threadId,                            // Thread ID returned from getOrCreateThreadId
-      createdAt: new Date(),               // Timestamp of when the message is created
-      updatedAt: new Date()                // Timestamp of last update
+      senderUsername,  // Sender's username (admin)
+      receiverUsername, // Receiver's username (from the frontend)
+      messageBody,      // Message content
+      threadId,         // Thread ID
+      createdAt: new Date(),
+      updatedAt: new Date()
     });
 
     res.status(200).json({ message: 'Message sent successfully', threadId });
@@ -112,6 +107,7 @@ exports.sendInAppMessage = async (req, res) => {
     res.status(500).json({ error: 'Failed to send message' });
   }
 };
+
 
 
 // Fetch all messages for a specific threadId
@@ -155,6 +151,68 @@ exports.fetchMessagesByThreadId = async (req, res) => {
   }
 };
 
+exports.getRolesByThreadId = async (req, res) => {
+  const { threadId } = req.params;
+
+  try {
+    // Find a message in the thread to get the sender and receiver usernames
+    const message = await Message.findOne({
+      where: { threadId },
+      attributes: ['senderUsername', 'receiverUsername'],
+    });
+
+    if (!message) {
+      return res.status(404).json({ error: 'Thread not found' });
+    }
+
+    const senderUsername = message.senderUsername;
+    const receiverUsername = message.receiverUsername;
+
+    // Fetch the roles of the sender and receiver from the Users table
+    const sender = await User.findOne({ where: { username: senderUsername } });
+    const receiver = await User.findOne({ where: { username: receiverUsername } });
+
+    if (!sender || !receiver) {
+      return res.status(404).json({ error: 'Sender or receiver not found' });
+    }
+
+    // Return the roles of both the sender and receiver
+    res.status(200).json({
+      senderRole: sender.role,
+      receiverRole: receiver.role,
+    });
+  } catch (error) {
+    console.error('Error fetching roles by threadId:', error);
+    res.status(500).json({ error: 'Failed to fetch roles' });
+  }
+};
 
 
+
+exports.getUsernamesByThreadId = async (req, res) => {
+  const { threadId } = req.params;
+
+  try {
+    // Fetch the message with sender and receiver by threadId
+    const message = await Message.findOne({
+      where: { threadId },
+      attributes: ['senderUsername', 'receiverUsername'],
+    });
+
+    if (!message) {
+      return res.status(404).json({ error: 'Thread not found' });
+    }
+
+    const senderUsername = message.senderUsername;
+    const receiverUsername = message.receiverUsername;
+
+    res.status(200).json({
+      senderUsername,
+      receiverUsername,
+    });
+  } catch (error) {
+    console.error('Error fetching usernames by threadId:', error);
+    res.status(500).json({ error: 'Failed to fetch usernames' });
+  }
+};
 

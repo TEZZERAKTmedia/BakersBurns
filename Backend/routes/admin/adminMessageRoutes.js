@@ -11,6 +11,8 @@ const {
     getOrCreateThreadId,       // In-app and email messaging
     fetchAllThreadIds,
     fetchMessagesByThreadId,
+    getRolesByThreadId,
+    getUsernamesByThreadId,
 
   } = require('../../controllers/admin/inAppMessagingController');
 
@@ -29,6 +31,12 @@ router.get('/fetch-all-threads', adminAuthMiddleware(), fetchAllThreadIds);
 router.get('/fetch-messages-by-thread',adminAuthMiddleware(), fetchMessagesByThreadId);
 
 router.get('/threads', adminAuthMiddleware(), getOrCreateThreadId);
+
+router.get('/get-roles-thread/:threadId', adminAuthMiddleware(), getRolesByThreadId);
+
+// Define a route to get usernames by thread ID
+router.get('/get-usernames-by-thread/:threadId', adminAuthMiddleware(), getUsernamesByThreadId);
+
 
 // Email messaging routes
 
