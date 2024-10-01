@@ -1,113 +1,164 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { userApi } from '../config/axios';  // Axios instance for user routes
-import ('../Pagecss/inAppMessaging.css');
+import React, { useState, useEffect } from 'react';
+import { userApi } from '../config/axios';  // Assuming userApi is configured for user endpoints
+import '../Pagecss/inappmessaging.css';
 
-const InAppMessaging = () => {
-  const [allMessages, setAllMessages] = useState([]);
-  const [newMessage, setNewMessage] = useState('');
-  const [error, setError] = useState(null);
-  const userId = 2; // Replace this with the actual logged-in user ID from your authentication
+const UserMessaging = () => {
+  const [selectedThreadId, setSelectedThreadId] = useState(null);
+  const [messages, setMessages] = useState([]);
+  const [messageBody, setMessageBody] = useState('');
+  const [userUsername, setUserUsername] = useState('');  // Logged-in user's username
+  const receiverUsername = 'admin';  // Assuming you're messaging the admin, adjust if dynamic
 
-  // Create a ref for the message end (the last message or bottom of the chat)
-  const messageEndRef = useRef(null);
+  // Get the threadId based on the senderUsername and receiverUsername
+  const getThreadId = async () => {
+    try {
+      const { data } = await userApi.get('/user-message-routes/get-thread', {
+        params: {
+          senderUsername: userUsername,   // Pass the logged-in user's username
+          receiverUsername: receiverUsername   // Pass the receiver's username (e.g., admin)
+        }
+      });
 
-  // Function to scroll to the bottom
-  const scrollToBottom = () => {
-    if (messageEndRef.current) {
-      messageEndRef.current.scrollIntoView({ behavior: 'smooth' });
+      if (data.threadId) {
+        setSelectedThreadId(data.threadId);  // Set the threadId in the state
+        console.log('ThreadId:', data.threadId);
+        return data.threadId;
+      }
+
+      return null;
+    } catch (err) {
+      console.error('Failed to get thread', err);
+      return null;
     }
   };
 
-  // Scroll to bottom every time the allMessages array is updated (after sending or receiving)
+  // Fetch messages for the thread
+  const fetchMessages = async (threadId) => {
+    try {
+      const { data: messageData } = await userApi.get(`/user-message-routes/fetch-messages-by-thread?threadId=${threadId}`);
+      setMessages(messageData.messages);
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+    }
+  };
+
+  // Check for the threadId and load messages on mount
+  const checkThreadAndLoadMessages = async () => {
+    const threadId = await getThreadId();  // Get or create the threadId
+    if (threadId) {
+      fetchMessages(threadId);  // Fetch the messages for the thread
+    }
+  };
+
+  // Fetch the user's data and check thread on mount
   useEffect(() => {
-    scrollToBottom();
-  }, [allMessages]);
+    // Assume userUsername is fetched from an auth context or cookie
+    setUserUsername('currentLoggedInUser');  // Set the logged-in user's username dynamically
 
-  useEffect(() => {
-    const fetchMessages = async () => {
-      try {
-        const receivedResponse = await userApi.get('/user-message-routes/get-received-messages');
-        const sentResponse = await userApi.get('/user-message-routes/get-sent-messages');
-
-        // Combine sent and received messages
-        const combinedMessages = [...receivedResponse.data, ...sentResponse.data];
-
-        // Sort messages by createdAt (timestamp) in ascending order
-        const sortedMessages = combinedMessages.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
-
-        setAllMessages(sortedMessages);
-      } catch (error) {
-        console.error('Error fetching messages:', error);
-        setError('Failed to load messages');
-      }
-    };
-
-    fetchMessages();
+    checkThreadAndLoadMessages();
   }, []);
 
-  const sendMessage = async (e) => {
-    e.preventDefault();
-
-    if (!newMessage.trim()) return;
+  // Send a message (create a thread if it doesn't exist)
+  const sendMessage = async () => {
+    if (!messageBody) {
+      console.error('Message body cannot be empty');
+      return;
+    }
 
     try {
-      const response = await userApi.post('/user-message-routes/send-message', { messageBody: newMessage });
-      setNewMessage('');
+      let threadId = selectedThreadId;
 
-      // Fetch messages again after sending
-      const receivedResponse = await userApi.get('/user-message-routes/get-received-messages');
-      const sentResponse = await userApi.get('/user-message-routes/get-sent-messages');
-      const combinedMessages = [...receivedResponse.data, ...sentResponse.data];
-      const sortedMessages = combinedMessages.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+      // If no threadId exists, allow backend to create one dynamically
+      const { data } = await userApi.post('/user-message-routes/send-message', {
+        messageBody,      // The input message content
+        threadId,         // Use the existing or pass null to create a new thread
+        senderUsername: userUsername,  // Send current user as the sender
+        receiverUsername: receiverUsername  // Send admin as the receiver
+      });
 
-      setAllMessages(sortedMessages);
+      // Set the threadId if it was just created
+      if (!threadId && data.threadId) {
+        setSelectedThreadId(data.threadId);
+      }
 
-      // Scroll to the bottom after sending a message (will be triggered automatically by useEffect)
+      setMessageBody('');  // Clear input field after sending
+      fetchMessages(data.threadId || threadId);  // Refetch messages to update the UI
+
     } catch (error) {
       console.error('Error sending message:', error);
-      setError('Failed to send message');
     }
   };
 
-  if (error) return <div>Error: {error}</div>;
+  // Render messages with styling based on the sender's role
+  const renderMessages = () => {
+    return messages.map((message, index) => {
+      const isAdmin = message.senderRole === 'admin';
+
+      const messageStyle = {
+        backgroundColor: isAdmin ? 'white' : 'orange',
+        color: isAdmin ? 'black' : 'white',
+        padding: '10px',
+        borderRadius: '10px',
+        marginBottom: '10px',
+        alignSelf: isAdmin ? 'flex-start' : 'flex-end',
+        maxWidth: '60%',
+        textAlign: isAdmin ? 'left' : 'right'  // Align text based on sender role
+      };
+
+      return (
+        <li key={index} style={messageStyle}>
+          <strong>{isAdmin ? 'Admin' : 'You'}</strong>:
+          <div>{message.messageBody}</div>
+        </li>
+      );
+    });
+  };
 
   return (
-    <div className="in-app-messaging-page">
-      <h2>Your Messages</h2>
-      <div className="messaging-layout">
-        {allMessages.length === 0 ? (
-          <div>No messages found.</div>
+    <div className={`messaging-interface ${selectedThreadId ? 'thread-selected' : ''}`}>
+      <div className="messaging-body">
+        <h3>Conversation with Admin</h3>
+
+        {/* Display messages if a thread is selected */}
+        {selectedThreadId && messages.length > 0 ? (
+          <ul className="message-list" style={{ listStyle: 'none', padding: 0 }}>
+            {renderMessages()}
+          </ul>
         ) : (
-          allMessages.map((message) => (
-            <div
-              key={message.id}
-              className={`message-item ${message.senderId === userId ? 'sent' : 'received'}`}
-            >
-              <strong>{message.senderId === userId ? 'You:' : 'Admin:'}</strong> {message.messageBody}
-              <div className="message-timestamp">{new Date(message.createdAt).toLocaleString()}</div>
-            </div>
-          ))
+          <p>No conversation yet. Start by typing a message.</p>
         )}
 
-        {/* This empty div will be scrolled into view to ensure the page scrolls to the bottom */}
-        <div ref={messageEndRef} />
-      </div>
-
-      {/* Message input and send button */}
-      <div className="message-input-container">
-        <input
-          type="text"
-          className="message-input"
-          value={newMessage}
-          onChange={(e) => setNewMessage(e.target.value)}
-          placeholder="Type a message..."
-        />
-        <button className="message-send-button" onClick={sendMessage}>
-          Send
-        </button>
+        {/* Message input field */}
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            sendMessage();
+          }}
+        >
+          <input
+            type="text"
+            value={messageBody}
+            onChange={(e) => setMessageBody(e.target.value)}
+            placeholder="Type a message to Admin"
+            style={{ width: '100%', padding: '10px', marginBottom: '10px' }}
+          />
+          <button type="submit">Send</button>
+        </form>
       </div>
     </div>
   );
 };
 
-export default InAppMessaging;
+export default UserMessaging;
+
+
+
+
+
+
+
+
+
+
+
+

@@ -2,7 +2,10 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const PendingUser = require('../../models/pendingUser');
 const User = require('../../models/user');
+const Message = require('../../models/messages');
 const sendVerificationEmail = require('../../utils/buildEmail'); // Nodemailer utility
+const { v4: uuidv4 } = require('uuid');
+
 
 // Signup Controller
 const signup = async (req, res) => {
@@ -63,6 +66,7 @@ const signup = async (req, res) => {
 };
 
 // Verify and Move Controller
+
 const verifyAndMove = async (req, res) => {
   const { email, token } = req.query;
 
@@ -75,10 +79,19 @@ const verifyAndMove = async (req, res) => {
       return res.status(400).json({ message: 'Invalid token or email mismatch.' });
     }
 
-    // Find the pending user by email
+    // Find the pending user by email BEFORE deleting it
     const pendingUser = await PendingUser.findOne({ where: { email } });
     if (!pendingUser) {
       return res.status(404).json({ message: 'Pending user not found.' });
+    }
+
+    // Check if the user already exists in the Users table
+    const existingUser = await User.findOne({ where: { email } });
+    if (existingUser) {
+      return res.status(409).json({
+        message: 'This email is already registered. Please log in.',
+        redirectUrl: process.env.LOGIN_URL || 'http://localhost:3010/login',
+      });
     }
 
     // Move the user to the Users table
@@ -87,29 +100,47 @@ const verifyAndMove = async (req, res) => {
       email: pendingUser.email,
       password: pendingUser.password,
       phoneNumber: pendingUser.phoneNumber,
-      isVerified: true,  // Mark the user as verified
+      isVerified: true, // Mark the user as verified
     });
 
-    // Delete the pending user entry from PendingUsers table
+    // After successful move, delete the pending user entry
     await PendingUser.destroy({ where: { email } });
 
     // Generate an authentication token (JWT) for the verified user
-    const authToken = jwt.sign({ id: newUser.id, email: newUser.email }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const authToken = jwt.sign({ id: newUser.id, email: newUser.email, username: newUser.username }, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+    // Find the admin user to initiate the messaging
+    const adminUser = await User.findOne({ where: { role: 'admin' } });
+    if (!adminUser) {
+      return res.status(500).json({ message: 'Admin user not found.' });
+    }
+
+    // Generate a unique threadId for the messaging thread
+    const threadId = uuidv4();
+
+    // Create an initial message from the admin to the user
+    await Message.create({
+      threadId: threadId,
+      senderUsername: adminUser.username,
+      receiverUsername: newUser.username,
+      messageBody: 'Hi, welcome to BakersBurns. How can I help?',
+      createdAt: new Date(),
+    });
 
     // Set a secure cookie for protecting future routes
     res.cookie('authToken', authToken, {
-      httpOnly: true,             // Prevent client-side access to cookie
-      secure: process.env.NODE_ENV === 'production',  // Set to true in production (HTTPS)
-      domain: process.env.COOKIE_DOMAIN || 'localhost',  // Cross-subdomain, if needed
-      maxAge: 60 * 60 * 1000,     // 1-hour expiration
-      sameSite: 'Lax',            // Prevent CSRF attacks
+      httpOnly: true, // Prevent client-side access to cookie
+      secure: process.env.NODE_ENV === 'production', // Set to true in production (HTTPS)
+      domain: process.env.COOKIE_DOMAIN || 'localhost', // Cross-subdomain, if needed
+      maxAge: 60 * 60 * 1000, // 1-hour expiration
+      sameSite: 'Lax', // Prevent CSRF attacks
     });
 
     // Respond with success and redirect URL
     return res.status(200).json({
-      message: 'User verified and moved to Users table.',
+      message: 'User verified, moved to Users table, and initial message created.',
       verified: true,
-      redirectUrl: process.env.DEV_USER_URL || 'http://localhost:4001',  // Redirect to user dashboard
+      redirectUrl: process.env.DEV_USER_URL || 'http://localhost:4001', // Redirect to user dashboard
     });
 
   } catch (error) {
@@ -117,8 +148,6 @@ const verifyAndMove = async (req, res) => {
     return res.status(400).json({ message: 'Invalid or expired token.' });
   }
 };
-
-
 
 
 // Resend verification email controller

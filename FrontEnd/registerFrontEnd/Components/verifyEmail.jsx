@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { registerApi } from '../config/axios';
 
 const VerifyEmail = () => {
@@ -7,7 +7,9 @@ const VerifyEmail = () => {
   const [message, setMessage] = useState('');
   const [resendMessage, setResendMessage] = useState(''); 
   const [emailResent, setEmailResent] = useState(false);  // Track if email was resent
+  const [showLoginButton, setShowLoginButton] = useState(false);  // Track if we should show login button
   const location = useLocation();
+  const navigate = useNavigate();  // Navigate to different routes
 
   // Extract the email and token from the query parameters
   const getQueryParams = () => {
@@ -39,6 +41,11 @@ const VerifyEmail = () => {
             setTimeout(() => {
               window.location.href = redirectUrl; // Redirect to user dashboard after 2 seconds
             }, 2000);
+          } else if (response.status === 409) {
+            // Handle case where email is already registered
+            setVerificationStatus('email_registered');
+            setMessage(response.data.message || 'This email is already registered.');
+            setShowLoginButton(true);
           } else {
             setVerificationStatus('failed');
             setMessage(response.data.message || 'Verification failed.');
@@ -85,6 +92,12 @@ const VerifyEmail = () => {
       {verificationStatus === 'success' && (
         <div className="success-message">
           {message}. Redirecting to your account...
+        </div>
+      )}
+      {verificationStatus === 'email_registered' && (
+        <div className="info-message">
+          {message} You can log in to your account.
+          <button onClick={() => navigate('/login')}>Go to Login</button>
         </div>
       )}
       {verificationStatus === 'failed' && (
