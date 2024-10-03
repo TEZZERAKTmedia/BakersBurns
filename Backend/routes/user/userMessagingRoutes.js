@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();  // Import your authentication middleware
 const userAuthMiddleware = require('../../middleware/userAuthMiddleware')
-const {  getThreadId, createThreadId, sendInAppMessage, fetchMessagesByThreadId, getRolesByThreadId, funtion} = require('../../controllers/user/inAppMessagingController');
+const {  getThreadId, sendInAppMessage, fetchMessagesByThreadId, getRolesByThreadId} = require('../../controllers/user/inAppMessagingController');
 
 
 
@@ -10,7 +10,7 @@ const {  getThreadId, createThreadId, sendInAppMessage, fetchMessagesByThreadId,
   // Fetch user messages without passing userId in the URL
 router.get('/get-thread', userAuthMiddleware(), getThreadId);
 
-router.post('/new-thread', userAuthMiddleware(), createThreadId)
+
 
 router.post('/send-message',userAuthMiddleware(),  sendInAppMessage);
 
@@ -28,11 +28,4 @@ module.exports = router;
 
 
 
-function clearAllCookies() {
-  const cookies = document.cookie.split(";");
 
-  cookies.forEach((cookie) => {
-    const cookieName = cookie.split("=")[0].trim();
-    document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
-  });
-}

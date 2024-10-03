@@ -5,11 +5,11 @@ import { registerApi } from '../config/axios';
 const VerifyEmail = () => {
   const [verificationStatus, setVerificationStatus] = useState(null);
   const [message, setMessage] = useState('');
-  const [resendMessage, setResendMessage] = useState(''); 
-  const [emailResent, setEmailResent] = useState(false);  // Track if email was resent
-  const [showLoginButton, setShowLoginButton] = useState(false);  // Track if we should show login button
+  const [resendMessage, setResendMessage] = useState('');
+  const [emailResent, setEmailResent] = useState(false);
+  const [showLoginButton, setShowLoginButton] = useState(false);
   const location = useLocation();
-  const navigate = useNavigate();  // Navigate to different routes
+  const navigate = useNavigate();
 
   // Extract the email and token from the query parameters
   const getQueryParams = () => {
@@ -18,6 +18,23 @@ const VerifyEmail = () => {
       email: searchParams.get('email'),
       token: searchParams.get('token'),
     };
+  };
+
+  // Function to generate the login token and set the cookie
+  const generateLoginTokenAndSetCookie = async (email) => {
+    try {
+      const tokenResponse = await registerApi.post('/sign-up/generate-token', { email });
+
+      if (tokenResponse.status === 200) {
+        // Token was successfully generated, and the cookie is set
+        const redirectUrl = import.meta.env.VITE_DEV_USER_URL || 'http://localhost:4001';
+        window.location.href = redirectUrl; // Redirect to user dashboard
+      } else {
+        setMessage('Failed to generate login token.');
+      }
+    } catch (error) {
+      setMessage('Error generating login token.');
+    }
   };
 
   useEffect(() => {
@@ -36,11 +53,8 @@ const VerifyEmail = () => {
             setVerificationStatus('success');
             setMessage('Verification successful, user moved to permanent table.');
 
-            // Redirect to DEV_USER_URL
-            const redirectUrl = import.meta.env.VITE_DEV_USER_URL || 'http://localhost:4001';
-            setTimeout(() => {
-              window.location.href = redirectUrl; // Redirect to user dashboard after 2 seconds
-            }, 2000);
+            // Once verified, generate the login token and set the cookie using the verified email
+            generateLoginTokenAndSetCookie(email);
           } else if (response.status === 409) {
             // Handle case where email is already registered
             setVerificationStatus('email_registered');
@@ -69,7 +83,7 @@ const VerifyEmail = () => {
 
     try {
       const resendResponse = await registerApi.post('sign-up/resend-verification', { email });
-      
+
       if (resendResponse.status === 200) {
         setEmailResent(true);
         setResendMessage('Verification email has been resent. Please check your inbox.');
@@ -77,7 +91,7 @@ const VerifyEmail = () => {
         setEmailResent(false);
         setResendMessage('Failed to resend verification email. Please try again.');
       }
-      
+
     } catch (error) {
       setEmailResent(false);
       setResendMessage(

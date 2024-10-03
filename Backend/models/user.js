@@ -30,6 +30,10 @@ const User = sequelize.define('User', {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
   },
+  role: {
+    type: DataTypes.STRING, // Role field should be here
+    allowNull: false,
+  },
 }, {
   hooks: {
     beforeValidate: (user) => {

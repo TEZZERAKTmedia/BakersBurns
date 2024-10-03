@@ -23,7 +23,12 @@ const PendingUsers = sequelize.define('PendingUsers', {
   verificationToken: {
     type: DataTypes.STRING,
     allowNull: false
-  }
+  },
+  role: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    defaultValue: 'user', // Assign a default role if none is provided
+  },
 }, {
   hooks: {
     beforeValidate: (pendingUser) => {

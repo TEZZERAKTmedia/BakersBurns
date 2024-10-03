@@ -4,38 +4,35 @@ const { Op } = require('sequelize');
 
 // Get or Create a Thread ID between sender and receiver
 // Get or Create a Thread ID between sender and receiver
-exports.getThreadId = async (senderUsername, receiverUsername) => {
+exports.getThreadId = async (req, res) => {
+  const senderUsername = req.user.username;  // Middleware provides the username
+
   try {
-    // Check if a thread already exists between these two users, irrespective of who is sender/receiver
+    // Check if a thread exists where the current user is either the sender or receiver
     const existingThread = await Message.findOne({
       where: {
         [Op.or]: [
-          {
-            senderUsername: senderUsername,
-            receiverUsername: receiverUsername
-          },
-          {
-            senderUsername: receiverUsername,
-            receiverUsername: senderUsername
-          }
+          { senderUsername: senderUsername },
+          { receiverUsername: senderUsername }
         ]
       },
       attributes: ['threadId'],
-      order: [['createdAt', 'ASC']]
+      order: [['createdAt', 'ASC']]  // Order by when the thread was created
     });
 
-    // If a thread exists, return the threadId
     if (existingThread) {
-      return existingThread.threadId;
+      // Return the existing threadId
+      return res.status(200).json({ threadId: existingThread.threadId });
     }
 
-    // If no thread exists, return null (so that a new thread can be created)
-    return null;
+    // No existing thread found, return a suitable response
+    return res.status(404).json({ message: 'No thread found for this user.' });
   } catch (error) {
     console.error('Error finding thread:', error);
-    throw error;
+    return res.status(500).json({ message: 'Server error while finding thread.' });
   }
 };
+
 
 exports.createThreadId = async (sender, receiver) => {
   try {
@@ -60,24 +57,7 @@ exports.createThreadId = async (sender, receiver) => {
 };
 
 // Helper function to generate a new threadId
-exports.generateNewThreadId = async () => {
-  const lastMessage = await Message.findOne({
-    order: [['threadId', 'DESC']] // Fetch the most recent threadId
-  });
-  return lastMessage ? lastMessage.threadId + 1 : 1; // Start at 1 if no threads exist
-};
 
-
-// Example function to generate a new threadId (simple increment)
-exports.generateNewThreadId = async () => {
-  // Fetch the last threadId and increment
-  const lastMessage = await Message.findOne({
-    order: [['threadId', 'DESC']] // Get the latest threadId
-  });
-
-  // Start with 1 if no threads exist, otherwise increment the latest threadId by 1
-  return lastMessage ? lastMessage.threadId + 1 : 1;
-};
 
 
 exports.sendInAppMessage = async (req, res) => {

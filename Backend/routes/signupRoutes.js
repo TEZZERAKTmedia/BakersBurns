@@ -11,4 +11,6 @@ router.get('/resend-verifictation-email', signupController.resendVerificationEma
 // GET request for verifying the user's email and moving them from PendingUsers to Users table
 router.get('/verify-and-move', signupController.verifyAndMove); 
 
+router.post('/generate-token', signupController.generateLoginTokenAndSetCookie);
+
 module.exports = router;
