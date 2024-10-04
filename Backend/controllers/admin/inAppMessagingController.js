@@ -113,23 +113,43 @@ exports.sendInAppMessage = async (req, res) => {
 // Fetch all messages for a specific threadId
 exports.fetchAllThreadIds = async (req, res) => {
   try {
-    // Fetch all unique thread IDs with receiverUsername
+    // Get the logged-in user's username from the cookie
+    const loggedInUsername = req.user.username;
+
+    // Fetch all unique thread IDs with senderUsername and receiverUsername
     const threads = await Message.findAll({
       attributes: [
         'threadId',
+        'senderUsername',
         'receiverUsername',
         [sequelize.fn('MAX', sequelize.col('createdAt')), 'lastMessageTime'], // Time of last message
       ],
-      group: ['threadId', 'receiverUsername'], // Group by threadId and receiverUsername
+      group: ['threadId'], // Group by threadId only
       order: [[sequelize.fn('MAX', sequelize.col('createdAt')), 'DESC']], // Sort by last message time
     });
 
-    res.status(200).json({ threads });
+    // Filter and label each thread with the other user's username
+    const filteredThreads = threads.map(thread => {
+      // If the logged-in user is the sender, label the thread with the receiver's username
+      const threadPreviewUsername = thread.senderUsername === loggedInUsername 
+        ? thread.receiverUsername 
+        : thread.senderUsername;
+      
+      return {
+        threadId: thread.threadId,
+        threadPreviewUsername, // Label the thread with the other user's username
+        lastMessageTime: thread.lastMessageTime
+      };
+    });
+
+    res.status(200).json({ threads: filteredThreads });
   } catch (error) {
     console.error('Error fetching thread IDs:', error);
     res.status(500).json({ error: 'Failed to fetch thread IDs' });
   }
 };
+
+
 exports.fetchMessagesByThreadId = async (req, res) => {
   const { threadId } = req.query;
 

@@ -38,11 +38,16 @@ const InAppMessaging = () => {
   const fetchThreads = async () => {
     try {
       const { data } = await adminApi.get('/admin-message-routes/fetch-all-threads');
-      setThreads(data.threads); // Store thread IDs in the state
+  
+      // Filter threads to show only the receiver's username (if the current user is the admin)
+      const filteredThreads = data.threads.filter(thread => thread.receiverUsername !== senderUsername);
+  
+      setThreads(filteredThreads); // Set the filtered threads
     } catch (error) {
       console.error('Error fetching threads:', error);
     }
   };
+  
 
   useEffect(() => {
     fetchThreads();
@@ -236,21 +241,22 @@ const InAppMessaging = () => {
       <div className="messaging-body">
         {/* Thread preview */}
         <div className="thread-preview">
-          <h3>Message Threads</h3>
-          <button onClick={fetchThreads}>Reload Threads</button>
-          <ul>
-            {threads.map(thread => (
-              <li key={thread.threadId} onClick={() => handleThreadSelected(thread.threadId)}>
-                <h3>{thread.receiverUsername}</h3>
-                <p>{thread.lastMessageTime || 'No messages yet'}</p> {/* Display the most recent message */}
-              </li>
-            ))}
-          </ul>
+          <h3 style={{ backgroundColor: 'black', color: 'white'}}>Message Threads</h3>
+          {/* <button onClick={fetchThreads}>Reload Threads</button>*/}
+              <ul>
+                  {threads.map(thread => (
+                    <li key={thread.threadId} onClick={() => handleThreadSelected(thread.threadId)}>
+                      <h3 >{thread.threadPreviewUsername}</h3>
+                      <p >{thread.lastMessageTime}</p>
+                    </li>
+                  ))}
+              </ul>
+
         </div>
 
         {/* Messaging window */}
         <div className="messaging-window">
-            <h3>Messages</h3>
+            <h3 style={{ backgroundColor: 'black'}}>Messages</h3>
 
             {/* Display messages if a thread is selected */}
             {selectedThreadId && messages.length > 0 ? (

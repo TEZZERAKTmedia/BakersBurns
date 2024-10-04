@@ -16,9 +16,10 @@ body {
 
 /* Main messaging interface */
 .messaging-interface {
-  width: 90%;
+  width: 150%;
   height: 80vh;
   margin-top: 20%;
+  margin-left: -25%;
   background-color: #fff;
   border-radius: 12px;
   overflow: hidden;
@@ -68,27 +69,33 @@ body {
   border-right: 1px solid #ddd;
   overflow-y: auto;
   padding: 20px;
+  
 }
 
 .thread-preview h3 {
   margin-bottom: 20px;
   color: #333;
+  
 }
 
 .thread-preview ul {
   list-style: none;
   padding: 0;
+  width: 100px;
+  
 }
 
 .thread-preview ul li {
   padding: 15px;
   margin-bottom: 10px;
-  background-color: #fff;
+  background-color: #f57e2e;
   border-radius: 6px;
   cursor: pointer;
   display: flex;
   justify-content: space-between;
   align-items: center;
+
+  
 }
 
 .thread-preview ul li:hover {
@@ -168,7 +175,7 @@ body {
 
   .thread-preview {
     width: 100%;
-    height: 50%;
+    height: 100%;
     border-right: none;
   }
 
