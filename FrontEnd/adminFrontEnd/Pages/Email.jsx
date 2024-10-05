@@ -1,20 +1,23 @@
 import React, { useState } from 'react';
-import { adminApi } from '../config/axios'; // Ensure axios is set up for admin routes
+import { adminApi } from '../config/axios';
 import '../Pagecss/email.css';
 
 const AdminEmailComponent = () => {
-  // State for individual user emailing
   const [searchTerm, setSearchTerm] = useState('');
   const [recipients, setRecipients] = useState([]);
   const [searchResults, setSearchResults] = useState([]);
-  const [subject, setSubject] = useState('');
-  const [messageBody, setMessageBody] = useState('');
-  const [password, setPassword] = useState('');
 
-  // State for emailing everyone
-  const [everyoneSubject, setEveryoneSubject] = useState('');
-  const [everyoneMessageBody, setEveryoneMessageBody] = useState('');
-  const [everyonePassword, setEveryonePassword] = useState('');
+  const [customSubject, setCustomSubject] = useState('');
+  const [customMessageBody, setCustomMessageBody] = useState('');
+  const [promotionSubject, setPromotionSubject] = useState('');
+  const [promotionMessageBody, setPromotionMessageBody] = useState('');
+  const [orderUpdateSubject, setOrderUpdateSubject] = useState('');
+  const [orderUpdateMessageBody, setOrderUpdateMessageBody] = useState('');
+  const [newsletterSubject, setNewsletterSubject] = useState('');
+  const [newsletterMessageBody, setNewsletterMessageBody] = useState('');
+
+  const [showPreview, setShowPreview] = useState(false);
+  const [previewData, setPreviewData] = useState({});
 
   // Function to search users in the database
   const handleUserSearch = async () => {
@@ -40,50 +43,34 @@ const AdminEmailComponent = () => {
     setRecipients(recipients.filter((user) => user.id !== id));
   };
 
-  // Function to send email to specific users
-  const handleSendEmailToUsers = async () => {
-    if (!subject || !messageBody || !password) {
-      return alert('Please complete all fields and enter your password.');
+  // Function to handle showing the preview modal
+  const handleShowPreview = (url, subject, messageBody) => {
+    if (!subject || !messageBody) {
+      return alert('Please complete all fields.');
     }
+
+    const recipientEmails = recipients.map((user) => `${user.username} (${user.email})`);
+    setPreviewData({ url, subject, messageBody, recipientEmails });
+    setShowPreview(true);
+  };
+
+  // Function to send the email after confirming the preview
+  const handleSendEmail = async () => {
+    const { url, subject, messageBody } = previewData;
 
     try {
       const recipientIds = recipients.map((user) => user.id);
-      await adminApi.post('/admin-mail/send-to-user', {
+      await adminApi.post(url, {
         recipientIds,
         subject,
         messageBody,
-        password,
       });
-      alert('Email sent successfully to selected users!');
+      alert('Email sent successfully!');
       setRecipients([]);
-      setSubject('');
-      setMessageBody('');
-      setPassword('');
+      setShowPreview(false);
     } catch (error) {
-      console.error('Error sending email to users:', error);
-      alert('Failed to send email to users.');
-    }
-  };
-
-  // Function to send email to everyone
-  const handleSendEmailToEveryone = async () => {
-    if (!everyoneSubject || !everyoneMessageBody || !everyonePassword) {
-      return alert('Please complete all fields and enter your password.');
-    }
-
-    try {
-      await adminApi.post('/admin-mail/send-to-all', {
-        subject: everyoneSubject,
-        messageBody: everyoneMessageBody,
-        password: everyonePassword,
-      });
-      alert('Email sent successfully to all users!');
-      setEveryoneSubject('');
-      setEveryoneMessageBody('');
-      setEveryonePassword('');
-    } catch (error) {
-      console.error('Error sending email to everyone:', error);
-      alert('Failed to send email to everyone.');
+      console.error('Error sending email:', error);
+      alert('Failed to send email.');
     }
   };
 
@@ -92,10 +79,8 @@ const AdminEmailComponent = () => {
       <h2>Admin Email</h2>
 
       {/* Section 1: Emailing Specific Users */}
-      <div className="section">
+      <section className="section">
         <h3>Email Specific Users</h3>
-
-        {/* Search Bar */}
         <input
           type="text"
           placeholder="Search users by name or email"
@@ -104,7 +89,6 @@ const AdminEmailComponent = () => {
         />
         <button onClick={handleUserSearch}>Search</button>
 
-        {/* Search Results */}
         {searchResults.length > 0 && (
           <div className="search-results">
             {searchResults.map((user) => (
@@ -116,7 +100,6 @@ const AdminEmailComponent = () => {
           </div>
         )}
 
-        {/* Recipients List */}
         <div className="recipients-list">
           <h4>Selected Recipients:</h4>
           {recipients.map((user) => (
@@ -127,53 +110,107 @@ const AdminEmailComponent = () => {
           ))}
         </div>
 
-        {/* Email Form for Specific Users */}
-        <div className="email-form">
+        {/* Custom Message Section */}
+        <section className="section">
+          <h3>Send Custom Email</h3>
           <input
             type="text"
-            placeholder="Subject"
-            value={subject}
-            onChange={(e) => setSubject(e.target.value)}
+            placeholder="Custom Subject"
+            value={customSubject}
+            onChange={(e) => setCustomSubject(e.target.value)}
           />
           <textarea
-            placeholder="Message body"
-            value={messageBody}
-            onChange={(e) => setMessageBody(e.target.value)}
+            placeholder="Custom Message Body"
+            value={customMessageBody}
+            onChange={(e) => setCustomMessageBody(e.target.value)}
           ></textarea>
-          <input
-            type="password"
-            placeholder="Admin Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <button onClick={handleSendEmailToUsers}>Send Email to Selected Users</button>
-        </div>
-      </div>
+          <button onClick={() => handleShowPreview('/admin-mail/send-custom', customSubject, customMessageBody)}>
+            Preview & Send Custom Email
+          </button>
+        </section>
+      </section>
 
-      {/* Section 2: Emailing Everyone */}
-      <div className="section">
-        <h3>Email Everyone</h3>
+      {/* Section for Promotions */}
+      <section className="section">
+        <h3>Send Promotional Email</h3>
         <div className="email-form">
           <input
             type="text"
-            placeholder="Subject"
-            value={everyoneSubject}
-            onChange={(e) => setEveryoneSubject(e.target.value)}
+            placeholder="Promotion Subject"
+            value={promotionSubject}
+            onChange={(e) => setPromotionSubject(e.target.value)}
           />
           <textarea
-            placeholder="Message body"
-            value={everyoneMessageBody}
-            onChange={(e) => setEveryoneMessageBody(e.target.value)}
+            placeholder="Promotion Message Body"
+            value={promotionMessageBody}
+            onChange={(e) => setPromotionMessageBody(e.target.value)}
           ></textarea>
-          <input
-            type="password"
-            placeholder="Admin Password"
-            value={everyonePassword}
-            onChange={(e) => setEveryonePassword(e.target.value)}
-          />
-          <button onClick={handleSendEmailToEveryone}>Send Email to Everyone</button>
+          <button onClick={() => handleShowPreview('/admin-mail/send-promotions', promotionSubject, promotionMessageBody)}>
+            Preview & Send Promotional Email
+          </button>
         </div>
-      </div>
+      </section>
+
+      {/* Section for Order Updates */}
+      <section className="section">
+        <h3>Send Order Update Email</h3>
+        <div className="email-form">
+          <input
+            type="text"
+            placeholder="Order Update Subject"
+            value={orderUpdateSubject}
+            onChange={(e) => setOrderUpdateSubject(e.target.value)}
+          />
+          <textarea
+            placeholder="Order Update Message Body"
+            value={orderUpdateMessageBody}
+            onChange={(e) => setOrderUpdateMessageBody(e.target.value)}
+          ></textarea>
+          <button onClick={() => handleShowPreview('/admin-mail/send-order-update', orderUpdateSubject, orderUpdateMessageBody)}>
+            Preview & Send Order Update Email
+          </button>
+        </div>
+      </section>
+
+      {/* Section for Newsletter */}
+      <section className="section">
+        <h3>Send Newsletter Email</h3>
+        <div className="email-form">
+          <input
+            type="text"
+            placeholder="Newsletter Subject"
+            value={newsletterSubject}
+            onChange={(e) => setNewsletterSubject(e.target.value)}
+          />
+          <textarea
+            placeholder="Newsletter Message Body"
+            value={newsletterMessageBody}
+            onChange={(e) => setNewsletterMessageBody(e.target.value)}
+          ></textarea>
+          <button onClick={() => handleShowPreview('/admin-mail/send-newsletter', newsletterSubject, newsletterMessageBody)}>
+            Preview & Send Newsletter
+          </button>
+        </div>
+      </section>
+
+      {/* Preview Modal */}
+      {showPreview && (
+        <>
+          <div className="preview-overlay"></div>
+          <div className="preview-modal">
+            <div className="preview-content">
+              <h3>Email Preview</h3>
+              <p><strong>Subject:</strong> {previewData.subject}</p>
+              <p><strong>Message Body:</strong> {previewData.messageBody}</p>
+              <p><strong>Recipients:</strong> {previewData.recipientEmails.join(', ')}</p>
+              <div className="preview-actions">
+                <button onClick={handleSendEmail}>Send Email</button>
+                <button onClick={() => setShowPreview(false)}>Cancel</button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 };

@@ -9,7 +9,9 @@ const SignUpForm = () => {
         email: '',
         password: '',
         confirmPassword: '',
-        phoneNumber: ''
+        phoneNumber: '',
+        isOptedInForPromotions: false, // Add opt-in state
+        isOptedInForEmailUpdates: false // Add opt-in state
     });
 
     const [errorMessage, setErrorMessage] = useState('');
@@ -26,7 +28,7 @@ const SignUpForm = () => {
 
     const checkUserName = async () => {
         try {
-            const response = await registerApi.post('/auth/check-username', { userName: formData.userName });
+            const response = await registerApi.post('/sign-up/check-username', { userName: formData.userName });
             setUserNameError('');
         } catch (error) {
             if (error.response && error.response.status === 400) {
@@ -38,9 +40,12 @@ const SignUpForm = () => {
     };
 
     const handleChange = (e) => {
+        const { name, value, type, checked } = e.target;
+        
+        // Update form data for checkboxes and other inputs
         setFormData({
             ...formData,
-            [e.target.name]: e.target.value
+            [name]: type === 'checkbox' ? checked : value
         });
     };
 
@@ -88,6 +93,8 @@ const SignUpForm = () => {
                 email: formData.email,
                 password: formData.password,
                 phoneNumber: formData.phoneNumber,
+                isOptedInForPromotions: formData.isOptedInForPromotions, // Pass the opt-in value
+                isOptedInForEmailUpdates: formData.isOptedInForEmailUpdates, // Pass the opt-in value
                 actionType: 'sign-up' // Pass actionType for email verification
             });
     
@@ -106,7 +113,6 @@ const SignUpForm = () => {
             }
         }
     };
-    
 
     const resetForm = () => {
         setFormData({
@@ -114,7 +120,9 @@ const SignUpForm = () => {
             email:'',
             password:'',
             confirmPassword:'',
-            phoneNumber:''
+            phoneNumber:'',
+            isOptedInForPromotions: false, // Reset opt-in state
+            isOptedInForEmailUpdates: false // Reset opt-in state
         });
     };
 
@@ -188,7 +196,30 @@ const SignUpForm = () => {
                         placeholder="Phone Number"
                         required />
                     </label>
-                
+
+                    {/* Checkboxes for Opt-ins */}
+                    <div className='check-boxes'>
+                        <input 
+                            type="checkbox" 
+                            name="isOptedInForPromotions" 
+                            checked={formData.isOptedInForPromotions} 
+                            onChange={handleChange} 
+                            id="optInPromotions"
+                        />
+                        <label htmlFor="optInPromotions"><span style={{ color: 'black'}}>Opt-in for Promotions</span></label>
+                    </div>
+
+                    <div className='check-boxes'>
+                        <input 
+                            type="checkbox" 
+                            name="isOptedInForEmailUpdates" 
+                            checked={formData.isOptedInForEmailUpdates} 
+                            onChange={handleChange} 
+                            id="optInEmailUpdates"
+                        />
+                        <label htmlFor="optInEmailUpdates"><span style={{ color: 'black'}}>Opt-in for Email Updates (This includes tracking updates)</span></label>
+                    </div>
+
                     <button style={{margin: '5px'}} ><Link to="/login">Already have an account? Click here to log in</Link></button>
                     <button type="submit">Sign Up</button>
                 </form>

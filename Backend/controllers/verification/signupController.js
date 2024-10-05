@@ -9,7 +9,7 @@ const { v4: uuidv4 } = require('uuid');
 
 // Signup Controller
 const signup = async (req, res) => {
-  const { userName, email, password, phoneNumber } = req.body;
+  const { userName, email, password, phoneNumber, isOptedInForPromotions, isOptedInForEmailUpdates } = req.body; // Include the new opt-in fields
 
   try {
     let existingUser = await PendingUser.findOne({ where: { email } });
@@ -37,6 +37,7 @@ const signup = async (req, res) => {
       }
     }
 
+
     // If no existing or expired user, proceed with sign-up
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -46,6 +47,7 @@ const signup = async (req, res) => {
     const emailSent = await sendVerificationEmail(email, verificationToken, 'sign-up');
 
     if (emailSent) {
+      // Create new pending user entry
       await PendingUser.create({
         userName,
         email,
@@ -53,6 +55,8 @@ const signup = async (req, res) => {
         phoneNumber,
         verificationToken, // Store the JWT token
         role: 'user',  // Assign a default role to the user during sign-up
+        isOptedInForPromotions: isOptedInForPromotions, // Default to false if not provided
+        isOptedInForEmailUpdates: isOptedInForEmailUpdates,  // Default to false if not provided
         createdAt: new Date() // Store creation time for expiration check
       });
 
@@ -63,6 +67,37 @@ const signup = async (req, res) => {
   } catch (error) {
     console.error('Signup error:', error);
     return res.status(500).json({ message: 'Signup failed.' });
+  }
+};
+
+const checkUsername = async (req, res) => {
+  const { userName } = req.body;
+
+  if (!userName) {
+    return res.status(400).json({ message: 'Username is required' });
+  }
+
+  try {
+    // Check if the username exists in the PendingUser table
+    const pendingUser = await PendingUser.findOne({ where: { userName } });
+    
+    if (pendingUser) {
+      return res.status(400).json({ message: 'Username is already taken (Pending verification)' });
+    }
+
+    // Check if the username exists in the User table (for already registered users)
+    const existingUser = await User.findOne({ where: { userName } });
+    
+    if (existingUser) {
+      return res.status(400).json({ message: 'Username is already taken (Registered)' });
+    }
+
+    // If username does not exist in both tables
+    return res.status(200).json({ message: 'Username is available' });
+
+  } catch (error) {
+    console.error('Error checking username:', error);
+    return res.status(500).json({ message: 'Server error checking username' });
   }
 };
 
@@ -97,12 +132,14 @@ const verifyAndMove = async (req, res) => {
       });
     }
 
-    // Move the user to the Users table
+    // Move the user to the Users table and retrieve opt-in fields from pendingUser
     const newUser = await User.create({
       username: pendingUser.userName,
       email: pendingUser.email,
       password: pendingUser.password,
       phoneNumber: pendingUser.phoneNumber,
+      isOptedInForPromotions: pendingUser.isOptedInForPromotions,  // Get from pendingUser
+      isOptedInForEmailUpdates: pendingUser.isOptedInForEmailUpdates,  // Get from pendingUser
       isVerified: true,
       role: 'user', // Default role for new users
     });
@@ -140,6 +177,7 @@ const verifyAndMove = async (req, res) => {
     return res.status(400).json({ message: 'Invalid or expired token.' });
   }
 };
+
 
 const generateLoginTokenAndSetCookie = async (req, res) => {
   const { email } = req.body; // Pass the email to fetch user details
@@ -220,6 +258,7 @@ const resendVerificationEmail = async (req, res) => {
 module.exports = {
   signup,
   resendVerificationEmail,
+  checkUsername,
   verifyAndMove,
   generateLoginTokenAndSetCookie
 };

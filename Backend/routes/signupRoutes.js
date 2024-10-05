@@ -13,4 +13,7 @@ router.get('/verify-and-move', signupController.verifyAndMove);
 
 router.post('/generate-token', signupController.generateLoginTokenAndSetCookie);
 
+
+router.post('/check-username', signupController.checkUsername);
+
 module.exports = router;

@@ -29,6 +29,14 @@ const PendingUsers = sequelize.define('PendingUsers', {
     allowNull: false,
     defaultValue: 'user', // Assign a default role if none is provided
   },
+  isOptedInForPromotions: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+  },
+  isOptedInForEmailUpdates: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+  }
 }, {
   hooks: {
     beforeValidate: (pendingUser) => {
@@ -37,6 +45,8 @@ const PendingUsers = sequelize.define('PendingUsers', {
       pendingUser.password = xss(pendingUser.password);
       pendingUser.phoneNumber = pendingUser.phoneNumber ? xss(pendingUser.phoneNumber) : null;
       pendingUser.verificationToken = xss(pendingUser.verificationToken);
+      pendingUser.isOptedInForPromotions = xss(pendingUser.isOptedInForPromotions);
+      pendingUser.isOptedInForEmailUpdates = xss(pendingUser.isOptedInForEmailUpdates);
     }
   }
 });

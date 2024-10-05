@@ -1,105 +1,131 @@
 .email-app {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh; /* This makes the form take up the full height of the screen */
-    margin-top: 25%;
-    padding: 20px;
-  }
-  
+  position: absolute;
+  top: 10%;
+  left: 50%;
+  transform: translateX(-50%); /* Horizontally center */
+  width: 100%;
+  max-width: 1200px; /* Ensure the width is constrained */
+  padding: 20px;
+  background-color: #f7f7f7;
+  box-sizing: border-box;
+}
+
+.section {
+  margin-bottom: 2rem;
+  padding: 2rem;
+  color: black;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: white;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto; /* Ensure the sections are centered */
+}
+
+h2, h3 {
+  text-align: center;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.email-form input,
+.email-form textarea {
+  display: block;
+  width: 100%;
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.email-form button {
+  padding: 0.75rem;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  width: 100%;
+}
+
+.email-form button:hover {
+  background-color: #0056b3;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
   .section {
-    margin-bottom: 2rem;
-    padding: 2rem;
-    color: black;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    background-color: white; /* White background for sections */
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1); /* Adds a slight shadow for better appearance */
-    width: 100%;
-    max-width: 600px; /* Limits the form width */
+      width: 90%;
   }
-  
+}
+
+@media (max-width: 480px) {
+  .section {
+      width: 100%;
+  }
+
   h2, h3 {
-    text-align: center; /* Center align the titles */
-    margin-bottom: 1rem;
-    background-color: rgb(252, 251, 251);
-    color: #f5f5f5;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-    padding: 5px;
-    border-radius: 5px;
+      font-size: 1.5rem;
   }
-  
-  .email-form input,
-  .email-form textarea {
-    display: block;
-    width: 100%;
-    margin-bottom: 1rem;
-    padding: 0.75rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-sizing: border-box; /* Ensure padding does not affect width */
-  }
-  
-  .email-form textarea {
-    height: 150px; /* Larger height for the message body */
-  }
-  
-  .email-form button {
-    padding: 0.75rem 1.5rem;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    width: 100%;
-    text-align: center;
-  }
-  
-  .email-form button:hover {
-    background-color: #0056b3;
-  }
-  
-  /* Recipients List Styling */
-  .recipients-list div {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.5rem;
-  }
-  
-  .search-results div {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.5rem;
-  }
-  
-  .search-results button,
-  .recipients-list button {
-    background-color: #ff4d4d;
-    color: white;
-    border: none;
-    padding: 0.5rem 1rem;
-    cursor: pointer;
-    border-radius: 4px;
-  }
-  
-  .search-results button:hover,
-  .recipients-list button:hover {
-    background-color: #cc0000;
-  }
-  
-  /* Responsive Adjustments */
-  @media (max-width: 768px) {
-    .section {
-      width: 90%; /* Adjust width for smaller screens */
-    }
-  }
-  
-  @media (max-width: 480px) {
-    .section {
-      width: 100%; /* Full width on small screens */
-    }
-  }
-  
+}
+
+
+/* Background overlay to block interaction */
+.preview-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999; /* Higher than the rest of the page */
+}
+
+/* Centered modal content */
+.preview-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80%;
+  max-width: 600px;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
+  z-index: 1000; /* Higher than the overlay */
+}
+
+.preview-content {
+  padding: 20px;
+  text-align: center;
+}
+
+.preview-actions {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 20px;
+}
+
+.preview-actions button {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.preview-actions button:hover {
+  background-color: #0056b3;
+}
+
+.preview-modal h3 {
+  margin-bottom: 15px;
+}
+
+.preview-modal p {
+  margin-bottom: 10px;
+}

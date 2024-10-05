@@ -94,3 +94,77 @@ p {
     width: 1em; /* Space between bullet and text */
     margin-left: -1em; /* Align bullets */
   }
+
+
+/* Container for the checkbox and label */
+.check-boxes {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    
+}
+
+/* Hide the default checkbox */
+.check-boxes input[type="checkbox"] {
+    display: none;
+    
+}
+
+/* Custom checkbox design */
+.check-boxes label {
+    position: relative;
+    display: inline-block;
+    width: 620px;
+    margin: 20px;
+    height: 30px;
+    margin-right: 15px;
+    cursor: pointer;
+}
+
+/* The slider background */
+.check-boxes label::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 60px;
+    height: 30px;
+    background-color: #ccc;
+    
+    border-radius: 50px;
+    transition: background-color 0.3s ease;
+}
+
+/* The slider dot */
+.check-boxes label::after {
+    content: "";
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    width: 22px;
+    height: 22px;
+    background-color: white;
+    border-radius: 50%;
+    transition: transform 0.3s ease;
+    
+}
+
+/* When the checkbox is checked */
+.check-boxes input[type="checkbox"]:checked + label::before {
+    background-color: #4CAF50; /* Change this to your preferred color */
+}
+
+/* Move the slider dot when checked */
+.check-boxes input[type="checkbox"]:checked + label::after {
+    transform: translateX(30px);
+}
+
+/* Optional text styles */
+.check-boxes label span {
+    font-size: 16px;
+    font-weight: bold;
+    color: #ffffff; /* White text */
+    margin-left: 20%;
+    
+    padding: 10px;
+}

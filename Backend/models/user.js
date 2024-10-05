@@ -26,14 +26,18 @@ const User = sequelize.define('User', {
     type: DataTypes.BOOLEAN,
     defaultValue: false
   },
-  isOptedInForMessaging: {
-    type: DataTypes.BOOLEAN,
-    defaultValue: false,
-  },
   role: {
     type: DataTypes.STRING, // Role field should be here
     allowNull: false,
   },
+  isOptedInForPromotions: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+  },
+  isOptedInForEmailUpdates: {
+    type: DataTypes. BOOLEAN,
+    defaultValue: false,
+  }
 }, {
   hooks: {
     beforeValidate: (user) => {
