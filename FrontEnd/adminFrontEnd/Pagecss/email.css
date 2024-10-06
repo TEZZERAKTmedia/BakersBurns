@@ -74,58 +74,92 @@ h2, h3 {
 
 
 /* Background overlay to block interaction */
-.preview-overlay {
+.preview-modal {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  z-index: 999; /* Higher than the rest of the page */
-}
-
-/* Centered modal content */
-.preview-modal {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 80%;
-  max-width: 600px;
-  background-color: white;
-  border-radius: 10px;
-  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
-  z-index: 1000; /* Higher than the overlay */
+  background-color: rgba(0, 0, 0, 0.6); /* Transparent black overlay */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999; /* Ensure it appears on top */
 }
 
 .preview-content {
-  padding: 20px;
+  background-color: #ffffff;
+  padding: 2rem;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.preview-content h3 {
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  color: #333;
   text-align: center;
+}
+
+.preview-content p {
+  margin: 0.5rem 0;
+  color: #666;
+}
+
+.preview-content strong {
+  color: #333;
 }
 
 .preview-actions {
   display: flex;
-  justify-content: space-around;
-  margin-top: 20px;
+  justify-content: space-between;
+  margin-top: 1.5rem;
 }
 
 .preview-actions button {
-  padding: 10px 20px;
-  background-color: #007bff;
-  color: white;
+  padding: 0.75rem 1.5rem;
   border: none;
-  border-radius: 5px;
+  border-radius: 8px;
+  font-size: 1rem;
   cursor: pointer;
+  transition: background-color 0.3s ease;
 }
 
-.preview-actions button:hover {
-  background-color: #0056b3;
+.preview-actions button:first-of-type {
+  background-color: #28a745;
+  color: #fff;
 }
 
-.preview-modal h3 {
-  margin-bottom: 15px;
+.preview-actions button:first-of-type:hover {
+  background-color: #218838;
 }
 
-.preview-modal p {
-  margin-bottom: 10px;
+.preview-actions button:last-of-type {
+  background-color: #dc3545;
+  color: #fff;
+}
+
+.preview-actions button:last-of-type:hover {
+  background-color: #c82333;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive Adjustments */
+@media (max-width: 600px) {
+  .preview-content {
+    width: 90%;
+  }
 }

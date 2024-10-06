@@ -199,8 +199,8 @@ const AdminEmailComponent = () => {
           <div className="preview-overlay"></div>
           <div className="preview-modal">
             <div className="preview-content">
-              <h3>Email Preview</h3>
-              <p><strong>Subject:</strong> {previewData.subject}</p>
+              <h3 style={{color: 'black'}}>Email Preview</h3>
+              <p style={{color: 'black'}}><strong>Subject:</strong> {previewData.subject}</p>
               <p><strong>Message Body:</strong> {previewData.messageBody}</p>
               <p><strong>Recipients:</strong> {previewData.recipientEmails.join(', ')}</p>
               <div className="preview-actions">

@@ -46,35 +46,34 @@ const sendCustomEmail = async (req, res) => {
 };
 
 // Function to send promotional email
-const sendPromotionalEmail = async (req, res) => {
-  const { recipientIds, subject, messageBody } = req.body;
+const  sendPromotionalEmail = async (req, res) => {
+  const {subject, messageBody} = req.body;
 
   try {
-    const users = await User.findAll({
+     const users = await User.findAll({
       where: {
-        id: recipientIds,
-        isOptedInForPromotions: true,  // Only users opted in for promotions
+        isOptedInForPromotions: true,
       },
       attributes: ['email'],
-    });
+     });
 
-    if (users.length === 0) {
-      return res.status(404).json({ message: 'No users found or opted in for promotions' });
-    }
+     if (users.length === 0) {
+      return res.status(404).json({ message: 'No users found or opted in for promotions'});
+     }
 
-    const recipientEmails = users.map((user) => user.email);
+     const recipientEmails = users.map((user) => user.email);
 
-    await transporter.sendMail({
+     await transporter.sendMail({
       from: process.env.EMAIL_USER,
-      to: recipientEmails,
+      to: recipientEmails.join(','),
       subject: subject || 'Exclusive Promotions',
       text: messageBody,
-    });
+     });
 
-    res.status(200).json({ message: 'Promotional email sent successfully!' });
+     res.status(200).json({ message: 'Promotional email sent successfully to all opted in users!'})
   } catch (error) {
     console.error('Error sending promotional email:', error);
-    res.status(500).json({ message: 'Failed to send promotional email' });
+    res.status(500).json({ message: 'Failed to send promotional email'});
   }
 };
 
