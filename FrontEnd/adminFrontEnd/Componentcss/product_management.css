@@ -1,120 +1,205 @@
-.container {
-  max-width: 800px;
+/* Set the body or the main container to have a fixed background */
+body {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  background: url('your-background-image.jpg') no-repeat center center fixed; /* Use your background image */
+  background-size: cover; /* Make sure the background covers the entire area */
+  overflow: hidden; /* Prevent the body itself from scrolling */
+}
+
+/* Main content container to scroll over the background */
+.product-manager-container {
+  max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
-  margin-top: 30%;
-  background-color: #f9f9f9;
-  border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  height: 100vh; /* Take the full height of the viewport */
+  overflow-y: auto; /* Enable vertical scrolling for the content */
+  background: rgba(255, 255, 255, 0.8); /* Add a slight background opacity to differentiate content */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Optional: Add shadow for better visual effect */
 }
 
-.image-upload {
-  margin: 20px 0;
-  padding: 10px;
-  border: 2px dashed #ddd;
-  border-radius: 10px;
-  text-align: center;
-  background-color: #fff;
-  transition: background-color 0.3s ease;
-  position: relative; /* Contain child elements */
-}
-
-.image-upload:hover {
-  background-color: #f1f1f1;
-}
-
-.image-preview {
-  max-width: 100%;
-  margin-top: 20px;
-  border-radius: 10px;
-  
-}
-
-.cropper-container {
-  position: relative;
-  width: 50%;
-  height: 300px;
-  margin: 20px 0;
-  left: 25%;
-  z-index: 1;
-}
-
-.cropper-buttons {
-  display: flex;
-  justify-content: center;
-  margin-top: 10px;
-}
-
-.cropper-buttons button {
-  padding: 10px 20px;
-  margin: 0 10px;
-  border: none;
-  background-color: #28a745;
-  color: white;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.cropper-buttons button:hover {
-  background-color: #218838;
-}
-
+/* Ensure content within the container has enough spacing */
 .product-list {
-  list-style-type: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-gap: 20px;
   padding: 0;
+  list-style-type: none;
 }
 
 .product-card {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px;
-  margin: 10px 0;
-  background-color: #fff;
-  color: #333;
+  position: relative;
+  padding: 15px;
+  border: 1px solid #ccc;
   border-radius: 10px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.product-details {
+  background-color: white;
+  max-height: 500px;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  justify-content: space-between;
 }
 
 .product-image img {
   max-width: 100px;
-  border-radius: 5px;
+  max-height: 100px;
+  object-fit: cover;
+  margin-bottom: 10px;
+  border-radius: 10px;
 }
 
-h1 {
-  margin-bottom: 1.5rem;
+/* Other styles remain the same */
+
+.cropper-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000; /* Ensures it's above other content */
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.cropper-container {
+  width: 300px;
+  height: 300px;
+  position: relative;
+}
+
+.crop-button {
+  margin-top: 10px;
+  padding: 8px 12px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.crop-button:hover {
+  background-color: #0056b3;
+}
+
+
+/* Discount banner styling */
+.discount-banner {
+  position: absolute;
+  top: 10px;
+  right: -30px;
+  background-color: #ff0000;
+  color: white;
+  font-weight: bold;
+  transform: rotate(45deg);
+  width: 100px;
+  text-align: center;
+  padding: 5px 0;
+  font-size: 12px;
+}
+
+/* Original and discounted price styling */
+.price {
+  font-size: 14px;
+  margin: 5px 0;
+}
+.price.original-price {
+  color: #999;
+  text-decoration: line-through;
+  font-size: 12px;
+}
+.price.discounted-price {
+  color: #007bff;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+/* Savings text */
+.price-difference {
+  font-size: 12px;
   color: #333;
 }
 
-input {
-  margin: 5px;
-  margin-bottom: 1rem;
-  width: 90%;
-  border: 1px solid #ccc;
+/* Buttons inside product cards */
+.product-card button {
+  padding: 8px 10px;
+  background-color: #007bff;
+  color: white;
+  border: none;
   border-radius: 5px;
-  font-size: 1rem;
-  transition: border-color 0.3s ease;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  margin-top: 10px;
 }
 
-input:focus {
-  border-color: #007bff;
-  outline: none;
+.product-card button:hover {
+  background-color: #0056b3;
+}
+
+/* Checkbox inside product card */
+.product-card input[type="checkbox"] {
+  position: relative;
+  margin-top: 10px;
+}
+
+/* General button styling for action buttons */
+.action-button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 5px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.action-button:hover {
+  background-color: #0056b3;
+}
+
+/* Edit and delete button styling */
+.action-button.edit {
+  background-color: #28a745;
+}
+.action-button.edit:hover {
+  background-color: #218838;
+}
+.action-button.delete {
+  background-color: #dc3545;
+}
+.action-button.delete:hover {
+  background-color: #c82333;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .product-card {
+    width: calc(50% - 20px);
+  }
+}
+
+@media (max-width: 576px) {
+  .product-card {
+    width: 100%;
+  }
+}
+.additional-info {
+  margin-top: 10px;
+  font-size: 12px;
+  color: #777;
+}
+
+.additional-info p {
+  margin: 5px 0;
 }
 
 button {
-  padding: 0.75rem;
+  padding: 8px 12px;
   background-color: #007bff;
-  color: #fff;
+  color: white;
   border: none;
-  border-radius: 5px;
-  font-size: 1rem;
   cursor: pointer;
   transition: background-color 0.3s ease;
 }
@@ -123,16 +208,46 @@ button:hover {
   background-color: #0056b3;
 }
 
-ul {
-  list-style: none;
-  padding: 0;
+.product-edit-form input,
+.discount-edit-form input {
+  margin-bottom: 10px;
+  padding: 8px;
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 4px;
 }
 
-li button {
-  background-color: #e74c3c;
+.product-edit-form label,
+.discount-edit-form label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 14px;
+}
+
+.product-edit-form button,
+.discount-edit-form button {
+  padding: 10px;
+  margin-right: 10px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.product-edit-form button:hover,
+.discount-edit-form button:hover {
+  background-color: #218838;
+}
+
+.delete-button {
+  background-color: #dc3545;
+}
+
+.delete-button:hover {
+  background-color: #c82333;
+}
+
+input[type="checkbox"] {
   margin-left: 10px;
-}
-
-li button:hover {
-  background-color: #c0392b;
 }

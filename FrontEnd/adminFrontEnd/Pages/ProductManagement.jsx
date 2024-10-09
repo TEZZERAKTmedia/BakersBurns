@@ -1,83 +1,228 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { adminApi } from '../config/axios';
 import Cropper from 'react-easy-crop';
+import getCroppedImg from '../util/cropImage'; // Assuming you have a utility to crop images
 import 'react-easy-crop/react-easy-crop.css';
 import '../Componentcss/product_management.css';
-import getCroppedImg from '../util/cropImage';
+import { useDropzone } from 'react-dropzone';
 
 const ProductManagement = () => {
   const [products, setProducts] = useState([]);
-  const [newProduct, setNewProduct] = useState({ name: '', description: '', price: 0, image: null, type: '' });
+  const [newProduct, setNewProduct] = useState({ name: '', description: '', price: 0, image: null, type: '', quantity: 1 });
+  const [productTypes, setProductTypes] = useState([]); // Initialize product types
+  const [selectedType, setSelectedType] = useState(''); 
+  const [isNewType, setIsNewType] = useState(false);
+  const [selectedProducts, setSelectedProducts] = useState([]);
+  const [discount, setDiscount] = useState({ type: 'percentage', amount: 0, startDate: '', endDate: '' });
+  const [editingProductId, setEditingProductId] = useState(null); // Track product being edited
+  const [editingDiscountId, setEditingDiscountId] = useState(null); // Track discount being edited
+  const [showAddProductForm, setShowAddProductForm] = useState(false); // Add product form visibility
+  const [showAddDiscountForm, setShowAddDiscountForm] = useState(false); // Add discount form visibility
+  const [sortCriteria, setSortCriteria] = useState('name'); // Default sort by name
+  const [sortOrder, setSortOrder] = useState('asc'); // Default order asc
+
   const [imagePreview, setImagePreview] = useState('');
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
   const [cropping, setCropping] = useState(false);
-  const [selectedProducts, setSelectedProducts] = useState([]);
-  const [discount, setDiscount] = useState({ type: 'percentage', amount: 0, startDate: '', endDate: '' });
-  const [discountedProducts, setDiscountedProducts] = useState([]);
-  const [showDiscountForm, setShowDiscountForm] = useState(false);
-  const [showProductForm, setShowProductForm] = useState(false);
-  const [editingProduct, setEditingProduct] = useState(null);
-  const [selectedType, setSelectedType] = useState('');
+  const [fileSize, setFileSize] = useState(0); // To track file size
+  const [maxFileSize] = useState(50 * 1024 * 1024);
 
   useEffect(() => {
     fetchProducts();
+    fetchProductTypes();
   }, []);
 
   const fetchProducts = async () => {
-    const response = await adminApi.get('/api/products/');
-    setProducts(response.data);
+    try {
+      const response = await adminApi.get('/api/products/');
+      console.log('Fetched products:', response.data); // Log the fetched data
+      setProducts(response.data);
+    } catch (error) {
+      console.error('Error fetching products:', error);
+    }
+  };
+  const fetchProductTypes = async () => {
+    try {
+      const response = await adminApi.get('/api/products/types');
+      setProductTypes(response.data);
+    } catch (error) {
+      console.error('Error fetching product types:', error);
+    }
   };
 
-  const handleAddProduct = async () => {
-    if (!newProduct.name || !newProduct.description || !newProduct.price || !newProduct.image || !newProduct.type) {
-      alert('Please fill out all fields');
+  
+
+  // Sorting logic
+  const handleSort = (criteria) => {
+    const sortedProducts = [...products].sort((a, b) => {
+      let valueA = a[criteria];
+      let valueB = b[criteria];
+
+      if (criteria === 'price') {
+        valueA = parseFloat(a.price);
+        valueB = parseFloat(b.price);
+      }
+
+      if (sortOrder === 'asc') {
+        return valueA > valueB ? 1 : -1;
+      } else {
+        return valueA < valueB ? 1 : -1;
+      }
+    });
+
+    setProducts(sortedProducts);
+    setSortCriteria(criteria);
+    setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+  };
+
+  const handleDeleteProduct = async (productId) => {
+    if (window.confirm('Are you sure you want to delete this product?')) {
+      try {
+        await adminApi.delete(`/api/products/${productId}`);
+        fetchProducts();
+      } catch (error) {
+        console.error('Error deleting product:', error);
+      }
+    }
+  };
+
+  const handleRemoveDiscount = async (productId) => {
+    if (window.confirm('Are you sure you want to remove the discount from this product?')) {
+      try {
+        await adminApi.delete(`/api/products/${productId}/discount`);
+        fetchProducts();
+      } catch (error) {
+        console.error('Error removing discount:', error);
+      }
+    }
+  };
+
+  const handleSelectProduct = (id) => {
+    setSelectedProducts((prevSelected) =>
+      prevSelected.includes(id) ? prevSelected.filter((p) => p !== id) : [...prevSelected, id]
+    );
+  };
+
+  const handleEditProduct = (product) => {
+    setNewProduct({
+      name: product.name,
+      description: product.description,
+      price: product.price,
+      image: product.image,
+      type: product.type,
+      quantity: product.quantity,
+    });
+    setEditingProductId(product.id);
+    setEditingDiscountId(null); // Hide discount form if open
+  };
+
+  const handleEditDiscount = (product) => {
+    setDiscount({
+      type: product.discountType,
+      amount: product.discountAmount,
+      startDate: product.discountStartDate,
+      endDate: product.discountEndDate,
+    });
+    setEditingDiscountId(product.id);
+    setEditingProductId(null); // Hide product form if open
+  };
+
+  const handleAddOrUpdateProduct = async (productId) => {
+    const { name, description, price, type, quantity, image } = newProduct;
+  
+    // Validation logic
+    if (!name) {
+      alert('Please enter the product name');
       return;
     }
-
-    const formData = new FormData();
-    formData.append('name', newProduct.name);
-    formData.append('description', newProduct.description);
-    formData.append('price', newProduct.price);
-    formData.append('image', newProduct.image);
-    formData.append('type', newProduct.type);
-
-    if (editingProduct) {
-      await adminApi.put(`/api/products/${editingProduct.id}`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-    } else {
-      await adminApi.post('/api/products', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+    if (!description) {
+      alert('Please enter the product description');
+      return;
     }
-    fetchProducts();
-    resetProductForm();
+    if (!price || price <= 0) {
+      alert('Please enter a valid price');
+      return;
+    }
+    if (!type) {
+      alert('Please select or enter a product type');
+      return;
+    }
+    if (!quantity || quantity <= 0) {
+      alert('Please enter a valid quantity');
+      return;
+    }
+    if (!image) {
+      alert('Please upload a product image');
+      return;
+    }
+  
+    // If all fields are valid, proceed with form submission
+    const formData = new FormData();
+    formData.append('name', name);
+    formData.append('description', description);
+    formData.append('price', price);
+    formData.append('type', type);
+    formData.append('image', image);
+    formData.append('quantity', quantity);
+  
+    try {
+      if (productId) {
+        await adminApi.put(`/api/products/${productId}`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+      } else {
+        await adminApi.post('/api/products', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+      }
+      fetchProducts();
+      resetForms();
+    } catch (error) {
+      console.error('Error adding or updating product:', error);
+    }
   };
-
-  const handleDeleteProduct = async (id) => {
-    await adminApi.delete(`/api/products/${id}`);
-    fetchProducts();
-    resetProductForm();
-  };
-
+  
+  // Handle Image Change
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       setNewProduct({ ...newProduct, image: file });
+  
+      // Calculate file size
+      setFileSize(file.size);
+  
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result);
-        setCropping(true);
+        setCropping(true); // Trigger cropping interface
       };
       reader.readAsDataURL(file);
     }
   };
+  
+  // Calculate the percentage of file size in relation to the max size
+  const fileSizePercentage = (fileSize / maxFileSize) * 100;
+
+  const handleDrop = (acceptedFiles, productId) => {
+    const file = acceptedFiles[0];
+    setNewProduct({ ...newProduct, image: file });
+    // Handle image upload logic here (e.g., API call to upload the image)
+  };
+
+  const { getRootProps, getInputProps } = useDropzone({
+    accept: {
+      'image/jpeg': ['.jpeg', '.jpg'],
+      'image/png': ['.png'],
+    },
+    onDrop: (acceptedFiles) => handleDrop(acceptedFiles, editingProductId),
+  });
+  
 
   const onCropComplete = useCallback((croppedArea, croppedAreaPixels) => {
     setCroppedAreaPixels(croppedAreaPixels);
@@ -88,219 +233,185 @@ const ProductManagement = () => {
       const croppedImage = await getCroppedImg(imagePreview, croppedAreaPixels);
       const file = new File([croppedImage], newProduct.image.name, { type: 'image/png' });
       setNewProduct({ ...newProduct, image: file });
-
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result);
-        setCropping(false);
-      };
-      reader.readAsDataURL(file);
+      setCropping(false); // Close the cropping interface
     } catch (e) {
       console.error(e);
     }
   };
 
-  const handlePriceChange = (e) => {
-    let value = e.target.value.replace(/[^0-9]/g, ''); // Remove all non-numeric characters
-    value = value.replace(/^0+/, '');
-    if (value.length > 2) {
-      value = value.slice(0, -2) + '.' + value.slice(-2);
-    } else if (value.length === 2) {
-      value = '0.' + value;
-    } else if (value.length === 1) {
-      value = '0.0' + value;
-    } else {
-      value = '0.00';
+  const applyDiscount = async () => {
+    const defaultStartDate = new Date().toISOString().split('T')[0];
+    const discountPayload = {
+      discountType: discount.type,
+      discountAmount: discount.amount,
+      discountStartDate: discount.startDate || defaultStartDate,
+      discountEndDate: discount.endDate,
+      isDiscounted: 1,
+    };
+
+    if (!discount.endDate) {
+      alert('Please select an end date for the discount.');
+      return;
     }
 
-    setNewProduct({ ...newProduct, price: value });
-  };
-
-  const resetProductForm = () => {
-    setNewProduct({ name: '', description: '', price: 0, image: null, type: '' });
-    setImagePreview('');
-    setCrop({ x: 0, y: 0 });
-    setZoom(1);
-    setCroppedAreaPixels(null);
-    setCropping(false);
-    setShowProductForm(false);
-    setEditingProduct(null);
-  };
-
-  const handleEditProduct = (product) => {
-    setNewProduct({
-      name: product.name,
-      description: product.description,
-      price: product.price,
-      type: product.type,
-      image: null,
-    });
-    setImagePreview(`http://localhost:3450/uploads/${product.image}`);
-    setShowProductForm(true);
-    setEditingProduct(product);
-  };
-
-  const handleSelectProduct = (id) => {
-    setSelectedProducts((prevSelected) =>
-      prevSelected.includes(id) ? prevSelected.filter((p) => p !== id) : [...prevSelected, id]
-    );
-  };
-
-  const handleSelectAll = () => {
-    const allProductIds = products.map((p) => p.id);
-    setSelectedProducts(selectedProducts.length === products.length ? [] : allProductIds);
-  };
-
-  const handleSelectAllByType = (type) => {
-    const productsOfType = products.filter((p) => p.type === type).map((p) => p.id);
-    setSelectedProducts(productsOfType);
-  };
-
-  const applyDiscount = () => {
-    const updatedProducts = products.map((product) => {
-      if (selectedProducts.includes(product.id)) {
-        let finalPrice = product.price;
-        if (discount.type === 'percentage') {
-          finalPrice = product.price - (product.price * discount.amount) / 100;
-        } else if (discount.type === 'fixed') {
-          finalPrice = product.price - discount.amount;
-        }
-
-        return {
-          ...product,
-          discountedPrice: finalPrice > 0 ? finalPrice : 0,
-          discountStartDate: discount.startDate,
-          discountEndDate: discount.endDate,
-          isDiscounted: true, // Mark the product as discounted
-        };
+    try {
+      for (const productId of selectedProducts) {
+        await adminApi.post(`/api/products/${productId}/discount`, discountPayload);
       }
-      return product;
-    });
-
-    setProducts(updatedProducts);
-    setDiscountedProducts(updatedProducts.filter((product) => product.isDiscounted));
-    setSelectedProducts([]);
-    setShowDiscountForm(false);
+      fetchProducts();
+      resetForms();
+    } catch (error) {
+      console.error('Error applying discount:', error);
+    }
+  };
+  const handleTypeChange = (e) => {
+    const value = e.target.value;
+  
+    if (value === 'new') {
+      setIsNewType(true); // Show input for new type
+      setSelectedType(''); // Clear selected type
+      setNewProduct({ ...newProduct, type: '' }); // Reset product type
+    } else {
+      setIsNewType(false); // Use dropdown
+      setSelectedType(value);
+      setNewProduct({ ...newProduct, type: value }); // Ensure product type is updated
+    }
   };
 
-  const handleDiscountTypeChange = (e) => {
-    setDiscount({ ...discount, type: e.target.value });
+  // Handle typing a new type
+  const handleNewTypeChange = (e) => {
+    setSelectedType(e.target.value); // Set the new type being typed
+    setNewProduct({ ...newProduct, type: e.target.value }); // Update product type
   };
 
-  const handleDiscountDateChange = (e) => {
-    const { name, value } = e.target;
-    setDiscount({ ...discount, [name]: value });
+  // Filter products by selected type
+  const filteredProducts = selectedType
+    ? products.filter(product => product.type === selectedType)
+    : products;
+
+  const resetForms = () => {
+    setNewProduct({ name: '', description: '', price: 0, image: null, type: '' });
+    setDiscount({ type: 'percentage', amount: 0, startDate: '', endDate: '' });
+    setEditingProductId(null);
+    setEditingDiscountId(null);
+    setShowAddProductForm(false);
+    setShowAddDiscountForm(false);
+    setImagePreview('');
+    setSelectedType('');
+
   };
 
   return (
-    <div className="container">
-      <h1>Product Management</h1>
-
-      {/* Toggle Add/Edit Product Form */}
-      {!showProductForm ? (
-        <button onClick={() => setShowProductForm(true)}>Add Product</button>
-      ) : (
-        <div className="product-form-section">
-          <h2>{editingProduct ? 'Edit Product' : 'Add New Product'}</h2>
-          <input
-            type="text"
-            placeholder="Product Name"
-            value={newProduct.name}
-            onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
-          />
-          <input
-            type="text"
-            placeholder="Product Description"
-            value={newProduct.description}
-            onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })}
-          />
-          <input
-            type="number"
-            placeholder="Price (USD)"
-            value={newProduct.price}
-            onChange={handlePriceChange}
-          />
-          <label>
-            Type:
-            <input
-              type="text"
-              placeholder="Product Type"
-              value={newProduct.type}
-              onChange={(e) => setNewProduct({ ...newProduct, type: e.target.value })}
-            />
-          </label>
-          <div className="image-upload">
-            <input type="file" accept="image/*" onChange={handleImageChange} />
-            {cropping && (
-              <div className="cropper-container">
-                <Cropper
-                  image={imagePreview}
-                  crop={crop}
-                  zoom={zoom}
-                  aspect={1}
-                  onCropChange={setCrop}
-                  onCropComplete={onCropComplete}
-                  onZoomChange={setZoom}
-                  cropShape="rect"
-                  showGrid={false}
-                />
-                <button onClick={handleCrop}>Crop Image</button>
-              </div>
-            )}
-          </div>
-          <button onClick={handleAddProduct}>{editingProduct ? 'Update Product' : 'Add Product'}</button>
-          <button onClick={resetProductForm}>Close</button>
-
-          {/* Product Preview */}
-          {editingProduct && (
-            <div className="product-preview">
-              <h3>Preview</h3>
-              <div className="product-details">
-                <p>Name: {newProduct.name}</p>
-                <p>Description: {newProduct.description}</p>
-                <p>Price: ${newProduct.price}</p>
-                <p>Type: {newProduct.type}</p>
-                {imagePreview && (
-                  <div className="product-image">
-                    <img src={imagePreview} alt={newProduct.name} />
-                  </div>
-                )}
-              </div>
-              <button onClick={() => handleDeleteProduct(editingProduct.id)}>Delete Product</button>
+    
+      <div className="product-manager-container">
+        <h1 style={{ padding: '20px' }}>Product Management</h1>
+    
+        {/* Add Product/Discount Forms */}
+        <div className="add-forms">
+          {!showAddProductForm && !showAddDiscountForm && (
+            <div className="add-buttons">
+              <button onClick={() => setShowAddProductForm(true)}>Add Product</button>
+              <button onClick={() => setShowAddDiscountForm(true)}>Add Discount</button>
             </div>
           )}
-        </div>
-      )}
+    
+          {showAddProductForm && (
+            <div className="product-form-section">
+                   <h2>Add New Product</h2>
 
-      {/* Display Existing Products */}
-      <div className="existing-products">
-        <h2>Existing Products</h2>
-        <ul className="product-list">
-          {products.map((product) => (
-            <li key={product.id} className="product-card">
-              <div className="product-details">
-                <h3>{product.name}</h3>
-                <p>Price: ${product.price}</p>
-                <p>Type: {product.type}</p>
-                <p>{product.isDiscounted ? 'Discounted!' : 'Regular Price'}</p>
-                <button onClick={() => handleEditProduct(product)}>Edit</button>
-              </div>
-            </li>
-          ))}
-        </ul>
+                      <input
+                        type="text"
+                        placeholder="Product Name"
+                        value={newProduct.name}
+                        onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
+                      />
+                      <input
+                        type="text"
+                        placeholder="Product Description"
+                        value={newProduct.description}
+                        onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })}
+                      />
+                      <input
+                        type="number"
+                        placeholder="Price (USD)"
+                        value={newProduct.price}
+                        onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
+                      />
+                      <input
+                        type="number"
+                        placeholder="Quantity"
+                        value={newProduct.quantity || 1}
+                        onChange={(e) => setNewProduct({ ...newProduct, quantity: e.target.value })}  // Quantity input
+                      />
+
+                      <label>Product Type:</label>
+                      <select value={selectedType} onChange={handleTypeChange}>
+                        <option value="">Select a Type</option>
+                        {productTypes.map((type, index) => (
+                          <option key={index} value={type.type}>
+                            {type.type}
+                          </option>
+                        ))}
+                        <option value="new">Enter a New Type</option> {/* Option for entering a new type */}
+                      </select>
+
+                      {isNewType && (
+                        <input
+                          type="text"
+                          placeholder="Enter new type"
+                          value={selectedType} // Bind this to new type value
+                          onChange={handleNewTypeChange}
+                        />
+                      )}
+              {/* Image Upload and Cropping */}
+              <div className="image-upload">
+  <input type="file" accept="image/*" onChange={handleImageChange} />
+  {fileSize > 0 && (
+    <div>
+      <p>File size: {(fileSize / 1024).toFixed(2)} KB</p>
+      {fileSize > maxFileSize && <p style={{ color: 'red' }}>File size exceeds the maximum allowed size of 2MB!</p>}
+      
+      {/* Progress bar */}
+      <div className="file-size-progress-bar">
+        <div
+          style={{
+            width: `${Math.min(fileSizePercentage, 100)}%`,
+            backgroundColor: fileSize > maxFileSize ? 'red' : 'green',
+            height: '10px',
+          }}
+        />
       </div>
 
-      {/* Discount Section */}
-      <div className="discount-section">
-        <h2>Discounted Products</h2>
-        {!showDiscountForm ? (
-          <button onClick={() => setShowDiscountForm(true)}>Add a Discount</button>
-        ) : (
-          <>
-            <button onClick={() => setShowDiscountForm(false)}>Close</button>
-            <label>
-              Discount Type:
-              <select value={discount.type} onChange={handleDiscountTypeChange}>
+      {/* Text for percentage */}
+      <p>{Math.min(fileSizePercentage, 100).toFixed(2)}% of allowed file size used</p>
+    </div>
+  )}
+
+  {cropping && (
+    <div className="cropper-container">
+      <Cropper
+        image={imagePreview}
+        crop={crop}
+        zoom={zoom}
+        aspect={1}
+        onCropChange={setCrop}
+        onCropComplete={onCropComplete}
+        onZoomChange={setZoom}
+      />
+      <button onClick={handleCrop}>Crop Image</button>
+    </div>
+  )}
+</div>
+              <button onClick={() => handleAddOrUpdateProduct(null)}>Add Product</button>
+              <button onClick={resetForms}>Cancel</button>
+            </div>
+          )}
+    
+    {showAddDiscountForm && (
+          <div className="discount-form-section">
+            <h2>Add a Discount</h2>
+            <label>Discount Type:
+              <select value={discount.type} onChange={(e) => setDiscount({ ...discount, type: e.target.value })}>
                 <option value="percentage">Percentage</option>
                 <option value="fixed">Fixed Amount</option>
               </select>
@@ -311,88 +422,193 @@ const ProductManagement = () => {
               value={discount.amount}
               onChange={(e) => setDiscount({ ...discount, amount: parseFloat(e.target.value) || 0 })}
             />
-            <label>
-              Start Date:
-              <input
-                type="date"
-                name="startDate"
-                value={discount.startDate}
-                onChange={handleDiscountDateChange}
-              />
+            <label>Start Date:
+              <input type="date" name="startDate" value={discount.startDate} onChange={(e) => setDiscount({ ...discount, startDate: e.target.value })} />
             </label>
-            <label>
-              End Date:
-              <input
-                type="date"
-                name="endDate"
-                value={discount.endDate}
-                onChange={handleDiscountDateChange}
-              />
+            <label>End Date:
+              <input type="date" name="endDate" value={discount.endDate} onChange={(e) => setDiscount({ ...discount, endDate: e.target.value })} />
+            </label>
+            <label>Product Type:
+              <select value={selectedType} onChange={(e) => setSelectedType(e.target.value)}>
+                <option value="">Select a Type</option>
+                {productTypes.map((type, index) => (
+                  <option key={index} value={type.type}>{type.type}</option>
+                ))}
+              </select>
             </label>
             <button onClick={applyDiscount}>Apply Discount</button>
-
-            <div className="product-selection">
-              <button onClick={handleSelectAll}>Select All</button>
-              <label>
-                Select All by Type:
-                <select onChange={(e) => handleSelectAllByType(e.target.value)}>
-                  <option value="">Select Type</option>
-                  {[...new Set(products.map((p) => p.type))].map((type) => (
-                    <option key={type} value={type}>
-                      {type}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <ul className="product-list">
-                {products.map((product) => (
-                  <li key={product.id} className="product-card">
-                    <input
-                      type="checkbox"
-                      checked={selectedProducts.includes(product.id)}
-                      onChange={() => handleSelectProduct(product.id)}
-                    />
-                    <div className="product-details">
-                      <h3>{product.name}</h3>
-                      <p>Price: ${product.price}</p>
-                      <p>{product.description}</p>
-                      {product.image && (
-                        <div className="product-image">
-                          <img src={`http://localhost:3450/uploads/${product.image}`} alt={product.name} />
-                        </div>
-                      )}
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </>
+            <button onClick={resetForms}>Cancel</button>
+          </div>
         )}
-
-        {/* Discounted Product Preview */}
-        <div className="discounted-products">
-          <h2>Discounted Products Preview</h2>
-          <ul className="product-list">
-            {discountedProducts.map((product) => (
-              <li key={product.id} className="product-card">
+        </div>
+    
+        {/* Sorting Controls */}
+        <div className="sorting-controls">
+          <p>Sort By:</p>
+          <button onClick={() => handleSort('name')}>Name ({sortOrder === 'asc' ? 'A-Z' : 'Z-A'})</button>
+          <button onClick={() => handleSort('type')}>Type</button>
+          <button onClick={() => handleSort('price')}>Price ({sortOrder === 'asc' ? 'Low-High' : 'High-Low'})</button>
+        </div>
+    
+        {/* Product List */}
+        <div className="existing-products">
+          <h2>Products Overview</h2>
+          <div className="product-list">
+            {products.map((product) => (
+              <div
+                key={product.id}
+                className={`product-card ${product.isDiscounted ? 'discounted' : 'regular'}`}
+                style={{ backgroundColor: product.isDiscounted ? 'orange' : 'white' }}
+              >
                 <div className="product-details">
                   <h3>{product.name}</h3>
-                  <p>Original Price: ${product.price}</p>
-                  <p>Discounted Price: ${product.discountedPrice}</p>
-                  <p>{product.description}</p>
-                  {product.image && (
+    
+                  {/* Conditionally render the image only when the product is not being edited */}
+                  {editingProductId !== product.id && editingDiscountId !== product.id && product.image && (
                     <div className="product-image">
                       <img src={`http://localhost:3450/uploads/${product.image}`} alt={product.name} />
                     </div>
                   )}
+    
+                  {/* Discounted Products */}
+                  {product.isDiscounted ? (
+                    <>
+                      <p className="price original-price">
+                        <s>${parseFloat(product.price).toFixed(2)}</s>
+                      </p>
+                      <p className="price discounted-price">
+                        ${parseFloat(product.discountPrice).toFixed(2) || 'N/A'}
+                      </p>
+                      <p className="price-difference">
+                        Save ${parseFloat(product.priceDifference).toFixed(2) || 'N/A'}!
+                      </p>
+                      <div className="discount-banner">
+                        {product.discountPrice && product.price
+                          ? `${Math.round((1 - parseFloat(product.discountPrice) / parseFloat(product.price)) * 100)}% OFF`
+                          : 'N/A'}
+                      </div>
+                      <p>Discount Type: {product.discountType || 'N/A'}</p>
+                      <p>Discount Start: {product.discountStartDate || 'N/A'}</p>
+                      <p>Discount End: {product.discountEndDate || 'N/A'}</p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="price">Price: ${parseFloat(product.price).toFixed(2)}</p>
+                      <div className="additional-info">
+
+                        <p>Type: {product.type || 'N/A'}</p>
+                        <p>Availability: {product.quantity > 0 ? 'In Stock' : 'Out of Stock'}</p>
+                      </div>
+                    </>
+                  )}
+    
+                  {/* Conditionally render the edit product form inside the product tile */}
+                  {editingProductId === product.id && (
+                    <div className="product-edit-form">
+                      <input
+                        type="text"
+                        placeholder="Product Name"
+                        value={newProduct.name}
+                        onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
+                      />
+                      <input
+                        type="text"
+                        placeholder="Product Description"
+                        value={newProduct.description}
+                        onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })}
+                      />
+                      <input
+                        type="number"
+                        placeholder="Price (USD)"
+                        value={newProduct.price}
+                        onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
+                      />
+                      <label>
+                        Type:
+                        <input
+                          type="text"
+                          placeholder="Product Type"
+                          value={newProduct.type}
+                          onChange={(e) => setNewProduct({ ...newProduct, type: e.target.value })}
+                        />
+                      </label>
+                      <input
+                        type="number"
+                        placeholder="Quantity"
+                        value={newProduct.quantity}
+                        onChange={(e) => setNewProduct({ ...newProduct, quantity: e.target.value })}
+                      />
+
+                {/* Drag-and-drop or choose file for image */}
+                      <div {...getRootProps()} className="image-dropzone">
+                        <input {...getInputProps()} accept=".png,.jpg,.jpeg"/>
+                        <p>Drag 'n' drop an image here, or click to select one</p>
+                      </div>
+
+                      <button onClick={() => handleAddOrUpdateProduct(product.id)}>Update Product</button>
+                      <button onClick={resetForms}>Cancel</button>
+                      <button className="delete-button" onClick={() => handleDeleteProduct(product.id)}>Delete Product</button>
+                    </div>
+                  )}
+    
+                  {/* Conditionally render the edit discount form inside the product tile */}
+                  {editingDiscountId === product.id && (
+                    <div className="discount-edit-form">
+                      <label>
+                        Discount Type:
+                        <select value={discount.type} onChange={(e) => setDiscount({ ...discount, type: e.target.value })}>
+                          <option value="percentage">Percentage</option>
+                          <option value="fixed">Fixed Amount</option>
+                        </select>
+                      </label>
+                      <input
+                        type="number"
+                        placeholder="Discount Amount"
+                        value={discount.amount}
+                        onChange={(e) => setDiscount({ ...discount, amount: parseFloat(e.target.value) || 0 })}
+                      />
+                      <label>
+                        Start Date:
+                        <input
+                          type="date"
+                          name="startDate"
+                          value={discount.startDate}
+                          onChange={(e) => setDiscount({ ...discount, startDate: e.target.value })}
+                        />
+                      </label>
+                      <label>
+                        End Date:
+                        <input
+                          type="date"
+                          name="endDate"
+                          value={discount.endDate}
+                          onChange={(e) => setDiscount({ ...discount, endDate: e.target.value })}
+                        />
+                      </label>
+                      <button onClick={() => applyDiscount(product.id)}>Update Discount</button>
+                      <button onClick={resetForms}>Cancel</button>
+                      <button className="delete-button" onClick={() => handleRemoveDiscount(product.id)}>Remove Discount</button>
+                    </div>
+                  )}
+    
+                  {/* Edit buttons */}
+                  {editingProductId !== product.id && <button onClick={() => handleEditProduct(product)}>Edit Product</button>}
+                  {product.isDiscounted && editingDiscountId !== product.id && (
+                    <button onClick={() => handleEditDiscount(product)}>Edit Discount</button>
+                  )}
+                  <input
+                    type="checkbox"
+                    checked={selectedProducts.includes(product.id)}
+                    onChange={() => handleSelectProduct(product.id)}
+                  />
                 </div>
-              </li>
+              </div>
             ))}
-          </ul>
+          </div>
         </div>
       </div>
-    </div>
-  );
+    );
+    
 };
 
 export default ProductManagement;
