@@ -22,9 +22,9 @@ const Product = sequelize.define('Product', {
   quantity: {
     type: DataTypes.INTEGER,
     allowNull: false,
-    validate: {
-      min: 0 // Ensure quantity is never negative
-    }
+      validate: {
+    min: 0 // Ensure quantity is never negative
+  }
   },
   type: {
     type: DataTypes.STRING,

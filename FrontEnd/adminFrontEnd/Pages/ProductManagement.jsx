@@ -129,64 +129,73 @@ const ProductManagement = () => {
     setEditingProductId(null); // Hide product form if open
   };
 
-  const handleAddOrUpdateProduct = async (productId) => {
-    const { name, description, price, type, quantity, image } = newProduct;
-  
-    // Validation logic
-    if (!name) {
-      alert('Please enter the product name');
-      return;
-    }
-    if (!description) {
-      alert('Please enter the product description');
-      return;
-    }
-    if (!price || price <= 0) {
-      alert('Please enter a valid price');
-      return;
-    }
-    if (!type) {
-      alert('Please select or enter a product type');
-      return;
-    }
-    if (!quantity || quantity <= 0) {
-      alert('Please enter a valid quantity');
-      return;
-    }
-    if (!image) {
-      alert('Please upload a product image');
+  const handleAddProduct = async () => {
+    if (!newProduct.name || !newProduct.description || !newProduct.price || !newProduct.type || !newProduct.quantity <= 0) {
+      alert('Please fill out all fields');
       return;
     }
   
-    // If all fields are valid, proceed with form submission
     const formData = new FormData();
-    formData.append('name', name);
-    formData.append('description', description);
-    formData.append('price', price);
-    formData.append('type', type);
-    formData.append('image', image);
-    formData.append('quantity', quantity);
+    formData.append('name', newProduct.name);
+    formData.append('description', newProduct.description);
+    formData.append('price', newProduct.price);
+    formData.append('type', newProduct.type);
+    formData.append('image', newProduct.image);
+    formData.append('quantity', newProduct.quantity);
   
     try {
-      if (productId) {
-        await adminApi.put(`/api/products/${productId}`, formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        });
-      } else {
-        await adminApi.post('/api/products', formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        });
-      }
+      await adminApi.post('/api/products', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
       fetchProducts();
       resetForms();
     } catch (error) {
-      console.error('Error adding or updating product:', error);
+      console.error('Error adding product:', error);
     }
   };
+  
+  const handleUpdateProduct = async (productId) => {
+    // Create formData and append fields only if they are filled in, otherwise fallback to existing product data
+    const formData = new FormData();
+  
+    if (newProduct.name) formData.append('name', newProduct.name);
+    if (newProduct.description) formData.append('description', newProduct.description);
+    if (newProduct.price) formData.append('price', newProduct.price);
+    if (newProduct.type) formData.append('type', newProduct.type);
+    if (newProduct.quantity) formData.append('quantity', newProduct.quantity);
+  
+    // Append the image only if it's updated
+    if (newProduct.image) {
+      formData.append('image', newProduct.image);
+    }
+  
+    // Log formData content to the console
+    for (const [key, value] of formData.entries()) {
+      console.log(`${key}: ${value}`);
+    }
+  
+    try {
+      await adminApi.put(`/api/products/${productId}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+  
+      fetchProducts(); // Fetch the updated list of products
+      resetForms(); // Reset form after success
+    } catch (error) {
+      console.error('Error updating product:', error);
+    }
+  };
+  
+  
+
+  
+  
+  
+  
   
   // Handle Image Change
   const handleImageChange = (e) => {
@@ -402,7 +411,7 @@ const ProductManagement = () => {
     </div>
   )}
 </div>
-              <button onClick={() => handleAddOrUpdateProduct(null)}>Add Product</button>
+              <button onClick={() => handleAddProduct(null)}>Add Product</button>
               <button onClick={resetForms}>Cancel</button>
             </div>
           )}
@@ -523,15 +532,25 @@ const ProductManagement = () => {
                         value={newProduct.price}
                         onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
                       />
-                      <label>
-                        Type:
+                      <label>Product Type:</label>
+                      <select value={selectedType} onChange={handleTypeChange}>
+                        <option value="">Select a Type</option>
+                        {productTypes.map((type, index) => (
+                          <option key={index} value={type.type}>
+                            {type.type}
+                          </option>
+                        ))}
+                        <option value="new">Enter a New Type</option> {/* Option for entering a new type */}
+                      </select>
+
+                      {isNewType && (
                         <input
                           type="text"
-                          placeholder="Product Type"
-                          value={newProduct.type}
-                          onChange={(e) => setNewProduct({ ...newProduct, type: e.target.value })}
+                          placeholder="Enter new type"
+                          value={selectedType} // Bind this to new type value
+                          onChange={handleNewTypeChange}
                         />
-                      </label>
+                      )}
                       <input
                         type="number"
                         placeholder="Quantity"
@@ -545,7 +564,7 @@ const ProductManagement = () => {
                         <p>Drag 'n' drop an image here, or click to select one</p>
                       </div>
 
-                      <button onClick={() => handleAddOrUpdateProduct(product.id)}>Update Product</button>
+                      <button onClick={() => handleUpdateProduct(product.id)}>Update Product</button>
                       <button onClick={resetForms}>Cancel</button>
                       <button className="delete-button" onClick={() => handleDeleteProduct(product.id)}>Delete Product</button>
                     </div>

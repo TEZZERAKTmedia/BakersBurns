@@ -40,7 +40,13 @@ const addProduct = async (req, res) => {
 // Update a product (existing)
 const updateProduct = async (req, res) => {
   const { id } = req.params;
-  const { name, description, price, image, type, quantity } = req.body;
+  
+  // Log req.body and req.file to see what data is coming in
+  console.log('Request Body:', req.body);
+  console.log('Request File:', req.file);
+
+  const { name, description, price, type, quantity } = req.body;
+  const image = req.file ? req.file.filename : null;
 
   try {
     console.log('Updating product with id:', id);

@@ -16,7 +16,7 @@ const {
 // Product routes
 router.get('/', getProducts);
 router.post('/', productUpload.single('image'), addProduct); // Handle single image upload
-router.put('/:id', updateProduct);
+router.put('/:id', productUpload.single('image'), updateProduct);
 router.delete('/:id', deleteProduct);
 
 // Discount routes
