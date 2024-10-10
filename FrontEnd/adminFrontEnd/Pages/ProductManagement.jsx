@@ -32,6 +32,7 @@ const ProductManagement = () => {
   useEffect(() => {
     fetchProducts();
     fetchProductTypes();
+    handleSort('createdAt');
   }, []);
 
   const fetchProducts = async () => {
@@ -454,6 +455,7 @@ const ProductManagement = () => {
         {/* Sorting Controls */}
         <div className="sorting-controls">
           <p>Sort By:</p>
+          <button onClick={() => handleSort('createdAt')}>Most recent</button>
           <button onClick={() => handleSort('name')}>Name ({sortOrder === 'asc' ? 'A-Z' : 'Z-A'})</button>
           <button onClick={() => handleSort('type')}>Type</button>
           <button onClick={() => handleSort('price')}>Price ({sortOrder === 'asc' ? 'Low-High' : 'High-Low'})</button>

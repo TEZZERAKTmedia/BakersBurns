@@ -168,3 +168,43 @@ p {
     
     padding: 10px;
 }
+/* Add this to your Componentcss/sign_up_form.css file */
+
+.phone-input-wrapper {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ccc;  /* Create a border around the input */
+    border-radius: 4px;  /* Rounded corners */
+    padding: 0.5em;
+    width: fit-content;
+    margin-bottom: 1em;  /* Space between elements */
+  }
+  
+  .phone-input-wrapper select {
+    border: none;
+    background-color: transparent;
+    font-size: 1rem;
+    padding-right: 0.5em;
+    margin-right: 0.5em;
+    outline: none;
+  }
+  
+  .phone-input-wrapper input {
+    border: none;
+    outline: none;
+    font-size: 1rem;
+    flex-grow: 1;  /* Make the input grow to take up remaining space */
+  }
+  
+  .phone-input-wrapper input::placeholder {
+    color: #888;  /* Placeholder text color */
+  }
+  
+  .phone-input-wrapper input:focus {
+    outline: none;  /* No outline on focus */
+  }
+  
+  .phone-input-wrapper select:focus {
+    outline: none;
+  }
+  

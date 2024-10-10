@@ -10,7 +10,7 @@ body {
 
 /* Main content container to scroll over the background */
 .product-manager-container {
-  max-width: 1200px;
+  max-width: 100vw;
   margin: 0 auto;
   padding: 20px;
   height: 100vh; /* Take the full height of the viewport */
@@ -153,15 +153,16 @@ body {
 .discount-banner {
   position: absolute;
   top: 10px;
-  right: -30px;
+  left: -30px;
   background-color: #ff0000;
   color: white;
   font-weight: bold;
-  transform: rotate(45deg);
-  width: 100px;
+  transform: rotate(-45deg);
+  width: 120px;
   text-align: center;
   padding: 5px 0;
   font-size: 12px;
+  z-index: 1;
 }
 
 /* Original and discounted price styling */
@@ -241,31 +242,33 @@ body {
 }
 
 /* Responsive Design */
-@media (max-width: 768px) {
-  .product-card {
-    width: calc(50% - 20px);
-  }
-}
-
-@media (max-width: 576px) {
-  .product-card {
-    width: 100%;
-  }
-}
-
+/* Individual product card */
 .product-card {
-  position: relative;
+  width: calc(33.33% - 20px); /* Default: 3 columns */
+  margin: 10px;
   padding: 15px;
   border: 1px solid #ccc;
   border-radius: 10px;
   background-color: white;
-  max-height: 500px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+  display: inline-block; /* Ensure the cards behave like block elements */
+  position: relative; /* Ensure absolute positioned discount banner is relative to the product card */
+  vertical-align: top; /* Align cards to the top */
 }
 
+/* Responsive adjustments for larger screens */
+@media (max-width: 1200px) {
+  .product-card {
+    width: calc(50% - 20px); /* 2 columns on medium screens */
+  }
+}
+
+@media (max-width: 768px) {
+  .product-card {
+    width: calc(100% - 20px); /* 1 column on small screens */
+  }
+}
+
+/* Product image styling */
 .product-image img {
   max-width: 100px;
   max-height: 100px;
@@ -283,7 +286,6 @@ body {
   color: #999;
   text-decoration: line-through;
   font-size: 12px;
-  color: #333;
 }
 .price.discounted-price {
   color: #007bff;

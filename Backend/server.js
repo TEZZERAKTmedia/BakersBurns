@@ -20,18 +20,19 @@ const galleryRoutes = require('./routes/galleryRoutes');
 const authRoutes = require('./routes/authRoutes');
 const storeRoutes = require('./routes/storeRoutes');
 const verifiedRoutes = require('./routes/verifiedRoutes');
-const signupRoutes = require('./routes/signupRoutes');
+const signupRoutes = require('./routes/register/signupRoutes');
 const adminMessagingRoutes = require('./routes/admin/adminMessageRoutes');
 const userMessagingRoutes = require('./routes/user/userMessagingRoutes');
 const adminEmailRoutes = require('./routes/admin/adminEmailRoutes');
 const ordersRoutes = require('./routes/admin/ordersRoutes');
 const stripeRoutes = require('./routes/user/stripeRoutes');
+const passkeyRoutes = require('./routes/admin/adminPasskeyRoutes');
 
 // Initialize Express app
 const app = express();
 
 app.use(cors({
-  origin: ['http://localhost:5010', 'http://localhost:4001', 'http://localhost:3010'],
+  origin: ['http://localhost:5010', 'http://localhost:4001', 'http://localhost:3010', 'http://localhost:8080'],
   credentials: true,
 }));
 
@@ -63,8 +64,8 @@ app.use('/register', express.static(path.join(__dirname, 'public/register')));
 app.use('/user', express.static(path.join(__dirname, 'public/user')));
 app.use('/sign-up', signupRoutes);
 
-//Login routes 
-
+//Passkey Routes 
+app.use('/login-passkey-routes', passkeyRoutes);
 // User routes
 app.use('/auth', authRoutes);
 app.use('/verification',emailVerificationRoutes);

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import DOMPurify from 'dompurify';  // For sanitization
 import { registerApi } from '../config/axios'; // Import the configured axios instance
 import '../Componentcss/sign_up_form.css';
 import { Link, useNavigate } from 'react-router-dom';
@@ -10,13 +11,15 @@ const SignUpForm = () => {
         password: '',
         confirmPassword: '',
         phoneNumber: '',
-        isOptedInForPromotions: false, // Add opt-in state
-        isOptedInForEmailUpdates: false // Add opt-in state
+        countryCode: '+1',  // Default country code (US)
+        isOptedInForPromotions: false, 
+        isOptedInForEmailUpdates: false 
     });
 
     const [errorMessage, setErrorMessage] = useState('');
-    const [emailSent, setEmailSent] = useState(false);  // State to track email confirmation
+    const [emailSent, setEmailSent] = useState(false);
     const [userNameError, setUserNameError] = useState('');
+    const [passwordVisible, setPasswordVisible] = useState(false);  // State for toggling password visibility
     const [requirements, setRequirements] = useState({
         length: false,
         upperLowerCase: false,
@@ -24,36 +27,34 @@ const SignUpForm = () => {
         digit: false
     });
 
-    const navigate = useNavigate(); // To navigate between pages
+    const navigate = useNavigate();
 
-    const checkUserName = async () => {
-        try {
-            const response = await registerApi.post('/sign-up/check-username', { userName: formData.userName });
-            setUserNameError('');
-        } catch (error) {
-            if (error.response && error.response.status === 400) {
-                setUserNameError('Username is already taken');
-            } else {
-                setUserNameError('Error checking username');
-            }
-        }
+    const formatPhoneNumber = (value) => {
+        const phoneNumber = value.replace(/[^\d]/g, ''); // Remove non-numeric characters
+        if (phoneNumber.length < 4) return phoneNumber;
+        if (phoneNumber.length < 7) return `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(3)}`;
+        return `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(3, 6)}-${phoneNumber.slice(6, 10)}`;
     };
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
-        
-        // Update form data for checkboxes and other inputs
         setFormData({
             ...formData,
             [name]: type === 'checkbox' ? checked : value
         });
     };
+    const handlePhoneChange = (e) => {
+        const formattedPhoneNumber = formatPhoneNumber(e.target.value);
+        setFormData({
+            ...formData,
+            phoneNumber: formattedPhoneNumber
+        });
+    };
 
-    // Simplified password validation without Apple-style rules
     useEffect(() => {
         const length = formData.password.length >= 8;
         const upperLowerCase = /(?=.*[a-z])(?=.*[A-Z])/.test(formData.password);
-        const specialChar = /(?=.*[@$!%*?&-])/.test(formData.password); // Add `-` to special char check
+        const specialChar = /(?=.*[@$!%*?&-])/.test(formData.password);
         const digit = /(?=.*\d)/.test(formData.password);
 
         setRequirements({
@@ -67,13 +68,11 @@ const SignUpForm = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
     
-        // Check if passwords match
         if (formData.password !== formData.confirmPassword) {
             setErrorMessage("Passwords do not match");
             return;
         }
     
-        // Ensure password meets requirements
         const passwordValid = requirements.length && requirements.upperLowerCase && requirements.specialChar && requirements.digit;
         if (!passwordValid) {
             setErrorMessage("Password must be at least 8 characters long, contain one uppercase letter, one lowercase letter, one number, and one special character (including dash '-').");
@@ -87,20 +86,23 @@ const SignUpForm = () => {
         }
     
         try {
-            // Step 1: Send registration data, which includes sending the verification email
+            const sanitizedUserName = DOMPurify.sanitize(formData.userName);
+            const sanitizedEmail = DOMPurify.sanitize(formData.email);
+            const sanitizedPhoneNumber = DOMPurify.sanitize(formData.phoneNumber);
+
             const response = await registerApi.post('/sign-up', {
-                userName: formData.userName,
-                email: formData.email,
+                userName: sanitizedUserName,
+                email: sanitizedEmail,
                 password: formData.password,
-                phoneNumber: formData.phoneNumber,
-                isOptedInForPromotions: formData.isOptedInForPromotions, // Pass the opt-in value
-                isOptedInForEmailUpdates: formData.isOptedInForEmailUpdates, // Pass the opt-in value
-                actionType: 'sign-up' // Pass actionType for email verification
+                phoneNumber: `${formData.countryCode} ${sanitizedPhoneNumber}`, // Combine country code and phone number
+                isOptedInForPromotions: formData.isOptedInForPromotions,
+                isOptedInForEmailUpdates: formData.isOptedInForEmailUpdates,
+                actionType: 'sign-up'
             });
     
             if (response.status === 200) {
-                setEmailSent(true); // Indicate that the email was sent successfully
-                resetForm(); // Reset the form after successful registration
+                setEmailSent(true);
+                resetForm();
             } else {
                 setErrorMessage(response.data.message || 'Error during registration.');
             }
@@ -113,6 +115,20 @@ const SignUpForm = () => {
             }
         }
     };
+	    const checkUsername = async () => {
+        try {
+            const response = await registerApi.post('/sign-up/check-username', { userName: formData.userName });
+            setUserNameError('');
+        } catch (error) {
+            if (error.response && error.response.status === 400) {
+                setUserNameError('Username is already taken');
+            } else {
+                setUserNameError('Error checking username');
+            }
+        }
+    };
+
+
 
     const resetForm = () => {
         setFormData({
@@ -121,9 +137,14 @@ const SignUpForm = () => {
             password:'',
             confirmPassword:'',
             phoneNumber:'',
-            isOptedInForPromotions: false, // Reset opt-in state
-            isOptedInForEmailUpdates: false // Reset opt-in state
+            countryCode: '+1',
+            isOptedInForPromotions: false, 
+            isOptedInForEmailUpdates: false 
         });
+    };
+
+    const togglePasswordVisibility = () => {
+        setPasswordVisible(!passwordVisible);  // Toggle visibility
     };
 
     return (
@@ -134,18 +155,19 @@ const SignUpForm = () => {
                 </div>
             ) : (
                 <form onSubmit={handleSubmit}>
-                    {errorMessage && <div className="error-message">{errorMessage}</div>} {/* Display error message */}
+                    {errorMessage && <div className="error-message">{errorMessage}</div>}
                     <label>
                         <input 
                         type="text" 
                         name="userName" 
                         value={formData.userName} 
                         onChange={handleChange}
-                        onBlur={checkUserName}
+			onBlur={checkUsername}
                         placeholder="Username" 
                         required />
                     </label>
                     {userNameError && <div className="error-message">{userNameError}</div>}
+                    
                     <label>
                         <input 
                         type="email" 
@@ -155,15 +177,59 @@ const SignUpForm = () => {
                         placeholder="Email" 
                         required />
                     </label>
-                    <label>
+
+                    {/* Group the country code dropdown and phone number input */}
+                    <div className="phone-input-wrapper">
+                        <select 
+                            name="countryCode" 
+                            value={formData.countryCode} 
+                            onChange={handleChange}
+                        >
+                            <option value="+1">+1 (US)</option>
+                            <option value="+44">+44 (UK)</option>
+                            <option value="+61">+61 (Australia)</option>
+                            {/* Add more country codes as needed */}
+                        </select>
+
+                        {/* Phone number input */}
+                        <input
+                            type="tel"
+                            name="phoneNumber"
+                            value={formData.phoneNumber}
+                            onChange={handlePhoneChange}
+                            placeholder="Phone Number"
+                            maxLength={14}  // Limiting to the format: (XXX) XXX-XXXX
+                            required
+                        />
+                    </div>
+
+                    {/* Password input with toggle visibility inside the input */}
+                    <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
                         <input 
-                        type="password" 
+                        type={passwordVisible ? 'text' : 'password'}  // Toggle between text and password
                         name="password" 
                         value={formData.password} 
                         onChange={handleChange} 
                         placeholder="Password"
-                        required />
-                    </label>
+                        required 
+                        style={{ paddingRight: '40px' }}  // Add space for the eye icon
+                        />
+                        {/* Eye icon for toggling password visibility */}
+                        <button 
+                            type="button" 
+                            onClick={togglePasswordVisibility} 
+                            style={{
+                                position: 'absolute',
+                                right: '10px',
+                                background: 'none',
+                                border: 'none',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            {passwordVisible ? '🙈' : '👁️'} {/* Simple emoji for eye icon */}
+                        </button>
+                    </div>
+                    
                     <ul>
                         <li className={requirements.length ? 'valid' : 'invalid'}>
                             Password must be at least 8 characters long
@@ -178,26 +244,34 @@ const SignUpForm = () => {
                             Requires at least one digit
                         </li>
                     </ul>
-                    <label>
+
+                    {/* Confirm password input */}
+                    <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
                         <input 
-                        type="password" 
+                        type={passwordVisible ? 'text' : 'password'}  // Toggle here as well
                         name="confirmPassword" 
                         value={formData.confirmPassword} 
                         onChange={handleChange} 
                         placeholder="Confirm Password"
-                        required />
-                    </label>
-                    <label>
-                        <input 
-                        type="text" 
-                        name="phoneNumber" 
-                        value={formData.phoneNumber} 
-                        onChange={handleChange} 
-                        placeholder="Phone Number"
-                        required />
-                    </label>
+                        required 
+                        style={{ paddingRight: '40px' }}  // Add space for the eye icon
+                        />
+                        <button 
+                            type="button" 
+                            onClick={togglePasswordVisibility} 
+                            style={{
+                                position: 'absolute',
+                                right: '10px',
+                                background: 'none',
+                                border: 'none',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            {passwordVisible ? '🙈' : '👁️'} {/* Toggle visibility for confirm password */}
+                        </button>
+                    </div>
 
-                    {/* Checkboxes for Opt-ins */}
+                    {/* Opt-in checkboxes */}
                     <div className='check-boxes'>
                         <input 
                             type="checkbox" 
@@ -229,3 +303,4 @@ const SignUpForm = () => {
 };
 
 export default SignUpForm;
+

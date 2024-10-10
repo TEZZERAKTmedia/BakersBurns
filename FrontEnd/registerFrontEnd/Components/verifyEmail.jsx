@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { registerApi } from '../config/axios';
+import * as webauthn from '../utils/webauthn';
 
 const VerifyEmail = () => {
   const [verificationStatus, setVerificationStatus] = useState(null);
@@ -20,20 +21,59 @@ const VerifyEmail = () => {
     };
   };
 
-  // Function to generate the login token and set the cookie
-  const generateLoginTokenAndSetCookie = async (email) => {
+  // Passkey registration (using cookie instead of email in the request)
+  const handlePasskeyRegistration = async () => {
+    console.log('Initiating passkey registration...');
     try {
-      const tokenResponse = await registerApi.post('/sign-up/generate-token', { email });
+      const options = await registerApi.get('/sign-up/generate-registration-challenge');
+      console.log('Passkey challenge options received:', options.data);
 
-      if (tokenResponse.status === 200) {
-        // Token was successfully generated, and the cookie is set
+      const publicKeyCredential = await webauthn.create(options.data);
+      console.log('PublicKeyCredential created:', publicKeyCredential);
+
+      const response = await registerApi.post('/sign-up/verify-registration', {
+        credential: publicKeyCredential,
+      });
+
+      console.log('Passkey verification response:', response);
+
+      if (response.status === 200) {
+        console.log('Passkey registration successful.');
+        setMessage('Passkey registration successful. Redirecting...');
         const redirectUrl = import.meta.env.VITE_DEV_USER_URL || 'http://localhost:4001';
-        window.location.href = redirectUrl; // Redirect to user dashboard
+        window.location.href = redirectUrl;
       } else {
-        setMessage('Failed to generate login token.');
+        setMessage('Failed to register passkey.');
+        console.log('Failed to register passkey:', response);
       }
     } catch (error) {
-      setMessage('Error generating login token.');
+      setMessage('Error during passkey registration: ' + error.message);
+      console.error('Error during passkey registration:', error);
+    }
+  };
+
+  // Generate login token and set the cookie
+  const generateLoginTokenAndSetCookie = async (email) => {
+    if (!email) {
+      setMessage('Email is missing. Cannot generate login token.');
+      return;
+    }
+
+    console.log('Generating login token for:', email);
+    try {
+      const tokenResponse = await registerApi.post('/sign-up/generate-token', { email });
+      console.log('Token response:', tokenResponse);
+
+      if (tokenResponse.status === 200) {
+        console.log('Token generated successfully. Proceeding with passkey registration...');
+        await handlePasskeyRegistration();  // Passkey registration triggered here
+      } else {
+        setMessage('Failed to generate login token.');
+        console.log('Token generation failed:', tokenResponse);
+      }
+    } catch (error) {
+      setMessage('Error generating login token: ' + error.message);
+      console.error('Login token generation error:', error);
     }
   };
 
@@ -53,8 +93,9 @@ const VerifyEmail = () => {
             setVerificationStatus('success');
             setMessage('Verification successful, user moved to permanent table.');
 
-            // Once verified, generate the login token and set the cookie using the verified email
-            generateLoginTokenAndSetCookie(email);
+            // Once verified, generate the login token and handle passkey registration
+            await generateLoginTokenAndSetCookie(email);  // This will trigger both token generation and passkey registration
+            
           } else if (response.status === 409) {
             // Handle case where email is already registered
             setVerificationStatus('email_registered');
@@ -72,7 +113,7 @@ const VerifyEmail = () => {
         }
       };
 
-      verifyEmail();
+      verifyEmail();  // Run the verification and trigger token generation
     } else {
       setMessage('Invalid or missing verification details.');
     }
@@ -105,7 +146,7 @@ const VerifyEmail = () => {
       <h1>Email Verification</h1>
       {verificationStatus === 'success' && (
         <div className="success-message">
-          {message}. Redirecting to your account...
+          {message}. Completing the process...
         </div>
       )}
       {verificationStatus === 'email_registered' && (
