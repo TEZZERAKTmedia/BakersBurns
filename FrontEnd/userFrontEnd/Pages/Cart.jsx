@@ -43,7 +43,7 @@ const Cart = () => {
       }));
 
       // Send a POST request to the backend to create a Stripe session
-      const response = await userApi.post('/stripe/create-checkout-session', { cartItems: cartData, totalAmount });
+      const response = await userApi.post('/stripe-checkout/create-checkout-session', { cartItems: cartData, totalAmount });
 
       const { sessionId } = response.data;
       const { error } = await stripe.redirectToCheckout({ sessionId });

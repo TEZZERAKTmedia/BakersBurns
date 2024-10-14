@@ -6,56 +6,97 @@ const Cart = require('../../models/cart');
 // Handle Stripe Webhooks
 const handleWebhook = async (req, res) => {
   const sig = req.headers['stripe-signature'];
-  let event;
 
   try {
-    event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET); 
-  } catch (err) {
-    console.error('Webhook signature verification failed.', err.message);
-    return res.status(400).send(`Webhook Error: ${err.message}`);
-  }
+    const event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
 
-  switch (event.type) {
-    case 'payment_intent.succeeded': {
-      const paymentIntent = event.data.object;
-      const { orderId, userId } = paymentIntent.metadata;
+    // Log the entire event object for debugging
+    console.log('Received Stripe event:', event);
 
-      try {
-        // 1. Update the order status to 'Processing'
-        const order = await Order.findByPk(orderId);
-        if (order) {
-          order.status = 'Processing';
-          await order.save();
-          console.log(`Order ${orderId} updated to Processing for user ${userId}`);
-        }
+    // Handle the checkout session completion
+    if (event.type === 'checkout.session.completed') {
+      const session = event.data.object;
+      const userId = session.metadata.userId;
 
-        // 2. Mark product as unavailable
-        const cartItems = await Cart.findAll({ where: { userId } });
-        for (let item of cartItems) {
-          const product = await Product.findByPk(item.productId);
-          if (product && product.isAvailable) {
-            product.isAvailable = 0; // Mark the product as unavailable
-            await product.save();
-            console.log(`Product ${product.id} marked as unavailable`);
-          }
-        }
+      console.log('Checkout session completed for user:', userId);
+      
+      // Fetch cart items for the user and move them to an order
+      const cartItems = await Cart.findAll({ where: { userId } });
 
-        // 3. Remove cart items for the purchased products
-        await Cart.destroy({ where: { userId } });
-        console.log(`Cart items for user ${userId} have been removed`);
+      // Create a new order
+      const order = await Order.create({
+        userId,
+        status: 'completed',
+        totalAmount: session.amount_total / 100,  // Convert from cents to dollars
+        paymentStatus: 'paid',
+      });
 
-      } catch (error) {
-        console.error('Error processing order and updating product/cart:', error);
-        return res.status(500).json({ message: 'Error processing order', error });
-      }
-      break;
+      // Move cart items to the order and update product inventory
+      await Promise.all(cartItems.map(async (cartItem) => {
+        const product = await Product.findByPk(cartItem.productId);
+        await order.addProduct(product, { through: { quantity: cartItem.quantity } });
+
+        // Reduce product inventory (if applicable)
+        product.stock -= cartItem.quantity;
+        await product.save();
+
+        // Remove cart items after they are added to the order
+        await cartItem.destroy();
+      }));
+
+      console.log('Order created and cart items moved for user:', userId);
     }
-    // Handle other Stripe events if necessary
-    default:
-      console.log(`Unhandled event type ${event.type}`);
-  }
 
-  res.status(200).json({ received: true });
+    // Handle payment intent success
+    if (event.type === 'payment_intent.succeeded') {
+      const paymentIntent = event.data.object;
+      const userId = paymentIntent.metadata.userId;
+
+      console.log('Payment intent succeeded for user:', userId);
+
+      // You could update the order or finalize other logic here
+      await Order.update(
+        { paymentStatus: 'paid' },
+        { where: { userId, status: 'pending' } }  // Update relevant orders for the user
+      );
+    }
+
+    // Handle charge success
+    if (event.type === 'charge.succeeded') {
+      const charge = event.data.object;
+      const userId = charge.metadata.userId;
+
+      console.log('Charge succeeded for user:', userId);
+
+      // Mark the order as fully paid and trigger shipment if needed
+      await Order.update(
+        { paymentStatus: 'paid', status: 'ready_to_ship' },
+        { where: { userId, paymentStatus: 'pending' } }
+      );
+    }
+
+    // Handle charge failure (optional)
+    if (event.type === 'charge.failed') {
+      const charge = event.data.object;
+      const userId = charge.metadata.userId;
+
+      console.log('Charge failed for user:', userId);
+
+      // Update the order status to failed
+      await Order.update(
+        { paymentStatus: 'failed', status: 'payment_failed' },
+        { where: { userId, paymentStatus: 'pending' } }
+      );
+
+      // Notify the customer (optional)
+      console.log(`Payment failed for user ${userId}, notification sent.`);
+    }
+
+    res.status(200).send('Webhook received');
+  } catch (err) {
+    console.error('Error in Stripe webhook:', err);
+    res.status(400).send(`Webhook Error: ${err.message}`);
+  }
 };
 
 module.exports = { handleWebhook };

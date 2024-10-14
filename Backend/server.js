@@ -27,6 +27,7 @@ const adminEmailRoutes = require('./routes/admin/adminEmailRoutes');
 const ordersRoutes = require('./routes/admin/ordersRoutes');
 const stripeRoutes = require('./routes/user/stripeRoutes');
 const passkeyRoutes = require('./routes/admin/adminPasskeyRoutes');
+const stripeWebhookRoutes = require('./routes/user/stripeWebhookRoutes');
 
 // Initialize Express app
 const app = express();
@@ -35,6 +36,9 @@ app.use(cors({
   origin: ['http://localhost:5010', 'http://localhost:4001', 'http://localhost:3010', 'http://localhost:8080'],
   credentials: true,
 }));
+
+app.use('/stripe-webhooks', express.raw({ type: 'application/json' }), stripeWebhookRoutes);
+
 
 app.use(bodyParser.json());
 app.use(cookieParser());
@@ -79,7 +83,7 @@ app.use('/user-message-routes', userAuthMiddleware('user'), userMessagingRoutes)
 
 
 //Middle Routes
-app.use('/stripe', stripeRoutes); 
+app.use('/stripe-checkout', stripeRoutes); 
 
 
 

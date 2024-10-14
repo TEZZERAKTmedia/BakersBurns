@@ -1,16 +1,17 @@
-// routes/ordersRoutes.js
-
 const express = require('express');
 const router = express.Router();
-const ordersController = require('../../controllers/admin/adminOrdersController');
+const ordersController = require('../../controllers/admin/ordersController');
+const adminAuthMiddleware = require('../../middleware/adminAuthMiddleware');
 
-// Route to get all active orders
-router.get('/', ordersController.getOrders);
+// GET
+router.get('/get', adminAuthMiddleware(), ordersController.getAllOrders);
+router.get('/get-by-id/:orderId', adminAuthMiddleware(), ordersController.getOrderById);
 
-// Route to get details of a specific order
-router.get('/:id', ordersController.getOrderDetails);
+// POST
+router.post('/create', adminAuthMiddleware(), ordersController.createOrder);
+router.post('/update/:orderId', adminAuthMiddleware(), ordersController.updateOrder);
 
-// Route to contact the user who placed an order
-router.post('/contact', ordersController.contactUser);
+// DELETE
+router.delete('/delete-order/:orderId', adminAuthMiddleware(), ordersController.deleteOrder);
 
 module.exports = router;
