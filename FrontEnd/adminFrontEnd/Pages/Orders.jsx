@@ -16,16 +16,20 @@ const OrderManagement = () => {
     trackingNumber: '',
     carrier: '',
   });
-
-  // Fetch all orders
   const fetchOrders = async () => {
     try {
-      const response = await adminApi.get('/orders/get');
-      setOrders(response.data.orders);
+      const response = await adminApi.get('/orders/get'); // Make an API call to fetch the orders
+      console.log('API Response:', response.data.orders);
+      setOrders(response.data.orders); // Assuming your API returns the orders inside a `data` object
     } catch (error) {
       console.error('Error fetching orders:', error);
     }
   };
+  // Fetch all orders
+
+
+  
+  
 
   // Create a new order
   const createOrder = async () => {
@@ -103,59 +107,61 @@ const OrderManagement = () => {
 
   return (
     <div style={{ padding: '20px' }}>
-      <h1>Order Management</h1>
+<h1>Order Management</h1>
 
-      <button onClick={handleNewOrderDialog}>Create New Order</button>
-
-      {/* Orders Table */}
-      <table border="1" style={{ width: '100%', marginTop: '20px' }}>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>User ID</th>
-            <th>Product ID</th>
-            <th>Quantity</th>
-            <th>Shipping Address</th>
-            <th>Billing Address</th>
-            <th>Tracking Number</th>
-            <th>Carrier</th>
-            <th>Status</th>
-            <th>Tracking Link</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-  {orders.map((order) => (
-    <tr key={order.id}>
-      <td data-label="ID">{order.id}</td>
-      <td data-label="User ID">{order.userId}</td>
-      <td data-label="Product ID">{order.productId}</td>
-      <td data-label="Quantity">{order.quantity}</td>
-      <td data-label="Shipping Address">{order.shippingAddress}</td>
-      <td data-label="Billing Address">{order.billingAddress}</td>
-      <td data-label="Tracking Number">{order.trackingNumber || 'No tracking available'}</td>
-      <td data-label="Carrier">{order.carrier}</td>
-      <td data-label="Status">{order.status}</td>
-      <td data-label="Tracking Link">
-        {order.trackingLink ? (
-          <a href={order.trackingLink} target="_blank" rel="noopener noreferrer">
-            Track your order
-          </a>
-        ) : (
-          'No tracking available'
-        )}
-      </td>
-      <td data-label="Actions">
-        <button onClick={() => deleteOrder(order.id)} className="delete" style={{ marginRight: '10px' }}>
-          Delete
-        </button>
-        <button onClick={() => setSelectedOrder(order)}>Edit</button>
-      </td>
+{/* Orders Table */}
+<table border="1" style={{ width: '100%', marginTop: '20px' }}>
+    <thead>
+    <tr>
+      <th>Order ID</th>
+      <th>Username</th>
+      <th>Email</th>
+      <th>Product Image</th> {/* Change from Product ID to Product Image */}
+      <th>Quantity</th>
+      <th>Shipping Address</th>
+      <th>Billing Address</th>
+      <th>Tracking Number</th>
+      <th>Carrier</th>
+      <th>Status</th>
+      <th>Tracking Link</th>
     </tr>
-  ))}
-</tbody>
-
-      </table>
+  </thead>
+  <tbody>
+    {orders.map(order => (
+      <tr key={order.id}>
+        <td>{order.id}</td>
+        <td>{order.username || 'Unknown'}
+          {order.username && (
+            <button onClick={() => copyToClipboard(order.username)}>Copy</button>
+          )}
+        </td>
+        <td>{order.email || 'Unknown'}
+          {order.email && (
+            <button onClick={() => copyToClipboard(order.email)}>Copy</button>
+          )}
+        </td>
+        <td>
+        <img className="product-image" src={`http://localhost:3450/uploads/${order.productImage}`} alt={order.productName} />
+        </td> {/* Display product image */}
+        <td>{order.quantity}</td>
+        <td>{order.shippingAddress}</td>
+        <td>{order.billingAddress}</td>
+        <td>{order.trackingNumber || 'No tracking available'}</td>
+        <td>{order.carrier}</td>
+        <td>{order.status}</td>
+        <td>
+          {order.trackingLink ? (
+            <a href={order.trackingLink} target="_blank" rel="noopener noreferrer">
+              Track your order
+            </a>
+          ) : (
+            'No tracking available'
+          )}
+        </td>
+      </tr>
+    ))}
+  </tbody>
+</table>
 
       {/* Edit Order Dialog */}
       {selectedOrder && (

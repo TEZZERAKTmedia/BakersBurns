@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { adminApi } from '../config/axios';
+import '../Componentcss/login.css';
 
 const AdminLoginForm = ({ onLoginSuccess }) => {
   const [identifier, setIdentifier] = useState('');
@@ -22,7 +23,8 @@ const AdminLoginForm = ({ onLoginSuccess }) => {
   };
 
   return (
-    <div className="container">
+    <div className="parent-container">
+    <div className="login-form-container">
       <h2 style={{color: 'black'}}>Admin Login</h2>
       <form onSubmit={handleSubmit}>
         <input
@@ -44,6 +46,7 @@ const AdminLoginForm = ({ onLoginSuccess }) => {
         <button type="submit">Login</button>
       </form>
       {message && <p>{message}</p>}
+    </div>
     </div>
   );
 };

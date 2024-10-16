@@ -2,6 +2,8 @@ const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 const xss = require('xss'); // Import xss library
 
+
+
 const Product = sequelize.define('Product', {
   name: {
     type: DataTypes.STRING,
@@ -68,5 +70,13 @@ const Product = sequelize.define('Product', {
     }
   }
 });
+
+Product.associate = (models) => {
+  Product.hasMany(models.Order, {
+    foreignKey: 'productId',
+    as: 'orders'
+  });
+};
+
 
 module.exports = Product;

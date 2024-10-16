@@ -1,27 +1,20 @@
-// utils/trackingUtils.js
+// utils/tracking.js
 
-// Function to generate the tracking link based on carrier and tracking number
+const carrierTrackingUrls = {
+    'UPS': 'https://www.ups.com/track?tracknum=',
+    'FedEx': 'https://www.fedex.com/fedextrack/?trknbr=',
+    'USPS': 'https://tools.usps.com/go/TrackConfirmAction_input?qtc_tLabels1=',
+    'DHL': 'https://www.dhl.com/en/express/tracking.html?AWB=',
+    // Add other carriers as needed
+};
+
 const generateTrackingLink = (carrier, trackingNumber) => {
-    let baseUrl;
-    
-    switch (carrier.toLowerCase()) {
-        case 'ups':
-            baseUrl = `https://wwwapps.ups.com/WebTracking/track?track=yes&trackNums=${trackingNumber}`;
-            break;
-        case 'fedex':
-            baseUrl = `https://www.fedex.com/fedextrack/?trknbr=${trackingNumber}`;
-            break;
-        case 'usps':
-            baseUrl = `https://tools.usps.com/go/TrackConfirmAction?tLabels=${trackingNumber}`;
-            break;
-        case 'dhl':
-            baseUrl = `https://www.dhl.com/en/express/tracking.html?AWB=${trackingNumber}&brand=DHL`;
-            break;
-        default:
-            throw new Error('Unsupported carrier');
+    const baseUrl = carrierTrackingUrls[carrier];
+    if (baseUrl) {
+        return `${baseUrl}${trackingNumber}`;
+    } else {
+        throw new Error('Unknown carrier');
     }
-
-    return baseUrl;
 };
 
 module.exports = { generateTrackingLink };

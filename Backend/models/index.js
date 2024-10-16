@@ -1,38 +1,39 @@
-const fs = require('fs');
-const path = require('path');
-const Sequelize = require('sequelize');
-const basename = path.basename(__filename);
-const env = process.env.NODE_ENV || 'development';
-const config = require(__dirname + '/../config/config.json')[env];
-const db = {};
+const sequelize = require('../config/database'); 
 
-// Initialize Sequelize with config
-let sequelize;
-if (config.use_env_variable) {
-  sequelize = new Sequelize(process.env[config.use_env_variable], config);
-} else {
-  sequelize = new Sequelize(config.database, config.username, config.password, config);
-}
+// Import models directly
+const User = require('./user');
+const Product = require('./product');
+const Order = require('./order');
 
-// Dynamically import all model files
-fs.readdirSync(__dirname)
-  .filter(file => {
-    return (file.indexOf('.') !== 0) && (file !== basename) && (file.slice(-3) === '.js');
-  })
-  .forEach(file => {
-    const model = require(path.join(__dirname, file))(sequelize, Sequelize.DataTypes);
-    db[model.name] = model;
-  });
+const db = {
+  User,
+  Product,
+  Order,
+};
 
-// Define associations after all models are loaded
-Object.keys(db).forEach(modelName => {
+// Manually define associations
+User.associate = (models) => {
+  User.hasMany(models.Order, { foreignKey: 'userId', as: 'orders' });
+};
+
+Product.associate = (models) => {
+  Product.hasMany(models.Order, { foreignKey: 'productId', as: 'orders' });
+};
+
+Order.associate = (models) => {
+  Order.belongsTo(models.User, { foreignKey: 'userId', as: 'user' });
+  Order.belongsTo(models.Product, { foreignKey: 'productId', as: 'product' });
+};
+
+// Call the associate method to set up relationships
+Object.keys(db).forEach((modelName) => {
   if (db[modelName].associate) {
-    db[modelName].associate(db);  // Call the associate method and pass in the db object
+    db[modelName].associate(db);
   }
 });
 
-// Export Sequelize instance and all models
+// Export Sequelize instance and models
 db.sequelize = sequelize;
-db.Sequelize = Sequelize;
+
 
 module.exports = db;

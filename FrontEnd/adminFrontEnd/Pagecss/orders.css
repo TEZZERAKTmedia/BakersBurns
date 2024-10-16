@@ -82,6 +82,14 @@ body, html {
   tr:hover td {
     background-color: #3a3a3a;
   }
+  .product-image {
+    max-width: 100px;
+    max-height: 100px;
+    object-fit: contain; /* Ensures the image retains its aspect ratio */
+    border: 1px solid #ddd; /* Optional: Add border for better visibility */
+    padding: 5px; /* Optional: Add padding around the image */
+  }
+  
   
   /* Responsive Table - Mobile Layout */
   @media (max-width: 768px) {

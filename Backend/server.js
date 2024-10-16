@@ -6,7 +6,7 @@ const path = require('path');
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
 const jwt = require('jsonwebtoken'); // Assuming JWT is used for auth
-
+const db = require('./models/index'); 
 // Import middleware
 
 
@@ -109,6 +109,13 @@ app.use((err, req, res, next) => {
 app.use((req, res, next) => {
   res.status(404).json({ message: 'Not Found' });
 });
+db.sequelize.sync({ alter: true })
+  .then(() => {
+    console.log('Database synchronized successfully.');
+  })
+  .catch(err => {
+    console.error('Error synchronizing database:', err);
+  });
 
 // Start the server
 const PORT = process.env.PORT || 3450;

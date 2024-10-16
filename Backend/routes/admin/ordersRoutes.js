@@ -7,6 +7,8 @@ const adminAuthMiddleware = require('../../middleware/adminAuthMiddleware');
 router.get('/get', adminAuthMiddleware(), ordersController.getAllOrders);
 router.get('/get-by-id/:orderId', adminAuthMiddleware(), ordersController.getOrderById);
 
+
+
 // POST
 router.post('/create', adminAuthMiddleware(), ordersController.createOrder);
 router.post('/update/:orderId', adminAuthMiddleware(), ordersController.updateOrder);

@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { adminApi } from '../config/axios';
+import { motion, AnimatePresence } from 'framer-motion';
 import '../Pagecss/inappmessaging.css';
 
 const InAppMessaging = () => {
@@ -10,263 +11,201 @@ const InAppMessaging = () => {
   const [messages, setMessages] = useState([]);
   const [messageBody, setMessageBody] = useState('');
   const [selectedUser, setSelectedUser] = useState(null);
-  
-  // State for sender and receiver usernames
+
   const [senderUsername, setSenderUsername] = useState('');
   const [receiverUsername, setReceiverUsername] = useState('');
-
-  // State for sender and receiver roles
   const [senderRole, setSenderRole] = useState('');
   const [receiverRole, setReceiverRole] = useState('');
+  const [isMobileView, setIsMobileView] = useState(false);
 
-  // Search users
-  const handleSearch = async () => {
-    if (!searchTerm.trim()) {
-      console.error('Search term is empty');
-      return;
-    }
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobileView(window.innerWidth <= 768);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
+  const handleSearch = useCallback(async () => {
+    if (!searchTerm.trim()) return;
     try {
       const { data } = await adminApi.get(`/admin-message-routes/search?searchTerm=${searchTerm}`);
       setSearchResults(data.users);
     } catch (error) {
       console.error('Error searching users:', error);
     }
-  };
+  }, [searchTerm]);
 
-  // Fetch threads when component mounts or on button press
-  const fetchThreads = async () => {
+  const fetchThreads = useCallback(async () => {
     try {
       const { data } = await adminApi.get('/admin-message-routes/fetch-all-threads');
-  
-      // Filter threads to show only the receiver's username (if the current user is the admin)
-      const filteredThreads = data.threads.filter(thread => thread.receiverUsername !== senderUsername);
-  
-      setThreads(filteredThreads); // Set the filtered threads
+      setThreads(data.threads);
     } catch (error) {
       console.error('Error fetching threads:', error);
     }
-  };
-  
+  }, []);
 
   useEffect(() => {
     fetchThreads();
-  }, []);
+  }, [fetchThreads]);
 
-  // Fetch messages and user roles when a thread is selected
-  useEffect(() => {
-    if (selectedThreadId) {
-      const fetchMessagesAndRoles = async () => {
-        try {
-          // Fetch messages
-          const { data: messageData } = await adminApi.get(`/admin-message-routes/fetch-messages-by-thread?threadId=${selectedThreadId}`);
-          setMessages(messageData.messages);
-
-          // Fetch roles
-          const roles = await fetchUserRole(selectedThreadId);
-          setSenderRole(roles.senderRole);   // Assuming sender is the user
-          setReceiverRole(roles.receiverRole); // Assuming receiver is the other user
-        } catch (error) {
-          console.error('Error fetching messages or roles:', error);
-        }
-      };
-      fetchMessagesAndRoles();
-    }
-  }, [selectedThreadId]);
-
-  // Handle thread selection from the preview
-  const handleThreadSelected = async (threadId) => {
-    setSelectedThreadId(threadId); // Set the selected thread ID
-   
+  const fetchMessagesAndRoles = useCallback(async (threadId, previewUsername) => {
     try {
-      // Fetch the roles and users associated with the thread
-      const { data } = await adminApi.get(`/admin-message-routes/get-roles-thread/${threadId}`);
-     
-      // Set the sender and receiver usernames and roles
-      setSenderUsername(data.senderUsername);
-      setReceiverUsername(data.receiverUsername);
-      console.log("Receiver Username after thread selection:", data.receiverUsername);
-    } catch (error) {
-      console.error('Error fetching roles or user:', error);
-    }
-  };
-  
-  // Handle user selection from search
-  const handleUserSelected = async (user) => {
-    setSelectedUser(user);
-    setReceiverUsername(user.username); // Set receiver username here
-    setMessages([]); // Clear message window for new user
-    setSearchTerm(''); // Clear the search term to reset the search bar
-    setSearchResults([]); // Optionally clear search results too
+      const [messageResponse, rolesResponse] = await Promise.all([
+        adminApi.get(`/admin-message-routes/fetch-messages-by-thread?threadId=${threadId}`),
+        adminApi.get(`/admin-message-routes/get-roles-thread/${threadId}`)
+      ]);
 
-    // Check if a thread exists for the selected user
+      setMessages(messageResponse.data.messages);
+      setSenderUsername(rolesResponse.data.senderUsername);
+      setReceiverUsername(rolesResponse.data.receiverUsername || previewUsername);
+      setSenderRole(rolesResponse.data.senderRole);
+      setReceiverRole(rolesResponse.data.receiverRole);
+
+      if (isMobileView) setIsMobileView(false);
+    } catch (error) {
+      console.error('Error fetching messages or roles:', error);
+    }
+  }, [isMobileView]);
+
+  const handleThreadSelected = useCallback(async (thread) => {
+    setReceiverUsername(thread.threadPreviewUsername);
+    setSelectedThreadId(thread.threadId);
+    await fetchMessagesAndRoles(thread.threadId, thread.threadPreviewUsername);
+  }, [fetchMessagesAndRoles]);
+
+  const handleUserSelected = useCallback(async (user) => {
+    setSelectedUser(user);
+    setReceiverUsername(user.username);
+
+    setMessages([]);
+    setSearchTerm('');
+    setSearchResults([]);
+
     try {
       const { data } = await adminApi.get(`/admin-message-routes/check-thread?receiverUsername=${user.username}`);
-      
       if (data.threadId) {
-        // If a thread exists, open it using handleThreadSelected
-        handleThreadSelected(data.threadId);
+        handleThreadSelected({ threadId: data.threadId, threadPreviewUsername: user.username });
       } else {
-        // No thread exists, clear selectedThreadId
         setSelectedThreadId(null);
-        console.log("No existing thread found. You can start a new conversation.");
       }
     } catch (error) {
       console.error('Error checking if thread exists for user:', error);
     }
-  };
-  
-  const sendMessageToExistingThread = async () => {
-    console.log("Send message to existing thread function is being used.");
-    console.log("Message Body:", messageBody);
-    console.log("Receiver Username:", receiverUsername);
-    console.log("Selected Thread ID:", selectedThreadId);
-  
-    if (!messageBody || !receiverUsername || !selectedThreadId) {
-      console.error("Message body, receiverUsername, and selectedThreadId cannot be empty");
-      return;
-    }
-  
-    try {
-      await adminApi.post('/admin-message-routes/messages/send', {
-        messageBody,
-        receiverUsername,   // Send message to the user in the thread
-        threadId: selectedThreadId, // Attach to the existing thread
-      });
-  
-      setMessageBody(''); // Clear input field after sending
-  
-      // Fetch messages for the thread after sending
-      const { data } = await adminApi.get(`/admin-message-routes/fetch-messages-by-thread?threadId=${selectedThreadId}`);
-      setMessages(data.messages);
-    } catch (error) {
-      console.error('Error sending message to thread:', error);
-    }
-  };
-  
-  const sendMessageToSearchedUser = async () => {
-    console.log("Send message to searched user function is being used");
-    console.log("Message Body:", messageBody);
-    console.log("Receiver Username:", receiverUsername);
+  }, [handleThreadSelected]);
 
-    if (!messageBody || !receiverUsername) {
-      console.error("Message body and receiverUsername cannot be empty");
-      return;
-    }
+  const sendMessage = useCallback(async () => {
+    if (!messageBody || !receiverUsername) return;
 
     try {
       await adminApi.post('/admin-message-routes/messages/send', {
         messageBody,
-        receiverUsername,   // Send receiver username from the frontend
-        // The backend will handle the senderUsername based on the authenticated admin user
+        receiverUsername,
+        threadId: selectedThreadId,
       });
+      setMessageBody('');
 
-      setMessageBody(''); // Clear input field
-
-      // Re-fetch messages after sending
       if (selectedThreadId) {
-        const { data } = await adminApi.get(`/admin-message-routes/fetch-messages-by-thread?threadId=${selectedThreadId}`);
-        setMessages(data.messages);
+        fetchMessagesAndRoles(selectedThreadId);
       }
     } catch (error) {
       console.error('Error sending message:', error);
     }
-  };
+  }, [messageBody, receiverUsername, selectedThreadId, fetchMessagesAndRoles]);
 
-  const fetchUserRole = async (threadId) => {
-    try {
-      const { data } = await adminApi.get(`/admin-message-routes/get-roles-thread/${threadId}`);
-      console.log('Roles fetched:', data);
-      return {
-        senderRole: data.senderRole,
-        receiverRole: data.receiverRole,
-      };
-    } catch (error) {
-      console.error('Error fetching user roles:', error);
-      return {};
-    }
+  // Framer Motion Variants for Animation
+  const containerVariants = {
+    hidden: { opacity: 0, x: '-100vw' },
+    visible: { opacity: 1, x: 0, transition: { type: 'spring', stiffness: 120 } },
+    exit: { x: '100vw', opacity: 0, transition: { ease: 'easeInOut' } }
   };
-
-  const fetchUsernamesAndRolesByThreadId = async (threadId) => {
-    try {
-      const { data } = await adminApi.get(`/admin-message-routes/get-usernames-by-thread/${threadId}`);
-      return {
-        senderUsername: data.senderUsername,
-        receiverUsername: data.receiverUsername,
-        senderRole: data.senderRole,
-        receiverRole: data.receiverRole,
-      };
-    } catch (error) {
-      console.error('Error fetching usernames and roles:', error);
-    }
-  };
-
-  // Call this function when a thread is selected
-  useEffect(() => {
-    if (selectedThreadId) {
-      const fetchData = async () => {
-        const usernamesAndRoles = await fetchUsernamesAndRolesByThreadId(selectedThreadId);
-        if (usernamesAndRoles) {
-          setSenderUsername(usernamesAndRoles.senderUsername);
-          setReceiverUsername(usernamesAndRoles.receiverUsername);
-          setSenderRole(usernamesAndRoles.senderRole);
-          setReceiverRole(usernamesAndRoles.receiverRole);
-        }
-      };
-      fetchData();
-    }
-  }, [selectedThreadId]);
 
   return (
     <div className={`messaging-interface ${selectedThreadId ? 'thread-selected' : ''}`}>
-      {/* Search bar */}
-      <div className="search-bar">
-        <input 
-          type="text" 
-          value={searchTerm} 
-          onChange={(e) => setSearchTerm(e.target.value)} 
-          placeholder="Search users by username or email" 
-        />
-        <button onClick={() => { handleSearch(); fetchThreads(); }}>Search</button>
-        <ul>
-          {searchResults.map(user => (
-            <li key={user.id} onClick={() => handleUserSelected(user)}>
-              {user.username} ({user.email})
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      {/* Main messaging body */}
-      <div className="messaging-body">
-        {/* Thread preview */}
-        <div className="thread-preview">
-          <h3 style={{ backgroundColor: 'black', color: 'white'}}>Message Threads</h3>
-          {/* <button onClick={fetchThreads}>Reload Threads</button>*/}
-              <ul>
-                  {threads.map(thread => (
-                    <li key={thread.threadId} onClick={() => handleThreadSelected(thread.threadId)}>
-                      <h3 >{thread.threadPreviewUsername}</h3>
-                      <p >{thread.lastMessageTime}</p>
-                    </li>
-                  ))}
-              </ul>
-
+      {isMobileView && selectedThreadId ? (
+        <motion.button
+          className="back-button"
+          onClick={() => setSelectedThreadId(null)}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        >
+          Back to Threads
+        </motion.button>
+      ) : (
+        <div className="search-bar">
+          <input 
+            type="text" 
+            value={searchTerm} 
+            onChange={(e) => setSearchTerm(e.target.value)} 
+            placeholder="Search users by username or email" 
+          />
+          <button onClick={handleSearch}>Search</button>
+          <ul>
+            {searchResults.map(user => (
+              <motion.li
+                key={user.id}
+                onClick={() => handleUserSelected(user)}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                {user.username} ({user.email})
+              </motion.li>
+            ))}
+          </ul>
         </div>
+      )}
 
-        {/* Messaging window */}
-        <div className="messaging-window">
-            <h3 style={{ backgroundColor: 'black'}}>Messages</h3>
+      <div className={`messaging-body ${isMobileView && selectedThreadId ? 'mobile-view' : ''}`}>
+        <AnimatePresence>
+          {!isMobileView || !selectedThreadId ? (
+            <motion.div
+              className="thread-preview"
+              key="thread-list"
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+            >
+              <h3>Message Threads</h3>
+              <ul>
+                {threads.map(thread => (
+                  <motion.li
+                    key={thread.threadId}
+                    onClick={() => handleThreadSelected(thread)}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <h3>{thread.threadPreviewUsername}</h3>
+                    <p>{thread.lastMessageTime}</p>
+                  </motion.li>
+                ))}
+              </ul>
+            </motion.div>
+          ) : null}
+        </AnimatePresence>
 
-            {/* Display messages if a thread is selected */}
+        {(!isMobileView || selectedThreadId) && (
+          <motion.div
+            className="messaging-window"
+            key="message-window"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+          >
+            <h3>Messages</h3>
             {selectedThreadId && messages.length > 0 ? (
               <ul>
                 {messages.map((message, index) => (
                   <li key={index}>
                     <strong>{message.senderUsername}</strong>:
-                    <div style={{color:'black'}}>
-                        {message.messageBody}
-                    </div> 
+                    <div>{message.messageBody}</div>
                   </li>
                 ))}
               </ul>
@@ -274,40 +213,19 @@ const InAppMessaging = () => {
               <p>Select a thread or search for a user to start messaging</p>
             )}
 
-            {/* If a thread is selected, show the input field for sending messages to an existing thread */}
-            {selectedThreadId ? (
-              <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    sendMessageToExistingThread(); // Call the function without passing parameters
-                  }}
-                >
-                  <input
-                    type="text"
-                    value={messageBody}
-                    onChange={(e) => setMessageBody(e.target.value)}
-                    placeholder={`Type a message to ${receiverUsername}`} // Show receiver's name
-                  />
-                  <button type="submit">Send</button>
+            {(selectedThreadId || selectedUser) && (
+              <form onSubmit={(e) => { e.preventDefault(); sendMessage(); }}>
+                <input 
+                  type="text" 
+                  value={messageBody} 
+                  onChange={(e) => setMessageBody(e.target.value)} 
+                  placeholder={`Type a message to ${receiverUsername || 'user'}`}
+                />
+                <button type="submit">Send</button>
               </form>
-
-            ) : (
-              // If no thread is selected but a user is selected via search, show input field for sending a message to the searched user
-              selectedUser ? (
-                <form onSubmit={(e) => { e.preventDefault(); sendMessageToSearchedUser();  }}>
-                  <input 
-                    type="text" 
-                    value={messageBody} 
-                    onChange={(e) => setMessageBody(e.target.value)} 
-                    placeholder="Type a message to new user"
-                  />
-                  <button type="submit">Send to New User</button>
-                </form>
-              ) : (
-                <p>Search for a user or select a thread to start messaging</p>
-              )
             )}
-          </div>
+          </motion.div>
+        )}
       </div>
     </div>
   );

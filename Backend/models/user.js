@@ -1,7 +1,9 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
-const xss = require('xss'); // Import xss library
+const xss = require('xss'); 
 
+
+// Define the User model
 const User = sequelize.define('User', {
   username: {
     type: DataTypes.STRING,
@@ -27,7 +29,7 @@ const User = sequelize.define('User', {
     defaultValue: false
   },
   role: {
-    type: DataTypes.STRING, // Role field should be here
+    type: DataTypes.STRING,
     allowNull: false,
   },
   isOptedInForPromotions: {
@@ -35,7 +37,7 @@ const User = sequelize.define('User', {
     defaultValue: false,
   },
   isOptedInForEmailUpdates: {
-    type: DataTypes. BOOLEAN,
+    type: DataTypes.BOOLEAN,
     defaultValue: false,
   }
 }, {
@@ -48,6 +50,15 @@ const User = sequelize.define('User', {
       user.verificationToken = user.verificationToken ? xss(user.verificationToken) : null;
     }
   }
+
 });
+
+// Set up the association directly within the model
+User.associate = (models) => {
+  User.hasMany(models.Order, {
+    foreignKey: 'userId',
+    as: 'orders'
+  });
+};
 
 module.exports = User;
