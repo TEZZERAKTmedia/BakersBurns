@@ -17,63 +17,77 @@ const sendCustomEmail = async (req, res) => {
   const { recipientIds, subject, messageBody } = req.body;
 
   try {
+    // Fetch all users by their IDs
+    const users = await User.findAll({
+      where: {
+        id: recipientIds
+      },
+      attributes: ['username', 'email', 'isOptedInForEmailUpdates'],
+    });
+
+    // Check if any user is not opted in for email updates
+    const notOptedInUsers = users.filter(user => !user.isOptedInForEmailUpdates);
+
+    if (notOptedInUsers.length > 0) {
+      const notOptedInUsernames = notOptedInUsers.map(user => user.username);
+      return res.status(400).json({
+        message: `${notOptedInUsernames.join(', ')} is/are not opted in for messaging.`,
+      });
+    }
+
+    // Gather recipient emails
+    const recipientEmails = users.map(user => user.email);
+
+    // Send the email using NodeMailer
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: recipientEmails,  // Send to all selected recipients
+      subject: subject || 'Custom Subject',
+      text: messageBody,
+    });
+
+    // Send success response
+    res.status(200).json({ message: 'Custom email sent successfully!' });
+
+  } catch (error) {
+    console.error('Error sending custom email:', error);
+    res.status(500).json({ message: 'Failed to send custom email', error: error.message });
+  }
+};
+
+
+// Function to send promotional email
+const sendPromotionalEmail = async (req, res) => {
+  const { recipientIds, subject, messageBody } = req.body;
+
+  try {
+    // Find all the users by their IDs
     const users = await User.findAll({
       where: {
         id: recipientIds,
-        isOptedInForEmailUpdates: true,  // Only users opted in for email updates
+        isOptedInForPromotions: true,  // Check opt-in for promotional emails
       },
       attributes: ['email'],
     });
 
     if (users.length === 0) {
-      return res.status(404).json({ message: 'No users found or opted in for email updates' });
+      return res.status(404).json({ message: 'No users found or opted in for promotions' });
     }
 
-    const recipientEmails = users.map((user) => user.email);
+    const recipientEmails = users.map(user => user.email);
 
+    // Send the email using NodeMailer
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
       to: recipientEmails,
-      subject: subject,
+      subject: subject || 'Latest Promotions',
       text: messageBody,
     });
 
-    res.status(200).json({ message: 'Custom email sent successfully!' });
-  } catch (error) {
-    console.error('Error sending custom email:', error);
-    res.status(500).json({ message: 'Failed to send custom email' });
-  }
-};
-
-// Function to send promotional email
-const  sendPromotionalEmail = async (req, res) => {
-  const {subject, messageBody} = req.body;
-
-  try {
-     const users = await User.findAll({
-      where: {
-        isOptedInForPromotions: true,
-      },
-      attributes: ['email'],
-     });
-
-     if (users.length === 0) {
-      return res.status(404).json({ message: 'No users found or opted in for promotions'});
-     }
-
-     const recipientEmails = users.map((user) => user.email);
-
-     await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: recipientEmails.join(','),
-      subject: subject || 'Exclusive Promotions',
-      text: messageBody,
-     });
-
-     res.status(200).json({ message: 'Promotional email sent successfully to all opted in users!'})
+    res.status(200).json({ message: 'Promotional email sent successfully!' });
   } catch (error) {
     console.error('Error sending promotional email:', error);
-    res.status(500).json({ message: 'Failed to send promotional email'});
+    res.status(500).json({ message: 'Failed to send promotional email', error: error.message });
   }
 };
 
@@ -154,8 +168,10 @@ const searchUsers = async (req, res) => {
           sequelize.where(sequelize.fn('LOWER', sequelize.col('username')), 'LIKE', `%${searchTerm.toLowerCase()}%`),
           sequelize.where(sequelize.fn('LOWER', sequelize.col('email')), 'LIKE', `%${searchTerm.toLowerCase()}%`)
         ]
-      }
+      },
+      attributes: ['id', 'username', 'email', 'isOptedInForEmailUpdates']
     });
+    
 
     res.status(200).json({ users });
   } catch (error) {

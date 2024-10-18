@@ -10,11 +10,12 @@
   color: #333;
   font-family: 'Arial', sans-serif;
   transition: all 0.3s ease-in-out;
+  width: 100%;
 }
 
 /* Thread Preview */
 .thread-preview {
-  width: 25%;
+  width: 100%;
   background-color: #fff;
   border-right: 1px solid #ddd;
   padding: 10px;
@@ -104,6 +105,7 @@
 @media (max-width: 768px) {
   .messaging-interface {
     flex-direction: column;
+    
   }
 
   .thread-preview {

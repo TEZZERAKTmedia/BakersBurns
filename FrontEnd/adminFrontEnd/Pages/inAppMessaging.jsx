@@ -2,6 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { adminApi } from '../config/axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import '../Pagecss/inappmessaging.css';
+import { FaTrashAlt } from 'react-icons/fa';
+
 
 const InAppMessaging = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -11,6 +13,9 @@ const InAppMessaging = () => {
   const [messages, setMessages] = useState([]);
   const [messageBody, setMessageBody] = useState('');
   const [selectedUser, setSelectedUser] = useState(null);
+  const [deletingThreadId, setDeletingThreadId] = useState(null); // Track the thread being deleted
+  const [showConfirm, setShowConfirm] = useState(null); // To handle confirmation dialog
+
 
   const [senderUsername, setSenderUsername] = useState('');
   const [receiverUsername, setReceiverUsername] = useState('');
@@ -95,6 +100,25 @@ const InAppMessaging = () => {
     }
   }, [handleThreadSelected]);
 
+  const handleDeleteThread = async (threadId) => {
+    try {
+      await adminApi.delete(`/admin-message-routes/delete-thread/${threadId}`);
+      setThreads(threads.filter((thread) => thread.threadId !== threadId));
+      setShowConfirm(null); // Close confirmation dialog
+    } catch (error) {
+      console.error('Error deleting thread:', error);
+    }
+  };
+
+  // Confirmation Dialog
+  const confirmDelete = (threadId) => {
+    setShowConfirm(threadId); // Set thread ID for confirmation
+  };
+
+  const cancelDelete = () => {
+    setShowConfirm(null); // Reset confirmation
+  };
+
   const sendMessage = useCallback(async () => {
     if (!messageBody || !receiverUsername) return;
 
@@ -172,20 +196,39 @@ const InAppMessaging = () => {
             >
               <h3>Message Threads</h3>
               <ul>
-                {threads.map(thread => (
-                  <motion.li
-                    key={thread.threadId}
-                    onClick={() => handleThreadSelected(thread)}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <h3>{thread.threadPreviewUsername}</h3>
-                    <p>{thread.lastMessageTime}</p>
-                  </motion.li>
-                ))}
-              </ul>
+          {threads.map((thread) => (
+            <motion.li
+              key={thread.threadId}
+              className={deletingThreadId === thread.threadId ? 'deleting' : ''}
+              onClick={() => handleThreadSelected(thread)}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <h3>{thread.threadPreviewUsername}</h3>
+              <p>{thread.lastMessageTime}</p>
+              {!isMobileView && (
+                <FaTrashAlt 
+                  className="delete-icon"
+                  onClick={(e) => {
+                    e.stopPropagation(); // Prevent thread selection on click
+                    confirmDelete(thread.threadId);
+                  }}
+                />
+              )}
+
+              {/* Confirmation dialog */}
+              {showConfirm === thread.threadId && (
+                <div className="confirmation-dialog">
+                  <p>Are you sure you want to delete this? This action cannot be undone.</p>
+                  <button onClick={() => handleDeleteThread(thread.threadId)}>Yes, Delete</button>
+                  <button onClick={cancelDelete}>Cancel</button>
+                </div>
+              )}
+            </motion.li>
+          ))}
+        </ul>
             </motion.div>
           ) : null}
         </AnimatePresence>

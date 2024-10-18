@@ -93,38 +93,5 @@
   }
   
   /* Desktop View - Horizontal Navbar */
-  @media (min-width: 768px) {
-    .navbar {
-      justify-content: space-between;
-    }
-  
-    .hamburger-menu {
-      display: none;
-    }
-  
-    .nav-list {
-      flex-direction: row;
-      position: static;
-      width: auto;
-      height: auto;
-      background-color: transparent;
-      padding: 0;
-    }
-  
-    .nav-item {
-      margin: 0 15px;
-    }
-  
-    .nav-item a {
-      background: transparent;
-      color: white;
-      padding: 10px 15px;
-      font-size: 1.2em;
-    }
-  
-    .nav-item a:hover {
-      color: #ffffff;
-      background-color: #000;
-    }
-  }
+
   

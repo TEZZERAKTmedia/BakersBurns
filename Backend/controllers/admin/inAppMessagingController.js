@@ -270,3 +270,23 @@ exports.checkThread = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
+exports.deleteThreadId = async (req, res) => {
+  const { threadId } = req.params;
+
+  if (!threadId) {
+    return res.status(400).json({ error: 'ThreadId is required' });
+  }
+
+  try {
+    // Delete all messages associated with the threadId
+    await Message.destroy({
+      where: { threadId }
+    });
+
+    res.status(200).json({ message: 'Thread and associated messages deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting thread:', error);
+    res.status(500).json({ error: 'Failed to delete thread' });
+  }
+};

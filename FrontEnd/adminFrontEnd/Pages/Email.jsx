@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { adminApi } from '../config/axios';
+import { motion, AnimatePresence } from 'framer-motion';
 import '../Pagecss/email.css';
 
 const AdminEmailComponent = () => {
@@ -18,6 +19,7 @@ const AdminEmailComponent = () => {
 
   const [showPreview, setShowPreview] = useState(false);
   const [previewData, setPreviewData] = useState({});
+  const [emailType, setEmailType] = useState(''); // Track email type for the preview
 
   // Function to search users in the database
   const handleUserSearch = async () => {
@@ -43,44 +45,112 @@ const AdminEmailComponent = () => {
     setRecipients(recipients.filter((user) => user.id !== id));
   };
 
-  // Function to handle showing the preview modal
-  const handleShowPreview = (url, subject, messageBody) => {
-    if (!subject || !messageBody) {
+  // Function to handle showing the preview modal for Custom Email
+  const handleShowCustomPreview = () => {
+    if (!customSubject || !customMessageBody) {
       return alert('Please complete all fields.');
     }
 
     const recipientEmails = recipients.map((user) => `${user.username} (${user.email})`);
-    setPreviewData({ url, subject, messageBody, recipientEmails });
+    setPreviewData({ url: '/admin-mail/send-custom', subject: customSubject, messageBody: customMessageBody, recipientEmails });
+    setEmailType('custom');
     setShowPreview(true);
   };
 
-  // Function to send the email after confirming the preview
-  const handleSendEmail = async () => {
-    const { url, subject, messageBody } = previewData;
+  // Function to handle showing the preview modal for Promotional Email
+  const handleShowPromotionalPreview = () => {
+    if (!promotionSubject || !promotionMessageBody) {
+      return alert('Please complete all fields.');
+    }
 
+    const recipientEmails = recipients.map((user) => `${user.username} (${user.email})`);
+    setPreviewData({ url: '/admin-mail/send-promotions', subject: promotionSubject, messageBody: promotionMessageBody, recipientEmails });
+    setEmailType('promotion');
+    setShowPreview(true);
+  };
+
+  // Similar preview functions for Order Update and Newsletter
+  const handleShowOrderUpdatePreview = () => {
+    if (!orderUpdateSubject || !orderUpdateMessageBody) {
+      return alert('Please complete all fields.');
+    }
+
+    const recipientEmails = recipients.map((user) => `${user.username} (${user.email})`);
+    setPreviewData({ url: '/admin-mail/send-order-update', subject: orderUpdateSubject, messageBody: orderUpdateMessageBody, recipientEmails });
+    setEmailType('orderUpdate');
+    setShowPreview(true);
+  };
+
+  const handleShowNewsletterPreview = () => {
+    if (!newsletterSubject || !newsletterMessageBody) {
+      return alert('Please complete all fields.');
+    }
+
+    const recipientEmails = recipients.map((user) => `${user.username} (${user.email})`);
+    setPreviewData({ url: '/admin-mail/send-newsletter', subject: newsletterSubject, messageBody: newsletterMessageBody, recipientEmails });
+    setEmailType('newsletter');
+    setShowPreview(true);
+  };
+
+  // Dynamic send function based on email type
+  const handleSendEmail = async () => {
+    const recipientIds = recipients.map(user => user.id);  // Send IDs of recipients
     try {
-      const recipientIds = recipients.map((user) => user.id);
-      await adminApi.post(url, {
+      const response = await adminApi.post(previewData.url, {
         recipientIds,
-        subject,
-        messageBody,
+        subject: previewData.subject,
+        messageBody: previewData.messageBody,
       });
-      alert('Email sent successfully!');
-      setRecipients([]);
-      setShowPreview(false);
+
+      alert(response.data.message);  // Success message
+      setShowPreview(false);  // Close the preview after sending
     } catch (error) {
-      console.error('Error sending email:', error);
-      alert('Failed to send email.');
+      if (error.response && error.response.data.message) {
+        alert(error.response.data.message);  // Error message with specific user not opted-in
+      } else {
+        console.error('Error sending email:', error);
+      }
     }
   };
 
   return (
-    <div className="email-app">
-      <h2>Admin Email</h2>
+    <motion.div className="email-app"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      <motion.h2
+        initial={{ x: -100, opacity: 0 }}
+        animate={{ x: 0, opacity: 1 }}
+        transition={{ duration: 0.6 }}
+      >
+        Admin Email
+      </motion.h2>
 
       {/* Section 1: Emailing Specific Users */}
-      <section className="section">
-        <h3>Email Specific Users</h3>
+      <motion.section className="section"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+      >
+          <motion.h3
+            initial={{ opacity: 0, x: -50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            Send Custom Email
+            
+          </motion.h3>
+        {/* Custom Message Section */}
+        <motion.section className="section"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5 }}
+        >
+
+<div className="search-container">
+        <h3>Search for Users</h3>
         <input
           type="text"
           placeholder="Search users by name or email"
@@ -88,31 +158,55 @@ const AdminEmailComponent = () => {
           onChange={(e) => setSearchTerm(e.target.value)}
         />
         <button onClick={handleUserSearch}>Search</button>
+      </div>
 
-        {searchResults.length > 0 && (
-          <div className="search-results">
-            {searchResults.map((user) => (
-              <div key={user.id}>
-                {user.username} ({user.email})
-                <button onClick={() => addRecipient(user)}>Add</button>
-              </div>
-            ))}
-          </div>
-        )}
+      {/* Display Search Results */}
+      <div className="search-results">
+        {searchResults.map((user) => (
+          <motion.div
+            key={user.id}
+            className={`search-result-item ${user.isOptedInForEmailUpdates ? 'opted-in' : 'not-opted-in'}`}
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 20 }}
+          >
+            {user.username} ({user.email})
+            <p>{user.isOptedInForEmailUpdates ? 'Opted in for email messaging' : 'Not opted in for email messaging'}</p>
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => addRecipient(user)}
+            >
+              Add
+            </motion.button>
+          </motion.div>
+        ))}
+      </div>
 
-        <div className="recipients-list">
-          <h4>Selected Recipients:</h4>
-          {recipients.map((user) => (
-            <div key={user.id}>
-              {user.username} ({user.email})
-              <button onClick={() => removeRecipient(user.id)}>Remove</button>
-            </div>
-          ))}
-        </div>
-
-        {/* Custom Message Section */}
-        <section className="section">
-          <h3>Send Custom Email</h3>
+      {/* Display Selected Recipients */}
+      <div className="recipients-container">
+        <h3>Selected Recipients</h3>
+        {recipients.length === 0 && <p>No recipients selected yet.</p>}
+        {recipients.map((user) => (
+          <motion.div
+            key={user.id}
+            className={`recipient-item ${user.isOptedInForEmailUpdates ? 'opted-in' : 'not-opted-in'}`}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.5 }}
+          >
+            {user.username} ({user.email})
+            <p>{user.isOptedInForEmailUpdates ? 'Opted in for email messaging' : 'Not opted in for email messaging'}</p>
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => removeRecipient(user.id)}
+            >
+              Remove
+            </motion.button>
+          </motion.div>
+        ))}
+      </div>
           <input
             type="text"
             placeholder="Custom Subject"
@@ -124,15 +218,29 @@ const AdminEmailComponent = () => {
             value={customMessageBody}
             onChange={(e) => setCustomMessageBody(e.target.value)}
           ></textarea>
-          <button onClick={() => handleShowPreview('/admin-mail/send-custom', customSubject, customMessageBody)}>
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={handleShowCustomPreview}
+          >
             Preview & Send Custom Email
-          </button>
-        </section>
-      </section>
+          </motion.button>
+        </motion.section>
+      </motion.section>
 
       {/* Section for Promotions */}
-      <section className="section">
-        <h3>Send Promotional Email</h3>
+      <motion.section className="section"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+      >
+        <motion.h3
+          initial={{ opacity: 0, x: -50 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          Send Promotional Email
+        </motion.h3>
         <div className="email-form">
           <input
             type="text"
@@ -145,73 +253,58 @@ const AdminEmailComponent = () => {
             value={promotionMessageBody}
             onChange={(e) => setPromotionMessageBody(e.target.value)}
           ></textarea>
-          <button onClick={() => handleShowPreview('/admin-mail/send-promotions', promotionSubject, promotionMessageBody)}>
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={handleShowPromotionalPreview}
+          >
             Preview & Send Promotional Email
-          </button>
+          </motion.button>
         </div>
-      </section>
-
-      {/* Section for Order Updates */}
-      <section className="section">
-        <h3>Send Order Update Email</h3>
-        <div className="email-form">
-          <input
-            type="text"
-            placeholder="Order Update Subject"
-            value={orderUpdateSubject}
-            onChange={(e) => setOrderUpdateSubject(e.target.value)}
-          />
-          <textarea
-            placeholder="Order Update Message Body"
-            value={orderUpdateMessageBody}
-            onChange={(e) => setOrderUpdateMessageBody(e.target.value)}
-          ></textarea>
-          <button onClick={() => handleShowPreview('/admin-mail/send-order-update', orderUpdateSubject, orderUpdateMessageBody)}>
-            Preview & Send Order Update Email
-          </button>
-        </div>
-      </section>
-
-      {/* Section for Newsletter */}
-      <section className="section">
-        <h3>Send Newsletter Email</h3>
-        <div className="email-form">
-          <input
-            type="text"
-            placeholder="Newsletter Subject"
-            value={newsletterSubject}
-            onChange={(e) => setNewsletterSubject(e.target.value)}
-          />
-          <textarea
-            placeholder="Newsletter Message Body"
-            value={newsletterMessageBody}
-            onChange={(e) => setNewsletterMessageBody(e.target.value)}
-          ></textarea>
-          <button onClick={() => handleShowPreview('/admin-mail/send-newsletter', newsletterSubject, newsletterMessageBody)}>
-            Preview & Send Newsletter
-          </button>
-        </div>
-      </section>
+      </motion.section>
 
       {/* Preview Modal */}
       {showPreview && (
-        <>
-          <div className="preview-overlay"></div>
-          <div className="preview-modal">
+        <AnimatePresence>
+          <motion.div
+            className="preview-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 0.8 }}
+            exit={{ opacity: 0 }}
+          ></motion.div>
+          <motion.div
+            className="preview-modal"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            transition={{ duration: 0.3 }}
+          >
             <div className="preview-content">
-              <h3 style={{color: 'black'}}>Email Preview</h3>
-              <p style={{color: 'black'}}><strong>Subject:</strong> {previewData.subject}</p>
+              <h3 style={{ color: 'black' }}>Email Preview</h3>
+              <p style={{ color: 'black' }}><strong>Subject:</strong> {previewData.subject}</p>
               <p><strong>Message Body:</strong> {previewData.messageBody}</p>
               <p><strong>Recipients:</strong> {previewData.recipientEmails.join(', ')}</p>
               <div className="preview-actions">
-                <button onClick={handleSendEmail}>Send Email</button>
-                <button onClick={() => setShowPreview(false)}>Cancel</button>
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleSendEmail}
+                >
+                  Send Email
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setShowPreview(false)}
+                >
+                  Cancel
+                </motion.button>
               </div>
             </div>
-          </div>
-        </>
+          </motion.div>
+        </AnimatePresence>
       )}
-    </div>
+    </motion.div>
   );
 };
 

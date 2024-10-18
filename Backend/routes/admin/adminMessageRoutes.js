@@ -14,37 +14,28 @@ const {
     getRolesByThreadId,
     getUsernamesByThreadId,
     checkThread,
+    deleteThreadId
 
   } = require('../../controllers/admin/inAppMessagingController');
 
-// In-app messaging routes
-
-// Route to search for users in-app by username or email
+//GET
 router.get('/search', searchInAppUsers);
-
-// Route to send a message to a user in-app
-router.post('/messages/send', adminAuthMiddleware(), sendInAppMessage);
-
-// Route to get all messages for the logged-in user (admin or user)
 router.get('/fetch-all-threads', adminAuthMiddleware(), fetchAllThreadIds);
-
-
 router.get('/fetch-messages-by-thread',adminAuthMiddleware(), fetchMessagesByThreadId);
-
 router.get('/threads', adminAuthMiddleware(), getOrCreateThreadId);
-
 router.get('/get-roles-thread/:threadId', adminAuthMiddleware(), getRolesByThreadId);
-
-// Define a route to get usernames by thread ID
 router.get('/get-usernames-by-thread/:threadId', adminAuthMiddleware(), getUsernamesByThreadId);
-
 router.get('/check-thread', adminAuthMiddleware(), checkThread);
+//POST
+router.post('/messages/send', adminAuthMiddleware(), sendInAppMessage);
+//DELETE
+router.delete('/delete-thread/:threadId',adminAuthMiddleware(), deleteThreadId);
 
-// Email messaging routes
+
+// EMAIL 
 
 // Route to send an email message to a user
 router.post('/email/send', adminAuthMiddleware(), sendMessage);
-
 // Route to get email messages for a specific user
 router.get('/email/messages', adminAuthMiddleware(), getMessages);
 
