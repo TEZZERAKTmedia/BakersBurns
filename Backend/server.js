@@ -28,6 +28,8 @@ const ordersRoutes = require('./routes/admin/ordersRoutes');
 const stripeRoutes = require('./routes/user/stripeRoutes');
 const passkeyRoutes = require('./routes/admin/adminPasskeyRoutes');
 const stripeWebhookRoutes = require('./routes/user/stripeWebhookRoutes');
+const userOrderRoutes = require('./routes/user/orderRoutes');
+const registerStoreRoutes = require('./routes/register/storeRegister');
 
 // Initialize Express app
 const app = express();
@@ -70,6 +72,11 @@ app.use('/sign-up', signupRoutes);
 
 //Passkey Routes 
 app.use('/login-passkey-routes', passkeyRoutes);
+
+//Register routes
+app.use('/register-store', registerStoreRoutes);
+
+
 // User routes
 app.use('/auth', authRoutes);
 app.use('/verification',emailVerificationRoutes);
@@ -79,6 +86,7 @@ app.use('/cart',userAuthMiddleware('user'), cartRoutes);
 app.use('/user',userAuthMiddleware('user'), userRoutes);
 app.use('/store',userAuthMiddleware('user'), storeRoutes);
 app.use('/user-message-routes', userAuthMiddleware('user'), userMessagingRoutes);
+app.use('/user-orders',userAuthMiddleware('user'), userOrderRoutes); 
 
 
 
@@ -93,7 +101,7 @@ app.use('/gallery-manager', adminAuthMiddleware('admin'), galleryRoutes);  // Pr
 app.use('/admin-mail', adminAuthMiddleware('admin'), adminEmailRoutes);
 app.use('/orders', ordersRoutes);
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-app.use('/gallery', express.static(path.join(__dirname, 'gallery')));
+app.use('/galleryuploads', express.static(path.join(__dirname, 'galleryuploads')));
 app.use('/admin', express.static(path.join(__dirname, 'public/admin')));
 app.use('/admin-message-routes', adminAuthMiddleware('admin'), adminMessagingRoutes);
 

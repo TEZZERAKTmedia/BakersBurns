@@ -5,7 +5,7 @@ import Home from './Pages/Home';
 import Store from './Pages/Store';
 import About from './Pages/About';
 import Create from './Pages/Create';
-import UserDashboard from './Pages/Profile';
+import Orders from './Pages/Orders';
 import Cart from './Pages/Cart';
 import Settings from './Pages/Settings';
 import Success from './Components/purchase/successfulPurchase';
@@ -26,7 +26,7 @@ function UserApp() {
         <Route path="/store" element={<Store />} />
         <Route path="/create" element={<Create />} />
         <Route path="/about" element={<About />} />
-        <Route path="/userDashboard" element={<UserDashboard />} />
+        <Route path="/orders" element={<Orders />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/success" element={<Success />} />
         <Route path="/in-app-messaging" element={<InAppMessaging/>} />

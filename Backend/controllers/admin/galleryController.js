@@ -14,9 +14,10 @@ const getGalleryItems = async (req, res) => {
 };
 
 // Add a new gallery item
+// Add a new gallery item
 const addGalleryItem = async (req, res) => {
   const { title, description } = req.body;
-  const image = req.file ? req.file.filename : null; // Save the filename
+  const image = req.file ? req.file.filename : null; // Get filename from multer
 
   try {
     console.log('Adding new gallery item');
@@ -29,10 +30,13 @@ const addGalleryItem = async (req, res) => {
   }
 };
 
+
 // Update a gallery item
+// Update gallery item
 const updateGalleryItem = async (req, res) => {
   const { id } = req.params;
-  const { title, description, image } = req.body;
+  const { title, description } = req.body;
+  const image = req.file ? req.file.filename : null;  // Check for new image
 
   try {
     console.log('Updating gallery item with id:', id);
@@ -41,7 +45,7 @@ const updateGalleryItem = async (req, res) => {
       console.log('Gallery item found:', galleryItem);
       galleryItem.title = title || galleryItem.title;
       galleryItem.description = description || galleryItem.description;
-      galleryItem.image = image || galleryItem.image;  // Update image if provided
+      if (image) galleryItem.image = image;  // Only update image if a new one is provided
       await galleryItem.save();
       console.log('Gallery item updated successfully', galleryItem);
       res.json(galleryItem);

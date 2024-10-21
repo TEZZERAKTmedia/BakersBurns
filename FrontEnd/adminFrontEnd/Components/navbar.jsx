@@ -25,12 +25,12 @@ const AdminNavbar = () => {
       {/* Admin Routes */}
       <ul className={`nav-list ${menuOpen ? 'show' : ''}`}>
         <li className="nav-item" onClick={closeMenu}><Link to="/">Admin Home</Link></li>
-        <li className="nav-item" onClick={closeMenu}><Link to="/admin-gallery">Admin Gallery</Link></li>
+        <li className="nav-item" onClick={closeMenu}><Link to="/gallery">Admin Gallery</Link></li>
         <li className="nav-item" onClick={closeMenu}><Link to="/product-manager">Product Manager</Link></li>
-        <li className="nav-item" onClick={closeMenu}><Link to="/admin-layout">Admin Layout</Link></li>
-        <li className="nav-item" onClick={closeMenu}><Link to="/admin-orders">Orders</Link></li>
-        <li className="nav-item" onClick={closeMenu}><Link to="/admin-messaging">Messages</Link></li>
-        <li className="nav-item" onClick={closeMenu}><Link to="/admin-dashboard">Admin Dashboard</Link></li>
+        <li className="nav-item" onClick={closeMenu}><Link to="/layout">User App Layout</Link></li>
+        <li className="nav-item" onClick={closeMenu}><Link to="/orders">Orders</Link></li>
+        <li className="nav-item" onClick={closeMenu}><Link to="/messaging">Messages</Link></li>
+
       </ul>
     </nav>
   );
