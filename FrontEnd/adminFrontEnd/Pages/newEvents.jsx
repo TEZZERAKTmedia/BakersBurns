@@ -1,221 +1,370 @@
-import React, { useState, useEffect } from 'react';
- // Import the CSS file for styling
 
-const newEvents = () => {
-  const [date, setDate] = useState(new Date());
-  const [events, setEvents] = useState([]);
+import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { adminApi } from '../config/axios';
+import moment from 'moment';
+import '../Pagecss/events.css';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
+
+const Events = () => {
+  const [events, setEvents] = useState([]); // Unique events only
+  const [calendarEvents, setCalendarEvents] = useState([]); //
+  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [showAddEventForm, setShowAddEventForm] = useState(false);
+  const [validationError, setValidationError] = useState('');
+  const [editEventId, setEditEventId] = useState(null);
+  const [currentDate, setCurrentDate] = useState(moment());
+
   const [newEvent, setNewEvent] = useState({
     name: '',
     description: '',
-    frequency: '',
+    frequency: 'weekly',
+    startDate: '',
+    endDate: '',
+    startTime: '', 
+    endTime: '',
     days: [],
-    startTime: '',
-    endTime: ''
   });
-  const [view, setView] = useState('week'); // 'week' or 'month'
-  const [showNavButtons, setShowNavButtons] = useState(false);
-
-  useEffect(() => {
-    fetchAdminEvents();
-  }, []);
-
-  const fetchAdminEvents = async () => {
-    // Example of fetching admin events (replace with your actual API call)
-    const response = await fetch('/api/admin/events');
-    const data = await response.json();
-    setEvents(data);
-  };
-
-  const getStartOfWeek = (date) => {
-    const day = date.getDay();
-    const diff = date.getDate() - day + (day === 0 ? -6 : 1);
-    return new Date(date.setDate(diff));
-  };
-
-  const getDaysInMonth = (date) => {
-    const month = date.getMonth();
-    const year = date.getFullYear();
-    const days = new Date(year, month + 1, 0).getDate();
-    return Array.from({ length: days }, (_, i) => new Date(year, month, i + 1));
-  };
-
-  const generateCalendarDays = () => {
-    if (view === 'week') {
-      const startOfWeek = getStartOfWeek(new Date(date));
-      const days = [];
-
-      for (let i = 0; i < 7; i++) {
-        const currentDay = new Date(startOfWeek);
-        currentDay.setDate(startOfWeek.getDate() + i);
-        days.push(currentDay);
-      }
-
-      return days;
-    } else {
-      return getDaysInMonth(new Date(date));
-    }
-  };
-
   const handleEventChange = (e) => {
     const { name, value, type, checked } = e.target;
     if (type === 'checkbox') {
-      if (checked) {
-        setNewEvent((prev) => ({
-          ...prev,
-          days: [...prev.days, value]
-        }));
-      } else {
-        setNewEvent((prev) => ({
-          ...prev,
-          days: prev.days.filter((day) => day !== value)
-        }));
-      }
+      setNewEvent((prev) => ({
+        ...prev,
+        days: checked ? [...prev.days, value] : prev.days.filter((day) => day !== value),
+      }));
     } else {
       setNewEvent({ ...newEvent, [name]: value });
     }
   };
 
-  const addEvent = (e) => {
-    e.preventDefault();
-    const currentDate = new Date();
-    const eventDates = [];
-
-    if (newEvent.frequency === 'weekly') {
-      for (let i = 0; i < 52; i++) {
-        newEvent.days.forEach(day => {
-          const dayIndex = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].indexOf(day);
-          const eventDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() + (i * 7) + (dayIndex - currentDate.getDay()));
-          eventDates.push({ ...newEvent, date: eventDate });
-        });
-      }
-    } else if (newEvent.frequency === 'bi-weekly') {
-      for (let i = 0; i < 26; i++) {
-        newEvent.days.forEach(day => {
-          const dayIndex = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].indexOf(day);
-          const eventDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() + (i * 14) + (dayIndex - currentDate.getDay()));
-          eventDates.push({ ...newEvent, date: eventDate });
-        });
-      }
-    } else if (newEvent.frequency === 'monthly') {
-      for (let i = 0; i < 12; i++) {
-        newEvent.days.forEach(day => {
-          const dayIndex = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].indexOf(day);
-          const eventDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + i, currentDate.getDate() + (dayIndex - currentDate.getDay()));
-          eventDates.push({ ...newEvent, date: eventDate });
-        });
-      }
-    } else if (newEvent.frequency === 'yearly') {
-      for (let i = 0; i < 1; i++) {
-        newEvent.days.forEach(day => {
-          const dayIndex = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].indexOf(day);
-          const eventDate = new Date(currentDate.getFullYear() + i, currentDate.getMonth(), currentDate.getDate() + (dayIndex - currentDate.getDay()));
-          eventDates.push({ ...newEvent, date: eventDate });
-        });
-      }
-    }
-
-    setEvents([...events, ...eventDates]);
-    setNewEvent({ name: '', description: '', frequency: '', days: [], startTime: '', endTime: '' });
-  };
-
-  const renderCalendar = () => {
-    const days = generateCalendarDays();
-    return days.map((day) => {
-      const options = { weekday: 'short', day: 'numeric' };
-      const formattedDay = day.toLocaleDateString('default', options);
-      const month = day.toLocaleDateString('default', { month: 'long' });
-      return (
-        <div key={day.toDateString()} className={`calendar-day ${isCurrentWeek(day) ? 'highlight' : ''}`}>
-          <div className="date-label">
-            {formattedDay}, {month}
-          </div>
-          <div className="events-list">
-            {events
-              .filter(event => new Date(event.date).toDateString() === day.toDateString())
-              .map(event => (
-                <div key={event.name} className="event-item">
-                  {event.name} - {event.description} ({event.startTime} - {event.endTime})
-                </div>
-              ))}
-          </div>
-        </div>
-      );
+  const resetForm = () => {
+    setNewEvent({
+      name: '',
+      description: '',
+      frequency: 'weekly',
+      startDate: '',
+      endDate: '',
+      startTime: '',
+      endTime: '',
+      days: [],
     });
   };
 
-  const isCurrentWeek = (date) => {
-    const startOfWeek = getStartOfWeek(new Date());
-    const endOfWeek = new Date(startOfWeek);
-    endOfWeek.setDate(startOfWeek.getDate() + 6);
+  const fetchEvents = async () => {
+    try {
+      const response = await adminApi.get('/event/events');
+      const rawEvents = response.data;
+  
+      // Set unique events for the Event Preview section
+      setEvents(rawEvents);
+  
+      // Generate all occurrences for calendar display
+      const allOccurrences = rawEvents.flatMap(event => {
+        return generateRecurringEvents(
+          event.days,
+          event.startDate,
+          event.endDate,
+          {
+            id: event.id,
+            name: event.name,
+            description: event.description,
+            startTime: event.startTime,
+            endTime: event.endTime,
+          }
+        );
+      });
+  
+      setCalendarEvents(allOccurrences); // Set all instances for calendar view
+      setLoading(false);
+    } catch (error) {
+      console.error("Fetch error:", error);
+      setError('Error fetching events');
+      setLoading(false);
+    }
+  };
+  
 
-    return date >= startOfWeek && date <= endOfWeek;
+  useEffect(() => {
+    fetchEvents();
+  }, []);
+
+  const handleDeleteEvent = async (eventId) => {
+    try {
+      await adminApi.delete(`/event/events/${eventId}`);
+      console.log(`Event with ID ${eventId} deleted successfully`);
+      fetchEvents(); // Re-fetch events to update the calendar
+    } catch (error) {
+      console.error("Error deleting event:", error);
+      setValidationError('Error deleting event');
+    }
   };
 
-  const switchView = () => {
-    setShowNavButtons(!showNavButtons);
-    setView(view === 'week' ? 'month' : 'week');
+  const handleAddEvent = async () => {
+    if (!validateForm()) return;
+    const formattedEvent = {
+      ...newEvent,
+      startDate: moment(newEvent.startDate).format('YYYY-MM-DD'),
+      endDate: moment(newEvent.endDate).format('YYYY-MM-DD'),
+      days: Array.isArray(newEvent.days) ? newEvent.days.join(',') : newEvent.days,
+    };
+
+    try {
+      const response = await adminApi.post('/event/events', formattedEvent);
+      setEvents([...events, response.data]);
+      setShowAddEventForm(false);
+      resetForm();
+    } catch (error) {
+      console.error("Error adding new event:", error);
+      setValidationError('Error adding new event');
+    }
   };
 
-  const changeMonth = (increment) => {
-    setDate(new Date(date.setMonth(date.getMonth() + increment)));
+  const validateForm = () => {
+    const { name, description, frequency, startDate, endDate, startTime, endTime, day } = newEvent
+    if(!name || !description || !frequency || !startDate || !endDate || !startTime || !endTime || !day === 0) {
+      setValidationError('All form inputs must be filled out');
+    return false;
+    }
+    setValidationError('');
+    return true;
+    
+  }
+  const generateRecurringEvents = (daysOfWeek, startDate, endDate, eventData) => {
+    const start = moment(startDate);
+    const end = moment(endDate);
+    const eventDays = [];
+  
+    const daysMap = {
+      Monday: 1,
+      Tuesday: 2,
+      Wednesday: 3,
+      Thursday: 4,
+      Friday: 5,
+      Saturday: 6,
+      Sunday: 0,
+    };
+  
+    while (start.isSameOrBefore(end)) {
+      const dayOfWeek = start.day();
+      const dayName = Object.keys(daysMap).find(day => daysMap[day] === dayOfWeek);
+  
+      if (daysOfWeek.includes(dayName)) {
+        eventDays.push({
+          id: eventData.id,
+          title: eventData.name,
+          description: eventData.description,
+          startTime: eventData.startTime,
+          endTime: eventData.endTime,
+          date: start.format('YYYY-MM-DD'), // Ensure date format consistency for the calendar
+        });
+      }
+      start.add(1, 'day'); // Move to the next day
+    }
+  
+    return eventDays;
+  };
+  
+
+  const handleDayChange = (day) => {
+    setNewEvent((prevEvent) => ({
+      ...prevEvent,
+      days: prevEvent.days.includes(day)
+        ? prevEvent.days.filter((d) => d !== day)
+        : [...prevEvent.days, day],
+
+    }));
+  };
+
+  const handlePrevMonth = () => {
+    setCurrentDate(currentDate.clone().subtract(1, 'months'));
+  };
+
+  const handleNextMonth = () => {
+    setCurrentDate(currentDate.clone().add(1, 'months'));
+  };
+
+  const renderCalendarDays = () => {
+    const startOfMonth = currentDate.clone().startOf('month');
+    const endOfMonth = currentDate.clone().endOf('month');
+
+    // Calculate start and end days for the calendar grid
+    const startDay = startOfMonth.clone().startOf('week');
+    const endDay = endOfMonth.clone().endOf('week');
+
+    const days = [];
+    let day = startDay.clone();
+
+    while (day.isBefore(endDay, 'day')) {
+      const isToday = day.isSame(moment(), 'day');
+      const isCurrentMonth = day.isSame(currentDate, 'month');
+      const eventsForDay = calendarEvents.filter(event => event.date === day.format('YYYY-MM-DD'));
+
+      days.push(
+        <div
+          key={day.toString()}
+          className={`calendar-day ${isCurrentMonth ? 'current-month' : 'other-month'} ${
+            isToday ? 'today' : ''
+          }`}
+        >
+          <span className="date-label">{day.date()}</span>
+          {eventsForDay.map((event, index) => (
+            <div key={index} className="event-item">
+              <p className="event-title">{event.title}</p>
+              <p className="event-time">{event.startTime} - {event.endTime}</p>
+            </div>
+          ))}
+        </div>
+      );
+      day.add(1, 'day');
+    }
+
+    return days;
   };
 
   return (
-    <div className="home-container">
-      <div className="background-image"></div>
-      <div className="content">
-        <h1>Home</h1>
-        <p>Welcome to the home page!</p>
-        <div className="calendar-header">
-          {showNavButtons && <button onClick={() => changeMonth(-1)}>Previous</button>}
-          <span onClick={switchView}>
-            {date.toLocaleString('default', { month: 'long' })} {date.getFullYear()}
-          </span>
-          {showNavButtons && <button onClick={() => changeMonth(1)}>Next</button>}
+    <div className='events-body'>
+      <div className="min-h-screen bg-gray-100 p-6">
+        <h1 className="text-4xl font-bold text-center mb-8">Events Management</h1>
+        {validationError && <p className="text-center text-red-500">{validationError}</p>}
+        {loading && <p className="text-center">Loading...</p>}
+        {error && <p className="text-center text-red-500">{error}</p>}
+
+        <div className="flex justify-center mb-8">
+          <motion.button
+            className="bg-blue-500 text-white px-6 py-3 rounded-lg shadow-md hover:bg-blue-600"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setShowAddEventForm(true)}
+          >
+            Add Event
+          </motion.button>
         </div>
-        <div className="calendar-container">
-          {renderCalendar()}
-        </div>
-        <div className="event-form">
-          <h2>Add Event</h2>
-          <form onSubmit={addEvent}>
-            <input
-              type="text"
-              name="name"
-              placeholder="Event Name"
-              value={newEvent.name}
-              onChange={handleEventChange}
-              required
-            />
-            <input
-              type="text"
-              name="description"
-              placeholder="Event Description"
-              value={newEvent.description}
-              onChange={handleEventChange}
-              required
-            />
-            <select name="frequency" value={newEvent.frequency} onChange={handleEventChange} required>
-              <option value="">Select Frequency</option>
-              <option value="weekly">Weekly</option>
-              <option value="bi-weekly">Bi-Weekly</option>
-              <option value="monthly">Monthly</option>
-              <option value="yearly">Yearly</option>
-            </select>
-            <div className="day-selector">
-              {['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map(day => (
-                <label key={day} className="day-selector-label">
-                  <input
-                    type="checkbox"
-                    name="days"
-                    value={day}
-                    checked={newEvent.days.includes(day)}
-                    onChange={handleEventChange}
-                  /> {day}
-                </label>
-              ))}
+
+        {/* Custom Calendar */}
+            <div className="calendar-container">
+      <div className="calendar-header">
+        <button onClick={handlePrevMonth}>&lt;</button>
+        <h2>{currentDate.format("MMMM YYYY")}</h2>
+        <button onClick={handleNextMonth}>&gt;</button>
+      </div>
+
+      <div className="calendar-grid">
+        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
+          <div key={day} className="calendar-day-header">
+            {day}
+          </div>
+        ))}
+        
+
+        {renderCalendarDays()}
+      </div>
+    </div>
+                {/* Event Preview Section */}
+                <div className="event-preview-section bg-white p-6 shadow-md rounded-lg mb-8">
+          <h2 className="text-2xl font-bold mb-4">Event Previews</h2>
+          {events.length === 0 && <p>No events to display</p>}
+          {events.map((event) => (
+            <div key={event.id} className="event-preview-tile p-4 mb-2 border rounded-lg flex flex-col">
+              <div className="flex justify-between items-center">
+                <div>
+                  <p className="event-title font-semibold">{event.name}</p>
+                  <p className="event-description text-gray-700">{event.description}</p>
+                  <p className="event-date text-sm text-gray-600">
+                    {moment(event.startDate).format('MMMM Do YYYY')} - {moment(event.endDate).format('MMMM Do YYYY')}
+                  </p>
+                  <p className="event-time text-sm text-gray-600">
+                    {event.startTime} - {event.endTime}
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <button className="text-blue-500" onClick={() => handleEditEvent(event)}>Edit</button>
+                  <button className="text-red-500" onClick={() => handleDeleteEvent(event.id)}>🗑️</button>
+                </div>
+              </div>
+
+              {editEventId === event.id && (
+                <div className="edit-form mt-4">
+                  <h3 className="text-lg font-semibold">Edit Event</h3>
+                  {/* Include your edit form inputs here */}
+                </div>
+              )}
             </div>
-            <label>
+          ))}
+        </div>
+
+
+{showAddEventForm && (
+          <motion.div
+            className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <div className="bg-white p-6 rounded-lg shadow-lg w-80 max-w-md">
+              <button
+                className="absolute top-2 right-2 text-gray-500"
+                onClick={() => setShowAddEventForm(false)}
+              >
+                Close
+              </button>
+              <h2 className="text-2xl font-bold mb-4">Add New Event</h2>
+
+              <div className="mb-4">
+                <label className="form-label">Event Name</label>
+                <input
+                  type="text"
+                  value={newEvent.name}
+                  onChange={(e) => setNewEvent({ ...newEvent, name: e.target.value })}
+                  className="form-input"
+                />
+              </div>
+
+              <div className="mb-4">
+                <label className="form-label">Description</label>
+                <textarea
+                  value={newEvent.description}
+                  onChange={(e) => setNewEvent({ ...newEvent, description: e.target.value })}
+                  className="form-input"
+                />
+              </div>
+
+              <div className="mb-4">
+                <label className="form-label">Frequency</label>
+                <select
+                  value={newEvent.frequency}
+                  onChange={(e) => setNewEvent({ ...newEvent, frequency: e.target.value })}
+                  className="form-input"
+                >
+                  <option value="weekly">Weekly</option>
+                  <option value="bi-weekly">Bi-Weekly</option>
+                  <option value="monthly">Monthly</option>
+                  <option value="yearly">Yearly</option>
+                </select>
+              </div>
+
+              <div className="mb-4">
+                <label className="form-label">Start Date</label>
+                <DatePicker
+                  selected={newEvent.startDate}
+                  onChange={(date) => setNewEvent({ ...newEvent, startDate: date })}
+                  className="form-input"
+                  dateFormat="yyyy-MM-dd"
+                />
+              </div>
+
+              <div className="mb-4">
+                <label className="form-label">End Date</label>
+                <DatePicker
+                  selected={newEvent.endDate}
+                  onChange={(date) => setNewEvent({ ...newEvent, endDate: date })}
+                  className="form-input"
+                  dateFormat="yyyy-MM-dd"
+                />
+              </div>
+              <label>
               Start Time:
               <input
                 type="time"
@@ -235,13 +384,37 @@ const newEvents = () => {
                 required
               />
             </label>
-            <button type="submit">Add Event</button>
-          </form>
-        </div>
+
+              <div className="mb-4">
+                <label className="form-label">Select Days of the Week</label>
+                <div className="grid grid-cols-7 gap-2">
+                  {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map(day => (
+                    <label key={day} className="flex items-center">
+                      <input
+                        type="checkbox"
+                        value={day}
+                        checked={newEvent.days.includes(day)}
+                        onChange={() => handleDayChange(day)}
+                        className="mr-2"
+                      />
+                      {day}
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex justify-end">
+                <button className="bg-blue-500 text-white px-4 py-2 rounded-md" onClick={handleAddEvent}>
+                  Add Event
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
       </div>
     </div>
   );
 };
 
-export default newEvents;
+export default Events;
 

@@ -20,6 +20,8 @@ const ProductManagement = () => {
   const [showAddDiscountForm, setShowAddDiscountForm] = useState(false); // Add discount form visibility
   const [sortCriteria, setSortCriteria] = useState('name'); // Default sort by name
   const [sortOrder, setSortOrder] = useState('asc'); // Default order asc
+  const [missingFields, setMissingFields] = useState([]);
+
 
   const [imagePreview, setImagePreview] = useState('');
   const [crop, setCrop] = useState({ x: 0, y: 0 });
@@ -131,10 +133,20 @@ const ProductManagement = () => {
   };
 
   const handleAddProduct = async () => {
-    if (!newProduct.name || !newProduct.description || !newProduct.price || !newProduct.type || !newProduct.quantity <= 0) {
-      alert('Please fill out all fields');
+    const missing = [];
+  
+    if (!newProduct.name) missing.push('name');
+    if (!newProduct.description) missing.push('description');
+    if (!newProduct.price || newProduct.price <= 0) missing.push('price');
+    if (!newProduct.type) missing.push('type');
+    if (newProduct.quantity <= 0) missing.push('quantity');
+  
+    if (missing.length > 0) {
+      setMissingFields(missing);
       return;
     }
+  
+    setMissingFields([]); // Clear missing fields if validation passes
   
     const formData = new FormData();
     formData.append('name', newProduct.name);
@@ -156,6 +168,7 @@ const ProductManagement = () => {
       console.error('Error adding product:', error);
     }
   };
+  
   
   const handleUpdateProduct = async (productId) => {
     // Create formData and append fields only if they are filled in, otherwise fallback to existing product data
@@ -325,97 +338,117 @@ const ProductManagement = () => {
             </div>
           )}
     
-          {showAddProductForm && (
-            <div className="product-form-section">
-                   <h2>Add New Product</h2>
+    {showAddProductForm && (
+  <div className="product-form-section">
+    <h2>Add New Product</h2>
 
-                      <input
-                        type="text"
-                        placeholder="Product Name"
-                        value={newProduct.name}
-                        onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
-                      />
-                      <input
-                        type="text"
-                        placeholder="Product Description"
-                        value={newProduct.description}
-                        onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })}
-                      />
-                      <input
-                        type="number"
-                        placeholder="Price (USD)"
-                        value={newProduct.price}
-                        onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
-                      />
-                      <input
-                        type="number"
-                        placeholder="Quantity"
-                        value={newProduct.quantity || 1}
-                        onChange={(e) => setNewProduct({ ...newProduct, quantity: e.target.value })}  // Quantity input
-                      />
+    <label>
+      Product Name {missingFields.includes('name') && <span className="error-dot">*</span>}
+    </label>
+    <input
+      type="text"
+      placeholder="Product Name"
+      value={newProduct.name}
+      onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
+    />
 
-                      <label>Product Type:</label>
-                      <select value={selectedType} onChange={handleTypeChange}>
-                        <option value="">Select a Type</option>
-                        {productTypes.map((type, index) => (
-                          <option key={index} value={type.type}>
-                            {type.type}
-                          </option>
-                        ))}
-                        <option value="new">Enter a New Type</option> {/* Option for entering a new type */}
-                      </select>
+    <label>
+      Product Description {missingFields.includes('description') && <span className="error-dot">*</span>}
+    </label>
+    <input
+      type="text"
+      placeholder="Product Description"
+      value={newProduct.description}
+      onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })}
+    />
 
-                      {isNewType && (
-                        <input
-                          type="text"
-                          placeholder="Enter new type"
-                          value={selectedType} // Bind this to new type value
-                          onChange={handleNewTypeChange}
-                        />
-                      )}
-              {/* Image Upload and Cropping */}
-              <div className="image-upload">
-  <input type="file" accept="image/*" onChange={handleImageChange} />
-  {fileSize > 0 && (
-    <div>
-      <p>File size: {(fileSize / 1024).toFixed(2)} KB</p>
-      {fileSize > maxFileSize && <p style={{ color: 'red' }}>File size exceeds the maximum allowed size of 2MB!</p>}
-      
-      {/* Progress bar */}
-      <div className="file-size-progress-bar">
-        <div
-          style={{
-            width: `${Math.min(fileSizePercentage, 100)}%`,
-            backgroundColor: fileSize > maxFileSize ? 'red' : 'green',
-            height: '10px',
-          }}
-        />
-      </div>
+    <label>
+      Price (USD) {missingFields.includes('price') && <span className="error-dot">*</span>}
+    </label>
+    <input
+      type="number"
+      placeholder="Price (USD)"
+      value={newProduct.price}
+      onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
+    />
 
-      {/* Text for percentage */}
-      <p>{Math.min(fileSizePercentage, 100).toFixed(2)}% of allowed file size used</p>
-    </div>
-  )}
+    <label>
+      Quantity {missingFields.includes('quantity') && <span className="error-dot">*</span>}
+    </label>
+    <input
+      type="number"
+      placeholder="Quantity"
+      value={newProduct.quantity || 1}
+      onChange={(e) => setNewProduct({ ...newProduct, quantity: e.target.value })}
+    />
 
-  {cropping && (
-    <div className="cropper-container">
-      <Cropper
-        image={imagePreview}
-        crop={crop}
-        zoom={zoom}
-        aspect={1}
-        onCropChange={setCrop}
-        onCropComplete={onCropComplete}
-        onZoomChange={setZoom}
+    <label>
+      Product Type {missingFields.includes('type') && <span className="error-dot">*</span>}
+    </label>
+    <select value={selectedType} onChange={handleTypeChange}>
+      <option value="">Select a Type</option>
+      {productTypes.map((type, index) => (
+        <option key={index} value={type.type}>
+          {type.type}
+        </option>
+      ))}
+      <option value="new">Enter a New Type</option>
+    </select>
+
+    {isNewType && (
+      <input
+        type="text"
+        placeholder="Enter new type"
+        value={selectedType}
+        onChange={handleNewTypeChange}
       />
-      <button onClick={handleCrop}>Crop Image</button>
-    </div>
-  )}
-</div>
-              <button onClick={() => handleAddProduct(null)}>Add Product</button>
-              <button onClick={resetForms}>Cancel</button>
-            </div>
+    )}
+
+    <label>
+      Image {missingFields.includes('image') && <span className="error-dot">*</span>}
+    </label>
+    <div className="image-upload">
+      <input type="file" accept="image/*" onChange={handleImageChange} />
+      {fileSize > 0 && (
+        <div>
+          <p>File size: {(fileSize / 1024).toFixed(2)} KB</p>
+          {fileSize > maxFileSize && (
+            <p style={{ color: 'red' }}>File size exceeds the maximum allowed size of 2MB!</p>
           )}
+          <div className="file-size-progress-bar">
+            <div
+              style={{
+                width: `${Math.min(fileSizePercentage, 100)}%`,
+                backgroundColor: fileSize > maxFileSize ? 'red' : 'green',
+                height: '10px',
+              }}
+            />
+          </div>
+          <p>{Math.min(fileSizePercentage, 100).toFixed(2)}% of allowed file size used</p>
+        </div>
+      )}
+
+      {cropping && (
+        <div className="cropper-container">
+          <Cropper
+            image={imagePreview}
+            crop={crop}
+            zoom={zoom}
+            aspect={1}
+            onCropChange={setCrop}
+            onCropComplete={onCropComplete}
+            onZoomChange={setZoom}
+          />
+          <button onClick={handleCrop}>Crop Image</button>
+        </div>
+      )}
+    </div>
+
+    <button onClick={() => handleAddProduct(null)}>Add Product</button>
+    <button onClick={resetForms}>Cancel</button>
+  </div>
+)}
+
     
     {showAddDiscountForm && (
           <div className="discount-form-section">

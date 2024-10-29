@@ -55,15 +55,39 @@ const Cart = () => {
     }
   };
 
+  // Delete a cart item
+  const deleteCartItem = async (itemId) => {
+    try {
+      await userApi.delete(`/cart/${itemId}`); // Call backend to delete the cart item
+      getCart(); // Refresh the cart after deletion
+    } catch (error) {
+      console.error('Error deleting cart item:', error);
+    }
+  };
+
   return (
     <div className="cart-container">
       <h2>Your Cart</h2>
       <div className="cart-items">
         {cartItems.map(item => (
           <div key={item.id} className="cart-item">
+            {/* Fetch the product image using the environment variable */}
+            {item.product.image ? (
+              <img
+                className="product-image"
+                src={`${import.meta.env.VITE_IMAGE_BASE_URL}/${item.product.image}`} // Use environment variable
+                alt={item.product.name}
+              />
+            ) : (
+              <p>No image available</p>
+            )}
             <h3>{item.product.name}</h3>
             <p>Price: ${item.product.price}</p>
             <p>Quantity: {item.quantity}</p>
+            <button onClick={() => deleteCartItem(item.productId)} className="delete-button">
+                Remove
+              </button>
+
           </div>
         ))}
       </div>

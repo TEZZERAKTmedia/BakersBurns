@@ -80,7 +80,7 @@ const Store = () => {
       {authError ? (
         <div className="auth-error">
           <p>{errorMessage}</p>
-          <Link to="http://localhost:3010/login">Click here to login or register</Link> {/* Register/Login link */}
+          <Link to={`${import.meta.env.VITE_LOG_IN_REDIRECTION}`}>Click here to login or register</Link> {/* Register/Login link */}
         </div>
       ) : (
         <div className="product-grid">
@@ -88,7 +88,7 @@ const Store = () => {
           {products.map(product => (
             <div className="product-tile" key={product.id}>
               <div className="product-image">
-                <img src={`http://localhost:3450/uploads/${product.image}`} alt={product.name} />
+                <img src={`${import.meta.env.VITE_IMAGE_BASE_URL}/${product.image}`}  alt={product.name} />
               </div>
               <div className="product-info">
                 <h3>{product.name}</h3>

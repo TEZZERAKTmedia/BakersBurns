@@ -50,10 +50,11 @@ const Orders = () => {
               <p><strong>Email:</strong> {order.email || 'Unknown'}</p>
               {order.productImage ? (
                 <img
-                  className="product-image"
-                  src={`http://localhost:3450/uploads/${order.productImage}`}
-                  alt={order.productName}
-                />
+  className="product-image"
+  src={`${import.meta.env.VITE_IMAGE_BASE_URL}/${order.productImage}`} 
+  alt={order.productName}
+/>
+
               ) : (
                 <p>No image</p>
               )}

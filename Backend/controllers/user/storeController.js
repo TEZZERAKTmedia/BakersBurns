@@ -1,6 +1,6 @@
 // controllers/storeController.js
-const Product = require('../../models/product'); // Importing the Product model
-const xss = require('xss'); // Sanitization for incoming data
+const Product = require('../../models/product'); // Importing the Product model // Sanitization for incoming data
+const { Op } = require('sequelize');
 
 // Function to get all products
 const getProducts = async (req, res) => {
@@ -13,6 +13,25 @@ const getProducts = async (req, res) => {
   }
 };
 
+
+const getFeaturedProducts = async (req, res) => {
+  try {
+    const featuredProducts = await Product.findAll({
+      where: {
+        type: {
+          [Op.or]: [
+            { [Op.like]: 'feature' },    // Search for 'feature'
+            { [Op.like]: 'featured' }    // Search for 'featured'
+          ]
+        }
+      }
+    });
+    res.status(200).json(featuredProducts);  // Return the featured products
+  } catch (error) {
+    console.error('Error fetching featured products:', error);
+    res.status(500).json({ message: 'Failed to fetch featured products.' });
+  }
+};
 // Function to add a product to the cart
 const addToCart = async (req, res) => {
   const { userId, productId, quantity } = req.body;
@@ -68,8 +87,10 @@ const handleStripeWebhook = async (req, res) => {
 
 module.exports = {
   getProducts,
+  getFeaturedProducts,
   addToCart,
   removeFromCart,
   createCheckoutSession,
   handleStripeWebhook,
+  
 };

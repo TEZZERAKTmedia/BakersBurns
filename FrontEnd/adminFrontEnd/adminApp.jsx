@@ -8,9 +8,11 @@ import Messaging from './Pages/inAppMessaging';
 import Email from './Pages/Email';
 import Layout from './Pages/Layout';
 import Orders from './Pages/Orders';
+import Events from './Pages/newEvents';
 import ProductManagement from './Pages/ProductManagement';
 import { ScannerProvider } from './context/scannerContext';
 import AdminLoginForm from './Components/loginForm';
+
 
 const AdminApp = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -63,6 +65,7 @@ const AdminApp = () => {
           <Route path="/messaging" element={<Messaging />} />
           <Route path="/email" element={<Email />} />
           <Route path="/orders" element={<Orders />} />
+          <Route path ="/event-manager" element={<Events/>} />
           <Route path="*" element={<Navigate to="/" />} />
 
         </Routes>

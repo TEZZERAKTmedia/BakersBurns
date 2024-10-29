@@ -1,31 +1,37 @@
 const { DataTypes } = require('sequelize');
-const sequelize = require('../config/database'); // Adjust path as necessary
+const sequelize = require('../config/database');
+const sanitizeModelFields = require('../utils/sanitization'); // Utility to sanitize fields
 
 const Message = sequelize.define('Messages', {
   senderUsername: {
     type: DataTypes.STRING,
-    allowNull: false
+    allowNull: false,
   },
   receiverUsername: {
     type: DataTypes.STRING,
-    allowNull: false
+    allowNull: false,
   },
   threadId: {
     type: DataTypes.INTEGER,
-    allowNull: false
+    allowNull: false,
   },
   createdAt: {
     type: DataTypes.DATE,
     defaultValue: DataTypes.NOW,
-    allowNull: false
+    allowNull: false,
   },
   messageBody: {
-    type: DataTypes.TEXT, // Use DataTypes instead of Sequelize
+    type: DataTypes.TEXT,
     allowNull: false,
   },
 }, {
   tableName: 'Messages',
-  timestamps: false // If you don't want Sequelize to manage createdAt/updatedAt automatically
+  timestamps: false,
+  hooks: {
+    beforeSave: (message) => {
+      sanitizeModelFields(message, ['senderUsername', 'receiverUsername', 'messageBody']); // Sanitize relevant fields
+    },
+  },
 });
 
 module.exports = Message;

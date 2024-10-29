@@ -69,21 +69,33 @@ const addToCart = async (req, res) => {
 };
 
 
+
+
 // Remove from Cart
 const removeFromCart = async (req, res) => {
   const userId = req.user.id;  // Get userId from middleware
-  const { productId } = req.params;
-  
+  const { productId } = req.params;  // productId should be from the Cart table
+
+  console.log(`Trying to remove productId ${productId} for userId ${userId}`);
+
   try {
     const cartItem = await Cart.findOne({ where: { userId, productId } });
+
     if (!cartItem) {
+      console.log(`Cart item not found for userId: ${userId} and productId: ${productId}`);
       return res.status(404).json({ message: 'Item not found in cart' });
     }
+
+    console.log(`Cart item found:`, cartItem);
+
     await cartItem.destroy();
     res.status(200).json({ message: 'Item removed from cart' });
   } catch (error) {
+    console.error('Error removing item from cart:', error);
     res.status(500).json({ message: 'Error removing item from cart', error });
   }
-  
 };
+
+
+
 module.exports = { getCart, addToCart, removeFromCart };

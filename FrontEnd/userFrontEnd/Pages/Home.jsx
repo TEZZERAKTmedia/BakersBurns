@@ -1,9 +1,31 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import '../Pagecss/Home.css'; // Import the CSS file for styling
 import { Link } from 'react-router-dom'; 
-import ScrollVideoBackground from '../Components/Background';
+import { userApi } from '../config/axios';
 
 const Home = () => {
+  const [featuredProducts, setFeaturedProducts] = useState([]);
+
+  // Fetch featured products on component mount
+  useEffect(() => {
+    const getFeaturedProducts = async () => {
+      const products = await fetchFeaturedProducts();
+      setFeaturedProducts(products);
+    };
+    getFeaturedProducts();
+  }, []);
+
+  // Function to fetch featured products
+  const fetchFeaturedProducts = async () => {
+    try {
+      const response = await userApi.get('/store/get-featured-products');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching featured products:', error);
+      return [];
+    }
+  };
+
   return (
     <div className="home-container">
       
@@ -11,7 +33,7 @@ const Home = () => {
       <section className="hero-section">
         <div className="hero-content">
           <h1 className="hero-title">BakersBurns</h1>
-          <p className="hero-description">Unique Wood Burning Art by [Artist Name]</p>
+          <p className="hero-description">Unique Wood Burning Art by Kalea Baker</p>
           <Link to="/store" className="hero-btn">Shop Now</Link>
         </div>
       </section>
@@ -27,28 +49,30 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Featured Products */}
+      {/* Featured Products Section */}
       <section className="featured-products-section">
         <h2 className="featured-products-title">Featured Products</h2>
         <div className="products-gallery">
-          <div className="product-card">
-            <img src="path/to/product1.jpg" alt="Product 1" />
-            <h3>Product Name 1</h3>
-            <p>$50.00</p>
-            <Link to="/product/1" className="product-btn">View Product</Link>
-          </div>
-          <div className="product-card">
-            <img src="path/to/product2.jpg" alt="Product 2" />
-            <h3>Product Name 2</h3>
-            <p>$75.00</p>
-            <Link to="/product/2" className="product-btn">View Product</Link>
-          </div>
-          <div className="product-card">
-            <img src="path/to/product3.jpg" alt="Product 3" />
-            <h3>Product Name 3</h3>
-            <p>$100.00</p>
-            <Link to="/product/3" className="product-btn">View Product</Link>
-          </div>
+          {featuredProducts.length > 0 ? (
+            featuredProducts.map((product) => (
+              <div key={product.id} className="product-card">
+                {product.image ? (
+                  <img
+                    className="product-image"
+                    src={`${import.meta.env.VITE_IMAGE_BASE_URL}/${product.image}`}  // Use environment variable here
+                    alt={product.name}
+                  />
+                ) : (
+                  <p>No image</p>
+                )}
+                <h3>{product.name}</h3>
+                <p>${product.price.toFixed(2)}</p>
+                <Link to={`/product/${product.id}`} className="product-btn">View Product</Link>
+              </div>
+            ))
+          ) : (
+            <p>No featured products available</p>
+          )}
         </div>
       </section>
 
