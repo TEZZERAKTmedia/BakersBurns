@@ -10,6 +10,8 @@ import Cart from './Pages/Cart';
 import Settings from './Pages/Settings';
 import Success from './Components/purchase/successfulPurchase';
 import InAppMessaging from './Pages/inAppMessaging';
+import Event from './Pages/Events';
+import Gallery from './Pages/Gallery';
 import './App.css';
 import VerificationWrapper from './Components/verification/verificationWrapper';
 import ScrollVideoBackground from './Components/Background'; // Import the ScrollVideoBackground component
@@ -30,6 +32,8 @@ function UserApp() {
         <Route path="/cart" element={<Cart />} />
         <Route path="/success" element={<Success />} />
         <Route path="/in-app-messaging" element={<InAppMessaging/>} />
+        <Route path="/event" element={<Event/>} />
+        <Route path="/gallery" element={<Gallery/>} />
         
         {/* Wrap Settings route in VerificationWrapper */}
         <Route 

@@ -31,12 +31,13 @@ const Navbar = () => {
       <ul className={`nav-list ${menuOpen ? 'show' : ''}`}>
         <li className="nav-item" onClick={closeMenu}><Link to="/">Home</Link></li>
         <li className="nav-item" onClick={closeMenu}><Link to="/store">Store</Link></li>
-        <li className="nav-item" onClick={closeMenu}><Link to="/events">Events</Link></li>
         <li className="nav-item" onClick={closeMenu}><Link to="/create">Create</Link></li>
         <li className="nav-item" onClick={closeMenu}><Link to="/about">About</Link></li>
         <li className="nav-item" onClick={closeMenu}><Link to="/orders">Orders</Link></li>
         <li className="nav-item" onClick={closeMenu}><Link to="/cart">Cart</Link></li>
         <li className="nav-item" onClick={closeMenu}><Link to="/in-app-messaging">Messages</Link></li>
+        <li className="nav-item" onClick={closeMenu}><Link to="/event">Events</Link></li>
+        <li className="nav-item" onClick={closeMenu}><Link to="/gallery">Gallery</Link></li>
       </ul>
  <LogoutButton />
 

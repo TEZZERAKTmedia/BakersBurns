@@ -1,8 +1,19 @@
 /* Basic reset */
+
+@font-face {
+  font-family: 'Dancing Script';
+  src: url('../assets/CarnivaleeFreakshow-DLrm.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+}
+body {
+  font-family: 'Dancing Script', cursive;
 }
 
 /* Home container */
@@ -203,4 +214,101 @@
   .hero-description {
     font-size: 1.2rem;
   }
+}
+
+
+/* Container styling */
+.upcoming-event-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 2rem 0;
+  height: 50%;
+  padding: 2.5rem;
+  border-radius: 1.2rem;
+  background-color: #000;
+  color: #fff;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
+  transition: transform 0.3s ease;
+}
+
+.upcoming-event-container:hover {
+  transform: scale(1.05);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Event Title */
+.upcoming-event-title {
+  font-family: 'Dancing Script', cursive;
+  font-size: 2.5rem;
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: #ffeb3b;
+  text-shadow: 2px 4px 10px rgba(0, 0, 0, 0.6);
+  letter-spacing: 1px;
+}
+
+/* Event Name */
+.upcoming-event-name {
+  font-family: 'Dancing Script', cursive;
+  font-size: 2rem;
+  font-family: 'Georgia', serif;
+  font-weight: bold;
+  margin-bottom: 0.8rem;
+  color: #ffffff;
+  text-shadow: 1px 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+/* Event Date */
+.upcoming-event-date {
+  font-size: 1.2rem;
+  font-family: 'Roboto', sans-serif;
+  color: #e0e0e0;
+  margin: 0.8rem 0;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  display: inline-block;
+}
+
+/* Event Time (if rendered separately) */
+.upcoming-event-time {
+  font-size: 1.2rem;
+  color: #ffa14f;
+  font-weight: bold;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 0.5rem 1.2rem;
+  border-radius: 8px;
+  margin-top: 0.8rem;
+}
+
+/* Event Description */
+.upcoming-event-description {
+  font-family: 'Dancing Script', cursive;
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: rgba(255, 255, 255, 0.9);
+  max-width: 600px;
+  text-align: center;
+  font-family: 'Open Sans', sans-serif;
+  margin-top: 1rem;
+}
+
+/* Learn More Button */
+.upcoming-event-btn {
+  margin-top: 1.5rem;
+  padding: 0.8rem 1.5rem;
+  background-color: #ffa73b;
+  color: #000;
+  font-weight: 600;
+  border-radius: 20px;
+  text-decoration: none;
+  font-size: 1.1rem;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.upcoming-event-btn:hover {
+  background-color: #ffd54f;
+  color: #333;
 }

@@ -6,7 +6,7 @@
 
 .product-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr); /* Creates exactly 3 columns */
+  grid-template-columns: repeat(2, 1fr); /* Creates exactly 3 columns */
   gap: 16px;
   
   

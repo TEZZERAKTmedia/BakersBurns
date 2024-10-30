@@ -76,21 +76,78 @@
 }
 
 .nav-item a {
+  color: #fff;
   text-decoration: none;
-  color: white;
-  font-size: 1.5em;
-  padding: 15px 30px;
-  display: inline-block;
-  text-align: center;
-  background: #333;
-  border-radius: 5px;
-  transition: background-color 0.3s, color 0.3s;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 2rem;
+  transition: background-color 0.3s;
+  opacity: 0; /* Initially hidden for animation */
+  transform: translateX(-20px); /* Slide in from the left */
 }
 
 .nav-item a:hover {
-  background-color: #444;
-  color: #fff;
+  background-color: #555;
 }
+
+/* Slide-in animation */
+.nav-list.show .nav-item:nth-child(1) a {
+  animation: slideIn 0.5s forwards;
+  animation-delay: 0.1s;
+}
+
+.nav-list.show .nav-item:nth-child(2) a {
+  animation: slideIn 0.5s forwards;
+  animation-delay: 0.2s;
+}
+
+.nav-list.show .nav-item:nth-child(3) a {
+  animation: slideIn 0.5s forwards;
+  animation-delay: 0.3s;
+}
+
+.nav-list.show .nav-item:nth-child(4) a {
+  animation: slideIn 0.5s forwards;
+  animation-delay: 0.4s;
+}
+
+.nav-list.show .nav-item:nth-child(5) a {
+  animation: slideIn 0.5s forwards;
+  animation-delay: 0.5s;
+}
+
+.nav-list.show .nav-item:nth-child(6) a {
+  animation: slideIn 0.5s forwards;
+  animation-delay: 0.6s;
+}
+
+.nav-list.show .nav-item:nth-child(7) a {
+  animation: slideIn 0.5s forwards;
+  animation-delay: 0.7s;
+}
+
+.nav-list.show .nav-item:nth-child(8) a {
+  animation: slideIn 0.5s forwards;
+  animation-delay: 0.8s;
+}
+
+.nav-list.show .nav-item:nth-child(9) a {
+  animation: slideIn 0.5s forwards;
+  animation-delay: 0.9s;
+}
+
+/* Keyframes for slide-in animation */
+@keyframes slideIn {
+  0% {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
 
 /* Desktop View - Horizontal Navbar */
 @media (min-width: 768px) {

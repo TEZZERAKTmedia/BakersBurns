@@ -90,33 +90,27 @@ const UserMessaging = () => {
   };
 
   // Render messages with styling based on the sender's role
-  const renderMessages = () => {
-    return messages.map((message, index) => {
-      const isAdmin = message.senderRole === 'admin';
+// Render messages with styling based on the sender's role
+const renderMessages = () => {
+  return messages.map((message, index) => {
+    const isAdmin = message.senderRole === 'admin';
 
-      const messageStyle = {
-        backgroundColor: isAdmin ? 'white' : 'orange',
-        color: isAdmin ? 'black' : 'white',
-        padding: '10px',
-        borderRadius: '10px',
-        marginBottom: '10px',
-        alignSelf: isAdmin ? 'flex-start' : 'flex-end',
-        maxWidth: '60%',
-        textAlign: isAdmin ? 'left' : 'right'  // Align text based on sender role
-      };
+    return (
+      <li
+        key={index}
+        className={`message ${isAdmin ? 'admin' : 'user'}`}
+      >
+        <strong >{isAdmin ? '' : ''}</strong>
+        <div  >{message.messageBody}</div>
+      </li>
+    );
+  });
+};
 
-      return (
-        <li key={index} style={messageStyle}>
-          <strong>{isAdmin ? 'Admin' : 'You'}</strong>:
-          <div>{message.messageBody}</div>
-        </li>
-      );
-    });
-  };
 
   return (
     <div className={`messaging-interface ${selectedThreadId ? 'thread-selected' : ''}`}>
-      <div className="messaging-body">
+      <div className="messaging-body" style={{ marginTop: '100px'}}>
         <h3>Conversation with Admin</h3>
 
         {/* Display messages if a thread is selected */}

@@ -1,6 +1,6 @@
 const express = require('express');
 const multer = require('multer');
-const { addGalleryItem, getGalleryItems, updateGalleryItem, deleteGalleryItem } = require('../controllers/admin/galleryController');
+const { addGalleryItem, getGalleryItems, updateGalleryItem, deleteGalleryItem } = require('../../controllers/admin/galleryController');
 
 const router = express.Router();
 

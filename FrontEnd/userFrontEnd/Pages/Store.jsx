@@ -8,6 +8,7 @@ const Store = () => {
   const [authError, setAuthError] = useState(false); // To track authentication errors
   const [errorMessage, setErrorMessage] = useState(''); // Error message for the user
   const [cartMessage, setCartMessage] = useState(''); // Message for cart-related actions
+  const [selectedProduct, setSelectedProduct] = useState(null); // State for selected product
 
   useEffect(() => {
     fetchProducts();
@@ -27,9 +28,19 @@ const Store = () => {
     }
   };
 
+  const openProductModal = (product) => {
+    setSelectedProduct(product); // Set the selected product
+  };
+
+  const closeProductModal = () => {
+    setSelectedProduct(null); // Clear the selected product to close modal
+  };
+
   const handleAddToCart = async (productId) => {
     const userId = 'userIdFromContext';
     const token = 'tokenFromContext'; // Replace with actual token from AuthContext or state
+
+    
 
     if (!userId) {
       console.error('User not authenticated');
@@ -73,40 +84,76 @@ const Store = () => {
 
   return (
     <div className="store-container">
-      
       <h2>Store</h2>
 
-      {/* If there is an authentication error, show the message and link */}
       {authError ? (
         <div className="auth-error">
           <p>{errorMessage}</p>
-          <Link to={`${import.meta.env.VITE_LOG_IN_REDIRECTION}`}>Click here to login or register</Link> {/* Register/Login link */}
+          <Link to={`${import.meta.env.VITE_LOG_IN_REDIRECTION}`}>Click here to login or register</Link>
         </div>
       ) : (
         <div className="product-grid">
-          
-          {products.map(product => (
-            <div className="product-tile" key={product.id}>
+          {products.map((product) => (
+            <div className="product-tile" key={product.id} onClick={() => openProductModal(product)}>
               <div className="product-image">
-                <img src={`${import.meta.env.VITE_IMAGE_BASE_URL}/${product.image}`}  alt={product.name} />
+                <img src={`${import.meta.env.VITE_IMAGE_BASE_URL}/${product.image}`} alt={product.name} />
               </div>
               <div className="product-info">
-                <h3>{product.name}</h3>
-                <p>${product.price}</p>
-                <button onClick={() => handleAddToCart(product.id)}>Add to Cart</button>
+                <h3 style={{ fontFamily: '"Dancing Script", cursive', fontSize: '1.8rem' }}>{product.name}</h3>
               </div>
               <div className="product-description">
-                <p>{product.description}</p>
+                <p style={{ fontFamily: 'Arial, sans-serif', fontSize: '1rem', color: '#555' }}>{product.description}</p>
               </div>
+              <p style={{ fontFamily: 'Arial, sans-serif', fontSize: '1rem', color: 'white' }}>${product.price}</p>
+              <button onClick={(e) => { e.stopPropagation(); handleAddToCart(product.id); }}>Add to Cart</button>
             </div>
           ))}
 
-          {/* Display cart message if there is one */}
           {cartMessage && (
             <div className="cart-message">
               <p>{cartMessage}</p>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Modal for displaying selected product */}
+      {selectedProduct && (
+        <div className="modal-overlay" onClick={closeProductModal} >
+          <div style={{backgroundColor:'#555555ce'}} className="modal-content" onClick={(e) => e.stopPropagation()} >
+            <span className="close-modal" onClick={closeProductModal}>&times;</span>
+            <h3 style={{ fontFamily: '"Dancing Script", cursive', fontSize: '2.5rem', textAlign: 'center' }}>
+              {selectedProduct.name}
+            </h3>
+            <img
+              src={`${import.meta.env.VITE_IMAGE_BASE_URL}/${selectedProduct.image}`}
+              alt={selectedProduct.name}
+              style={{ width: '100%', borderRadius: '8px' }}
+            />
+            <p style={{ fontFamily: 'Arial, sans-serif', fontSize: '1.2rem', color: 'white', margin: '15px 0' }}>
+              {selectedProduct.description}
+            </p>
+            <p style={{ fontFamily: 'Arial, sans-serif', fontSize: '1.5rem', color: 'white' ,textAlign: 'center' }}>
+              ${selectedProduct.price}
+            </p>
+            <button
+              style={{
+                fontFamily: '"Dancing Script", cursive',
+                fontSize: '1.2rem',
+                color: '#fff',
+                backgroundColor: '#ff6347',
+                padding: '8px 16px',
+                borderRadius: '5px',
+                border: 'none',
+                cursor: 'pointer',
+                display: 'block',
+                margin: '0 auto'
+              }}
+              onClick={() => handleAddToCart(selectedProduct.id)}
+            >
+              Add to Cart
+            </button>
+          </div>
         </div>
       )}
     </div>

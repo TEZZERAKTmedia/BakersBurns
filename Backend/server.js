@@ -16,7 +16,7 @@ const emailVerificationRoutes = require('./routes/verificationRoutes');
 const productRoutes = require('./routes/productRoutes');
 const userRoutes = require('./routes/user/userRoutes');
 const accountSettingsRoutes = require('./routes/accountSettingsRoutes');
-const galleryRoutes = require('./routes/galleryRoutes');
+const galleryRoutes = require('./routes/admin/galleryRoutes');
 const authRoutes = require('./routes/authRoutes');
 const storeRoutes = require('./routes/user/storeRoutes');
 const verifiedRoutes = require('./routes/verifiedRoutes');
@@ -31,6 +31,8 @@ const stripeWebhookRoutes = require('./routes/user/stripeWebhookRoutes');
 const userOrderRoutes = require('./routes/user/orderRoutes');
 const registerStoreRoutes = require('./routes/register/storeRegister');
 const adminEventRoutes = require('./routes/admin/adminEventRoutes');
+const userEventRoutes = require('./routes/user/eventRoutes');
+const userGalleryRoutes = require('./routes/user/galleryRoutes');
 
 // Initialize Express app
 const app = express();
@@ -88,6 +90,8 @@ app.use('/user',userAuthMiddleware('user'), userRoutes);
 app.use('/store',userAuthMiddleware('user'), storeRoutes);
 app.use('/user-message-routes', userAuthMiddleware('user'), userMessagingRoutes);
 app.use('/user-orders',userAuthMiddleware('user'), userOrderRoutes); 
+app.use('/event', userAuthMiddleware('user'), userEventRoutes);
+app.use('/user-gallery', userAuthMiddleware('user'), userGalleryRoutes)
 
 
 

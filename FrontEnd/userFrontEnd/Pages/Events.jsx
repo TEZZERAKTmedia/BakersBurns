@@ -1,120 +1,216 @@
 import React, { useState, useEffect } from 'react';
-// Create a separate CSS file for styling the Events page
 import { userApi } from '../config/axios';
+import moment from 'moment';
+import { Link } from 'react-router-dom';
+import '../Pagecss/events.css';
 
-const Events = () => {
-  const [date, setDate] = useState(new Date());
-  const [events, setEvents] = useState([]);
-  const [view, setView] = useState('week'); // 'week' or 'month'
-  const [showNavButtons, setShowNavButtons] = useState(false);
+const UserEvents = () => {
+  const [events, setEvents] = useState([]); // Original events fetched from the API
+  const [calendarEvents, setCalendarEvents] = useState([]); // Recurring instances of events for display
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [currentDate, setCurrentDate] = useState(moment());
+  const [upcomingEvent, setUpcomingEvent] = useState(null);
 
-  useEffect(() => {
-    fetchEvents();
-  }, []);
+  // Function to generate recurring events
+  const generateRecurringEvents = (daysOfWeek, startDate, endDate, eventData) => {
+    const start = moment(startDate);
+    const end = moment(endDate);
+    const eventDays = [];
+
+    const daysMap = {
+      Monday: 1,
+      Tuesday: 2,
+      Wednesday: 3,
+      Thursday: 4,
+      Friday: 5,
+      Saturday: 6,
+      Sunday: 0,
+    };
+
+    while (start.isSameOrBefore(end)) {
+      const dayOfWeek = start.day();
+      const dayName = Object.keys(daysMap).find(day => daysMap[day] === dayOfWeek);
+
+      if (daysOfWeek.includes(dayName)) {
+        eventDays.push({
+          id: eventData.id,
+          title: eventData.name,
+          description: eventData.description,
+          startTime: eventData.startTime,
+          endTime: eventData.endTime,
+          date: start.format('YYYY-MM-DD'), // Ensure date format consistency
+        });
+      }
+      start.add(1, 'day'); // Move to the next day
+    }
+
+    return eventDays;
+  };
 
   const fetchEvents = async () => {
     try {
-      const response = await userApi.get('/api/events');
+      const response = await userApi.get('/event/user-events'); // Adjust URL as needed
+      console.log("Fetched events data:", response.data);
       setEvents(response.data);
+
+      // Generate all occurrences for calendar display
+      const allOccurrences = response.data.flatMap(event => {
+        return generateRecurringEvents(
+          event.days, 
+          event.startDate, 
+          event.endDate, 
+          {
+            id: event.id,
+            name: event.name,
+            description: event.description,
+            startTime: event.startTime,
+            endTime: event.endTime,
+          }
+        );
+      });
+
+      setCalendarEvents(allOccurrences); // Set all instances for calendar view
+      setLoading(false);
     } catch (error) {
-      console.error('There was an error fetching the events!', error);
+      console.error("Fetch error:", error);
+      setError('Error fetching events');
+      setLoading(false);
     }
   };
 
-  const getStartOfWeek = (date) => {
-    const day = date.getDay();
-    const diff = date.getDate() - day + (day === 0 ? -6 : 1);
-    return new Date(date.setDate(diff));
-  };
-
-  const getDaysInMonth = (date) => {
-    const month = date.getMonth();
-    const year = date.getFullYear();
-    const days = new Date(year, month + 1, 0).getDate();
-    return Array.from({ length: days }, (_, i) => new Date(year, month, i + 1));
-  };
-
-  const generateCalendarDays = () => {
-    if (view === 'week') {
-      const startOfWeek = getStartOfWeek(new Date(date));
-      const days = [];
-
-      for (let i = 0; i < 7; i++) {
-        const currentDay = new Date(startOfWeek);
-        currentDay.setDate(startOfWeek.getDate() + i);
-        days.push(currentDay);
-      }
-
-      return days;
-    } else {
-      return getDaysInMonth(new Date(date));
+  // Fetch the upcoming event
+  const fetchUpcomingEvent = async () => {
+    try {
+      const response = await userApi.get('/event/upcoming'); // Adjust URL if necessary
+      console.log("Fetched upcoming event:", response.data); // Log the returned data
+      setUpcomingEvent(response.data);
+    } catch (error) {
+      console.error('Error fetching upcoming event:', error);
+      setUpcomingEvent(null);
     }
   };
 
-  const renderCalendar = () => {
-    const days = generateCalendarDays();
+  useEffect(() => {
+    fetchEvents();
+    fetchUpcomingEvent(); // Fetch upcoming event on mount
+  }, []);
 
-    return days.map((day) => {
-      const options = { weekday: 'short', day: 'numeric' };
-      const formattedDay = day.toLocaleDateString('default', options);
-      const month = day.toLocaleDateString('default', { month: 'long' });
+  const renderCalendarDays = () => {
+    const startOfMonth = currentDate.clone().startOf('month');
+    const endOfMonth = currentDate.clone().endOf('month');
+    const startDay = startOfMonth.clone().startOf('week');
+    const endDay = endOfMonth.clone().endOf('week');
 
-      return (
+    const days = [];
+    let day = startDay.clone();
+
+    while (day.isBefore(endDay, 'day')) {
+      const isToday = day.isSame(moment(), 'day');
+      const isCurrentMonth = day.isSame(currentDate, 'month');
+      const eventsForDay = calendarEvents.filter(event => event.date === day.format('YYYY-MM-DD'));
+
+      days.push(
         <div
-          key={day.toDateString()}
-          className={`calendar-day ${isCurrentWeek(day) ? 'highlight' : ''}`}
+          key={day.toString()}
+          className={`calendar-day ${isCurrentMonth ? 'current-month' : 'other-month-day'} ${
+            isToday ? 'today' : ''
+          }`}
         >
-          <div className="date-background">
-            <div className="date-label">
-              {formattedDay}, {month}
+          <span className="date-label">{day.date()}</span>
+          {eventsForDay.map((event, index) => (
+            <div key={index} className="event-item">
+              <p className="event-title">{event.title}</p>
+              <p className="event-time">
+                {moment(event.startTime, 'HH:mm').format('hh:mm A')} -{' '}
+                {moment(event.endTime, 'HH:mm').format('hh:mm A')}
+              </p>
+              <p className="event-description">{event.description}</p>
             </div>
-          </div>
-          <div className="events-list">
-            {events
-              .filter(event => new Date(event.date).toDateString() === day.toDateString())
-              .map(event => (
-                <div key={event.id} className="event-item">
-                  {event.name} - {event.description} ({event.start_time} - {event.end_time})
-                </div>
-              ))}
-          </div>
+          ))}
         </div>
       );
-    });
-  };
+      day.add(1, 'day');
+    }
 
-  const isCurrentWeek = (date) => {
-    const startOfWeek = getStartOfWeek(new Date());
-    const endOfWeek = new Date(startOfWeek);
-    endOfWeek.setDate(startOfWeek.getDate() + 6);
-
-    return date >= startOfWeek && date <= endOfWeek;
-  };
-
-  const switchView = () => {
-    setShowNavButtons(!showNavButtons);
-    setView(view === 'week' ? 'month' : 'week');
-  };
-
-  const changeMonth = (increment) => {
-    setDate(new Date(date.setMonth(date.getMonth() + increment)));
+    return days;
   };
 
   return (
-    <div className="events-page">
-      <h2 className="events-header-home">Upcoming Events</h2>
-      <div className="calendar-header">
-        {showNavButtons && <button onClick={() => changeMonth(-1)}>Previous</button>}
-        <span onClick={switchView}>
-          {date.toLocaleString('default', { month: 'long' })} {date.getFullYear()}
-        </span>
-        {showNavButtons && <button onClick={() => changeMonth(1)}>Next</button>}
-      </div>
-      <div className="calendar-container">
-        {renderCalendar()}
+    <div  style={{ marginTop: '100px'}} className='events-body'>
+      <div className="min-h-screen bg-gray-100 p-6">
+        <h1 className="text-4xl font-bold text-center mb-8">Events Calendar</h1>
+        {loading && <p className="text-center">Loading...</p>}
+        {error && <p className="text-center text-red-500">{error}</p>}
+
+        <div className="calendar-container">
+          <div  className="calendar-header">
+            <button onClick={() => setCurrentDate(currentDate.clone().subtract(1, 'months'))}>&lt;</button>
+            <h2>{currentDate.format("MMMM YYYY")}</h2>
+            <button onClick={() => setCurrentDate(currentDate.clone().add(1, 'months'))}>&gt;</button>
+          </div>
+
+          <div className="calendar-grid">
+            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
+              <div key={day} className="calendar-day-header">
+                {day}
+              </div>
+            ))}
+            {renderCalendarDays()}
+          </div>
+        </div>
+
+        {/* Upcoming Event Section */}
+        {upcomingEvent && (
+          <section className="upcoming-event-section" style={{
+            backgroundColor: '#000',
+            color: '#fff',
+            padding: '2.5rem',
+            borderRadius: '1.2rem',
+            boxShadow: '0 8px 16px rgba(0, 0, 0, 0.25)',
+            textAlign: 'center',
+            marginTop: '2rem'
+          }}>
+            <h2 style={{
+              fontFamily: '"Dancing Script", cursive',
+              fontSize: '2.5rem',
+              color: '#ffeb3b',
+              textShadow: '2px 4px 10px rgba(0, 0, 0, 0.6)',
+            }}>
+              Upcoming Event
+            </h2>
+            <h3 style={{
+              fontFamily: '"Dancing Script", cursive',
+              fontSize: '2rem',
+              margin: '1rem 0',
+            }}>
+              {upcomingEvent.name}
+            </h3>
+            <p style={{
+              fontFamily: 'Roboto, sans-serif',
+              fontSize: '1.2rem',
+              color: '#e0e0e0',
+              margin: '0.8rem 0',
+            }}>
+              {moment(upcomingEvent.date).format('MMMM Do, YYYY')} 
+              {upcomingEvent.startTime && ` at ${moment(upcomingEvent.startTime, 'HH:mm').format('h:mm A')}`}
+            </p>
+            <p style={{
+              fontFamily: '"Dancing Script", cursive',
+              fontSize: '1.1rem',
+              lineHeight: '1.8',
+              color: 'rgba(255, 255, 255, 0.9)',
+              maxWidth: '600px',
+              margin: '1rem auto',
+            }}>
+              {upcomingEvent.description}
+            </p>
+            <Link to="/event" className="upcoming-event-btn">See All Events</Link>
+          </section>
+        )}
       </div>
     </div>
   );
 };
 
-export default Events;
+export default UserEvents;

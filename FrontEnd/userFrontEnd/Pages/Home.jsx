@@ -1,21 +1,29 @@
 import React, { useState, useEffect } from 'react';
-import '../Pagecss/Home.css'; // Import the CSS file for styling
+import { motion } from 'framer-motion';
+import '../Pagecss/Home.css';
 import { Link } from 'react-router-dom'; 
 import { userApi } from '../config/axios';
+import moment from 'moment';
 
 const Home = () => {
   const [featuredProducts, setFeaturedProducts] = useState([]);
+  const [upcomingEvent, setUpcomingEvent] = useState(null);
 
-  // Fetch featured products on component mount
   useEffect(() => {
     const getFeaturedProducts = async () => {
       const products = await fetchFeaturedProducts();
       setFeaturedProducts(products);
     };
+
+    const getUpcomingEvent = async () => {
+      const event = await fetchUpcomingEvent();
+      setUpcomingEvent(event);
+    };
+
     getFeaturedProducts();
+    getUpcomingEvent();
   }, []);
 
-  // Function to fetch featured products
   const fetchFeaturedProducts = async () => {
     try {
       const response = await userApi.get('/store/get-featured-products');
@@ -26,40 +34,174 @@ const Home = () => {
     }
   };
 
+  const fetchUpcomingEvent = async () => {
+    try {
+      const response = await userApi.get('/event/upcoming');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching upcoming event:', error);
+      return null;
+    }
+  };
+
+  const fadeIn = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.8 } }
+  };
+
   return (
     <div className="home-container">
       
       {/* Hero Section */}
-      <section className="hero-section">
+      <motion.section 
+        className="hero-section"
+        initial="hidden"
+        animate="visible"
+        variants={fadeIn}
+      >
         <div className="hero-content">
-          <h1 className="hero-title">BakersBurns</h1>
+          <motion.h1 
+            style={{
+              fontFamily: '"Dancing Script", cursive',
+              fontSize: '5rem',
+              color: 'Black',
+              textShadow: '2px 4px 10px rgba(0, 0, 0, 0.6)',
+            }}
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 1 }}
+          >
+            BakersBurns
+          </motion.h1>
           <p className="hero-description">Unique Wood Burning Art by Kalea Baker</p>
           <Link to="/store" className="hero-btn">Shop Now</Link>
         </div>
-      </section>
+      </motion.section>
+
+      {/* Upcoming Event Section */}
+      {upcomingEvent && (
+        <motion.section 
+          className="upcoming-event-section"
+          style={{
+            backgroundColor: '#000',
+            color: '#fff',
+            padding: '2.5rem',
+            borderRadius: '1.2rem',
+            boxShadow: '0 8px 16px rgba(0, 0, 0, 0.25)',
+            textAlign: 'center',
+            transition: 'transform 0.3s ease',
+          }}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.5 }}
+          variants={fadeIn}
+        >
+          <motion.h2 style={{
+              fontFamily: '"Dancing Script", cursive',
+              fontSize: '2.5rem',
+              color: '#ffeb3b',
+              textShadow: '2px 4px 10px rgba(0, 0, 0, 0.6)',
+            }}
+          >
+            Upcoming Event
+          </motion.h2>
+          <h3 style={{
+            fontFamily: '"Dancing Script", cursive',
+            fontSize: '2rem',
+            margin: '1rem 0',
+          }}>
+            {upcomingEvent.name}
+          </h3>
+          <p style={{
+            fontFamily: 'Roboto, sans-serif',
+            fontSize: '1.2rem',
+            color: '#e0e0e0',
+            margin: '0.8rem 0',
+          }}>
+            {moment(upcomingEvent.date).format('MMMM Do, YYYY')} 
+            {upcomingEvent.startTime && ` at ${moment(upcomingEvent.startTime, 'HH:mm').format('h:mm A')}`}
+          </p>
+          <p style={{
+            fontFamily: '"Dancing Script", cursive',
+            fontSize: '1.1rem',
+            lineHeight: '1.8',
+            color: 'rgba(255, 255, 255, 0.9)',
+            maxWidth: '600px',
+            margin: '1rem auto',
+          }}>
+            {upcomingEvent.description}
+          </p>
+          <Link to="/event" className="upcoming-event-btn">See All Events</Link>
+        </motion.section>
+      )}
 
       {/* About Section */}
-      <section className="about-section">
+      <motion.section 
+        className="about-section"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.2 }}
+        variants={fadeIn}
+      >
         <div className="about-content">
-          <h2>About The Artist</h2>
+        <motion.h1 
+            style={{
+              fontFamily: '"Dancing Script", cursive',
+              fontSize: '3rem',
+              color: 'Black',
+              textShadow: '2px 4px 10px rgba(0, 0, 0, 0.6)',
+            }}
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 1 }}
+          >
+            About the Artist
+          </motion.h1>
           <p>
             Kalea is a passionate wood-burning artist specializing in creating intricate and one-of-a-kind designs. Each piece is made with dedication, precision, and a love for wood and fire. Explore our gallery to discover unique products that blend nature and craftsmanship.
           </p>
           <Link to="/about" className="about-btn">Learn More</Link>
         </div>
-      </section>
+      </motion.section>
 
       {/* Featured Products Section */}
-      <section className="featured-products-section">
-        <h2 className="featured-products-title">Featured Products</h2>
-        <div className="products-gallery">
+      <motion.section 
+        className="featured-products-section"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.2 }}
+        variants={fadeIn}
+      >
+                  <motion.h1 
+            style={{
+              fontFamily: '"Dancing Script", cursive',
+              fontSize: '4rem',
+              color: 'Black',
+              textShadow: '2px 4px 10px rgba(0, 0, 0, 0.6)',
+            }}
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 1 }}
+          >
+            Featured Products
+          </motion.h1>
+        <motion.div 
+          className="products-gallery"
+          initial="hidden"
+          whileInView="visible"
+          variants={{ visible: { opacity: 1, transition: { staggerChildren: 0.3 } } }}
+        >
           {featuredProducts.length > 0 ? (
             featuredProducts.map((product) => (
-              <div key={product.id} className="product-card">
+              <motion.div 
+                key={product.id} 
+                className="product-card"
+                variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
+              >
                 {product.image ? (
                   <img
                     className="product-image"
-                    src={`${import.meta.env.VITE_IMAGE_BASE_URL}/${product.image}`}  // Use environment variable here
+                    src={`${import.meta.env.VITE_IMAGE_BASE_URL}/${product.image}`}
                     alt={product.name}
                   />
                 ) : (
@@ -68,22 +210,33 @@ const Home = () => {
                 <h3>{product.name}</h3>
                 <p>${product.price.toFixed(2)}</p>
                 <Link to={`/product/${product.id}`} className="product-btn">View Product</Link>
-              </div>
+              </motion.div>
             ))
           ) : (
             <p>No featured products available</p>
           )}
-        </div>
-      </section>
+        </motion.div>
+      </motion.section>
 
       {/* Contact Section */}
-      <section className="contact-section">
-        <h2>Get In Touch</h2>
-        <p>
+      <motion.section 
+        className="contact-section"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.2 }}
+        variants={fadeIn}
+      >
+        <h2 style={{
+            fontFamily: '"Dancing Script", cursive',
+            fontSize: '2.5rem',
+            color: 'black',
+            textShadow: '2px 4px 10px rgba(0, 0, 0, 0.6)',
+          }}>Get In Touch</h2>
+        <p style={{ color: 'black'}}>
           For commissions, inquiries, or collaborations, feel free to contact me. Let's create something beautiful together!
         </p>
-        <Link to="/contact" className="contact-btn">Contact Me</Link>
-      </section>
+        <Link to="/in-app-messaging" className="contact-btn">Contact Me</Link>
+      </motion.section>
     </div>
   );
 };
