@@ -505,12 +505,12 @@ const ProductManagement = () => {
                 style={{ backgroundColor: product.isDiscounted ? 'orange' : 'white' }}
               >
                 <div className="product-details">
-                  <h3>{product.name}</h3>
+                  <h3 className='product-title'>{product.name}</h3>
     
                   {/* Conditionally render the image only when the product is not being edited */}
                   {editingProductId !== product.id && editingDiscountId !== product.id && product.image && (
                     <div className="product-image">
-                      <img src={`http://localhost:3450/uploads/${product.image}`} alt={product.name} />
+                      <img src={`${import.meta.env.VITE_BACKEND}/uploads/${product.image}`} alt={product.name} />
                     </div>
                   )}
     

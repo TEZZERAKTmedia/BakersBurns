@@ -6,10 +6,13 @@ body {
   background: url('your-background-image.jpg') no-repeat center center fixed; /* Use your background image */
   background-size: cover; /* Make sure the background covers the entire area */
   overflow: hidden; /* Prevent the body itself from scrolling */
+  font-family: 'Dancing Script', cursive;
+  
 }
 
 /* Main content container to scroll over the background */
 .product-manager-container {
+  
   max-width: 100vw;
   margin: 0 auto;
   padding: 20px;
@@ -253,6 +256,7 @@ body {
   display: inline-block; /* Ensure the cards behave like block elements */
   position: relative; /* Ensure absolute positioned discount banner is relative to the product card */
   vertical-align: top; /* Align cards to the top */
+  font-size: large;
 }
 
 /* Responsive adjustments for larger screens */
@@ -268,6 +272,7 @@ body {
   }
 }
 
+
 /* Product image styling */
 .product-image img {
   max-width: 100px;
@@ -278,18 +283,20 @@ body {
 }
 
 .price {
-  font-size: 14px;
+  
   margin: 5px 0;
   color: #333;
+  font-size: 20px;
 }
 .price.original-price {
   color: #999;
   text-decoration: line-through;
-  font-size: 12px;
+  font-size: 20px;
+
 }
 .price.discounted-price {
   color: #007bff;
-  font-size: 16px;
+  font-size: 20px;
   font-weight: bold;
 }
 
@@ -297,4 +304,9 @@ body {
 .price-difference {
   font-size: 12px;
   color: #333;
+}
+
+.product-title {
+  font-family: 'Dancing Script', cursive;
+  font-size: 3rem;
 }

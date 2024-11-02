@@ -10,7 +10,7 @@ import Login from './Pages/Login';
 import PasswordResetForm from './Components/verification/passwordReset';
 import ForgotPassword from './Components/passwordForgot';
 import Events from '../userFrontEnd/Pages/Events';
-import './App.css';
+
 
 
 

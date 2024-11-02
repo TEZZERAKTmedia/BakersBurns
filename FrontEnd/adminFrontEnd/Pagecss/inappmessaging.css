@@ -1,25 +1,27 @@
-
-
 /* General Layout */
 .messaging-interface {
-  margin-top: 20%;
-  display: flex;
-  flex-direction: row;
-  height: 100vh;
+  margin-top: 5%;
+  
+  height: 90vh;
+  width: 90vw;
   background-color: #f4f4f9;
   color: #333;
   font-family: 'Arial', sans-serif;
   transition: all 0.3s ease-in-out;
-  width: 100%;
+  overflow: hidden;
 }
 
 /* Thread Preview */
 .thread-preview {
-  width: 100%;
+  font-family: 'Dancing Script', cursive;
+    /* Use percentage to make it responsive */
+  max-width: 800px; /* Set a max width to keep it consistent on large screens */
+  min-width: 250px; /* Ensure minimum size for usability */
   background-color: #fff;
   border-right: 1px solid #ddd;
   padding: 10px;
   overflow-y: auto;
+  transition: flex-basis 0.3s ease-in-out;
 }
 
 .thread-preview h3 {
@@ -101,11 +103,10 @@
   cursor: pointer;
 }
 
-/* Media Queries for Mobile */
+/* Mobile and Tablet View */
 @media (max-width: 768px) {
   .messaging-interface {
     flex-direction: column;
-    
   }
 
   .thread-preview {
@@ -125,4 +126,38 @@
   .messaging-window {
     padding: 10px;
   }
+}
+
+/* Message List */
+.message-list {
+  display: flex;
+  flex-direction: column;
+}
+
+
+/* Individual Messages */
+.message {
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  max-width: 70%;
+}
+
+.admin-message {
+  background-color: #f1f1f1;
+  color: #333;
+  align-self: flex-start;
+}
+
+.user-message {
+  background-color: #007bff;
+  color: white;
+  align-self: flex-end;
+}
+
+.message-content {
+  padding: 8px;
+  border-radius: 8px;
 }

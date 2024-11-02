@@ -33,6 +33,7 @@ const registerStoreRoutes = require('./routes/register/storeRegister');
 const adminEventRoutes = require('./routes/admin/adminEventRoutes');
 const userEventRoutes = require('./routes/user/eventRoutes');
 const userGalleryRoutes = require('./routes/user/galleryRoutes');
+const { handleDhlWebhook, handleFedexWebhook, handleUpsWebhook, handleUspsWebhook} = require('./webhooks/carrierWebhooks');
 
 // Initialize Express app
 const app = express();
@@ -90,7 +91,7 @@ app.use('/user',userAuthMiddleware('user'), userRoutes);
 app.use('/store',userAuthMiddleware('user'), storeRoutes);
 app.use('/user-message-routes', userAuthMiddleware('user'), userMessagingRoutes);
 app.use('/user-orders',userAuthMiddleware('user'), userOrderRoutes); 
-app.use('/event', userAuthMiddleware('user'), userEventRoutes);
+app.use('/user-event', userAuthMiddleware('user'), userEventRoutes);
 app.use('/user-gallery', userAuthMiddleware('user'), userGalleryRoutes)
 
 
@@ -104,13 +105,19 @@ app.use('/stripe-checkout', stripeRoutes);
 app.use('/api/products', adminAuthMiddleware('admin'), productRoutes);  // Protect product management routes
 app.use('/gallery-manager', adminAuthMiddleware('admin'), galleryRoutes);  // Protect gallery management routes
 app.use('/admin-mail', adminAuthMiddleware('admin'), adminEmailRoutes);
-app.use('/orders', ordersRoutes);
+app.use('/orders',adminAuthMiddleware('admin'), ordersRoutes);
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/galleryuploads', express.static(path.join(__dirname, 'galleryuploads')));
 app.use('/admin', express.static(path.join(__dirname, 'public/admin')));
 app.use('/admin-message-routes', adminAuthMiddleware('admin'), adminMessagingRoutes);
-app.use('/event', adminAuthMiddleware('admin'), adminEventRoutes);
+app.use('/admin-event', adminAuthMiddleware('admin'), adminEventRoutes);
 
+
+// Webhook routes for tracking updates from each carrier
+app.post('/webhook/ups', express.json(), handleUpsWebhook);
+app.post('/webhook/fedex', express.json(), handleFedexWebhook);
+app.post('/webhook/usps', express.json(), handleUspsWebhook);
+app.post('/webhook/dhl', express.json(), handleDhlWebhook);
 
 
 
@@ -131,7 +138,7 @@ db.sequelize.sync({ alter: true })
   .catch(err => {
     console.error('Error synchronizing database:', err);
   });
-  */
+*/
 // Start the server
 const PORT = process.env.PORT || 3450;
 app.listen(PORT, () => {

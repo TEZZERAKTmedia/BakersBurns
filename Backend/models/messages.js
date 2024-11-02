@@ -29,7 +29,7 @@ const Message = sequelize.define('Messages', {
   timestamps: false,
   hooks: {
     beforeSave: (message) => {
-      sanitizeModelFields(message, ['senderUsername', 'receiverUsername', 'messageBody']); // Sanitize relevant fields
+      sanitizeModelFields(message, ['senderUsername', 'receiverUsername', 'messageBody']);
     },
   },
 });

@@ -17,6 +17,7 @@ const Events = () => {
   const [validationError, setValidationError] = useState('');
   const [editEventId, setEditEventId] = useState(null);
   const [currentDate, setCurrentDate] = useState(moment());
+  const [showEditEventModal, setShowEditEventModal] = useState(false);
 
   const [newEvent, setNewEvent] = useState({
     name: '',
@@ -51,11 +52,51 @@ const Events = () => {
       endTime: '',
       days: [],
     });
+    setEditEventId(null);
+  };
+
+  const handleEditEvent = (event) => {
+    setNewEvent({
+      name: event.name,
+      description: event.description,
+      frequency: event.frequency,
+      startDate: moment(event.startDate).toDate(),
+      endDate: moment(event.endDate).toDate(),
+      startTime: event.startTime,
+      endTime: event.endTime,
+      days: typeof event.days === 'string' ? event.days.split(',') : event.days,
+    });
+    setEditEventId(event.id);
+    setShowEditEventModal(true); // Show the edit modal
+  };
+
+  const handleSaveEvent = async () => {
+    if (!validateForm()) return;
+    const formattedEvent = {
+      ...newEvent,
+      startDate: moment(newEvent.startDate).format('YYYY-MM-DD'),
+      endDate: moment(newEvent.endDate).format('YYYY-MM-DD'),
+      days: Array.isArray(newEvent.days) ? newEvent.days.join(',') : newEvent.days,
+    };
+
+    try {
+      if (editEventId) {
+        await adminApi.put(`/admin-event/events/${editEventId}`, formattedEvent);
+      } else {
+        await adminApi.post('/admin-event/events', formattedEvent);
+      }
+      setShowEditEventModal(false); // Close the modal
+      resetForm();
+      fetchEvents();
+    } catch (error) {
+      console.error("Error saving event:", error);
+      setValidationError('Error saving event');
+    }
   };
 
   const fetchEvents = async () => {
     try {
-      const response = await adminApi.get('/event/events');
+      const response = await adminApi.get('/admin-event/events');
       const rawEvents = response.data;
   
       // Set unique events for the Event Preview section
@@ -93,7 +134,7 @@ const Events = () => {
 
   const handleDeleteEvent = async (eventId) => {
     try {
-      await adminApi.delete(`/event/events/${eventId}`);
+      await adminApi.delete(`/admin-event/events/${eventId}`);
       console.log(`Event with ID ${eventId} deleted successfully`);
       fetchEvents(); // Re-fetch events to update the calendar
     } catch (error) {
@@ -112,13 +153,17 @@ const Events = () => {
     };
 
     try {
-      const response = await adminApi.post('/event/events', formattedEvent);
-      setEvents([...events, response.data]);
+      if (editEventId) {
+        await adminApi.put(`/admin-event/events/${editEventId}`, formattedEvent);
+      } else {
+        await adminApi.post('/admin-event/events', formattedEvent);
+      }
       setShowAddEventForm(false);
       resetForm();
+      fetchEvents();
     } catch (error) {
-      console.error("Error adding new event:", error);
-      setValidationError('Error adding new event');
+      console.error("Error adding/updating event:", error);
+      setValidationError('Error adding/updating event');
     }
   };
 
@@ -224,10 +269,84 @@ const Events = () => {
     return days;
   };
 
+
+  const renderEventPreview = (event) => {
+    if (editEventId === event.id) {
+      return (
+        <div className="event-preview-tile p-4 mb-2 border rounded-lg flex flex-col" >
+          
+          <input
+            type="text"
+            value={newEvent.name}
+            onChange={(e) => setNewEvent({ ...newEvent, name: e.target.value })}
+            className="form-input mb-2"
+            placeholder="Event Name"
+          />
+          <textarea
+            value={newEvent.description}
+            onChange={(e) => setNewEvent({ ...newEvent, description: e.target.value })}
+            className="form-input mb-2"
+            placeholder="Description"
+          />
+          <DatePicker
+            selected={newEvent.startDate}
+            onChange={(date) => setNewEvent({ ...newEvent, startDate: date })}
+            className="form-input mb-2"
+            dateFormat="yyyy-MM-dd"
+            placeholderText="Start Date"
+          />
+          <DatePicker
+            selected={newEvent.endDate}
+            onChange={(date) => setNewEvent({ ...newEvent, endDate: date })}
+            className="form-input mb-2"
+            dateFormat="yyyy-MM-dd"
+            placeholderText="End Date"
+          />
+          <input
+            type="time"
+            value={newEvent.startTime}
+            onChange={(e) => setNewEvent({ ...newEvent, startTime: e.target.value })}
+            className="form-input mb-2"
+          />
+          <input
+            type="time"
+            value={newEvent.endTime}
+            onChange={(e) => setNewEvent({ ...newEvent, endTime: e.target.value })}
+            className="form-input mb-2"
+          />
+          <div className="flex gap-2">
+            <button className="text-green-500" onClick={handleSaveEvent}>Save</button>
+            <button className="text-gray-500" onClick={() => setEditEventId(null)}>Cancel</button>
+          </div>
+        </div>
+      );
+    } else {
+      return (
+        <div className="event-preview-tile p-4 mb-2 border rounded-lg flex flex-col">
+          <div>
+            <p className="event-title font-semibold">{event.name}</p>
+            <p className="event-description text-gray-700">{event.description}</p>
+            <p className="event-date text-sm text-gray-600">
+              {moment(event.startDate).format('MMMM Do YYYY')} - {moment(event.endDate).format('MMMM Do YYYY')}
+            </p>
+            <p className="event-time text-sm text-gray-600">
+              {event.startTime} - {event.endTime}
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <button className="text-blue-500" onClick={() => handleEditEvent(event)}>Edit</button>
+            <button className="text-red-500" onClick={() => handleDeleteEvent(event.id)}>🗑️</button>
+          </div>
+        </div>
+      );
+    }
+  };
+
+
   return (
     <div className='events-body'>
       <div className="min-h-screen bg-gray-100 p-6">
-        <h1 className="text-4xl font-bold text-center mb-8">Events Management</h1>
+        <h1 className="text-4xl font-bold text-center mb-8" style={{color:'black', marginTop:'100px', fontSize:'5rem'}}>Event Management</h1>
         {validationError && <p className="text-center text-red-500">{validationError}</p>}
         {loading && <p className="text-center">Loading...</p>}
         {error && <p className="text-center text-red-500">{error}</p>}
@@ -263,39 +382,17 @@ const Events = () => {
       </div>
     </div>
                 {/* Event Preview Section */}
-                <div className="event-preview-section bg-white p-6 shadow-md rounded-lg mb-8">
-          <h2 className="text-2xl font-bold mb-4">Event Previews</h2>
-          {events.length === 0 && <p>No events to display</p>}
-          {events.map((event) => (
-            <div key={event.id} className="event-preview-tile p-4 mb-2 border rounded-lg flex flex-col">
-              <div className="flex justify-between items-center">
-                <div>
-                  <p className="event-title font-semibold">{event.name}</p>
-                  <p className="event-description text-gray-700">{event.description}</p>
-                  <p className="event-date text-sm text-gray-600">
-                    {moment(event.startDate).format('MMMM Do YYYY')} - {moment(event.endDate).format('MMMM Do YYYY')}
-                  </p>
-                  <p className="event-time text-sm text-gray-600">
-                    {event.startTime} - {event.endTime}
-                  </p>
-                </div>
-                <div className="flex gap-2">
-                  <button className="text-blue-500" onClick={() => handleEditEvent(event)}>Edit</button>
-                  <button className="text-red-500" onClick={() => handleDeleteEvent(event.id)}>🗑️</button>
-                </div>
-              </div>
-
-              {editEventId === event.id && (
-                <div className="edit-form mt-4">
-                  <h3 className="text-lg font-semibold">Edit Event</h3>
-                  {/* Include your edit form inputs here */}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-
-
+                <div className="event-preview-section bg-white p-6 shadow-md rounded-lg mb-8" style={{ backgroundColor: 'black', borderRadius: '20px' }}>
+        <h2 style={{ fontFamily: 'Dancing Script', fontSize: '5rem', color: 'white' }}>Event Previews</h2>
+        {validationError && <p className="text-center text-red-500">{validationError}</p>}
+        {events.length === 0 && <p>No events to display</p>}
+        {events.map((event) => (
+          <div key={event.id}>
+            {renderEventPreview(event)}
+          </div>
+        ))}
+      </div>
+    
 {showAddEventForm && (
           <motion.div
             className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center"

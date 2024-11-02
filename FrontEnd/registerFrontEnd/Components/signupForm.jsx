@@ -291,7 +291,7 @@ const SignUpForm = () => {
                             onChange={handleChange} 
                             id="optInEmailUpdates"
                         />
-                        <label htmlFor="optInEmailUpdates"><span style={{ color: 'black'}}>Opt-in for Email Updates (This includes tracking updates)</span></label>
+                        <label htmlFor="optInEmailUpdates"><span style={{ color: 'black', lineHeight: '30px'}}>Opt-in for Email Updates (This includes tracking updates)</span></label>
                     </div>
 
                     <button style={{margin: '5px'}} ><Link to="/login">Already have an account? Click here to log in</Link></button>

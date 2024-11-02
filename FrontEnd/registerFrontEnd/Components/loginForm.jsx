@@ -46,6 +46,7 @@ const LoginForm = () => {
           onChange={(e) => setIdentifier(e.target.value)}
           placeholder="Enter your username or email"
           required
+          style={{boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',}}
         />
         <input
           type="password"
@@ -55,8 +56,10 @@ const LoginForm = () => {
           required
         />
         <button type="submit">Login</button>
+        <Link to="/forgotpassword" style={{textDecoration:'none', color:'white', backgroundColor:'grey', padding: '3px', borderRadius:'5px', marginTop:'20px', width:'150px', marginLeft:'25%'}}>Forgot Password?</Link>
       </form>
-      <Link to="/forgotpassword">Forgot Password?</Link>
+
+      
       {message && <p>{message}</p>}
     </div>
   );

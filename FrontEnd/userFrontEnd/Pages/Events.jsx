@@ -50,7 +50,7 @@ const UserEvents = () => {
 
   const fetchEvents = async () => {
     try {
-      const response = await userApi.get('/event/user-events'); // Adjust URL as needed
+      const response = await userApi.get('/user-event/user-events'); // Adjust URL as needed
       console.log("Fetched events data:", response.data);
       setEvents(response.data);
 
@@ -82,7 +82,7 @@ const UserEvents = () => {
   // Fetch the upcoming event
   const fetchUpcomingEvent = async () => {
     try {
-      const response = await userApi.get('/event/upcoming'); // Adjust URL if necessary
+      const response = await userApi.get('/user-event/upcoming'); // Adjust URL if necessary
       console.log("Fetched upcoming event:", response.data); // Log the returned data
       setUpcomingEvent(response.data);
     } catch (error) {

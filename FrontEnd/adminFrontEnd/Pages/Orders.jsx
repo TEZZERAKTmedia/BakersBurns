@@ -1,12 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { adminApi } from '../config/axios';
-import '../Pagecss/orders.css';
 
 const OrderManagement = () => {
   const [orders, setOrders] = useState([]);
-  const [selectedOrder, setSelectedOrder] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);  // Track editing mode
   const [newOrder, setNewOrder] = useState({
     userId: '',
     productId: '',
@@ -16,28 +13,35 @@ const OrderManagement = () => {
     trackingNumber: '',
     carrier: '',
   });
+  const [editingOrderId, setEditingOrderId] = useState(null);
+  const [editingOrder, setEditingOrder] = useState({});
+
   const fetchOrders = async () => {
     try {
-      const response = await adminApi.get('/orders/get'); // Make an API call to fetch the orders
-      console.log('API Response:', response.data.orders);
-      setOrders(response.data.orders); // Assuming your API returns the orders inside a `data` object
+      const response = await adminApi.get('/orders/get');
+      setOrders(response.data.orders);
     } catch (error) {
       console.error('Error fetching orders:', error);
     }
   };
-  // Fetch all orders
 
+  useEffect(() => {
+    fetchOrders();
+  }, []);
 
-  
-  
+  const handleInputChange = (e, isEditing = false) => {
+    const { name, value } = e.target;
+    if (isEditing) {
+      setEditingOrder((prev) => ({ ...prev, [name]: value }));
+    } else {
+      setNewOrder((prev) => ({ ...prev, [name]: value }));
+    }
+  };
 
-  // Create a new order
   const createOrder = async () => {
     try {
       await adminApi.post('/orders/create', newOrder);
-      console.log(newOrder);
-
-      setNewOrder({ userId: '', productId: '', quantity: '', shippingAddress: '', billingAddress: '' });
+      setNewOrder({ userId: '', productId: '', quantity: '', shippingAddress: '', billingAddress: '', trackingNumber: '', carrier: '' });
       fetchOrders();
       setDialogOpen(false);
     } catch (error) {
@@ -45,265 +49,285 @@ const OrderManagement = () => {
     }
   };
 
-  // Update an order (including tracking number and carrier)
-  const updateOrder = async () => {
+  const updateOrder = async (orderId) => {
     try {
-      await adminApi.post(`/orders/update/${selectedOrder.id}`, selectedOrder);
+      await adminApi.put(`/orders/update/${orderId}`, editingOrder);
+      setEditingOrderId(null);
       fetchOrders();
-      setSelectedOrder(null);
-      setIsEditing(false);  // Exit editing mode after update
     } catch (error) {
       console.error('Error updating order:', error);
     }
   };
 
-  // Delete an order
-  const deleteOrder = async (orderId) => {
-    try {
-      await adminApi.delete(`/orders/delete-order/${orderId}`);
-      fetchOrders();
-    } catch (error) {
-      console.error('Error deleting order:', error);
+  // Function to get the tracking URL based on the carrier and tracking number
+  const getTrackingLink = (carrier, trackingNumber) => {
+    switch (carrier) {
+      case 'UPS':
+        return `https://www.ups.com/track?tracknum=${trackingNumber}`;
+      case 'FedEx':
+        return `https://www.fedex.com/apps/fedextrack/?tracknumbers=${trackingNumber}`;
+      case 'USPS':
+        return `https://tools.usps.com/go/TrackConfirmAction?tLabels=${trackingNumber}`;
+      case 'DHL':
+        return `https://www.dhl.com/en/express/tracking.html?AWB=${trackingNumber}`;
+      default:
+        return null;
     }
   };
-
-  // Open dialog for new order
-  const handleNewOrderDialog = () => {
-    setDialogOpen(true);
-  };
-
-  const handleCloseDialog = () => {
-    setDialogOpen(false);
-  };
-
-  // Handle input change for new and existing orders
-  const handleInputChange = (e, isNew = false) => {
-    const { name, value } = e.target;
-    if (isNew) {
-      setNewOrder((prev) => ({ ...prev, [name]: value }));
-    } else {
-      setSelectedOrder((prev) => ({ ...prev, [name]: value }));
-    }
-  };
-
-  // Copy Billing Address to Shipping Address
-  const copyBillingToShipping = () => {
-    if (selectedOrder) {
-      setSelectedOrder((prev) => ({ ...prev, shippingAddress: prev.billingAddress }));
-    } else {
-      setNewOrder((prev) => ({ ...prev, shippingAddress: prev.billingAddress }));
-    }
-  };
-
-  // Select an order to edit
-  const selectOrderToEdit = (order) => {
-    setSelectedOrder(order);  // Load order details into form
-    setIsEditing(true);  // Enter editing mode
-  };
-
-  useEffect(() => {
-    fetchOrders();
-  }, []);
 
   return (
-    <div style={{ padding: '20px' }}>
-<h1>Order Management</h1>
+    <div style={styles.fixedContainer}>
+      <h1 style={styles.title}>Order Management</h1>
 
-{/* Orders Table */}
-<table border="1" style={{ width: '100%', marginTop: '20px' }}>
-    <thead>
-    <tr>
-      <th>Order ID</th>
-      <th>Username</th>
-      <th>Email</th>
-      <th>Product Image</th> {/* Change from Product ID to Product Image */}
-      <th>Quantity</th>
-      <th>Shipping Address</th>
-      <th>Billing Address</th>
-      <th>Tracking Number</th>
-      <th>Carrier</th>
-      <th>Status</th>
-      <th>Tracking Link</th>
-    </tr>
-  </thead>
-  <tbody>
-    {orders.map(order => (
-      <tr key={order.id}>
-        <td>{order.id}</td>
-        <td>{order.username || 'Unknown'}
-          {order.username && (
-            <button onClick={() => copyToClipboard(order.username)}>Copy</button>
-          )}
-        </td>
-        <td>{order.email || 'Unknown'}
-          {order.email && (
-            <button onClick={() => copyToClipboard(order.email)}>Copy</button>
-          )}
-        </td>
-        <td>
-        <img className="product-image" src={`http://localhost:3450/uploads/${order.productImage}`} alt={order.productName} />
-        </td> {/* Display product image */}
-        <td>{order.quantity}</td>
-        <td>{order.shippingAddress}</td>
-        <td>{order.billingAddress}</td>
-        <td>{order.trackingNumber || 'No tracking available'}</td>
-        <td>{order.carrier}</td>
-        <td>{order.status}</td>
-        <td>
-          {order.trackingLink ? (
-            <a href={order.trackingLink} target="_blank" rel="noopener noreferrer">
-              Track your order
-            </a>
-          ) : (
-            'No tracking available'
-          )}
-        </td>
-      </tr>
-    ))}
-  </tbody>
-</table>
+      <button onClick={() => setDialogOpen(true)} style={styles.addButton}>
+        Add Order
+      </button>
 
-      {/* Edit Order Dialog */}
-      {selectedOrder && (
-        <div style={{ marginTop: '20px' }}>
-          <h2>Edit Order</h2>
-          <div>
-            <label>Status:</label>
-            <input
-              type="text"
-              name="status"
-              value={selectedOrder.status}
-              onChange={(e) => handleInputChange(e)}
-            />
-          </div>
-          <div>
-            <label>Shipping Address:</label>
-            <input
-              type="text"
-              name="shippingAddress"
-              value={selectedOrder.shippingAddress}
-              onChange={(e) => handleInputChange(e)}
-            />
-          </div>
-          <div>
-            <label>Billing Address:</label>
-            <input
-              type="text"
-              name="billingAddress"
-              value={selectedOrder.billingAddress}
-              onChange={(e) => handleInputChange(e)}
-            />
-          </div>
-          {/* Button to copy billing to shipping address */}
-          <button onClick={copyBillingToShipping}>Use Billing Address for Shipping</button>
-          <div>
-            <label>Tracking Number:</label>
-            <input
-              type="text"
-              name="trackingNumber"
-              value={selectedOrder.trackingNumber || ''}
-              onChange={(e) => handleInputChange(e)}
-            />
-          </div>
-          <div>
-            <label>Carrier:</label>
-            <select
-              name="carrier"
-              value={selectedOrder.carrier || ''}
-              onChange={(e) => handleInputChange(e)}
-            >
-              <option value="">Select Carrier</option>
-              <option value="UPS">UPS</option>
-              <option value="FedEx">FedEx</option>
-              <option value="USPS">USPS</option>
-              <option value="DHL">DHL</option>
-            </select>
-          </div>
-          <button onClick={() => updateOrder(selectedOrder.id)}>Update Order</button>
-          <button onClick={() => setSelectedOrder(null)}>Cancel</button>
-        </div>
-      )}
-
-      {/* Create New Order Dialog */}
       {dialogOpen && (
-        <div style={{ marginTop: '20px' }}>
-          <h2>Create New Order</h2>
-          <div>
-            <label>User ID:</label>
-            <input
-              type="text"
-              name="userId"
-              value={newOrder.userId}
-              onChange={(e) => handleInputChange(e, true)}
-            />
+        <div style={styles.modalOverlay}>
+          <div style={styles.modal}>
+            <h2>Create New Order</h2>
+            {['userId', 'productId', 'quantity', 'shippingAddress', 'billingAddress', 'trackingNumber'].map((field) => (
+              <div style={styles.inputGroup} key={field}>
+                <label>{field.charAt(0).toUpperCase() + field.slice(1)}:</label>
+                <input
+                  type="text"
+                  name={field}
+                  value={newOrder[field]}
+                  onChange={(e) => handleInputChange(e)}
+                  style={styles.input}
+                />
+              </div>
+            ))}
+            <div style={styles.inputGroup}>
+              <label>Carrier:</label>
+              <select
+                name="carrier"
+                value={newOrder.carrier}
+                onChange={(e) => handleInputChange(e)}
+                style={styles.input}
+              >
+                <option value="">Select Carrier</option>
+                <option value="UPS">UPS</option>
+                <option value="FedEx">FedEx</option>
+                <option value="USPS">USPS</option>
+                <option value="DHL">DHL</option>
+              </select>
+            </div>
+            <div style={styles.buttonContainer}>
+              <button onClick={() => setDialogOpen(false)} style={styles.closeButton}>Cancel</button>
+              <button onClick={createOrder} style={styles.createButton}>Create Order</button>
+            </div>
           </div>
-          <div>
-            <label>Product ID:</label>
-            <input
-              type="text"
-              name="productId"
-              value={newOrder.productId}
-              onChange={(e) => handleInputChange(e, true)}
-            />
-          </div>
-          <div>
-            <label>Quantity:</label>
-            <input
-              type="text"
-              name="quantity"
-              value={newOrder.quantity}
-              onChange={(e) => handleInputChange(e, true)}
-            />
-          </div>
-          <div>
-            <label>Shipping Address:</label>
-            <input
-              type="text"
-              name="shippingAddress"
-              value={newOrder.shippingAddress}
-              onChange={(e) => handleInputChange(e, true)}
-            />
-          </div>
-          <div>
-            <label>Billing Address:</label>
-            <input
-              type="text"
-              name="billingAddress"
-              value={newOrder.billingAddress}
-              onChange={(e) => handleInputChange(e, true)}
-            />
-          </div>
-          {/* Button to copy billing to shipping address for new orders */}
-          <button onClick={copyBillingToShipping}>Use Billing Address for Shipping</button>
-          <div>
-            <label>Tracking Number:</label>
-            <input
-              type="text"
-              name="trackingNumber"
-              value={newOrder.trackingNumber || ''}
-              onChange={(e) => handleInputChange(e, true)}
-            />
-          </div>
-          <div>
-            <label>Carrier:</label>
-            <select
-              name="carrier"
-              value={newOrder.carrier || ''}
-              onChange={(e) => handleInputChange(e, true)}
-            >
-              <option value="">Select Carrier</option>
-              <option value="UPS">UPS</option>
-              <option value="FedEx">FedEx</option>
-              <option value="USPS">USPS</option>
-              <option value="DHL">DHL</option>
-            </select>
-          </div>
-          <button onClick={createOrder}>Create</button>
-          <button onClick={handleCloseDialog}>Cancel</button>
         </div>
       )}
+
+      <div style={styles.ordersContainer}>
+        {orders.map((order) => (
+          <div key={order.id} style={styles.orderCard}>
+            <div style={styles.orderSection}>
+              {order.productImage ? (
+                <img
+                  src={`${import.meta.env.VITE_DEVELOPMENT}/uploads/${order.productImage}`}
+                  alt="Order Product"
+                  style={styles.image}
+                />
+              ) : (
+                <p>No image available</p>
+              )}
+            </div>
+            {editingOrderId === order.id ? (
+              <div>
+                {['userId', 'productId', 'quantity', 'shippingAddress', 'billingAddress', 'trackingNumber'].map((field) => (
+                  <div style={styles.inputGroup} key={field}>
+                    <label>{field.charAt(0).toUpperCase() + field.slice(1)}:</label>
+                    <input
+                      type="text"
+                      name={field}
+                      value={editingOrder[field] || ''}
+                      onChange={(e) => handleInputChange(e, true)}
+                      style={styles.input}
+                    />
+                  </div>
+                ))}
+                <div style={styles.inputGroup}>
+                  <label>Carrier:</label>
+                  <select
+                    name="carrier"
+                    value={editingOrder.carrier || ''}
+                    onChange={(e) => handleInputChange(e, true)}
+                    style={styles.input}
+                  >
+                    <option value="">Select Carrier</option>
+                    <option value="UPS">UPS</option>
+                    <option value="FedEx">FedEx</option>
+                    <option value="USPS">USPS</option>
+                    <option value="DHL">DHL</option>
+                  </select>
+                </div>
+                <div style={styles.buttonContainer}>
+                  <button onClick={() => updateOrder(order.id)} style={styles.createButton}>Save</button>
+                  <button onClick={() => setEditingOrderId(null)} style={styles.closeButton}>Cancel</button>
+                </div>
+              </div>
+            ) : (
+              <div>
+                <div style={styles.orderSection}>
+                  <strong>Order ID:</strong> {order.id}
+                </div>
+                <div style={styles.orderSection}>
+                  <strong>Quantity:</strong> {order.quantity || 'N/A'}
+                </div>
+                <div style={styles.orderSection}>
+              <strong>Status:</strong> {order.status}
+            </div>
+                <div style={styles.orderSection}>
+                  <strong>Tracking Number:</strong> {order.trackingNumber || 'No tracking available'}
+                </div>
+                <div style={styles.orderSection}>
+                  {order.carrier && order.trackingNumber ? (
+                    <a
+                      href={getTrackingLink(order.carrier, order.trackingNumber)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={styles.link}
+                    >
+                      Track your order
+                    </a>
+                  ) : (
+                    <p>No tracking available</p>
+                  )}
+                </div>
+                <button onClick={() => { setEditingOrderId(order.id); setEditingOrder(order); }} style={styles.editButton}>Edit</button>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
     </div>
   );
+};
+
+// Styles for inline layout with image rendering
+const styles = {
+  fixedContainer: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    width: '100vw',
+    height: '100vh',
+    overflow: 'hidden',
+    padding: '20px',
+    fontFamily: 'Arial, sans-serif',
+    backgroundColor: '#f0f0f0',
+  },
+  title: {
+    color: 'black',
+    marginTop: '50px',
+    textAlign: 'center',
+    fontSize: '2.5em',
+  },
+  addButton: {
+    marginBottom: '20px',
+    padding: '10px',
+    backgroundColor: '#007bff',
+    color: '#fff',
+    border: 'none',
+    borderRadius: '5px',
+    cursor: 'pointer',
+    width: '100%',
+  },
+  ordersContainer: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: '20px',
+    justifyContent: 'center',
+    overflowY: 'auto',
+    height: 'calc(100vh - 200px)',
+    padding: '10px',
+  },
+  orderCard: {
+    flex: '1 1 300px',
+    maxWidth: '400px',
+    padding: '15px',
+    backgroundColor: 'black',
+    borderRadius: '8px',
+    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+    display: 'flex',
+    flexDirection: 'column',
+
+  },
+  orderSection: {
+    marginBottom: '10px',
+    fontSize: '1em',
+    color: '#333',
+  },
+  image: {
+    width: '100%',
+    height: 'auto',
+    borderRadius: '8px',
+    marginBottom: '10px',
+  },
+  modalOverlay: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    width: '100vw',
+    height: '100vh',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 1000,
+    color: 'black',
+  },
+  modal: {
+    backgroundColor: '#fff',
+    borderRadius: '8px',
+    width: '90%',
+    maxWidth: '500px',
+    padding: '20px',
+    boxSizing: 'border-box',
+    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+  },
+  buttonContainer: {
+    display: 'flex',
+    justifyContent: 'space-between',
+  },
+  createButton: {
+    padding: '10px 15px',
+    backgroundColor: '#28a745',
+    color: '#fff',
+    border: 'none',
+    borderRadius: '5px',
+    cursor: 'pointer',
+    fontSize: '1rem',
+    flex: 1,
+  },
+  closeButton: {
+    backgroundColor: 'red',
+    padding: '10px 15px',
+    fontSize: '1rem',
+    color: 'white',
+    border: 'none',
+    borderRadius: '5px',
+    cursor: 'pointer',
+    flex: 1,
+  },
+  editButton: {
+    marginTop: '10px',
+    padding: '10px',
+    backgroundColor: '#ffc107',
+    color: '#fff',
+    border: 'none',
+    borderRadius: '5px',
+    cursor: 'pointer',
+    width: '100%',
+  },
+  link: {
+    color: '#007bff',
+    textDecoration: 'none',
+  },
 };
 
 export default OrderManagement;

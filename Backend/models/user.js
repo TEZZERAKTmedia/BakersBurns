@@ -1,13 +1,14 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
-const xss = require('xss'); 
-
+const xss = require('xss');
+const Message = require('./messages'); // Import Message model
 
 // Define the User model
 const User = sequelize.define('User', {
   username: {
     type: DataTypes.STRING,
-    allowNull: false
+    allowNull: false,
+    unique: true, // Ensure username is unique
   },
   email: {
     type: DataTypes.STRING,
@@ -50,14 +51,18 @@ const User = sequelize.define('User', {
       user.verificationToken = user.verificationToken ? xss(user.verificationToken) : null;
     }
   }
-
 });
 
-// Set up the association directly within the model
+// Define associations
 User.associate = (models) => {
   User.hasMany(models.Order, {
     foreignKey: 'userId',
     as: 'orders'
+  });
+  User.hasMany(models.Message, {
+    foreignKey: 'senderUsername',
+    sourceKey: 'username',
+    as: 'sentMessages' // Alias for messages sent by the user
   });
 };
 

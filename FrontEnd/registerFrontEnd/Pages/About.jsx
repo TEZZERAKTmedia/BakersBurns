@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const About = () => {
     return (
@@ -10,7 +11,7 @@ const About = () => {
                 style={styles.image}
             />
             <p style={styles.text}>
-                Welcome to the world of woodburning art by [Artist's Name]. With a passion for creating intricate and expressive pieces, [Artist's Name] has been mastering the craft of pyrography for over [number] years. Inspired by the natural beauty of wood and the endless possibilities of this unique medium, each piece tells a story and captures the essence of the artist's vision.
+                Welcome to the world of woodburning art by Kalea Baker. With a passion for creating intricate and expressive pieces, Kalea Baker has been mastering the craft of pyrography for over [number] years. Inspired by the natural beauty of wood and the endless possibilities of this unique medium, each piece tells a story and captures the essence of the artist's vision.
             </p>
             <h2 style={styles.subheading}>Our Work</h2>
             <p style={styles.text}>
@@ -24,8 +25,10 @@ const About = () => {
             <p style={styles.text}>
                 If you are interested in commissioning a custom piece or learning more about woodburning art, please don't hesitate to contact us. Follow [Artist's Name] on social media to stay updated on the latest creations and upcoming exhibitions.
             </p>
-            <button style={styles.button} onClick={() => window.location = 'contact.html'}>
+            <button style={styles.button} >
+                <Link to="/login">
                 Contact the Artist
+                </Link>
             </button>
         </div>
     );
@@ -33,43 +36,61 @@ const About = () => {
 
 const styles = {
     container: {
-        padding: '20px',
+        padding: '40px 20px',
         maxWidth: '800px',
         margin: 'auto',
         fontFamily: 'Arial, sans-serif',
+        color: '#444',
+        backgroundColor: '#fafafa',
+        borderRadius: '8px',
+        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
     },
     heading: {
-        fontSize: '2.5em',
+        fontSize: '2.8em',
         textAlign: 'center',
-        marginBottom: '20px',
+        fontWeight: '300',
+        color: '#333',
+        marginBottom: '25px',
     },
     subheading: {
-        fontSize: '1.5em',
-        marginTop: '20px',
-        marginBottom: '10px',
+        fontSize: '1.75em',
+        marginTop: '30px',
+        marginBottom: '15px',
+        color: '#666',
+        fontWeight: '400',
     },
     text: {
-        fontSize: '1em',
-        lineHeight: '1.6',
-        color: '#333',
+        fontSize: '1.1em',
+        lineHeight: '1.8',
+        color: '#555',
+        marginBottom: '15px',
     },
     image: {
         display: 'block',
         maxWidth: '100%',
         height: 'auto',
         margin: 'auto',
-        marginBottom: '20px',
+        marginBottom: '30px',
+        borderRadius: '10px',
+        boxShadow: '0 4px 15px rgba(0, 0, 0, 0.2)',
     },
     button: {
         display: 'block',
-        margin: '20px auto',
-        padding: '10px 20px',
+        margin: '40px auto 0',
+        padding: '12px 28px',
         fontSize: '1em',
+        fontWeight: 'bold',
         backgroundColor: '#333',
         color: '#fff',
         border: 'none',
         borderRadius: '5px',
         cursor: 'pointer',
+        transition: 'background-color 0.3s, transform 0.2s',
+        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
+    },
+    buttonHover: {
+        backgroundColor: '#555',
+        transform: 'translateY(-2px)',
     }
 };
 

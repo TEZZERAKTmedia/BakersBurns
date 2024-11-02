@@ -8,6 +8,7 @@ body, html {
   }
   
   div#root {
+    font-family: 'Dancing Script', cursive;
     display: flex;
     flex-direction: column;
     align-items: flex-start; /* Align content to the left */
@@ -27,6 +28,7 @@ body, html {
   
   /* Button Styles */
   button {
+
     background-color: #28a745;
     border: none;
     color: white;

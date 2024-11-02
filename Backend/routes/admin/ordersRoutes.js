@@ -11,7 +11,7 @@ router.get('/get-by-id/:orderId', adminAuthMiddleware(), ordersController.getOrd
 
 // POST
 router.post('/create', adminAuthMiddleware(), ordersController.createOrder);
-router.post('/update/:orderId', adminAuthMiddleware(), ordersController.updateOrder);
+router.put('/update/:orderId', adminAuthMiddleware(), ordersController.updateOrder);
 
 // DELETE
 router.delete('/delete-order/:orderId', adminAuthMiddleware(), ordersController.deleteOrder);

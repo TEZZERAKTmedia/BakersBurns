@@ -1,9 +1,23 @@
+@font-face {
+  font-family: 'Dancing Script';
+  src: url('../assets/CarnivaleeFreakshow-DLrm.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+body {
+  font-family: 'Dancing Script', cursive;
+}
+
+
+
 .home-app-tiles {
   display: flex;
   flex-wrap: wrap;
   gap: 20px;
   list-style: none;
   padding: 0;
+  font-family: 'Dancing Script', cursive;
 }
 
 .home-tile {

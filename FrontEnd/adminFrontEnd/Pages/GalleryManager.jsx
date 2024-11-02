@@ -107,7 +107,7 @@ const Gallery = () => {
 
     return (
         <div className="gallery-container">
-            <h1>Gallery Management</h1>
+            <h1 style={{color:'black', marginTop:'100px'}}>Gallery Management</h1>
 
             <ToastContainer />
 
@@ -118,22 +118,23 @@ const Gallery = () => {
             {/* Gallery List */}
             <div className="gallery-grid">
                 <AnimatePresence>
-                    {galleryItems.map((item) => (
-                        <motion.div
-                            key={item.id}
-                            initial={{ opacity: 0, y: 50 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: 50 }}
-                            className="gallery-card"
-                        >
-                            <div className="gallery-card-content">
-                                <h3>{item.title}</h3>
-                                <p>{item.description}</p>
-                                {item.image && <img src={`http://localhost:3450/galleryuploads/${item.image}`} alt={item.title} />}
-                            </div>
-                            <button onClick={() => handleDeleteGalleryItem(item.id)}>Delete</button>
-                        </motion.div>
-                    ))}
+                {galleryItems.map((item) => (
+                    <motion.div
+                        key={item.id}
+                        initial={{ opacity: 0, y: 50 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 50 }}
+                        className="gallery-card"
+                    >
+                        <div className="gallery-card-content">
+                            <h3>{item.title}</h3>
+                            <p>{item.description}</p>
+                            {item.image && <img src={`${import.meta.env.VITE_BACKEND}/galleryuploads/${item.image}`} alt={item.title} />}
+                        </div>
+                        <button onClick={() => handleDeleteGalleryItem(item.id)}>Delete</button>
+                    </motion.div>
+                ))}
+
                 </AnimatePresence>
             </div>
 
@@ -158,9 +159,9 @@ const Gallery = () => {
                                     <div {...getRootProps()} className="dropzone">
                                         <input {...getInputProps()} />
                                         {imagePreview ? (
-                                            <img src={imagePreview} alt="Preview" className="image-preview" />
+                                            <img  style={{ width: '100px'}} src={imagePreview} alt="Preview" className="image-preview" />
                                         ) : (
-                                            <p>Drag and drop an image here, or click to select one</p>
+                                            <p style={{border:'dashed', padding:'20px', color:'#74aef'}}>Drag and drop an image here, or click to select one</p>
                                         )}
                                     </div>
                                 )}

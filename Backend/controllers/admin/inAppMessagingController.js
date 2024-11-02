@@ -3,6 +3,8 @@ const Message = require('../../models/messages');
 const User = require('../../models/user');
 const { Op } = require('sequelize');
 const sequelize = require('../../config/database');
+const { Sequelize } = require('sequelize');
+
 
 // Check if a thread exists or create a new one
  // Adjust path as necessary
@@ -159,53 +161,78 @@ exports.fetchMessagesByThreadId = async (req, res) => {
 
   try {
     const messages = await Message.findAll({
-      where: { threadId }, // Fetch messages for the specific threadId
+      where: { threadId },
       attributes: ['messageBody', 'senderUsername', 'receiverUsername', 'createdAt'],
-      order: [['createdAt', 'ASC']], // Order by oldest to newest
+      order: [['createdAt', 'ASC']],
+      include: [
+        {
+          model: User,
+          as: 'sender',
+          attributes: ['role'],
+        },
+      ],
     });
 
-    res.status(200).json({ messages });
+    // Map messages to include `senderRole` and log the result
+    const messagesWithRole = messages.map((message) => {
+      const role = message.sender?.role || 'user';
+      console.log(`Message ID: ${message.id}, SenderRole: ${role}, MessageBody: ${message.messageBody}`);
+      return {
+        ...message.get(),
+        senderRole: role,
+      };
+    });
+
+    console.log('Messages with roles:', messagesWithRole); // Log entire message array with roles
+    res.status(200).json({ messages: messagesWithRole });
   } catch (error) {
     console.error('Error fetching messages by threadId:', error);
     res.status(500).json({ error: 'Failed to fetch messages' });
   }
 };
 
+
+
+
+
 exports.getRolesByThreadId = async (req, res) => {
-  const { threadId } = req.params;
+  const { threadId } = req.params; // Corrected to use params instead of query
+
+  if (!threadId) {
+    return res.status(400).json({ message: 'Thread ID is required' });
+  }
 
   try {
-    // Find a message in the thread to get the sender and receiver usernames
-    const message = await Message.findOne({
+    // Fetch messages with associated user roles
+    const messages = await Message.findAll({
       where: { threadId },
-      attributes: ['senderUsername', 'receiverUsername'],
+      include: [
+        {
+          model: User,
+          as: 'sender', // Assuming Message model has a foreign key `senderId`
+          attributes: ['username', 'role'], // Select `username` and `role` for each sender
+        },
+      ],
     });
 
-    if (!message) {
-      return res.status(404).json({ error: 'Thread not found' });
-    }
+    // Format response to include sender role and username
+    const formattedMessages = messages.map((message) => ({
+      id: message.id,
+      senderUsername: message.sender.username,
+      senderRole: message.sender.role,
+      messageBody: message.messageBody,
+      createdAt: message.createdAt,
+    }));
 
-    const senderUsername = message.senderUsername;
-    const receiverUsername = message.receiverUsername;
-
-    // Fetch the roles of the sender and receiver from the Users table
-    const sender = await User.findOne({ where: { username: senderUsername } });
-    const receiver = await User.findOne({ where: { username: receiverUsername } });
-
-    if (!sender || !receiver) {
-      return res.status(404).json({ error: 'Sender or receiver not found' });
-    }
-
-    // Return the roles of both the sender and receiver
-    res.status(200).json({
-      senderRole: sender.role,
-      receiverRole: receiver.role,
-    });
+    return res.status(200).json({ messages: formattedMessages });
   } catch (error) {
-    console.error('Error fetching roles by threadId:', error);
-    res.status(500).json({ error: 'Failed to fetch roles' });
+    console.error('Error fetching messages with roles:', error);
+    return res.status(500).json({ message: 'Error fetching messages' });
   }
 };
+
+
+
 
 
 
