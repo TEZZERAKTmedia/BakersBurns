@@ -1,0 +1,79 @@
+.privacy-policy {
+    padding: 20px;
+    background-color: #f9f9f9; /* Light gray background */
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for the container */
+    max-width: 600px;
+    margin: 0 auto; /* Center the container */
+    overflow-y: auto; /* Enable vertical scrolling if necessary */
+    color: #000; /* Ensure all text in the container is black */
+  }
+  
+  .privacy-policy h1 {
+    font-size: 2rem;
+    color: #000; /* Black text for the main heading */
+    margin-bottom: 20px;
+    text-align: center;
+    margin-top: 10%;
+  }
+  
+  .privacy-policy p {
+    font-size: 1rem;
+    line-height: 1.6; /* Improve readability */
+    color: #000; /* Black text for paragraphs */
+  }
+  
+  .privacy-policy ul {
+    padding-left: 20px; /* Indent lists */
+    margin-bottom: 20px;
+  }
+  
+  .privacy-policy li {
+    margin-bottom: 10px; /* Add space between list items */
+    color: #000; /* Black text for list items */
+  }
+  
+  .privacy-section {
+    margin-bottom: 30px; /* Add space between sections */
+    padding: 10px;
+    border: 1px solid #ddd; /* Light border for separation */
+    border-radius: 8px; /* Rounded corners */
+    background-color: #ffffff; /* White background for sections */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* Light shadow for sections */
+    color: #000; /* Ensure all text in the sections is black */
+  }
+  
+  .privacy-section h2 {
+    font-size: 1.5rem;
+    color: #000; /* Black text for section headings */
+    margin-bottom: 10px;
+  }
+  
+  .privacy-section p {
+    margin-bottom: 10px; /* Add space after paragraphs */
+    color: #000; /* Black text for section paragraphs */
+  }
+  
+  .privacy-section ul {
+    padding-left: 20px;
+  }
+  
+  .privacy-section li {
+    margin-bottom: 5px; /* Add space between list items */
+    color: #000; /* Black text for list items */
+    
+  }
+  
+  /* Add a hover effect for sections for a modern look */
+  .privacy-section:hover {
+    border-color: #1a73e8; /* Highlight border on hover */
+    background-color: #f4f8ff; /* Light blue background on hover */
+    transition: all 0.3s ease-in-out;
+  }
+  
+  /* Ensure the container is scrollable if the content overflows */
+  .privacy-policy {
+    max-height: 90vh; /* Prevent the container from taking up the entire viewport */
+    overflow-y: auto;
+  }
+  
