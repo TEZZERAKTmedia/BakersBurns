@@ -1,0 +1,38 @@
+
+
+/* Fullscreen overlay to cover the entire viewport */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.8); /* Semi-transparent overlay */
+    z-index: 9999; /* Ensure it appears above other content */
+}
+
+/* Inner loading container */
+.loading-page {
+    background-color: rgba(77, 77, 77, 0.678);
+    border-radius: 20px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.5); /* Adds shadow to make it pop */
+}
+
+.loading-page img {
+    width: 100px; /* Adjust size as needed */
+    height: 100px;
+}
+
+.loading-page p {
+    margin-top: 16px;
+    font-size: 18px;
+    color: #ffffff;
+}

@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
+import { Link } from 'react-router-dom';
 
 const About = () => {
     useEffect(() => {
@@ -10,7 +11,7 @@ const About = () => {
     }, []);
 
     return (
-        <div className="body">
+        <div className="body" >
         <div style={styles.container}>
             <h1 style={styles.heading} data-aos="fade-up">About the Artist</h1>
             <img
@@ -20,7 +21,7 @@ const About = () => {
                 data-aos="fade-up"
             />
             <p style={styles.text} data-aos="fade-up">
-                Welcome to the world of woodburning art by [Artist's Name]. With a passion for creating intricate and expressive pieces, [Artist's Name] has been mastering the craft of pyrography for over [number] years. Inspired by the natural beauty of wood and the endless possibilities of this unique medium, each piece tells a story and captures the essence of the artist's vision.
+                Welcome to the world of woodburning art by Kalea Baker. With a passion for creating intricate and expressive pieces, Kalea Baker has been mastering the craft of pyrography for over 3 years. Inspired by the natural beauty of wood and the endless possibilities of this unique medium, each piece tells a story and captures the essence of the artist's vision.
             </p>
             <h2 style={styles.subheading} data-aos="fade-up">Our Work</h2>
             <p style={styles.text} data-aos="fade-up">
@@ -28,15 +29,18 @@ const About = () => {
             </p>
             <h2 style={styles.subheading} data-aos="fade-up">Our Process</h2>
             <p style={styles.text} data-aos="fade-up">
-                The process of woodburning, also known as pyrography, involves using a heated tool to burn designs onto wood surfaces. [Artist's Name] begins with a careful selection of high-quality wood, followed by sketching the initial design. Using various tips and techniques, the design is then burned onto the wood, creating a permanent and lasting piece of art. The final step includes sealing and finishing the artwork to enhance its durability and beauty.
+                The process of woodburning, also known as pyrography, involves using a heated tool to burn designs onto wood surfaces. Kalea Baker begins with a careful selection of high-quality wood, followed by sketching the initial design. Using various tips and techniques, the design is then burned onto the wood, creating a permanent and lasting piece of art. The final step includes sealing and finishing the artwork to enhance its durability and beauty.
             </p>
             <h2 style={styles.subheading} data-aos="fade-up">Get in Touch</h2>
             <p style={styles.text} data-aos="fade-up">
-                If you are interested in commissioning a custom piece or learning more about woodburning art, please don't hesitate to contact us. Follow [Artist's Name] on social media to stay updated on the latest creations and upcoming exhibitions.
+                If you are interested in commissioning a custom piece or learning more about woodburning art, please don't hesitate to contact us. Follow Kalea Baker on social media to stay updated on the latest creations and upcoming exhibitions.
             </p>
-            <button style={styles.button} onClick={() => window.location = 'contact.html'} data-aos="fade-up">
-                Contact the Artist
+            <Link to="/in-app-messaging">
+            <button style={styles.button}  data-aos="fade-up">
+                
+                Contact Us
             </button>
+            </Link>
         </div>
         </div>
     );
@@ -51,9 +55,10 @@ const styles = {
         fontFamily: 'Arial, sans-serif',
     },
     heading: {
-        fontSize: '2.5em',
+        fontSize: '5em',
         textAlign: 'center',
         marginBottom: '20px',
+        fontFamily:'Dancing Script'
     },
     subheading: {
         fontSize: '1.5em',
@@ -82,6 +87,7 @@ const styles = {
         border: 'none',
         borderRadius: '5px',
         cursor: 'pointer',
+        marginBottom:'200px'
     }
 };
 

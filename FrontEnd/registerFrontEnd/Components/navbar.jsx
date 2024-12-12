@@ -1,33 +1,52 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import '../Componentcss/navbar.css';  // Import the CSS file for styling
 
+import '../Componentcss/navbar.css'; // Import the CSS file for styling
+import { FaCog } from 'react-icons/fa'; // Import settings icon from Font Awesome
 
 const Navbar = () => {
-    const [message, setMessage] = useState('');
+  const [menuOpen, setMenuOpen] = useState(false);
 
-    const handleClick = (e) => {
-        e.preventDefault()
-        setMessage('Please Sign up or Sign in')
-        setTimeout(() => {
-            setMessage('');
-            window.location.href = '/store';
-        }, 2000);
-    };
+  const toggleMenu = () => {
+    setMenuOpen(!menuOpen);
+  };
+
+  const closeMenu = () => {
+    setMenuOpen(false);
+  };
+
+  return (
+    <nav className="navbar">
+      {/* Hamburger menu icon */}
+      <div className={`hamburger-menu ${menuOpen ? 'open' : ''}`} onClick={toggleMenu}>
+        <div className="bar1"></div>
+        <div className="bar2"></div>
+        <div className="bar3"></div>
+      </div>
+    
+      <div>
+      <button style={{backgroundColor:'white', color:'black', padding:'5px', margin:'10px', borderRadius:'20px'}} onClick={closeMenu}><Link style={{textDecoration:'none', color:'black'}} to="/sign-up">Sign up</Link></button>
+      <button style={{backgroundColor:'white', color:'black', padding:'5px', margin:'10px', borderRadius:'20px'}} onClick={closeMenu}><Link style={{textDecoration:'none', color:'black'}} to="/login">Login</Link></button>
+      </div>
+      {/* Navbar links */}
+      <ul className={`nav-list ${menuOpen ? 'show' : ''}`}>
+
+        <li className="nav-item" onClick={closeMenu}><Link to="/">Home</Link></li>
+        <li className="nav-item" onClick={closeMenu}><Link to="/store">Store</Link></li>
+       
+        {/*<li className="nav-item" onClick={closeMenu}><Link to="/create">Create</Link></li>*/}
+        <li className="nav-item" onClick={closeMenu}><Link to="/about">About</Link></li>
 
 
-    return (
-        <nav className="navbar">
-            <ul className="nav-list">
-                
-                <li className="nav-item" onClick={handleClick}><Link to="/store">Store</Link></li>
-                <li className="nav-item"><Link to="/about">About</Link></li>
-                
-                <li className="nav-item"><Link to="/signup">Sign Up</Link></li>
-                <li className="nav-item"><Link to="/login">Log In</Link></li>
-            </ul>
-        </nav>
-    );
+
+
+        
+      </ul>
+
+      {/* Settings icon at the bottom of the navbar, visible only when menu is open */}
+
+    </nav>
+  );
 };
 
 export default Navbar;

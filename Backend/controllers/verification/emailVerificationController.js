@@ -14,12 +14,14 @@ const generateVerificationToken = () => {
 
 // Controller function to handle sending a verification email
 const sendEmailVerification = async (req, res) => {
-  const { email, actionType } = req.body;
-
   try {
-    console.log('Received email:', email, 'and actionType:', actionType);
+    // Extract email from authMiddleware
+    const email = req.user.email;
+    const { actionType } = req.body;
 
-    // Check if the usnmer exists
+    console.log('Authenticated user email:', email, 'and actionType:', actionType);
+
+    // Check if the user exists
     const user = await User.findOne({ where: { email } });
     if (!user) {
       console.log('User not found for email:', email);
@@ -127,10 +129,10 @@ const verifyToken = async (req, res) => {
   
 };
 const verificationCode = async (req, res) => {
-  console.log('Verification request received:', req.query); // Add this to see incoming params
-  const { email, token } = req.query;  // Changed 'verificationCode' to 'token'
-
   try {
+    const email = req.user.email; // Get email from userAuthMiddleware
+    const { token } = req.query; // The verification code passed as a query param
+
     console.log(`Verifying email: ${email}, token: ${token}`);
 
     // Find the user by email and token

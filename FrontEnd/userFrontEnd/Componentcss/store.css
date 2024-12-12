@@ -1,18 +1,23 @@
+/* Store Container */
 .store-container {
   padding: 2%;
-  margin-top: 30%;
-  
+  margin-top: 10%;
 }
 
+.store-container h2 {
+  font-size: calc(3rem + 2vw); /* Responsive header font size */
+  color: black;
+  text-align: center;
+}
+
+/* Product Grid */
 .product-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr); /* Creates exactly 3 columns */
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); /* Responsive columns */
   gap: 16px;
-  
-  
 }
 
-
+/* Product Tile */
 .product-tile {
   background-color: #000000ab;
   border: 1px solid #dddddd59;
@@ -22,56 +27,180 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-}
-
-.product-image {
-  max-width: 100%;
-  height: auto;
-  border-radius: 4px;
-}
-.product-image img {
-  width: 100px;
-  height: 100px;
-  object-fit: cover; /* Maintain aspect ratio and cover the box */
-  border-radius: 10px;
-}
-
-.product-info {
-  margin-top: 8px;
   text-align: center;
+  width: 100%;
+  max-width: 200px;
+  cursor: pointer;
+}
+
+/* Product Info */
+.product-info img {
+  width: 80%;
+  max-width: 200px;
+  max-height: 200px;
+  object-fit: cover;
+  border-radius: 8px;
 }
 
 .product-info h3 {
-  margin: 0;
-  font-size: 1.2em;
+  font-family: "Dancing Script", cursive;
+  font-size: 1.8rem;
 }
 
 .product-info p {
-  margin: 4px 0;
-  color: #555555ce;
+  font-family: Arial, sans-serif;
+  font-size: 1rem;
+  color: white;
 }
 
-.product-description {
-  margin-top: 8px;
+/* Modal Styling */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-content {
+  background-color: #555555ce;
+  padding: 20px;
+  border-radius: 8px;
+  max-width: 500px;
+  width: 90%;
   text-align: center;
 }
 
-.product-description p {
-  margin: 0;
-  color: #777;
+.modal-content h3 {
+  font-family: "Dancing Script", cursive;
+  font-size: 4rem;
+  color: white;
 }
 
-button {
-  background-color: #ff5a5f;
-  color: #fff;
-  border: none;
-  border-radius: 4px;
-  padding: 8px 16px;
+.modal-content img {
+  width: 100%;
+  height: auto;
+  max-height: 400px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.modal-content .close-modal {
+  font-size: 1.5rem;
   cursor: pointer;
-  font-size: 1em;
-  margin-top: 8px;
+  position: absolute;
+  top: 10px;
+  right: 10px;
 }
 
-button:hover {
+.modal-content h4 {
+  background-color: rgba(0, 0, 0, 0.616);
+  color: white;
+  margin: 15px 0;
+}
+
+.modal-content p {
+  font-family: Arial, sans-serif;
+  font-size: 1.2rem;
+  color: black;
+  background-color: white;
+}
+
+/* Button Styling */
+button {
+  font-family: "Dancing Script", cursive;
+  font-size: 1.2rem;
+  color: #fff;
+  background-color: #ff6347;
+  padding: 8px 16px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  margin: 0 auto;
+}
+
+button:disabled {
+  background-color: #ff9a8d;
+}
+
+button:hover:not(:disabled) {
   background-color: #e04b50;
+}
+
+/* Cart Message */
+.cart-message {
+  position: fixed;
+  top: 20px;
+  right: -300px;
+  background-color: #28a745;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-size: 1rem;
+  z-index: 3000;
+  transition: transform 0.5s ease-in-out;
+}
+
+.cart-message.slide-in {
+  transform: translateX(-320px);
+}
+
+.cart-message.slide-out {
+  transform: translateX(300px);
+}
+
+/* Media Queries */
+@media (max-width: 768px) {
+  .store-container {
+    padding: 1%;
+    margin-top: 5%;
+  }
+
+  .product-grid {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  }
+
+  .product-info img {
+    width: 100%;
+  }
+
+  .modal-content h3 {
+    font-size: 3rem;
+  }
+}
+
+.modal-content h4 {
+  background-color: rgba(0, 0, 0, 0.61);
+  color: white;
+  margin: 15px 0;
+  text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.5); /* Adds shadow to the "Description" header */
+  
+}
+
+.modal-content p {
+  font-family: Arial, sans-serif;
+  font-size: 1.2rem;
+  color: black;
+  background-color: white;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.modal-descriptor{
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+  
+}
+
+.modal-content .price {
+  font-family: Arial, sans-serif;
+  font-size: 1.5rem;
+  color: white;
+  text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7); /* Adds a stronger shadow to the price */
+  text-align: center;
+  margin-top: 10px;
 }

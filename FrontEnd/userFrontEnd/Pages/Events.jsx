@@ -11,6 +11,21 @@ const UserEvents = () => {
   const [error, setError] = useState(null);
   const [currentDate, setCurrentDate] = useState(moment());
   const [upcomingEvent, setUpcomingEvent] = useState(null);
+  const [isSmallScreen, setIsSmallScreen] = useState(false); // State to track screen size
+
+  // Detect screen size and set isSmallScreen
+  useEffect(() => {
+    const handleResize = () => {
+      setIsSmallScreen(window.innerWidth <= 768);
+    };
+
+    handleResize(); // Check screen size on component mount
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
 
   // Function to generate recurring events
   const generateRecurringEvents = (daysOfWeek, startDate, endDate, eventData) => {
@@ -101,50 +116,65 @@ const UserEvents = () => {
     const endOfMonth = currentDate.clone().endOf('month');
     const startDay = startOfMonth.clone().startOf('week');
     const endDay = endOfMonth.clone().endOf('week');
-
+  
     const days = [];
     let day = startDay.clone();
-
+  
     while (day.isBefore(endDay, 'day')) {
       const isToday = day.isSame(moment(), 'day');
       const isCurrentMonth = day.isSame(currentDate, 'month');
-      const eventsForDay = calendarEvents.filter(event => event.date === day.format('YYYY-MM-DD'));
-
+      const eventsForDay = calendarEvents.filter(
+        (event) => event.date === day.format('YYYY-MM-DD')
+      );
+  
+      // Determine the background color for the tile
+      const backgroundColor = eventsForDay.length > 0 
+        ? (isToday ? '#FFDD57' : '#AED581') // Highlight today or use a default event color
+        : (isCurrentMonth ? '#FFFFFF' : '#F5F5F5'); // Default for current or other month days
+  
       days.push(
         <div
           key={day.toString()}
           className={`calendar-day ${isCurrentMonth ? 'current-month' : 'other-month-day'} ${
             isToday ? 'today' : ''
           }`}
+          style={{
+            backgroundColor, // Set the dynamic background color
+            borderRadius: '4px',
+            padding: '5px',
+            transition: 'background-color 0.3s ease', // Smooth color transition
+          }}
         >
           <span className="date-label">{day.date()}</span>
-          {eventsForDay.map((event, index) => (
-            <div key={index} className="event-item">
-              <p className="event-title">{event.title}</p>
-              <p className="event-time">
-                {moment(event.startTime, 'HH:mm').format('hh:mm A')} -{' '}
-                {moment(event.endTime, 'HH:mm').format('hh:mm A')}
-              </p>
-              <p className="event-description">{event.description}</p>
-            </div>
-          ))}
+          {!isSmallScreen &&
+            eventsForDay.map((event, index) => (
+              <div key={index} className="event-item">
+                <p className="event-title">{event.title}</p>
+                <p className="event-time">
+                  {moment(event.startTime, 'HH:mm').format('hh:mm A')} -{' '}
+                  {moment(event.endTime, 'HH:mm').format('hh:mm A')}
+                </p>
+                <p className="event-description">{event.description}</p>
+              </div>
+            ))}
         </div>
       );
       day.add(1, 'day');
     }
-
+  
     return days;
   };
+  
 
   return (
-    <div  style={{ marginTop: '100px'}} className='events-body'>
+    <div style={{ marginTop: '100px' }} className='events-body'>
       <div className="min-h-screen bg-gray-100 p-6">
         <h1 className="text-4xl font-bold text-center mb-8">Events Calendar</h1>
         {loading && <p className="text-center">Loading...</p>}
         {error && <p className="text-center text-red-500">{error}</p>}
 
         <div className="calendar-container">
-          <div  className="calendar-header">
+          <div className="calendar-header">
             <button onClick={() => setCurrentDate(currentDate.clone().subtract(1, 'months'))}>&lt;</button>
             <h2>{currentDate.format("MMMM YYYY")}</h2>
             <button onClick={() => setCurrentDate(currentDate.clone().add(1, 'months'))}>&gt;</button>

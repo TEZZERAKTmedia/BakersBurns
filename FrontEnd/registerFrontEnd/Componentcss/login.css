@@ -1,15 +1,5 @@
-body {
-  background-color: #f4f4f9;
-  font-family: 'Roboto', sans-serif;
-  height: 100vh;
-  margin: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: relative;
-}
-
-.container {
+/* Centering and Responsive Container */
+.log-in-container {
   background: #fff;
   padding: 2rem;
   border-radius: 10px;
@@ -21,35 +11,72 @@ body {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  box-sizing: border-box;
 }
 
-
-
-h2 {
-  margin-bottom: 1.5rem;
+/* Title */
+.login-title {
+  margin-top: 30px;
+  border-radius: 50px;
+  font-size: 1rem;
   color: #333;
+  padding: 5%;
+  margin-bottom: 1.5rem;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
 }
 
-form {
+/* Form Styling */
+.login-form {
   display: flex;
   flex-direction: column;
+  align-items: center;
 }
 
-input {
+.login-input {
   margin-bottom: 1rem;
   padding: 0.75rem;
   border: 1px solid #ccc;
   border-radius: 5px;
   font-size: 1rem;
+  width: 100%;
+  box-sizing: border-box;
   transition: border-color 0.3s ease;
 }
 
-input:focus {
+.login-input:focus {
   border-color: #007bff;
   outline: none;
 }
 
-button {
+/* Password Container */
+.password-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.password-input {
+  padding-right: 40px;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  
+}
+
+.login-animation {
+  width: 24px;
+  height: 24px;
+  background-color: #fff;
+}
+
+/* Buttons */
+.login-button {
   padding: 0.75rem;
   background-color: #007bff;
   color: #fff;
@@ -58,21 +85,49 @@ button {
   font-size: 1rem;
   cursor: pointer;
   transition: background-color 0.3s ease;
+  font-family: 'Segoe UI', Tahoma, Geneva, sans-serif;
+  margin-bottom: 1rem;
 }
 
-button:hover {
-  background-color: #0056b3;
+
+
+/* Links */
+.forgot-password-link,
+.sign-up-link {
+  text-decoration: none;
+  color: white;
+  background-color: grey;
+  padding: 0.5rem;
+  border-radius: 5px;
+  display: block;
+  margin-top: 1rem;
+  width: 100%;
+  max-width: 300px;
+  text-align: center;
+  font-size: 1rem;
 }
 
-p {
+.sign-up-link {
+  background-color: black;
+  margin-top: 1.5rem;
+}
+
+/* Message Styling */
+.login-message {
   margin-top: 1rem;
   color: #e74c3c;
 }
 
-.valid {
-  color: green;
-}
-
-.invalid {
-  color: black;
+/* Mobile Responsiveness */
+@media (max-width: 500px) {
+  .log-in-container {
+    top: 10%;
+    transform: translate(-50%, 0);
+    width: 90%;
+    padding: 1.5rem;
+  }
+  
+  .login-animation {
+    margin-right: 0;
+  }
 }

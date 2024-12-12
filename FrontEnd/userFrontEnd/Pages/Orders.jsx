@@ -4,109 +4,169 @@ import '../Pagecss/orders.css';
 import { motion } from 'framer-motion';
 
 const Orders = () => {
-  console.log('Orders component rendered'); // Root log
-
   const [orders, setOrders] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null);
-  const [error, setError] = useState(null); // Optional: To display errors to users
+  const [error, setError] = useState(null);
 
-  // Fetch all orders
   const fetchOrders = async () => {
-    console.log('Fetching orders...'); // Log when fetch starts
     try {
-      const response = await userApi.get('/user-orders/get-orders'); // Ensure this endpoint is correct
-      console.log('API Response:', response.data.orders);
+      const response = await userApi.get('/user-orders/get-orders');
+
       setOrders(response.data.orders);
     } catch (error) {
-      console.error('Error fetching orders:', error.response ? error.response.data : error.message);
       setError('Failed to fetch orders. Please try again later.');
     }
   };
+
+  const fetchOrderDetails = async (orderId) => {
+    try {
+      const response = await userApi.get(`/user-orders/get-order-details/${orderId}`);
+
+      setSelectedOrder(response.data.order);
+    } catch (error) {
+      console.error('Failed to fetch order details:', error);
+      setError('Failed to fetch order details. Please try again later.');
+    }
+  };
+  
 
   useEffect(() => {
     fetchOrders();
   }, []);
 
+  const getTrackingLink = (carrier, trackingNumber) => {
+    if (!carrier || !trackingNumber) return null;
+    switch (carrier.toLowerCase()) {
+      case 'ups':
+        return `https://www.ups.com/track?tracknum=${trackingNumber}`;
+      case 'fedex':
+        return `https://www.fedex.com/apps/fedextrack/?tracknumbers=${trackingNumber}`;
+      case 'usps':
+        return `https://tools.usps.com/go/TrackConfirmAction?tLabels=${trackingNumber}`;
+      case 'dhl':
+        return `https://www.dhl.com/en/express/tracking.html?AWB=${trackingNumber}`;
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className="order-management-container">
       <h1 className="order-management-title">Order Management</h1>
+      {error && <div className="error-message">{error}</div>}
 
-      {error && <div className="error-message">{error}</div>} {/* Optional: Display error messages */}
-
-      {/* Orders Grid */}
       <div className="orders-grid">
         {orders.length > 0 ? (
-          orders.map(order => (
-            <motion.div
+          orders.map((order) => (
+            <div
               key={order.id}
               className="order-tile"
               onClick={() => fetchOrderDetails(order.id)}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              transition={{ duration: 0.2 }}
             >
               <h3>Order ID: {order.id}</h3>
-              <p><strong>Username:</strong> {order.username || 'Unknown'}</p>
-              <p><strong>Email:</strong> {order.email || 'Unknown'}</p>
-              {order.productImage ? (
-                <img
-  className="product-image"
-  src={`${import.meta.env.VITE_IMAGE_BASE_URL}/${order.productImage}`} 
-  alt={order.productName}
-/>
-
-              ) : (
-                <p>No image</p>
-              )}
-              <p><strong>Quantity:</strong> {order.quantity}</p>
-              <p><strong>Status:</strong> {order.status || 'N/A'}</p>
-              <p><strong>Tracking:</strong> {order.trackingNumber || 'No tracking available'}</p>
-              <p><strong>Carrier:</strong> {order.carrier || 'N/A'}</p>
               <p>
-                {order.trackingLink && order.trackingLink !== 'Tracking info not available' ? (
-                  <a href={order.trackingLink} target="_blank" rel="noopener noreferrer">
+                <strong>Username:</strong> {order.username || 'Unknown'}
+              </p>
+              <p>
+                <strong>Email:</strong> {order.email || 'Unknown'}
+              </p>
+              <p>
+                <strong>Tracking:</strong> {order.trackingNumber || 'No tracking available'}
+              </p>
+              <p>
+                <strong>Carrier:</strong> {order.carrier || 'N/A'}
+              </p>
+              <p>
+                {order.carrier && order.trackingNumber ? (
+                  <a
+                    href={getTrackingLink(order.carrier, order.trackingNumber)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="tracking-link-button"
+                  >
                     Track your order
                   </a>
                 ) : (
                   'No tracking available'
                 )}
               </p>
-            </motion.div>
+            </div>
           ))
         ) : (
           <p>No orders found.</p>
         )}
       </div>
 
-      {/* Selected Order Details */}
       {selectedOrder && (
-        <motion.div
-          className="order-details"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <h2>Order Details</h2>
-          <p><strong>Order ID:</strong> {selectedOrder.id}</p>
-          <p><strong>Status:</strong> {selectedOrder.status}</p>
-          <p><strong>Total:</strong> ${selectedOrder.total}</p>
-          <p><strong>Shipping Address:</strong> {selectedOrder.shippingAddress}</p>
-          <p><strong>Billing Address:</strong> {selectedOrder.billingAddress}</p>
-          <p><strong>Tracking Number:</strong> {selectedOrder.trackingNumber || 'N/A'}</p>
-          <p><strong>Carrier:</strong> {selectedOrder.carrier || 'N/A'}</p>
-          <p><strong>Tracking Link:</strong> 
-            {selectedOrder.trackingLink && selectedOrder.trackingLink !== 'Tracking info not available' 
-              ? <a href={selectedOrder.trackingLink} target="_blank" rel="noopener noreferrer">Track Order</a> 
-              : 'Tracking info not available'}
-          </p>
-          <h3>Products</h3>
-          <ul>
-            <li>
-              <strong>{selectedOrder.productName}</strong> - {selectedOrder.productImage ? <img src={`http://localhost:3450/uploads/${selectedOrder.productImage}`} alt={selectedOrder.productName} /> : 'No image'}
-            </li>
-          </ul>
-        </motion.div>
-      )}
+  <>
+    {/* Backdrop */}
+    <button className="close-button" style={{backgroundColor:'#ff5050', color: 'white'}} onClick={() => setSelectedOrder(null)}>X</button>
+    <div className="backdrop" onClick={() => setSelectedOrder(null)}>
+  <motion.div
+    className="order-details"
+    initial={{ opacity: 0, scale: 0.95 }}
+    animate={{ opacity: 1, scale: 1 }}
+    transition={{ duration: 0.3 }}
+  >
+
+    <h2>Order Details</h2>
+
+    {/* Details grouped into tiles */}
+
+    <div className="detail-tile">
+      <label><strong>Status:</strong></label>
+      <p>{selectedOrder.status}</p>
+    </div>
+
+
+    <div className="detail-tile">
+      <label><strong>Total:</strong></label>
+      <p>${Number(selectedOrder.total).toFixed(2)}</p>
+    </div>
+    <div className="detail-tile">
+      <label><strong>Shipping Address:</strong></label>
+      <p>{JSON.parse(selectedOrder.shippingAddress).line1}, {JSON.parse(selectedOrder.shippingAddress).city}, {JSON.parse(selectedOrder.shippingAddress).state}</p>
+    </div>
+
+
+    <div className="detail-tile">
+      <label><strong>Tracking Link:</strong></label>
+      <p>
+        {selectedOrder.carrier && selectedOrder.trackingNumber ? (
+          <a
+            href={getTrackingLink(selectedOrder.carrier, selectedOrder.trackingNumber)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="tracking-link-button"
+          >
+            Track Order
+          </a>
+        ) : (
+          'Tracking info not available'
+        )}
+      </p>
+    </div>
+
+    <h3>Products</h3>
+    <ul>
+      {selectedOrder.items.map((item) => (
+        <div className="detail-tile" key={item.productName} style={{marginTop:'10px'}}>
+          <label><strong>{item.productName}:</strong></label>
+          <img
+            className="product-image"
+            src={item.productImage || 'https://via.placeholder.com/100'}
+            alt={item.productName}
+          />
+          <p>{item.quantity} x ${item.price.toFixed(2)}</p>
+        </div>
+      ))}
+    </ul>
+  </motion.div>
+</div>
+
+  </>
+)}
+
     </div>
   );
 };

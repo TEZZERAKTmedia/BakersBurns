@@ -5,33 +5,51 @@ const { Op } = require('sequelize');
 // Function to get all products
 const getProducts = async (req, res) => {
   try {
-    const products = await Product.findAll();  // Fetch all products
-    res.status(200).json(products);  // Return the list of products
-  } catch (err) {
-    console.error('Error fetching products:', err);
-    res.status(500).json({ message: 'Failed to fetch products.' });
+    const products = await Product.findAll({
+      where: {
+        quantity: {
+          [Op.gt]: 0, // Fetch only products where quantity is greater than 0
+        },
+      },
+    });
+
+    res.status(200).json({ products });
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching products', error });
   }
 };
+
 
 
 const getFeaturedProducts = async (req, res) => {
   try {
     const featuredProducts = await Product.findAll({
       where: {
-        type: {
-          [Op.or]: [
-            { [Op.like]: 'feature' },    // Search for 'feature'
-            { [Op.like]: 'featured' }    // Search for 'featured'
-          ]
-        }
+        [Op.and]: [
+          {
+            type: {
+              [Op.or]: [
+                { [Op.like]: 'feature' },   // Search for 'feature'
+                { [Op.like]: 'featured' }  // Search for 'featured'
+              ]
+            }
+          },
+          {
+            quantity: {
+              [Op.gt]: 0 // Fetch only products with quantity greater than 0
+            }
+          }
+        ]
       }
     });
-    res.status(200).json(featuredProducts);  // Return the featured products
+
+    res.status(200).json(featuredProducts); // Return the filtered featured products
   } catch (error) {
     console.error('Error fetching featured products:', error);
     res.status(500).json({ message: 'Failed to fetch featured products.' });
   }
 };
+
 // Function to add a product to the cart
 const addToCart = async (req, res) => {
   const { userId, productId, quantity } = req.body;

@@ -1,9 +1,9 @@
 const { Model, DataTypes } = require('sequelize');
-const sequelize = require('../config/database'); // Adjust this path as necessary
+const sequelize = require('../config/database');
+const { encrypt, decrypt } = require('../utils/encrypt');
 
 class Order extends Model {}
 
-// Define the model
 Order.init({
   id: {
     type: DataTypes.INTEGER,
@@ -17,16 +17,7 @@ Order.init({
   userId: {
     type: DataTypes.INTEGER,
     allowNull: false,
-    references: { model: 'Users', key: 'id' },  // Ensure this is correct
-  },
-  productId: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: { model: 'Products', key: 'id' },
-  },
-  quantity: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
+    references: { model: 'Users', key: 'id' },
   },
   status: {
     type: DataTypes.STRING,
@@ -35,29 +26,41 @@ Order.init({
   },
   shippingAddress: {
     type: DataTypes.STRING,
-    allowNull: true,  // You may set this to false if it's required
+    allowNull: true,
+    set(value) {
+      this.setDataValue('shippingAddress', encrypt(value));
+    },
+    get() {
+      const value = this.getDataValue('shippingAddress');
+      return value ? decrypt(value) : null;
+    }
   },
   billingAddress: {
     type: DataTypes.STRING,
-    allowNull: true,  // You may set this to false if it's required
+    allowNull: true,
+    set(value) {
+      this.setDataValue('billingAddress', encrypt(value));
+    },
+    get() {
+      const value = this.getDataValue('billingAddress');
+      return value ? decrypt(value) : null;
+    }
   },
   trackingNumber: {
     type: DataTypes.STRING,
-    allowNull: true,  // It may be empty initially
+    allowNull: true,
   },
   carrier: {
     type: DataTypes.STRING,
-    allowNull: true,  // It may be empty initially
+    allowNull: true,
   },
 }, {
   sequelize,
-  modelName: 'Order'
+  modelName: 'Order',
+  tableName: 'Orders' // Match the actual table name in the database
 });
 
-// Define associations
-Order.associate = (models) => {
-  Order.belongsTo(models.User, { foreignKey: 'userId', as: 'user' });
-  Order.belongsTo(models.Product, { foreignKey: 'productId', as: 'product' });
-};
+// Associations
+
 
 module.exports = Order;

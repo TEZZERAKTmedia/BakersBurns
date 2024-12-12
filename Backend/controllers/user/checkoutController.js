@@ -1,11 +1,12 @@
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const Product = require('../../models/product');
 const Cart = require('../../models/cart');
+require('dotenv').config();
 
 // Function to create a Stripe checkout session
 const createCheckoutSession = async (req, res) => {
   const { userId, items } = req.body;
-  
+
   try {
     // Create the checkout session logic here...
     const cartItems = await Promise.all(
@@ -16,7 +17,7 @@ const createCheckoutSession = async (req, res) => {
             currency: 'usd',
             product_data: {
               name: product.name,
-              images: [`${yourDomain}/uploads/${product.image}`],
+              images: [`${process.env.USER_FRONTEND}/uploads/${product.image}`],
             },
             unit_amount: product.price * 100,
           },
@@ -29,8 +30,8 @@ const createCheckoutSession = async (req, res) => {
       payment_method_types: ['card'],
       line_items: cartItems,
       mode: 'payment',
-      success_url: `${yourDomain}/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${yourDomain}/cancel`,
+      success_url: `${process.env.USER_FRONTEND}/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.USER_FRONTEND}/cancel`,
       automatic_tax: { enabled: true },
     });
 

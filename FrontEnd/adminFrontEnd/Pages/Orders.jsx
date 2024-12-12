@@ -1,18 +1,35 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { adminApi } from '../config/axios';
+import QuantitySelector from './numberWheel';
+import AddProduct from '../Components/addProductForm';
+import StatusBanner from '../Components/statusBanner';
 
 const OrderManagement = () => {
   const [orders, setOrders] = useState([]);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [users, setUsers] = useState([]); // State to hold the list of users
+  const [selectedProducts, setSelectedProducts] = useState([]); // Products added to the order
+  const [productOptions, setProductOptions] = useState([]); // Dropdown product list
+  const [products, setProducts] = useState([]); // Ensure this is declared
+  const addProductFormRef = useRef(null); // Ref for Add Product Form
+  const productBoxRef = useRef(null); //
+  const [showAddProductButton, setShowAddProductButton] = useState(false);
+
+  const [showProductDropdown, setShowProductDropdown] = useState(false); // Toggle dropdown window
+
+
   const [newOrder, setNewOrder] = useState({
-    userId: '',
-    productId: '',
-    quantity: '',
+    username: '',
     shippingAddress: '',
-    billingAddress: '',
+    
     trackingNumber: '',
     carrier: '',
+    total: '',
+    orderItems: [
+      { productId: '', quantity: '', price: '' }, // Initial item
+    ],
   });
+  
   const [editingOrderId, setEditingOrderId] = useState(null);
   const [editingOrder, setEditingOrder] = useState({});
 
@@ -26,8 +43,31 @@ const OrderManagement = () => {
   };
 
   useEffect(() => {
+
+    
+    
+  
+    fetchProducts();
+    fetchUsers();
     fetchOrders();
   }, []);
+  const fetchProducts = async () => {
+    try {
+      const response = await adminApi.get('/api/products/');
+      console.log('Fetched products:', response.data);
+
+      setProductOptions(
+        response.data.map((product) => ({
+          id: product.id,
+          name: product.name,
+          image: product.image || null, // Ensure image field is set correctly or null
+          price: product.price,
+        }))
+      );
+    } catch (error) {
+      console.error('Error fetching products:', error);
+    }
+  };
 
   const handleInputChange = (e, isEditing = false) => {
     const { name, value } = e.target;
@@ -37,15 +77,68 @@ const OrderManagement = () => {
       setNewOrder((prev) => ({ ...prev, [name]: value }));
     }
   };
+    //ITEM MANAGEMT
+    
+    const handleSelectProduct = (product) => {
+      setSelectedProducts((prev) => [...prev, product]);
+      setProductOptions((prev) => prev.filter((item) => item.id !== product.id));
+    };
+  
+    const handleRemoveProduct = (product) => {
+      setProductOptions((prev) => [...prev, product]);
+      setSelectedProducts((prev) => prev.filter((item) => item.id !== product.id));
+    };
+    
 
-  const createOrder = async () => {
+    const fetchUsers = async () => {
+      try {
+        const response = await adminApi.get('/orders/get-users');
+        setUsers(response.data.users); // Store usernames in the state
+      } catch (error) {
+        console.error('Error fetching users:', error);
+      } 
+    };
+
+    const createOrder = async () => {
+      try {
+        const orderData = {
+          ...newOrder,
+          orderItems: selectedProducts.map((product) => ({
+            productId: product.id,
+            quantity: newOrder.quantity,
+          })),
+        };
+        await adminApi.post('/orders/create', orderData)
+        fetchOrders();
+        setDialogOpen(false);
+        console.log('Order Created:', orderData);
+      } catch (error) {
+        console.error('Error creating order:', error);
+      }
+    };
+
+
+  
+    const handleProductAdded = async (newProduct) => {
+      try {
+        setProducts((prev) => [...prev, newProduct]); // Optimistic update
+        await fetchProducts(); // Refresh product list
+      } catch (error) {
+        console.error('Error fetching updated product list:', error);
+      }
+    };
+  
+    useEffect(() => {
+      fetchProducts();
+    }, []);
+
+
+  const deleteOrder = async (orderId) => {
     try {
-      await adminApi.post('/orders/create', newOrder);
-      setNewOrder({ userId: '', productId: '', quantity: '', shippingAddress: '', billingAddress: '', trackingNumber: '', carrier: '' });
-      fetchOrders();
-      setDialogOpen(false);
+      await adminApi.delete(`/orders/delete/${orderId}`);
+      fetchOrders(); // Refresh the orders list after deletion
     } catch (error) {
-      console.error('Error creating order:', error);
+      console.error('Error deleting order:', error);
     }
   };
 
@@ -74,49 +167,212 @@ const OrderManagement = () => {
         return null;
     }
   };
+  const handleScroll = () => {
+    if (productBoxRef.current) {
+      const scrollTop = productBoxRef.current.scrollTop;
+      setShowAddProductButton(scrollTop > 0); // Show button if scrolled down
+    }
+  };
 
+  // Scroll to the Add Product form
+  const scrollToAddProductForm = () => {
+    if (addProductFormRef.current) {
+      addProductFormRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  };
   return (
     <div style={styles.fixedContainer}>
       <h1 style={styles.title}>Order Management</h1>
 
-      <button onClick={() => setDialogOpen(true)} style={styles.addButton}>
-        Add Order
-      </button>
+          <button onClick={() => setDialogOpen(true)} style={styles.addButton}>
+            Add Order
+          </button>
 
-      {dialogOpen && (
-        <div style={styles.modalOverlay}>
-          <div style={styles.modal}>
-            <h2>Create New Order</h2>
-            {['userId', 'productId', 'quantity', 'shippingAddress', 'billingAddress', 'trackingNumber'].map((field) => (
-              <div style={styles.inputGroup} key={field}>
-                <label>{field.charAt(0).toUpperCase() + field.slice(1)}:</label>
-                <input
-                  type="text"
-                  name={field}
-                  value={newOrder[field]}
-                  onChange={(e) => handleInputChange(e)}
-                  style={styles.input}
-                />
-              </div>
-            ))}
-            <div style={styles.inputGroup}>
-              <label>Carrier:</label>
-              <select
-                name="carrier"
-                value={newOrder.carrier}
-                onChange={(e) => handleInputChange(e)}
-                style={styles.input}
+
+          {dialogOpen && (
+                  <div style={styles.modalOverlay}>
+                    <div style={styles.modal}>
+                      <h2>Create New Order</h2>
+                      <div style={styles.inputContainer}>
+                        <div nstyle={styles.formSection}>
+                        <label>Username:</label>
+                        <select
+                          name="username"
+                          value={newOrder.username}
+                          onChange={handleInputChange}
+                          style={styles.select}
+                        >
+                          <option value="">Select a User</option>
+                          {users.map((user) => (
+                            <option key={user.id} value={user.username}>
+                                      {user.username}
+                              </option>
+                            ))}
+                        </select>
+                        </div>
+
+                        <div style={styles.formSection}>
+                        <label>Tracking Number:</label>
+                        <input
+                          type="text"
+                          name="trackingNumber"
+                          value={newOrder.trackingNumber}
+                          onChange={handleInputChange}
+                          style={styles.input}
+                        />
+                        </div >
+                        <div >
+                        <label>
+                    Carrier 
+                  </label>
+
+                  <select
+                    value={newOrder.carrier}
+                    onChange={(e) =>
+                      setNewProduct({ ...newOrder, carrier: e.target.value })
+                    }
+                  >
+                    <option value="">Select a Carrier</option>
+                    <option value="UPS">UPS</option>
+                    <option value="FedEx">FedEx</option>
+                    <option value="USPS">USPS</option>
+                    <option value="DHL">DHL</option>
+                  </select>
+                    </div>
+                        <div style={styles.formSection}>
+                        <label>Shipping Address:</label>
+                        <textarea
+                          name="shippingAddress"
+                          value={newOrder.shippingAddress}
+                          onChange={handleInputChange}
+                          style={styles.textarea}
+                        />
+                        </div>
+
+                      </div>
+
+                      <div style={styles.boxContainer}>
+                      {showAddProductButton && (
+                    <button
+                      onClick={scrollToAddProductForm}
+                      style={styles.floatingButton}
+                    >
+                      +
+                    </button>
+                  )}
+              {/* Existing Products Box */}
+              <div 
+              style={styles.box}
+              onScroll={handleScroll}
+              ref={productBoxRef}
               >
-                <option value="">Select Carrier</option>
-                <option value="UPS">UPS</option>
-                <option value="FedEx">FedEx</option>
-                <option value="USPS">USPS</option>
-                <option value="DHL">DHL</option>
-              </select>
+
+                <h3 style={{fontSize:'3vw', color:'white', backgroundColor:'black',padding:'10px', borderRadius:'20px'}}>Existing Products</h3>
+                <div style={styles.productList}>
+
+                  {productOptions.map((product) => (
+                    <div
+                      key={product.id}
+                      
+                      style={styles.formSection}
+                      onClick={() => handleSelectProduct(product)}
+                    >
+                      <img
+                        src={`${import.meta.env.VITE_BACKEND}/uploads/${product.image}`}
+                        alt={product.name}
+                        style={styles.productImage}
+                      />
+                      <div style={styles.formSection}>
+                      <p style={styles.productTileLabel}>Name</p>
+                      <p >  {product.name}</p>
+                      </div>
+                      <div style={styles.formSection}>
+                      <p style={styles.productTileLabel}>Price</p>
+                      <p >${product.price}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div >
+
+                <div ref={addProductFormRef}>
+                <AddProduct onProductAdded={(newProduct) => {
+        console.log(newProduct); // Log the new product
+        fetchProducts(); // Re-fetch products after adding a new one
+      }} />
+
+                </div>
+              </div>
+              
+
+              {/* Selected Items Box */}
+              <div style={styles.box}>
+              <h3 style={{fontSize:'3vw', color:'white', backgroundColor:'black',padding:'10px', borderRadius:'20px',}}>Selected Items</h3>
+              <div style={styles.productList}>
+                {selectedProducts.map((product, index) => (
+                  <div key={product.id} style={styles.productTile}>
+                    <div
+                      style={styles.closeButton}
+                      onClick={() => handleRemoveProduct(product)}
+                    >
+                      &times;
+                    </div>
+                    <img
+                      src={`${import.meta.env.VITE_BACKEND}/uploads/${product.image}`}
+                      alt={product.name}
+                      style={styles.productImage}
+                    />
+                    <p>{product.name}</p>
+                    <p>${product.price}</p>
+                    <div style={styles.quantitySelector}>
+                      <button
+                        onClick={() =>
+                          setSelectedProducts((prev) =>
+                            prev.map((p, i) =>
+                              i === index
+                                ? { ...p, quantity: Math.max((p.quantity || 1) - 1, 1) }
+                                : p
+                            )
+                          )
+                        }
+                        style={styles.quantityButton}
+                      >
+                        -
+                      </button>
+                      <span>{product.quantity || 1}</span>
+                      <button
+                        onClick={() =>
+                          setSelectedProducts((prev) =>
+                            prev.map((p, i) =>
+                              i === index
+                                ? {
+                                    ...p,
+                                    quantity: Math.min(
+                                      (p.quantity || 1) + 1,
+                                      p.availableStock
+                                    ),
+                                  }
+                                : p
+                            )
+                          )
+                        }
+                        style={styles.quantityButton}
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
+            </div>
+
             <div style={styles.buttonContainer}>
-              <button onClick={() => setDialogOpen(false)} style={styles.closeButton}>Cancel</button>
-              <button onClick={createOrder} style={styles.createButton}>Create Order</button>
+              <button onClick={() => setDialogOpen(false)} style={styles.closeButton}>
+                Cancel
+              </button>
+              <button style={styles.createButton} onClick={createOrder}>
+                Create Order
+              </button>
             </div>
           </div>
         </div>
@@ -126,9 +382,10 @@ const OrderManagement = () => {
         {orders.map((order) => (
           <div key={order.id} style={styles.orderCard}>
             <div style={styles.orderSection}>
+            <StatusBanner status={order.status} />
               {order.productImage ? (
                 <img
-                  src={`${import.meta.env.VITE_DEVELOPMENT}/uploads/${order.productImage}`}
+                  src={`${import.meta.env.VITE_BACKEND}/uploads/${order.productImage}`}
                   alt="Order Product"
                   style={styles.image}
                 />
@@ -138,7 +395,7 @@ const OrderManagement = () => {
             </div>
             {editingOrderId === order.id ? (
               <div>
-                {['userId', 'productId', 'quantity', 'shippingAddress', 'billingAddress', 'trackingNumber'].map((field) => (
+                {['userId', 'productId', 'quantity', 'shippingAddress', 'billingAddress', 'trackingNumber', 'total'].map((field) => (
                   <div style={styles.inputGroup} key={field}>
                     <label>{field.charAt(0).toUpperCase() + field.slice(1)}:</label>
                     <input
@@ -151,7 +408,7 @@ const OrderManagement = () => {
                   </div>
                 ))}
                 <div style={styles.inputGroup}>
-                  <label>Carrier:</label>
+                  <label style={styles.formLabel}>Carrier:</label>
                   <select
                     name="carrier"
                     value={editingOrder.carrier || ''}
@@ -166,6 +423,12 @@ const OrderManagement = () => {
                   </select>
                 </div>
                 <div style={styles.buttonContainer}>
+                <button
+                onClick={() => deleteOrder(order.id)}
+                style={styles.closeButton}
+              >
+                Delete
+              </button>
                   <button onClick={() => updateOrder(order.id)} style={styles.createButton}>Save</button>
                   <button onClick={() => setEditingOrderId(null)} style={styles.closeButton}>Cancel</button>
                 </div>
@@ -199,6 +462,7 @@ const OrderManagement = () => {
                   )}
                 </div>
                 <button onClick={() => { setEditingOrderId(order.id); setEditingOrder(order); }} style={styles.editButton}>Edit</button>
+
               </div>
             )}
           </div>
@@ -210,124 +474,219 @@ const OrderManagement = () => {
 
 // Styles for inline layout with image rendering
 const styles = {
-  fixedContainer: {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    width: '100vw',
-    height: '100vh',
-    overflow: 'hidden',
+  container: {
     padding: '20px',
     fontFamily: 'Arial, sans-serif',
-    backgroundColor: '#f0f0f0',
+    display: 'flex', // Use flexbox
+    flexDirection: 'column', // Align content vertically
+    alignItems: 'center', // Center align items horizontally
+    gap: '20px', // Add spacing between sections
   },
   title: {
-    color: 'black',
-    marginTop: '50px',
-    textAlign: 'center',
-    fontSize: '2.5em',
+    fontSize: '2rem',
+    marginBottom: '20px',
+
   },
   addButton: {
-    marginBottom: '20px',
     padding: '10px',
     backgroundColor: '#007bff',
     color: '#fff',
     border: 'none',
     borderRadius: '5px',
     cursor: 'pointer',
-    width: '100%',
-  },
-  ordersContainer: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    gap: '20px',
-    justifyContent: 'center',
-    overflowY: 'auto',
-    height: 'calc(100vh - 200px)',
-    padding: '10px',
-  },
-  orderCard: {
-    flex: '1 1 300px',
-    maxWidth: '400px',
-    padding: '15px',
-    backgroundColor: 'black',
-    borderRadius: '8px',
-    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-    display: 'flex',
-    flexDirection: 'column',
-
-  },
-  orderSection: {
-    marginBottom: '10px',
-    fontSize: '1em',
-    color: '#333',
-  },
-  image: {
-    width: '100%',
-    height: 'auto',
-    borderRadius: '8px',
-    marginBottom: '10px',
   },
   modalOverlay: {
     position: 'fixed',
     top: 0,
     left: 0,
-    width: '100vw',
-    height: '100vh',
+    width: '100%',
+    height: '100%',
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     display: 'flex',
-    alignItems: 'center',
     justifyContent: 'center',
-    zIndex: 1000,
-    color: 'black',
+    alignItems: 'center',
+    zIndex: 1000, // Ensure it overlays above all content
   },
   modal: {
     backgroundColor: '#fff',
-    borderRadius: '8px',
-    width: '90%',
-    maxWidth: '500px',
     padding: '20px',
-    boxSizing: 'border-box',
-    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+    borderRadius: '10px',
+    width: '80%',
+    maxWidth: '800px',
+    overflowY: 'auto', // Allow scrolling within the modal
+    maxHeight: '90vh', // Ensure modal doesn't overflow the viewport
   },
-  buttonContainer: {
+
+  formSection: {
+    boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.3)',
+    padding: '10px',
+  },
+  inputContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '10px',
+    marginBottom: '20px',
+  },
+  input: {
+    padding: '8px',
+    borderRadius: '5px',
+    border: '1px solid #ccc',
+    fontSize: '16px',
+    width: '100%',
+  },
+  textarea: {
+    padding: '8px',
+    borderRadius: '5px',
+    border: '1px solid #ccc',
+    fontSize: '16px',
+    height: '60px',
+    width: '100%',
+  },
+  boxContainer: {
     display: 'flex',
     justifyContent: 'space-between',
+    gap: '20px',
+  },
+  box: {
+    flex: 1,
+    border: '1px solid #ccc',
+    borderRadius: '10px',
+    padding: '10px',
+    overflowY: 'auto',
+    maxHeight: '400px', // Limit height for scrolling
+    width: '100%', // Full width of parent container
+    maxWidth: '800px', // Explicit maximum width
+    boxSizing: 'border-box', // Include padding in width
+    margin: '0 auto', // Center horizontally
+  },
+  
+  productList: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))',
+    gap: '10px',
+    padding: '10px',
+    justifyContent: 'center', // Center grid items in the parent
+    width: '100%',
+    boxSizing: 'border-box',
+  },
+  
+  
+  
+  productTile: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    border: '1px solid #ddd',
+    borderRadius: '10px',
+    padding: '10px',
+    backgroundColor: '#f9f9f9',
+    boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.3)',
+    width: '100%', // Fit inside grid column
+    maxWidth: '120px', // Prevent excessive width
+    
+    textAlign: 'center',
+    boxSizing: 'border-box', // Include padding in width
+  },
+
+  
+  productImage: {
+    width: '50%', // Scale to container width
+    height: 'auto', // Maintain aspect ratio
+    maxHeight: '150px', // Prevent excessive height
+    objectFit: 'contain', // Ensure image fits within tile
+    borderRadius: '5px',
+    padding: '5px',
+  },
+  
+  productTileLabel: {
+    backgroundColor:'black',
+    padding: '5px',
+    width: '100%',
+    color: 'white',
+    
+  },
+
+  closeButton: {
+    position: 'absolute',
+    top: '5px',
+    right: '5px',
+    backgroundColor: 'red',
+    color: '#fff',
+    borderRadius: '50%',
+    width: '20px',
+    height: '20px',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    cursor: 'pointer',
+  },
+  floatingButton: {
+    position: "fixed",
+    bottom: "20px",
+    right: "20px",
+    width: "50px",
+    height: "50px",
+    borderRadius: "50%",
+    backgroundColor: "#007bff",
+    color: "#fff",
+    border: "none",
+    cursor: "pointer",
+    fontSize: "1.5rem",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 9999,
+    boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.3)",
+  },
+  buttonContainer: {
+    marginTop: '20px',
+    display: 'flex',
+    justifyContent: 'space-between',
+    width: '100%'
   },
   createButton: {
-    padding: '10px 15px',
+    padding: '10px 20px',
     backgroundColor: '#28a745',
     color: '#fff',
     border: 'none',
     borderRadius: '5px',
     cursor: 'pointer',
-    fontSize: '1rem',
-    flex: 1,
   },
   closeButton: {
+    padding: '10px 20px',
     backgroundColor: 'red',
-    padding: '10px 15px',
-    fontSize: '1rem',
-    color: 'white',
-    border: 'none',
-    borderRadius: '5px',
-    cursor: 'pointer',
-    flex: 1,
-  },
-  editButton: {
-    marginTop: '10px',
-    padding: '10px',
-    backgroundColor: '#ffc107',
     color: '#fff',
     border: 'none',
     borderRadius: '5px',
     cursor: 'pointer',
-    width: '100%',
+    
   },
-  link: {
-    color: '#007bff',
-    textDecoration: 'none',
+  ordersContainer: {
+    width: '100%',
+    maxWidth: '1200px', // Limit max width
+    margin: '0 auto', // Center align in the page
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '20px', // Space between orders
+  },
+
+  orderCard: {
+    padding: '10px',
+    border: '1px solid #ddd',
+    borderRadius: '10px',
+    backgroundColor: '#fff',
+    display: 'flex',
+    flexDirection: 'column', // Stack content vertically
+    gap: '10px',
+    width: '100%', // Ensure card takes up full container width
+  },
+  productTile: {
+    width: '100%', // Ensure full width inside parent
+    maxWidth: '200px', // Limit individual tile size
+    margin: '0 auto', // Center within the grid
   },
 };
+
 
 export default OrderManagement;

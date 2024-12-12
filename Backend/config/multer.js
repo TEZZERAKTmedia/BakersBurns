@@ -30,6 +30,7 @@ const productUpload = multer({
   limits: { fileSize: 50 * 1024 * 1024 } // File size limit (2 MB example)
 });
 
+
 // Configure storage for gallery images
 const galleryStorage = multer.diskStorage({
   destination: function (req, file, cb) {

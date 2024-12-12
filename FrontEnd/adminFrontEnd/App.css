@@ -32,6 +32,10 @@
     animation: logo-spin infinite 20s linear;
   }
 }
+body {
+  letter-spacing: 0.1em; /* Increases spacing across the entire app */
+}
+
 
 .card {
   padding: 2em;

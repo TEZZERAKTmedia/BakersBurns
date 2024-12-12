@@ -21,7 +21,7 @@ const Home = () => {
     };
 
     getFeaturedProducts();
-    getUpcomingEvent();
+    fetchUpcomingEvent();
   }, []);
 
   const fetchFeaturedProducts = async () => {
@@ -36,11 +36,12 @@ const Home = () => {
 
   const fetchUpcomingEvent = async () => {
     try {
-      const response = await userApi.get('/event/upcoming');
-      return response.data;
+      const response = await userApi.get('/user-event/upcoming'); // Adjust URL if necessary
+      console.log("Fetched upcoming event:", response.data); // Log the returned data
+      setUpcomingEvent(response.data);
     } catch (error) {
       console.error('Error fetching upcoming event:', error);
-      return null;
+      setUpcomingEvent(null);
     }
   };
 
@@ -63,9 +64,9 @@ const Home = () => {
           <motion.h1 
             style={{
               fontFamily: '"Dancing Script", cursive',
-              fontSize: '5rem',
+              fontSize: '10vw',
               color: 'Black',
-              textShadow: '2px 4px 10px rgba(0, 0, 0, 0.6)',
+              
             }}
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -165,58 +166,56 @@ const Home = () => {
       </motion.section>
 
       {/* Featured Products Section */}
-      <motion.section 
-        className="featured-products-section"
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, amount: 0.2 }}
-        variants={fadeIn}
-      >
-                  <motion.h1 
-            style={{
-              fontFamily: '"Dancing Script", cursive',
-              fontSize: '4rem',
-              color: 'Black',
-              textShadow: '2px 4px 10px rgba(0, 0, 0, 0.6)',
-            }}
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 1 }}
-          >
-            Featured Products
-          </motion.h1>
+      {featuredProducts.length > 0 && (
+  <motion.section 
+    className="featured-products-section"
+    initial="hidden"
+    whileInView="visible"
+    viewport={{ once: true, amount: 0.2 }}
+    variants={fadeIn}
+  >
+    <motion.h1 
+      style={{
+        fontFamily: '"Dancing Script", cursive',
+        fontSize: '4rem',
+        color: 'Black',
+        textShadow: '2px 4px 10px rgba(0, 0, 0, 0.6)',
+      }}
+      initial={{ scale: 0.8, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      transition={{ duration: 1 }}
+    >
+      Featured Products
+    </motion.h1>
+    <motion.div 
+      className="products-gallery"
+      initial="hidden"
+      whileInView="visible"
+      variants={{ visible: { opacity: 1, transition: { staggerChildren: 0.3 } } }}
+    >
+      {featuredProducts.map((product) => (
         <motion.div 
-          className="products-gallery"
-          initial="hidden"
-          whileInView="visible"
-          variants={{ visible: { opacity: 1, transition: { staggerChildren: 0.3 } } }}
+          key={product.id} 
+          className="product-card"
+          variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
         >
-          {featuredProducts.length > 0 ? (
-            featuredProducts.map((product) => (
-              <motion.div 
-                key={product.id} 
-                className="product-card"
-                variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
-              >
-                {product.image ? (
-                  <img
-                    className="product-image"
-                    src={`${import.meta.env.VITE_IMAGE_BASE_URL}/${product.image}`}
-                    alt={product.name}
-                  />
-                ) : (
-                  <p>No image</p>
-                )}
-                <h3>{product.name}</h3>
-                <p>${product.price.toFixed(2)}</p>
-                <Link to={`/product/${product.id}`} className="product-btn">View Product</Link>
-              </motion.div>
-            ))
+          {product.image ? (
+            <img
+              className="product-image"
+              src={`${import.meta.env.VITE_IMAGE_BASE_URL}/${product.image}`}
+              alt={product.name}
+            />
           ) : (
-            <p>No featured products available</p>
+            <p>No image</p>
           )}
+          <h3>{product.name}</h3>
+          <p>${product.price.toFixed(2)}</p>
+          <Link to={`/product/${product.id}`} className="product-btn">View Product</Link>
         </motion.div>
-      </motion.section>
+      ))}
+    </motion.div>
+  </motion.section>
+)}
 
       {/* Contact Section */}
       <motion.section 

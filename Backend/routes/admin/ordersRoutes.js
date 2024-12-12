@@ -7,13 +7,13 @@ const adminAuthMiddleware = require('../../middleware/adminAuthMiddleware');
 router.get('/get', adminAuthMiddleware(), ordersController.getAllOrders);
 router.get('/get-by-id/:orderId', adminAuthMiddleware(), ordersController.getOrderById);
 
-
+router.get('/get-users', adminAuthMiddleware(), ordersController.getUsers);
 
 // POST
 router.post('/create', adminAuthMiddleware(), ordersController.createOrder);
 router.put('/update/:orderId', adminAuthMiddleware(), ordersController.updateOrder);
 
 // DELETE
-router.delete('/delete-order/:orderId', adminAuthMiddleware(), ordersController.deleteOrder);
+router.delete('/delete/:orderId', adminAuthMiddleware(), ordersController.deleteOrder);
 
 module.exports = router;

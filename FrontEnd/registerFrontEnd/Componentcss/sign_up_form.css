@@ -4,19 +4,21 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
-    padding-top: 20%;
+    min-height: 100vh;
+    margin: 0;
+    padding: 10px; /* Padding for mobile devices */
+    box-sizing: border-box;
 }
 
 .container {
-    
     background: #fff;
-    padding: 2rem;
+    padding: 1.5rem;
     border-radius: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    
-    max-width: 400px;
+    max-width: 90%; /* Fit within the viewport */
+    width: 100%; /* Responsive width */
     text-align: center;
+    
 }
 
 h2 {
@@ -24,43 +26,96 @@ h2 {
     color: #333;
 }
 
-form {
-    margin-top: 20%;
-    background: #fff;
-    padding: 2rem;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    
-    max-width: 400px;
-    text-align: center;
-    
-}
-
 form ul li {
     color: #333;
-    
 }
 
 label {
-    
     text-align: left;
     color: #333;
     font-weight: bold;
     margin-bottom: 0.5rem;
     align-self: center;
-    width: 80%;
+    width: 100%;
 }
 
+.user-email {
+    background-color: rgb(52, 52, 52);
+    color: white;
+    padding: 10px;
+    border-radius: 10px;
+    margin: 20px;
+}
 input {
     margin: 5px;
     margin-bottom: 1rem;
     width: 90%;
     border: 1px solid #ccc;
     border-radius: 5px;
+    margin-left: 0;
     font-size: 1rem;
     transition: border-color 0.3s ease;
+}
+
+.success-message {
+    padding: 20px;
+    background-color: #dedede;
+    margin-top: -30%;
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    z-index: 0; /* Ensure the text is above the animation */
+    
     
 }
+.signup-button {
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 1rem;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.signup-button:disabled {
+    background-color: grey;
+    cursor: not-allowed;
+}
+
+
+.success-message::before {
+    content: '';
+    position: absolute;
+    top: -8px; /* Adjust to be outside the actual content */
+    left: -8px;
+    right: -8px;
+    bottom: -8px;
+    border-radius: 12px; /* Match and slightly exaggerate the parent border radius */
+    border: 4px solid transparent;
+    background: linear-gradient(90deg, transparent, #e2e2e2, #8cbea1, #6ebd8f, transparent);
+    background-size: 200% 200%;
+    z-index: -1; /* Place the animation behind the text */
+    animation: rotate-border 5s linear infinite;
+}
+
+@keyframes rotate-border {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+
+
+
 
 input:focus {
     border-color: #007bff;
@@ -78,9 +133,7 @@ button {
     transition: background-color 0.3s ease;
 }
 
-button:hover {
-    background-color: #0056b3;
-}
+
 
 p {
     margin-top: 1rem;
@@ -88,123 +141,180 @@ p {
 }
 
 .bullet-point::before {
-    content: "•"; /* Bullet symbol */
-    color: black; /* Bullet color */
-    display: inline-block; 
-    width: 1em; /* Space between bullet and text */
-    margin-left: -1em; /* Align bullets */
-  }
+    content: "•";
+    color: black;
+    display: inline-block;
+    width: 1em;
+    margin-left: -1em;
+}
+.username {
+    margin-left: 0%;
+    margin-bottom: -30px;
+    padding-top: 100px;
+}
 
+.email {
+    margin-left: 0%;
 
-/* Container for the checkbox and label */
+}
+
 .check-boxes {
     display: flex;
     align-items: center;
     margin-bottom: 20px;
-    
+    flex-wrap: wrap; /* Wrap content on smaller screens */
 }
 
-/* Hide the default checkbox */
 .check-boxes input[type="checkbox"] {
     display: none;
-    
 }
 
-/* Custom checkbox design */
 .check-boxes label {
     position: relative;
     display: inline-block;
-    width: 620px;
-    margin: 20px;
-    height: 30px;
-    margin-right: 15px;
+    width: auto; /* Allow flexible width */
+    padding: 10px;
     cursor: pointer;
 }
 
-/* The slider background */
 .check-boxes label::before {
     content: "";
     position: absolute;
     top: 0;
     left: 0;
-    width: 60px;
-    height: 30px;
+    width: 40px;
+    height: 20px;
     background-color: #ccc;
-    
     border-radius: 50px;
     transition: background-color 0.3s ease;
 }
 
-/* The slider dot */
 .check-boxes label::after {
     content: "";
     position: absolute;
-    top: 4px;
-    left: 4px;
-    width: 22px;
-    height: 22px;
+    top: 2px;
+    left: 2px;
+    width: 16px;
+    height: 16px;
     background-color: white;
     border-radius: 50%;
     transition: transform 0.3s ease;
-    
 }
 
-/* When the checkbox is checked */
 .check-boxes input[type="checkbox"]:checked + label::before {
-    background-color: #4CAF50; /* Change this to your preferred color */
+    background-color: #4CAF50;
 }
 
-/* Move the slider dot when checked */
 .check-boxes input[type="checkbox"]:checked + label::after {
-    transform: translateX(30px);
+    transform: translateX(20px);
 }
 
-/* Optional text styles */
 .check-boxes label span {
-    font-size: 16px;
+    font-size: 1rem;
     font-weight: bold;
-    color: #ffffff; /* White text */
-    margin-left: 20%;
-    
-    padding: 10px;
+    color: #333;
+    margin-left: 10px;
 }
-/* Add this to your Componentcss/sign_up_form.css file */
 
+.opt-in-description {
+   color: black;
+}
 .phone-input-wrapper {
     display: flex;
     align-items: center;
-    border: 1px solid #ccc;  /* Create a border around the input */
-    border-radius: 4px;  /* Rounded corners */
+    border: 1px solid #ccc;
+    border-radius: 4px;
     padding: 0.5em;
-    width: fit-content;
-    margin-bottom: 1em;  /* Space between elements */
-  }
-  
-  .phone-input-wrapper select {
+    width: 100%; /* Fit to the container */
+    margin-bottom: 1em;
+}
+
+.phone-input-wrapper select {
     border: none;
     background-color: transparent;
     font-size: 1rem;
     padding-right: 0.5em;
-    margin-right: 0.5em;
     outline: none;
-  }
-  
-  .phone-input-wrapper input {
+}
+
+.phone-input-wrapper input {
     border: none;
     outline: none;
     font-size: 1rem;
-    flex-grow: 1;  /* Make the input grow to take up remaining space */
-  }
-  
-  .phone-input-wrapper input::placeholder {
-    color: #888;  /* Placeholder text color */
-  }
-  
-  .phone-input-wrapper input:focus {
-    outline: none;  /* No outline on focus */
-  }
-  
-  .phone-input-wrapper select:focus {
+    flex-grow: 1;
+}
+
+.phone-input-wrapper input::placeholder {
+    color: #888;
+}
+
+.phone-input-wrapper input:focus {
     outline: none;
-  }
+}
+
+.phone-input-wrapper select:focus {
+    outline: none;
+}
+.visibility-animation {
+  margin-right: 30px;
+}
+/* Responsive adjustments */
+@media (max-width: 600px) {
+    h2 {
+        font-size: 1.5rem;
+    }
+
+    .country-code {
+        width:50px
+    }
   
+    label, .check-boxes label span {
+        font-size: 0.875rem; /* Smaller font size on small screens */
+        padding: 20px;
+        margin: 20px;
+    }
+
+    button {
+        font-size: 0.875rem;
+        padding: 0.5rem;
+    }
+
+    .check-boxes label {
+        width: auto;
+        padding: 0.5rem;
+    }
+}
+
+@media (max-width: 320px) {
+    h2 {
+        font-size: 1.5rem;
+    }
+
+    .country-code {
+        width:50px
+    }
+    .visibility-animation {
+        margin-left: 10px;
+    }
+    label, .check-boxes label span {
+        font-size: 0.875rem; /* Smaller font size on small screens */
+        padding: 20px;
+        margin: 20px;
+    }
+    .username {
+        margin-left: -5%;
+    }
+    .email {
+        margin-left: -5%;
+    }
+
+    button {
+        font-size: 0.875rem;
+        padding: 0.5rem;
+    }
+
+    .check-boxes label {
+        width: auto;
+        padding: 0.5rem;
+    }
+}

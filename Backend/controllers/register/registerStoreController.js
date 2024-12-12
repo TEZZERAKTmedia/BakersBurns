@@ -1,4 +1,5 @@
 // controllers/registerStoreController.js
+const { Op } = require('sequelize');
 
 const Product = require('../../models/product'); // Assuming a Product model exists
 const TempCart = require('../../models/tempCart'); // Temporary Cart model for unregistered users
@@ -6,12 +7,20 @@ const TempCart = require('../../models/tempCart'); // Temporary Cart model for u
 // Get all available products
 const getProducts = async (req, res) => {
   try {
-    const products = await Product.findAll(); // Fetch all products
+    const products = await Product.findAll({
+      where: {
+        quantity: {
+          [Op.gt]: 0, // Fetch only products where quantity is greater than 0
+        },
+      },
+    });
+
     res.status(200).json({ products });
   } catch (error) {
     res.status(500).json({ message: 'Error fetching products', error });
   }
 };
+
 
 // Add an item to the temporary cart for unregistered users
 const addToCart = async (req, res) => {

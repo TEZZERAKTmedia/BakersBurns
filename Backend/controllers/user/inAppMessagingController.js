@@ -133,30 +133,23 @@ exports.sendInAppMessage = async (req, res) => {
 exports.fetchMessagesByThreadId = async (req, res) => {
   const { threadId } = req.query;
 
+  if (!threadId) {
+    return res.status(400).json({ error: 'Thread ID is required' });
+  }
+
   try {
-    // Fetch all messages for the thread
+    // Fetch all messages for the specified thread
     const messages = await Message.findAll({
       where: { threadId },
-      attributes: ['messageBody', 'senderUsername', 'receiverUsername', 'createdAt'],
-      order: [['createdAt', 'ASC']]
+      attributes: ['id', 'messageBody', 'senderUsername', 'receiverUsername', 'createdAt'],
+      order: [['createdAt', 'ASC']], // Sort by ascending creation date
     });
 
     if (!messages.length) {
       return res.status(404).json({ error: 'No messages found' });
     }
 
-    // Fetch roles for each sender using their username
-    const enrichedMessages = await Promise.all(
-      messages.map(async (message) => {
-        const sender = await User.findOne({ where: { username: message.senderUsername }, attributes: ['role'] });
-        return {
-          ...message.get(),  // Extract the Sequelize data object
-          senderRole: sender ? sender.role : 'unknown'  // Add the role to the message data
-        };
-      })
-    );
-
-    res.status(200).json({ messages: enrichedMessages });
+    res.status(200).json({ messages });
   } catch (error) {
     console.error('Error fetching messages by threadId:', error);
     res.status(500).json({ error: 'Failed to fetch messages' });

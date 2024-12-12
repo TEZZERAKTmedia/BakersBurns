@@ -1,0 +1,128 @@
+/* Wrapper to scale the entire component */
+.add-product-form-input {
+  width: 100%;
+}
+
+/* Main container for the add product form */
+.add-product-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 90%; /* Take up 90% of the parent width */
+  max-width: 600px; /* Optional: Limit the maximum width */
+  margin: 0 auto;
+  padding: 5%; /* Use percentages for padding */
+  background-color: #f9f9f9;
+  border-radius: 1em; /* Use em for consistent scaling */
+  box-shadow: 0 2% 4% rgba(0, 0, 0, 0.1); /* Scale shadow dimensions */
+  font-family: Arial, sans-serif;
+}
+
+/* Title style */
+.add-product-container h2 {
+  font-size: 4vw; /* Scale with viewport width */
+  margin-bottom: 3%; /* Use percentages for spacing */
+  color: #333;
+  text-align: center;
+}
+@media (max-width: 480px) {
+  .box {
+    max-width: '90%';
+  }
+  .productTile {
+    max-width: '75px'; 
+    padding: 3px;
+  }
+  .productImage {
+    max-height: '40px';
+  }
+  .productTileLabel {
+    font-size: '0.65rem';
+  }
+}
+
+/* Label style */
+.add-product-container label {
+  align-self: flex-start;
+  font-size: 3.5vw; /* Scale with viewport width */
+  margin-bottom: 1%; /* Use percentages for spacing */
+  color: #555;
+}
+
+/* Input, textarea, and file input styles */
+.add-product-container input[type="text"],
+.add-product-container input[type="number"],
+.add-product-container textarea,
+.add-product-container input[type="file"] {
+  width: 100%;
+  padding: 2%; /* Use percentages for padding */
+  margin-bottom: 2%; /* Use percentages for spacing */
+  border: 0.2em solid #ccc; /* Scalable border thickness */
+  border-radius: 0.5em; /* Scalable border radius */
+  font-size: 3.5vw; /* Scale with viewport width */
+  box-sizing: border-box; /* Include padding in width/height */
+}
+
+/* Textarea specific styles */
+.add-product-container textarea {
+  resize: none; /* Disable resizing for consistent layout */
+  height: 10vh; /* Use viewport height for textarea */
+}
+
+/* Button styles */
+.add-product-container button {
+  padding: 2% 5%; /* Use percentages for padding */
+  background-color: #28a745;
+  color: #fff;
+  border: none;
+  border-radius: 0.5em;
+  font-size: 4vw; /* Scale with viewport width */
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+/* Hover effect for buttons */
+.add-product-container button:hover {
+  background-color: #218838;
+}
+
+/* Error message style */
+.add-product-container span {
+  color: red;
+  font-weight: bold;
+  margin-left: 1%; /* Use percentages for spacing */
+  font-size: 3vw; /* Scale with viewport width */
+}
+
+/* Cropper container */
+.cropper-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 3%; /* Use percentages for spacing */
+  width: 100%; /* Adjusts to full width of the parent */
+  max-width: 600px; /* Optional: Limit the maximum width */
+  padding: 5%; /* Add padding for spacing */
+  border: 0.2em solid #ddd; /* Scalable border thickness */
+  background-color: #f9f9f9; /* Optional: Background color for visibility */
+  box-sizing: border-box; /* Include padding in width/height */
+}
+
+/* Cropper button styles */
+.cropper-container button {
+  margin-top: 3%; /* Use percentages for spacing */
+  padding: 2% 5%; /* Use percentages for padding */
+  background-color: #007bff;
+  color: #fff;
+  font-size: 4vw; /* Scale with viewport width */
+  border: none;
+  border-radius: 0.5em; /* Scalable border radius */
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+/* Hover effect for cropper buttons */
+.cropper-container button:hover {
+  background-color: #0056b3;
+}

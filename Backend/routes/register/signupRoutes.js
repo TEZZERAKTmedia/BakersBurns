@@ -7,11 +7,10 @@ const userAuthMiddleware = require('../../middleware/userAuthMiddleware');
 //
 router.post('/', signupController.signup);
 router.get('/resend-verifictation-email', signupController.resendVerificationEmail);
-router.get('/verify-and-move', signupController.verifyAndMove); 
+router.get('/create-account', signupController.createAccount); 
 router.post('/generate-token', signupController.generateLoginTokenAndSetCookie);
 router.post('/check-username', signupController.checkUsername);
 
-//
 router.get('/generate-registration-challenge', userAuthMiddleware, signupPasskeyController.generateRegistrationChallenge);
 
 // POST request to verify passkey registration during signup

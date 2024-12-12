@@ -10,6 +10,9 @@ import Login from './Pages/Login';
 import PasswordResetForm from './Components/verification/passwordReset';
 import ForgotPassword from './Components/passwordForgot';
 import Events from '../userFrontEnd/Pages/Events';
+import PrivacyPolicy from './Components/Privacy&Terms/privacyPolicy';
+import TermsOfService from './Components/Privacy&Terms/termsOfService';
+
 
 
 
@@ -25,12 +28,14 @@ function App() {
                     <Route path="/store" element={<Store />} />
                     <Route path="/about" element={<About />} />
                     <Route path='/verifyemail' element={<VerifyEmail/>} />
-                    <Route path="/signup" element={<Signup />} />
+                    <Route path="/sign-up" element={<Signup />} />
                     <Route path ="/login" element={<Login />} />
                     <Route path ="/passwordreset" element={<PasswordResetForm />} />
                     <Route path ="/forgotpassword" element={<ForgotPassword />} />
                     <Route path ="/verify" element={<VerifyEmail />} />
                     <Route path ="/event-manager" element={<Events/>} />
+                    <Route path ="/privacy-policy" element={<PrivacyPolicy />} />
+                    <Route path ="/terms-of-service" element={<TermsOfService />} />
                 </Routes>
             </div>
         </Router>

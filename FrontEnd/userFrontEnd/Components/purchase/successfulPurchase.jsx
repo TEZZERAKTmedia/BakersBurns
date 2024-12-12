@@ -9,7 +9,7 @@ const Success = () => {
       <p>Thank you for your purchase. Your order is confirmed.</p>
       <p>You can track your order using the link below.</p>
       
-      <Link to="/tracking" className="track-order-link">
+      <Link to="/orders" className="track-order-link">
         Track My Order
       </Link>
     </div>

@@ -60,7 +60,25 @@ const verifyEmail = async (req, res) => {
     }
 };
 
+const checkUserRole = async (req, res) => {
+    try {
+        const { role } = req.user;
+        const user = await User.findByPk(req.user.id);
+
+        if(!user){
+            return res.status(404).json({ message: 'User not found'})
+        }
+
+        return res.status(200).json({ role })
+    } catch (error) {
+        console.error('Error checking user role:', error.message);
+        return res.status(500).json({ message: 'Error checking user role', error: error.message});
+        
+    }
+}
+
 module.exports = {
     signup,
-    verifyEmail
+    verifyEmail, 
+    checkUserRole
 };

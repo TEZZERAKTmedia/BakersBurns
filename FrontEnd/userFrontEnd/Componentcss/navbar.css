@@ -1,4 +1,11 @@
 /* General Navbar Styling */
+
+body {
+  -webkit-text-size-adjust: 100%;
+  -moz-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
 .navbar {
   position: fixed;
   top: 0;
@@ -51,15 +58,14 @@
   list-style: none;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
+  justify-content: center; /* Center items vertically */
+  align-items: center; /* Center items horizontally */
   position: fixed;
   top: 60px;
   left: 0;
   width: 100vw;
   height: 100vh;
   background-color: rgba(0, 0, 0, 0.9);
-  margin: 0;
   padding: 0;
   display: none;
   z-index: 1000;
@@ -78,6 +84,7 @@
 .nav-item a {
   color: #fff;
   text-decoration: none;
+  text-align: center;
   padding: 8px 12px;
   border-radius: 4px;
   font-size: 2rem;
@@ -110,31 +117,23 @@
   animation: slideIn 0.5s forwards;
   animation-delay: 0.4s;
 }
-
 .nav-list.show .nav-item:nth-child(5) a {
   animation: slideIn 0.5s forwards;
-  animation-delay: 0.5s;
+  animation-delay: 0.4s;
 }
-
 .nav-list.show .nav-item:nth-child(6) a {
   animation: slideIn 0.5s forwards;
-  animation-delay: 0.6s;
+  animation-delay: 0.4s;
 }
-
 .nav-list.show .nav-item:nth-child(7) a {
   animation: slideIn 0.5s forwards;
-  animation-delay: 0.7s;
+  animation-delay: 0.4s;
 }
-
 .nav-list.show .nav-item:nth-child(8) a {
   animation: slideIn 0.5s forwards;
-  animation-delay: 0.8s;
+  animation-delay: 0.4s;
 }
 
-.nav-list.show .nav-item:nth-child(9) a {
-  animation: slideIn 0.5s forwards;
-  animation-delay: 0.9s;
-}
 
 /* Keyframes for slide-in animation */
 @keyframes slideIn {
@@ -148,14 +147,11 @@
   }
 }
 
-
 /* Desktop View - Horizontal Navbar */
 @media (min-width: 768px) {
   .navbar {
-    justify-content: space-between;
+    justify-content: center; /* Center navbar items on larger screens */
   }
-
-  
 
   .nav-list {
     flex-direction: row;
@@ -182,3 +178,50 @@
     background-color: #000;
   }
 }
+
+/* Additional styling for settings icon */
+/* Additional styling for settings icon */
+.settings-icon {
+ padding: 10px;
+}
+
+/* Show settings icon when navbar is open in mobile view */
+.settings-icon.show {
+  display: block;
+}
+
+/* Desktop View - Adjust settings icon visibility and position */
+@media (min-width: 768px) {
+  .settings-icon {
+    display: inline-block; /* Make it visible in desktop view */
+    position: relative; /* Relative position aligns with desktop layout */
+    right: 0;
+    padding-left: 15px;
+  }
+
+  .nav-list {
+    flex-direction: row;
+    position: static;
+    width: auto;
+    height: auto;
+    background-color: transparent;
+    padding: 0;
+  }
+
+  .nav-item {
+    margin: 0 15px;
+  }
+
+  .nav-item a {
+    background: transparent;
+    color: white;
+    padding: 10px 15px;
+    font-size: 1.2em;
+  }
+
+  .nav-item a:hover {
+    color: #ffffff;
+    background-color: #000;
+  }
+}
+

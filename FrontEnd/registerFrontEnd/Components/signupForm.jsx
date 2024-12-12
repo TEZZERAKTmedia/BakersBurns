@@ -3,6 +3,71 @@ import DOMPurify from 'dompurify';  // For sanitization
 import { registerApi } from '../config/axios'; // Import the configured axios instance
 import '../Componentcss/sign_up_form.css';
 import { Link, useNavigate } from 'react-router-dom';
+import eyeOpenIcon from '../assets/password-visibility-icon.png';
+import eyeCloseIcon from '../assets/password-visibility-icon-reverse.png';
+import PrivacyPolicy from './Privacy&Terms/privacyPolicy';
+import TermsOfService from './Privacy&Terms/termsOfService';
+
+
+const Modal = ({ isVisible, content, onClose, requireScroll }) => {
+    const [hasScrolledToBottom, setHasScrolledToBottom] = useState(!requireScroll);
+
+    const handleScroll = (e) => {
+        const { scrollTop, scrollHeight, clientHeight } = e.target;
+        console.log({ scrollTop, scrollHeight, clientHeight });
+        if (scrollTop + clientHeight >= scrollHeight) {
+            setHasScrolledToBottom(true);
+        }
+    };
+
+    if (!isVisible) return null;
+
+    return (
+        <div style={modalOverlayStyles}>
+        <div style={modalStyles}>
+            {/* Content with Scroll */}
+            <div
+                onScroll={handleScroll}
+                style={contentStyles(requireScroll)}
+            >
+                {content}
+            </div>
+
+            {/* Scroll Prompt and Close Button - Only show if requireScroll is true */}
+            {requireScroll && (
+                <div>
+                    {!hasScrolledToBottom && (
+                        <p style={scrollPromptStyles}>
+                            Please scroll to the bottom to enable the Close button.
+                        </p>
+                    )}
+                    
+                    {hasScrolledToBottom && (
+                        <button
+                            onClick={onClose}
+                            style={closeButtonStyles}
+
+                        >
+                            Close
+                        </button>
+                    )}
+                </div>
+            )}
+
+            {/* If no scroll requirement, show close button normally */}
+            {!requireScroll && (
+                <button
+                    onClick={onClose}
+                    style={closeButtonStyles}
+                >
+                    Close
+                </button>
+            )}
+        </div>
+    </div>
+    );
+};
+
 
 const SignUpForm = () => {
     const [formData, setFormData] = useState({
@@ -16,9 +81,16 @@ const SignUpForm = () => {
         isOptedInForEmailUpdates: false 
     });
 
+    const [hasAcceptedPrivacyPolicy, setHasAcceptedPrivacyPolicy] = useState(false);
+    const [hasAcceptedTermsOfService, setHasAcceptedTermsOfService] = useState(false);
+    const [modalContent, setModalContent] = useState('');
+    const [isModalVisible, setModalVisible] = useState(false);
+
     const [errorMessage, setErrorMessage] = useState('');
+    const [animationState, setAnimationState] = useState(false);
     const [emailSent, setEmailSent] = useState(false);
     const [userNameError, setUserNameError] = useState('');
+    const [registeredEmail, setRegisteredEmail] = useState('');
     const [passwordVisible, setPasswordVisible] = useState(false);  // State for toggling password visibility
     const [requirements, setRequirements] = useState({
         length: false,
@@ -27,7 +99,26 @@ const SignUpForm = () => {
         digit: false
     });
 
-    const navigate = useNavigate();
+    const areTermsAccepted = () => {
+        return hasAcceptedPrivacyPolicy && hasAcceptedTermsOfService;
+      };
+      
+      // ... rest of your component code
+      
+      <button
+        type="submit"
+        disabled={!areTermsAccepted()}
+        style={{
+          // ... button styles
+        }}
+      >
+        {areTermsAccepted() ? 'Sign Up' : 'Please accept Terms and Conditions'}
+      </button>
+
+    const togglePasswordVisibility = () => {
+        setPasswordVisible(!passwordVisible);  // Toggle password visibility
+        setAnimationState(!animationState); // Toggle between forward and reverse animations
+    };
 
     const formatPhoneNumber = (value) => {
         const phoneNumber = value.replace(/[^\d]/g, ''); // Remove non-numeric characters
@@ -43,6 +134,8 @@ const SignUpForm = () => {
             [name]: type === 'checkbox' ? checked : value
         });
     };
+
+    
     const handlePhoneChange = (e) => {
         const formattedPhoneNumber = formatPhoneNumber(e.target.value);
         setFormData({
@@ -50,7 +143,15 @@ const SignUpForm = () => {
             phoneNumber: formattedPhoneNumber
         });
     };
+    const handleOpenModal = (content) => {
+        setModalContent(content);
+        setModalVisible(true);
+    };
 
+    const handleCloseModal = () => {
+        setModalVisible(false);
+    };
+    
     useEffect(() => {
         const length = formData.password.length >= 8;
         const upperLowerCase = /(?=.*[a-z])(?=.*[A-Z])/.test(formData.password);
@@ -101,6 +202,7 @@ const SignUpForm = () => {
             });
     
             if (response.status === 200) {
+                setRegisteredEmail(formData.email);
                 setEmailSent(true);
                 resetForm();
             } else {
@@ -115,7 +217,8 @@ const SignUpForm = () => {
             }
         }
     };
-	    const checkUsername = async () => {
+
+    const checkUsername = async () => {
         try {
             const response = await registerApi.post('/sign-up/check-username', { userName: formData.userName });
             setUserNameError('');
@@ -128,47 +231,45 @@ const SignUpForm = () => {
         }
     };
 
-
-
     const resetForm = () => {
         setFormData({
-            userName:'',
-            email:'',
-            password:'',
-            confirmPassword:'',
-            phoneNumber:'',
+            userName: '',
+            email: '',
+            password: '',
+            confirmPassword: '',
+            phoneNumber: '',
             countryCode: '+1',
             isOptedInForPromotions: false, 
             isOptedInForEmailUpdates: false 
         });
     };
 
-    const togglePasswordVisibility = () => {
-        setPasswordVisible(!passwordVisible);  // Toggle visibility
-    };
-
     return (
-        <div>
+        <div style={{marginTop:'50%'}}>
             {emailSent ? (
-                <div className="success-message">
-                    Registration successful! A verification email has been sent to {formData.email}. Please check your inbox to verify your account.
-                </div>
+    <div className="success-message" style={{color: 'black'}}>
+    Registration successful! A verification email has been sent to your inbox: 
+    <div className='user-email'>{registeredEmail}</div>
+    Please check your inbox to verify your account.
+    <p style={{backgroundColor:'black',color: 'white', padding:'10px' , borderRadius:'10px'}}>If this email is incorrect please sign up again</p>
+</div>
             ) : (
                 <form onSubmit={handleSubmit}>
-                    {errorMessage && <div className="error-message">{errorMessage}</div>}
-                    <label>
+                    {errorMessage && <div className="error-message" style={{padding:'20%'}}>{errorMessage}</div>}
+                    <button style={{margin: '5px'}} ><Link to="/login">Already have an account? Click here to log in</Link></button>
+                    <label className='username'>
                         <input 
                         type="text" 
                         name="userName" 
                         value={formData.userName} 
                         onChange={handleChange}
-			onBlur={checkUsername}
-                        placeholder="Username" 
+                        onBlur={checkUsername}
+                        placeholder="Username"
                         required />
                     </label>
                     {userNameError && <div className="error-message">{userNameError}</div>}
                     
-                    <label>
+                    <label className='email'>
                         <input 
                         type="email" 
                         name="email" 
@@ -184,14 +285,13 @@ const SignUpForm = () => {
                             name="countryCode" 
                             value={formData.countryCode} 
                             onChange={handleChange}
+                            className='country-code'
                         >
                             <option value="+1">+1 (US)</option>
                             <option value="+44">+44 (UK)</option>
                             <option value="+61">+61 (Australia)</option>
-                            {/* Add more country codes as needed */}
                         </select>
 
-                        {/* Phone number input */}
                         <input
                             type="tel"
                             name="phoneNumber"
@@ -203,18 +303,17 @@ const SignUpForm = () => {
                         />
                     </div>
 
-                    {/* Password input with toggle visibility inside the input */}
+                    {/* Password input with toggle visibility */}
                     <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
                         <input 
-                        type={passwordVisible ? 'text' : 'password'}  // Toggle between text and password
-                        name="password" 
-                        value={formData.password} 
-                        onChange={handleChange} 
-                        placeholder="Password"
-                        required 
-                        style={{ paddingRight: '40px' }}  // Add space for the eye icon
+                            type={passwordVisible ? 'text' : 'password'}
+                            name="password"
+                            value={formData.password}
+                            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                            placeholder="Password"
+                            required 
+                            style={{ paddingRight: '40px', height:'30px'}} 
                         />
-                        {/* Eye icon for toggling password visibility */}
                         <button 
                             type="button" 
                             onClick={togglePasswordVisibility} 
@@ -223,13 +322,19 @@ const SignUpForm = () => {
                                 right: '10px',
                                 background: 'none',
                                 border: 'none',
-                                cursor: 'pointer'
+                                cursor: 'pointer',
+
                             }}
                         >
-                            {passwordVisible ? '🙈' : '👁️'} {/* Simple emoji for eye icon */}
+                            <img
+                                className='visibility-animation'
+                                src={animationState ? eyeCloseIcon : eyeOpenIcon} // Toggle between icons
+                                alt="Toggle Password Visibility"
+                                style={{ width: '24px', height: '24px' }}
+                            />
                         </button>
                     </div>
-                    
+
                     <ul>
                         <li className={requirements.length ? 'valid' : 'invalid'}>
                             Password must be at least 8 characters long
@@ -246,33 +351,17 @@ const SignUpForm = () => {
                     </ul>
 
                     {/* Confirm password input */}
-                    <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                        <input 
-                        type={passwordVisible ? 'text' : 'password'}  // Toggle here as well
-                        name="confirmPassword" 
-                        value={formData.confirmPassword} 
-                        onChange={handleChange} 
+                    <input 
+                        type={passwordVisible ? 'text' : 'password'}
+                        name="confirmPassword"
+                        value={formData.confirmPassword}
+                        onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                         placeholder="Confirm Password"
                         required 
-                        style={{ paddingRight: '40px' }}  // Add space for the eye icon
-                        />
-                        <button 
-                            type="button" 
-                            onClick={togglePasswordVisibility} 
-                            style={{
-                                position: 'absolute',
-                                right: '10px',
-                                background: 'none',
-                                border: 'none',
-                                cursor: 'pointer'
-                            }}
-                        >
-                            {passwordVisible ? '🙈' : '👁️'} {/* Toggle visibility for confirm password */}
-                        </button>
-                    </div>
+                        style={{ height:'30px',paddingRight: '40px', marginTop: '10px' }}
+                    />
 
-                    {/* Opt-in checkboxes */}
-                    <div className='check-boxes'>
+                    <div className='check-boxes' style={{ marginBottom: '1rem', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.6)', margin:'20px', padding:'2vw' }}>
                         <input 
                             type="checkbox" 
                             name="isOptedInForPromotions" 
@@ -280,10 +369,10 @@ const SignUpForm = () => {
                             onChange={handleChange} 
                             id="optInPromotions"
                         />
-                        <label htmlFor="optInPromotions"><span style={{ color: 'black'}}>Opt-in for Promotions</span></label>
+                        <label htmlFor="optInPromotions" className="opt-in-description"><p>Opt-in for Promotions</p></label>
                     </div>
 
-                    <div className='check-boxes'>
+                    <div className='check-boxes' style={{ marginBottom: '1rem', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.6)', margin:'20px', padding:'2vw' }}>
                         <input 
                             type="checkbox" 
                             name="isOptedInForEmailUpdates" 
@@ -291,11 +380,66 @@ const SignUpForm = () => {
                             onChange={handleChange} 
                             id="optInEmailUpdates"
                         />
-                        <label htmlFor="optInEmailUpdates"><span style={{ color: 'black', lineHeight: '30px'}}>Opt-in for Email Updates (This includes tracking updates)</span></label>
+                        <label htmlFor="optInEmailUpdates" className="opt-in-description">
+                           
+                            <p>Opt-in for Email Updates (This includes tracking updates)</p>
+                            
+                        </label>
+                        
+                    </div>
+                    
+                   
+                    
+                    <Modal isVisible={isModalVisible} content={modalContent} onClose={handleCloseModal} />
+
+                    <div style={{ marginBottom: '1rem', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.6)', margin:'20px', padding:'2vw' }}>
+                    <div className="check-boxes">
+                        <input
+                            type="checkbox"
+                            name="hasAcceptedPrivacyPolicy"
+                            checked={hasAcceptedPrivacyPolicy}
+                            onChange={(e) => setHasAcceptedPrivacyPolicy(e.target.checked)}
+                            id="acceptPrivacyPolicy"
+                            className="toggle-input"
+                        />
+                        <label htmlFor="acceptPrivacyPolicy" className="toggle-label">
+                            <p style={{color:'black'}}>I have read and agree to the </p>
+                            <div onClick={() => handleOpenModal(<PrivacyPolicy />)} style={linkStyles}>
+                                Privacy Policy
+                            </div>
+                            
+                        </label>
+                    </div>
+                    </div>
+                    <div style={{ marginBottom: '1rem', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.6)', margin:'20px', padding:'2vw' }}>
+                    <div className="check-boxes">
+                        <input
+                            type="checkbox"
+                            name="hasAcceptedTermsOfService"
+                            checked={hasAcceptedTermsOfService}
+                            onChange={(e) => setHasAcceptedTermsOfService(e.target.checked)}
+                            id="acceptTermsOfService"
+                            className="toggle-input"
+                        />
+                        <label htmlFor="acceptTermsOfService" className="toggle-label">
+                            <p style={{color:'black'}}>I have read and agree to the </p>
+                            <div onClick={() => handleOpenModal(<TermsOfService />)} style={linkStyles}>
+                                Terms of Service
+                            </div>
+                            .
+                        </label>
+                    </div>
                     </div>
 
-                    <button style={{margin: '5px'}} ><Link to="/login">Already have an account? Click here to log in</Link></button>
-                    <button type="submit">Sign Up</button>
+                    <button
+    type="submit"
+    disabled={!hasAcceptedPrivacyPolicy || !hasAcceptedTermsOfService}
+    className="signup-button"
+>
+    {hasAcceptedPrivacyPolicy && hasAcceptedTermsOfService
+        ? 'Sign Up'
+        : 'Accept Terms and Conditions'}
+</button>
                 </form>
             )}
         </div>
@@ -303,4 +447,106 @@ const SignUpForm = () => {
 };
 
 export default SignUpForm;
+
+const modalOverlayStyles = {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000,
+};
+
+const modalStyles = {
+    backgroundColor: 'white',
+    padding: '2rem',
+    borderRadius: '1rem',
+    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
+    maxWidth: '600px',
+    width: '120%',
+    position: 'relative',
+};
+const buttonStyles = {
+    padding: '0.75rem',
+    fontSize: '1rem',
+    backgroundColor: '#28a745',
+    color: 'white',
+    border: 'none',
+    borderRadius: '0.25rem',
+    cursor: 'pointer',
+    width: '100%',
+};
+
+const modalCloseButtonStyles = {
+    position: 'absolute',
+    top: '1rem',
+    right: '1rem',
+    background: 'none',
+    border: 'none',
+    fontSize: '1.5rem',
+    cursor: 'pointer',
+};
+
+const modalContentStyles = {
+    fontSize: '1.2rem',
+    lineHeight: '1.6',
+};
+
+const linkStyles = {
+    color: 'white',
+    backgroundColor: '#007BFF',
+    textDecoration: 'underline',
+    cursor: 'pointer',
+    padding:'10px'
+};
+const closeButtonStyles = {
+    position: 'absolute',
+    bottom: '10%',
+    right: '10%',
+    padding: '0.5rem',
+    fontSize: '1rem',
+    backgroundColor: '#007BFF',
+    color: 'white',
+    border: 'none',
+    borderRadius: '0.25rem',
+    cursor: 'pointer',
+    disabled: {
+        backgroundColor: 'grey',
+        cursor: 'not-allowed',
+    },
+};
+
+
+const contentStyles = (requireScroll) => ({
+    maxHeight: requireScroll ? '300px' : 'auto',
+    overflowY: requireScroll ? 'scroll' : 'visible',
+    padding: '1rem',
+    marginBottom: '2rem',
+    border: '1px solid #ddd',
+    borderRadius: '0.25rem',
+    fontSize: '1rem',
+    lineHeight: '1.5',
+});
+
+const scrollPromptStyles = {
+    fontSize: '0.9rem',
+    color: '#888',
+    textAlign: 'center',
+};
+const headerStyles = {
+    display: 'flex',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    position: 'sticky',
+    top: 0,
+    backgroundColor: 'white',
+    padding: '0.5rem',
+    borderBottom: '1px solid #ddd',
+    zIndex: 10,
+};
+
 

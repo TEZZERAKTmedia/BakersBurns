@@ -18,6 +18,7 @@ const Events = () => {
   const [editEventId, setEditEventId] = useState(null);
   const [currentDate, setCurrentDate] = useState(moment());
   const [showEditEventModal, setShowEditEventModal] = useState(false);
+  const [isMobileView, setIsMobileView] = useState(window.innerWidth <= 768);
 
   const [newEvent, setNewEvent] = useState({
     name: '',
@@ -40,6 +41,13 @@ const Events = () => {
       setNewEvent({ ...newEvent, [name]: value });
     }
   };
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobileView(window.innerWidth <= 768);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const resetForm = () => {
     setNewEvent({
@@ -231,7 +239,43 @@ const Events = () => {
     setCurrentDate(currentDate.clone().add(1, 'months'));
   };
 
-  const renderCalendarDays = () => {
+  const renderCalendarDaysMobile = () => {
+    const startOfMonth = currentDate.clone().startOf('month');
+    const endOfMonth = currentDate.clone().endOf('month');
+
+    // Calculate start and end days for the calendar grid
+    const startDay = startOfMonth.clone().startOf('week');
+    const endDay = endOfMonth.clone().endOf('week');
+
+    const days = [];
+    let day = startDay.clone();
+
+    while (day.isBefore(endDay, 'day')) {
+      const isToday = day.isSame(moment(), 'day');
+      const isCurrentMonth = day.isSame(currentDate, 'month');
+      const eventsForDay = calendarEvents.filter(event => event.date === day.format('YYYY-MM-DD'));
+
+      days.push(
+        <div
+          key={day.toString()}
+          className={`calendar-day ${isCurrentMonth ? 'current-month' : 'other-month'} ${
+            isToday ? 'today' : ''
+          }`}
+        >
+          <span className="date-label">{day.date()}</span>
+          {eventsForDay.map((event, index) => (
+            <div key={index} className="event-item" style={{backgroundColor:'blue'}}>
+              
+            </div>
+          ))}
+        </div>
+      );
+      day.add(1, 'day');
+    }
+
+    return days;
+  };
+  const renderCalendarDaysDesktop = () => {
     const startOfMonth = currentDate.clone().startOf('month');
     const endOfMonth = currentDate.clone().endOf('month');
 
@@ -268,6 +312,7 @@ const Events = () => {
 
     return days;
   };
+
 
 
   const renderEventPreview = (event) => {
@@ -334,8 +379,8 @@ const Events = () => {
             </p>
           </div>
           <div className="flex gap-2">
-            <button className="text-blue-500" onClick={() => handleEditEvent(event)}>Edit</button>
-            <button className="text-red-500" onClick={() => handleDeleteEvent(event.id)}>🗑️</button>
+            <button className="text-blue-500" style={{margin:'20px'}} onClick={() => handleEditEvent(event)}>Edit</button>
+            <button className="text-red-500"style={{margin:'20px'}} onClick={() => handleDeleteEvent(event.id)}>🗑️</button>
           </div>
         </div>
       );
@@ -346,7 +391,7 @@ const Events = () => {
   return (
     <div className='events-body'>
       <div className="min-h-screen bg-gray-100 p-6">
-        <h1 className="text-4xl font-bold text-center mb-8" style={{color:'black', marginTop:'100px', fontSize:'5rem'}}>Event Management</h1>
+        <h1 className="event-header" style={{color:'black', marginTop:'20%', letterSpacing:'.1em'}}>Event Management</h1>
         {validationError && <p className="text-center text-red-500">{validationError}</p>}
         {loading && <p className="text-center">Loading...</p>}
         {error && <p className="text-center text-red-500">{error}</p>}
@@ -366,7 +411,7 @@ const Events = () => {
             <div className="calendar-container">
       <div className="calendar-header">
         <button onClick={handlePrevMonth}>&lt;</button>
-        <h2>{currentDate.format("MMMM YYYY")}</h2>
+        <h2 style={{letterSpacing:'.1em'}}>{currentDate.format("MMMM YYYY")}</h2>
         <button onClick={handleNextMonth}>&gt;</button>
       </div>
 
@@ -378,16 +423,17 @@ const Events = () => {
         ))}
         
 
-        {renderCalendarDays()}
+        {isMobileView ? renderCalendarDaysMobile() : renderCalendarDaysDesktop()}
+
       </div>
     </div>
                 {/* Event Preview Section */}
                 <div className="event-preview-section bg-white p-6 shadow-md rounded-lg mb-8" style={{ backgroundColor: 'black', borderRadius: '20px' }}>
-        <h2 style={{ fontFamily: 'Dancing Script', fontSize: '5rem', color: 'white' }}>Event Previews</h2>
+        <h2 style={{ fontFamily: 'Dancing Script', fontSize: '2rem', color: 'white',letterSpacing:'.1em' }}>Event Previews</h2>
         {validationError && <p className="text-center text-red-500">{validationError}</p>}
         {events.length === 0 && <p>No events to display</p>}
         {events.map((event) => (
-          <div key={event.id}>
+          <div key={event.id} style={{letterSpacing:'.1em'}}>
             {renderEventPreview(event)}
           </div>
         ))}
@@ -509,6 +555,7 @@ const Events = () => {
           </motion.div>
         )}
       </div>
+
     </div>
   );
 };

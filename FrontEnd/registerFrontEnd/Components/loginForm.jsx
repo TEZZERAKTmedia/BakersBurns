@@ -1,66 +1,88 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { registerApi } from '../config/axios';
+import LoadingPage from '../Components/loading'; // Import the loading component
 import '../Componentcss/login.css';
+import eyeOpenIcon from '../assets/password-visibility-icon.png';
+import eyeCloseIcon from '../assets/password-visibility-icon-reverse.png';
 
 const LoginForm = () => {
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
+  const [passwordVisible, setPasswordVisible] = useState(false);
+  const [animationState, setAnimationState] = useState(false);
+  const [loading, setLoading] = useState(false); // Loading state
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true); // Start loading animation
     try {
       const response = await registerApi.post('/auth/login', { identifier, password });
-
-      // Log the response for debugging purposes
-      console.log('Response data:', response.data);
-
-      // Extract token and redirectUrl from response
       const { token, redirectUrl } = response.data;
 
-      if (token) {
-        // Store the token in localStorage
-        localStorage.setItem('authToken', token);
-      }
-
-      if (redirectUrl) {
-        // Redirect based on user role
-        window.location.href = redirectUrl;
-      } else {
+      if (token) localStorage.setItem('authToken', token);
+      if (redirectUrl) window.location.href = redirectUrl;
+      else {
         setMessage('Login successful, but no redirection URL was provided.');
+        setLoading(false); // Stop loading if no redirect
       }
     } catch (error) {
       console.error('Login error:', error);
       setMessage('Error logging in: ' + (error.response ? error.response.data.message : error.message));
+      setLoading(false); // Stop loading on error
     }
   };
 
-  return (
-    <div className="container">
-      <h2 style={{color: 'black'}}>Login</h2>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          value={identifier}
-          onChange={(e) => setIdentifier(e.target.value)}
-          placeholder="Enter your username or email"
-          required
-          style={{boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',}}
-        />
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="Enter your password"
-          required
-        />
-        <button type="submit">Login</button>
-        <Link to="/forgotpassword" style={{textDecoration:'none', color:'white', backgroundColor:'grey', padding: '3px', borderRadius:'5px', marginTop:'20px', width:'150px', marginLeft:'25%'}}>Forgot Password?</Link>
-      </form>
+  const togglePasswordVisibility = () => {
+    setPasswordVisible(!passwordVisible);
+    setAnimationState(!animationState);
+  };
 
-      
-      {message && <p>{message}</p>}
+  return (
+    <div className="log-in-container">
+      {loading ? ( // Show loading animation if loading is true
+        <LoadingPage />
+      ) : (
+        <>
+          <h2 className="login-title">Login</h2>
+          <form onSubmit={handleSubmit} className="login-form">
+            <input
+              type="text"
+              value={identifier}
+              onChange={(e) => setIdentifier(e.target.value)}
+              placeholder="Enter your username or email"
+              required
+              className="login-input"
+            />
+            
+            <div className="password-container">
+              <input
+                type={passwordVisible ? 'text' : 'password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter your password"
+                required
+                className="login-input password-input"
+              />
+              <button type="button" onClick={togglePasswordVisibility} className="toggle-password">
+                <img
+                  src={animationState ? eyeCloseIcon : eyeOpenIcon}
+                  alt="Toggle Password Visibility"
+                  className="login-animation"
+                />
+              </button>
+            </div>
+            
+            <button type="submit" className="login-button">Login</button>
+
+            <Link to="/forgotpassword" className="forgot-password-link">Forgot Password?</Link>
+            <Link to='/sign-up' className="sign-up-link">Don't have an account? Click here to sign up</Link>
+          </form>
+
+          {message && <p className="login-message">{message}</p>}
+        </>
+      )}
     </div>
   );
 };

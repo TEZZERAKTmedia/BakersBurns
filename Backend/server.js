@@ -6,7 +6,8 @@ const path = require('path');
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
 const jwt = require('jsonwebtoken'); // Assuming JWT is used for auth
-const db = require('./models/index'); 
+const db = require('./models/index');
+const rateLimit = require('express-rate-limit'); 
 // Import middleware
 
 
@@ -33,15 +34,27 @@ const registerStoreRoutes = require('./routes/register/storeRegister');
 const adminEventRoutes = require('./routes/admin/adminEventRoutes');
 const userEventRoutes = require('./routes/user/eventRoutes');
 const userGalleryRoutes = require('./routes/user/galleryRoutes');
+const carrierRoutes = require('./routes/carrier/carrierRoutes');
 const { handleDhlWebhook, handleFedexWebhook, handleUpsWebhook, handleUspsWebhook} = require('./webhooks/carrierWebhooks');
+const { rateLimiter } = require('./utils/rateLimiter');
+
 
 // Initialize Express app
 const app = express();
 
+// Set allowed origins based on environment
+const allowedOrigins = process.env.NODE_ENV === 'production' 
+  ? [process.env.PROD_USER_FRONTEND, process.env.PROD_ADMIN_FRONTEND, process.env.PROD_REGISTER_FRONTEND]
+  : [process.env.USER_FRONTEND, process.env.ADMIN_FRONTEND, process.env.REGISTER_FRONTEND, 'http://localhost:8080'];
+
+// Configure CORS middleware with dynamic origins
 app.use(cors({
-  origin: ['http://localhost:5010', 'http://localhost:4001', 'http://localhost:3010', 'http://localhost:8080'],
+  origin: allowedOrigins,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   credentials: true,
 }));
+
+
 
 app.use('/stripe-webhooks', express.raw({ type: 'application/json' }), stripeWebhookRoutes);
 
@@ -69,49 +82,54 @@ if (process.env.NODE_ENV === 'production') {
   });
 }
 
+
+
 // Serve static files
 app.use('/register', express.static(path.join(__dirname, 'public/register')));
 app.use('/user', express.static(path.join(__dirname, 'public/user')));
 app.use('/sign-up', signupRoutes);
 
 //Passkey Routes 
-app.use('/login-passkey-routes', passkeyRoutes);
+app.use('/login-passkey-routes', rateLimiter('passkey'), passkeyRoutes);
+
 
 //Register routes
-app.use('/register-store', registerStoreRoutes);
+app.use('/register-store', rateLimiter('register-store'), registerStoreRoutes);
 
 
 // User routes
-app.use('/auth', authRoutes);
-app.use('/verification',emailVerificationRoutes);
-app.use('/verified', userAuthMiddleware('user'),verifiedRoutes);
-app.use('/account-settings', accountSettingsRoutes);
-app.use('/cart',userAuthMiddleware('user'), cartRoutes);
-app.use('/user',userAuthMiddleware('user'), userRoutes);
-app.use('/store',userAuthMiddleware('user'), storeRoutes);
-app.use('/user-message-routes', userAuthMiddleware('user'), userMessagingRoutes);
-app.use('/user-orders',userAuthMiddleware('user'), userOrderRoutes); 
-app.use('/user-event', userAuthMiddleware('user'), userEventRoutes);
-app.use('/user-gallery', userAuthMiddleware('user'), userGalleryRoutes)
+app.use('/auth', rateLimiter('auth'), authRoutes);
+app.use('/verification', rateLimiter('verification'), emailVerificationRoutes);
+app.use('/verified', userAuthMiddleware('user'), rateLimiter('verified'), verifiedRoutes);
+app.use('/account-settings', rateLimiter('account-settings'), accountSettingsRoutes);
+app.use('/cart', userAuthMiddleware('user'), rateLimiter('cart'), cartRoutes);
+app.use('/user', userAuthMiddleware('user'), rateLimiter('user'), userRoutes);
+app.use('/store', userAuthMiddleware('user'), rateLimiter('store'), storeRoutes);
+app.use('/user-message-routes', userAuthMiddleware('user'), rateLimiter('user-messaging'), userMessagingRoutes);
+app.use('/user-orders', userAuthMiddleware('user'), rateLimiter('user-orders'), userOrderRoutes);
+app.use('/user-event', userAuthMiddleware('user'), rateLimiter('user-event'), userEventRoutes);
+app.use('/user-gallery', userAuthMiddleware('user'), rateLimiter('user-gallery'), userGalleryRoutes);
 
 
-
-//Middle Routes
-app.use('/stripe-checkout', stripeRoutes); 
+//STRIPE ROUTES
+app.use('/stripe', rateLimiter('stripe'),stripeRoutes); 
+app.use('/carriers', carrierRoutes);
 
 
 
 // Admin routes (protected by adminAuthMiddleware)
-app.use('/api/products', adminAuthMiddleware('admin'), productRoutes);  // Protect product management routes
-app.use('/gallery-manager', adminAuthMiddleware('admin'), galleryRoutes);  // Protect gallery management routes
-app.use('/admin-mail', adminAuthMiddleware('admin'), adminEmailRoutes);
-app.use('/orders',adminAuthMiddleware('admin'), ordersRoutes);
+app.use('/api/products', adminAuthMiddleware('admin'), rateLimiter('admin-products'), productRoutes);
+app.use('/gallery-manager', adminAuthMiddleware('admin'), rateLimiter('gallery-manager'), galleryRoutes);
+app.use('/admin-mail', adminAuthMiddleware('admin'), rateLimiter('admin-mail'), adminEmailRoutes);
+app.use('/orders', adminAuthMiddleware('admin'), rateLimiter('orders'), ordersRoutes);
+app.use('/admin-message-routes', adminAuthMiddleware('admin'), rateLimiter('admin-messaging'), adminMessagingRoutes);
+app.use('/admin-event', adminAuthMiddleware('admin'), rateLimiter('admin-event'), adminEventRoutes);
+
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/galleryuploads', express.static(path.join(__dirname, 'galleryuploads')));
 app.use('/admin', express.static(path.join(__dirname, 'public/admin')));
-app.use('/admin-message-routes', adminAuthMiddleware('admin'), adminMessagingRoutes);
-app.use('/admin-event', adminAuthMiddleware('admin'), adminEventRoutes);
-
+app.use('/terms-of-service', express.static(path.join(__dirname, 'public/static/terms-of-service.html')));
+app.use('/privacy-policy', express.static(path.join(__dirname, 'public/static/privacy-policy.html')));
 
 // Webhook routes for tracking updates from each carrier
 app.post('/webhook/ups', express.json(), handleUpsWebhook);
@@ -138,9 +156,10 @@ db.sequelize.sync({ alter: true })
   .catch(err => {
     console.error('Error synchronizing database:', err);
   });
-*/
+  */
 // Start the server
+
 const PORT = process.env.PORT || 3450;
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+    console.log(`Server running on port ${PORT}`);
 });

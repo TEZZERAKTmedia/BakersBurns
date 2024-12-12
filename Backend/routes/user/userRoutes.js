@@ -10,5 +10,12 @@ router.get('/verify-email/:token', verifyEmail);
 router.get('/dashboard', (req, res) => {
   res.send('User Dashboard');
 });
+router.get('/verify-session', (req, res) => {
+  if (req.user) {
+    return res.status(200).json({ message: 'User authenticated', user: req.user });
+  }
+  return res.status(401).json({ message: 'Unauthorized' });
+});
+
 
 module.exports = router;

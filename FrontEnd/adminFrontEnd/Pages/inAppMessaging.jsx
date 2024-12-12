@@ -20,29 +20,38 @@ const MessagingApp = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  useEffect(() => {
-    const fetchThreads = async () => {
-      try {
-        const { data } = await adminApi.get('/admin-message-routes/fetch-all-threads');
-        setThreads(data.threads);
-      } catch (error) {
-        console.error('Error fetching threads:', error);
-      }
-    };
-    fetchThreads();
-  }, []);
-
-  const fetchMessages = async (threadId) => {
-    if (!threadId) return;
-  
+useEffect(() => {
+  const fetchThreads = async () => {
     try {
-      const { data } = await adminApi.get(`/admin-message-routes/fetch-messages-by-thread?threadId=${threadId}`);
-      setMessages(data.messages);
-      scrollToBottom();
-    } catch (error) {
-      console.error('Error fetching messages:', error);
+      const { data } = await adminApi.get('/admin-message-routes/fetch-all-threads');
+      console.log('Fetched Threads:', data.threads); // Log the threads
+      setThreads(data.threads);
+    } catch (error) {x
+      console.error('Error fetching threads:', error);
     }
   };
+  fetchThreads();
+}, []);
+
+
+
+
+  
+const fetchMessages = async (threadId) => {
+  if (!threadId) return;
+
+  try {
+    const { data } = await adminApi.get(`/admin-message-routes/fetch-messages-by-thread?threadId=${threadId}`);
+    setMessages(data.messages);
+    scrollToBottom();
+  } catch (error) {
+    console.error('Error fetching messages:', error);
+  }
+};
+useEffect(() => {
+  console.log("Messages: ", messages);
+}, [messages]);
+
 
   const refetchMessages = async () => {
     if (!selectedThreadId) return;
@@ -68,6 +77,8 @@ useEffect(() => {
 
   const handleThreadSelect = (thread) => {
     setSelectedThreadId(thread.threadId); // Ensure only the ID is set
+    console.log('Selected Thread ID:', thread.threadId);
+
     setSelectedUser(null);
     fetchMessages(thread.threadId);
     scrollToBottom();
@@ -105,17 +116,29 @@ useEffect(() => {
     if (!messageBody.trim() || !selectedThreadId) return;
   
     try {
-        await adminApi.post('/admin-message-routes/messages/send', {
-            messageBody,
-            receiverUsername: selectedUser?.username || messages[0]?.receiverUsername,
-            threadId: selectedThreadId,
-        });
-        setMessageBody(''); // Clear the input
-        await refetchMessages(); // Refetch messages to update the list
+      const selectedThread = threads.find(thread => thread.threadId === selectedThreadId);
+      let receiverUsername = null;
+  
+      // If the thread is selected, determine the receiverUsername
+      if (selectedThread) {
+        receiverUsername = selectedThread.senderUsername || null; // Assume senderUsername from thread is the receiver
+      }
+  
+      // Send message to the backend
+      await adminApi.post('/admin-message-routes/messages/send', {
+        threadId: selectedThreadId,
+        messageBody,
+        receiverUsername, // Pass the resolved receiverUsername
+      });
+  
+      setMessageBody(''); // Clear the input
+      await refetchMessages(); // Refetch messages to update the list
     } catch (error) {
-        console.error('Error sending message:', error);
+      console.error('Error sending message:', error);
     }
-};
+  };
+  
+  
 
 
 
@@ -125,10 +148,10 @@ useEffect(() => {
   };
 
   const renderDesktopView = () => (
-    <div style={{ display: 'flex', height: '100vh', marginTop: '100px', width: '100vw', fontFamily: 'Arial, sans-serif',backgroundColor:'white', }}>
+    <div style={{ display: 'flex', height: '100vh', width: '100vw', fontFamily: 'Arial, sans-serif', backgroundColor: 'white' }}>
       {/* Sidebar for Threads */}
       <div style={{ width: '300px', borderRight: '1px solid #ddd', padding: '10px' }}>
-        <h3 style={{ fontSize: '2rem', fontFamily: 'Dancing Script' }}>Conversations</h3>
+        <h3 style={{ fontSize: '2rem', fontFamily: 'Dancing Script', marginTop: '30%'}}>Conversations</h3>
         <div style={{ display: 'flex', gap: '5px', marginBottom: '10px' }}>
           <input
             type="text"
@@ -148,55 +171,92 @@ useEffect(() => {
         </ul>
         <ul style={{ listStyle: 'none', padding: 0 }}>
           {threads.map((thread) => (
-            <li key={thread.threadId} onClick={() => handleThreadSelect(thread)} style={{ padding: '10px', cursor: 'pointer', borderBottom: '1px solid #ddd' }}>
-              <div style={{ color: 'black', fontFamily: 'Dancing Script', fontSize: '3rem' }}>{thread.threadPreviewUsername}</div>
-              <div style={{ fontSize: '12px', color: '#999' }}>{new Date(thread.lastMessageTime).toLocaleString()}</div>
+            <li
+              key={thread.threadId}
+              onClick={() => handleThreadSelect(thread)}
+              style={{
+                padding: '10px',
+                cursor: 'pointer',
+                borderBottom: '1px solid #ddd',
+              }}
+            >
+              <div style={{ color: 'black', fontFamily: 'Dancing Script', fontSize: '1.5rem' }}>
+  {thread.senderUsername === 'Admin'
+    ? thread.receiverUsername || 'Unknown User'
+    : thread.senderUsername || 'Unknown User'}
+</div>
+
+              
+              <div style={{ fontSize: '14px', color: '#555' }}>
+  {thread.lastMessage?.messageBody || 'No messages yet'}
+</div>
+      <div style={{ fontSize: '12px', color: '#999' }}>
+        {thread.lastMessageTime
+          ? new Date(thread.lastMessageTime).toLocaleString()
+          : 'No recent messages'}
+      </div>
             </li>
           ))}
         </ul>
+
+
+
       </div>
   
       {/* Main Message Window */}
-      <div style={{ flex: 1, padding: '10px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', }}>
+      <div style={{ flex: 1, padding: '10px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
         {selectedThreadId && (
           <>
             <ul style={{ listStyle: 'none', padding: 0, flex: 1, overflowY: 'auto' }}>
-              {messages.map((message, index) => (
+            {messages.map((message, index) => {
+              const isAdminMessage = message.senderUsername === 'Admin'; // Admin sent the message
+              const isUserMessage = message.receiverUsername === 'Admin'; // User sent the message
+
+              return (
                 <li
                   key={index}
                   style={{
                     display: 'flex',
                     flexDirection: 'column',
-                    alignItems: message.senderRole === 'admin' ? 'flex-end' : 'flex-start',
+                    alignItems: isAdminMessage ? 'flex-end' : 'flex-start',
                     marginBottom: '10px',
-                    maxWidth: '50%', // Limit the maximum width of each message
+                    maxWidth: '70%',
                   }}
                 >
                   <div
                     style={{
                       padding: '10px',
                       borderRadius: '15px',
-                      backgroundColor: message.senderRole === 'admin' ? '#ff9800' : '#e0e0e0',
-                      color: message.senderRole === 'admin' ? '#fff' : '#000',
-                      maxWidth: '70%', // Consistent max-width for messages
-                      wordWrap: 'break-word', // Wrap text within the box
-                      textAlign: message.senderRole === 'admin' ? 'right' : 'left',
-                      alignSelf: message.senderRole === 'admin' ? 'flex-end' : 'flex-start', // Align based on sender role
+                      backgroundColor: isAdminMessage ? 'white' : 'orange',
+                      color: isAdminMessage ? 'black' : 'white',
+                      wordWrap: 'break-word',
+                      textAlign: isAdminMessage ? 'right' : 'left',
+                      alignSelf: isAdminMessage ? 'flex-end' : 'flex-start',
+                      border: isAdminMessage ? '1px solid #ccc' : 'none',
+                      boxShadow: isAdminMessage ? '0px 2px 5px rgba(0, 0, 0, 0.1)' : 'none',
                     }}
-                    
                   >
-                    
+
                     <p style={{ margin: 0 }}>{message.messageBody}</p>
-                    <div ref={messagesEndRef} />
                   </div>
-                  <small style={{ fontSize: '10px', color: '#999', marginTop: '5px' }}>
+                  <small
+                    style={{
+                      fontSize: '10px',
+                      color: '#999',
+                      marginTop: '5px',
+                      textAlign: isAdminMessage ? 'right' : 'left',
+                    }}
+                  >
                     {new Date(message.createdAt).toLocaleString()}
                   </small>
                 </li>
-              ))}
-              
+              );
+            })}
+            <div ref={messagesEndRef} />
+          </ul>
 
-            </ul>
+
+
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -204,45 +264,41 @@ useEffect(() => {
               }}
               style={{ display: 'flex', alignItems: 'center', marginTop: '10px' }}
             >
- <div
-    style={{
-      display: 'grid',
-      gridTemplateColumns: '1fr auto', // Two columns: input takes the remaining space, button auto-sizes
-      gap: '10px',
-      alignItems: 'center', // Vertically align input and button
-      marginRight:'50%',
-      backgroundColor:'white',
-      
-    }}
-  >
-    <input
-      type="text"
-      value={messageBody}
-      onChange={(e) => setMessageBody(e.target.value)}
-      placeholder="Type a message"
-      style={{
-        padding: '10px',
-        borderRadius: '20px',
-        border: '1px solid #ddd',
-        
-       
-        
-      }}
-    />
-    <button
-      type="submit"
-      style={{
-        padding: '10px 20px',
-        borderRadius: '20px',
-        backgroundColor: '#007bff',
-        color: '#fff',
-        border: 'none',
-        marginBottom:'100px'
-      }}
-    >
-      Send
-    </button>
-  </div>
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr auto',
+                  gap: '10px',
+                  alignItems: 'center',
+                  marginRight: '50%',
+                  backgroundColor: 'white',
+                }}
+              >
+                <input
+                  type="text"
+                  value={messageBody}
+                  onChange={(e) => setMessageBody(e.target.value)}
+                  placeholder="Type a message"
+                  style={{
+                    padding: '10px',
+                    borderRadius: '20px',
+                    border: '1px solid #ddd',
+                  }}
+                />
+                <button
+                  type="submit"
+                  style={{
+                    padding: '10px 20px',
+                    borderRadius: '20px',
+                    backgroundColor: '#007bff',
+                    color: '#fff',
+                    border: 'none',
+                    marginBottom: '100px',
+                  }}
+                >
+                  Send
+                </button>
+              </div>
             </form>
           </>
         )}
@@ -279,40 +335,58 @@ useEffect(() => {
           {selectedThreadId.threadPreviewUsername}
         </div>
 
-        <ul style={{ listStyle: 'none', padding: '10px', overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', marginBottom: '10%' }}>
-        {messages.map((message, index) => (
-          <li
-            key={index}
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: message.senderRole === 'admin' ? 'flex-end' : 'flex-start',
-              marginBottom: '0px',
-              maxWidth: '100%', // Limit the maximum width of each message
-            }}
-          >
-            <div
-              style={{
-                padding: '10px',
-                borderRadius: '15px',
-                backgroundColor: message.senderRole === 'admin' ? '#ff9800' : '#e0e0e0',
-                color: message.senderRole === 'admin' ? '#fff' : '#000',
-                maxWidth: '100%', // Restrict message box to max-width
-                wordWrap: 'break-word', // Wrap text within the box
-                textAlign: message.senderRole === 'admin' ? 'right' : 'left',
-                alignSelf: message.senderRole === 'admin' ? 'flex-end' : 'flex-start',
-              }}
-            >
-              <p style={{ margin: 0 }}>{message.messageBody}</p>
-            </div>
-            <small style={{ fontSize: '10px', color: '#999', marginTop: '5px' }}>
-              {new Date(message.createdAt).toLocaleString()}
-            </small>
-          </li>
-        ))}
+        <ul style={{ listStyle: 'none', padding: 0, flex: 1, overflowY: 'auto' , paddingTop:'50px', paddingBottom:'30px'}}>
+            {messages.map((message, index) => {
+              const isAdminMessage = message.senderUsername === 'Admin'; // Admin sent the message
+              const isUserMessage = message.receiverUsername === 'Admin'; // User sent the message
 
-          <div ref={messagesEndRef} />
-        </ul>
+              return (
+                <li
+                  key={index}
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: isAdminMessage ? 'flex-end' : 'flex-start',
+                    marginBottom: '30px',
+                    maxWidth: '100%',
+                    padding:'30px',
+                   
+                  }}
+                >
+                  <div
+                    style={{
+                      padding: '10px',
+                      borderRadius: '15px',
+                      backgroundColor: isAdminMessage ? 'white' : 'orange',
+                      color: isAdminMessage ? 'black' : 'white',
+                      wordWrap: 'break-word',
+                      textAlign: isAdminMessage ? 'right' : 'left',
+                      alignSelf: isAdminMessage ? 'flex-end' : 'flex-start',
+                    }}
+                  >
+                    <p style={{ margin: 0 }}>{message.messageBody}</p>
+                  </div>
+                  <small
+                    style={{
+                      fontSize: '10px',
+                      color: '#999',
+                      marginTop: '5px',
+                      textAlign: isAdminMessage ? 'right' : 'left',
+                    }}
+                  >
+                    {new Date(message.createdAt).toLocaleString()}
+                  </small>
+                </li>
+              );
+            })}
+            <div ref={messagesEndRef} />
+          </ul>
+
+
+
+
+
+
 
         <form
           onSubmit={(e) => {
@@ -356,7 +430,16 @@ useEffect(() => {
       </div>
     ) : (
       <div style={{ padding: '10px' }}>
-        <h3 style={{ fontFamily: 'Dancing Script', fontSize: '5rem', marginTop: '10%'}}>Conversations</h3>
+        <h3 style={{ 
+  fontFamily: 'Dancing Script', 
+  fontSize: isMobileView ? '8vw' : '2rem', // Scale for mobile
+  marginTop: '10%',
+  paddingTop: '20%', 
+  textAlign: 'center',
+}}>
+  Conversations
+</h3>
+
         <input
           type="text"
           value={searchTerm}
@@ -373,11 +456,39 @@ useEffect(() => {
         </ul>
         <ul style={{ listStyle: 'none', padding: 0 }}>
           {threads.map((thread) => (
-            <li key={thread.threadId} onClick={() => handleThreadSelect(thread)} style={{ padding: '10px', cursor: 'pointer', borderBottom: '1px solid #ddd', color: 'black',fontFamily: 'Dancing Script', fontSize: '3rem' }}>
-              {thread.threadPreviewUsername}
-            </li>
-          ))}
-        </ul>
+              <li
+                key={thread.threadId}
+                onClick={() => handleThreadSelect(thread)}
+                style={{
+                  padding: '10px',
+                  cursor: 'pointer',
+                  borderBottom: '1px solid #ddd',
+                }}
+              >
+                {/* Username */}
+                <div style={{ fontFamily: 'Arial', fontSize: '1.2rem', color: '#333' }}>
+                  {thread.senderUsername || 'Unknown User'}
+                </div>
+
+                {/* Most Recent Message */}
+                <div style={{ fontSize: '14px', color: '#555' }}>
+                  {thread.lastMessage?.messageBody || 'No recent messages'}
+                </div>
+
+                {/* Timestamp */}
+                <div style={{ fontSize: '12px', color: '#999' }}>
+                  {thread.lastMessage?.createdAt
+                    ? new Date(thread.lastMessage.createdAt).toLocaleString()
+                    : ''}
+                </div>
+              </li>
+            ))}
+         </ul>
+
+
+
+
+
       </div>
     )}
   </div>

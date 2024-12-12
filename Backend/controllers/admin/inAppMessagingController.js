@@ -1,56 +1,13 @@
 
 const Message = require('../../models/messages');
 const User = require('../../models/user');
+const Thread = require('../../models/threads');
 const { Op } = require('sequelize');
 const sequelize = require('../../config/database');
 const { Sequelize } = require('sequelize');
 
-
-// Check if a thread exists or create a new one
- // Adjust path as necessary
-
-// Function to get or create a thread between two users
-exports.getOrCreateThreadId = async (sender, receiver) => {
-  try {
-    // Check if a thread already exists between the sender and receiver
-    const existingThread = await Message.findOne({
-      where: {
-        senderUsername: sender,
-        receiverUsername: receiver
-      },
-      order: [['createdAt', 'ASC']] // Sort by earliest message to get the thread's first message
-    });
-
-    // If an existing thread is found, return its threadId
-    if (existingThread) {
-      return existingThread.threadId;
-    }
-
-    // If no existing thread, create a new threadId (this can be a new sequence or UUID)
-    const newThreadId = await this.generateNewThreadId(); // Use `this` or `exports`
- // Your custom logic to generate a new threadId
-    return newThreadId;
-
-  } catch (error) {
-    console.error('Error finding or creating thread:', error);
-    throw error;
-  }
-};
-
-// Example function to generate a new threadId (simple increment)
-exports.generateNewThreadId = async () => {
-  // Fetch the last threadId and increment
-  const lastMessage = await Message.findOne({
-    order: [['threadId', 'DESC']] // Get the latest threadId
-  });
-
-  return lastMessage ? lastMessage.threadId + 1 : 1; // Start with 1 if no threads exist
-};
-
-
-
 // Search for users by username or email
-exports.searchInAppUsers = async (req, res) => {
+const searchInAppUsers = async (req, res) => {
   const { searchTerm } = req.query;
 
   if (!searchTerm || searchTerm.trim() === "") {
@@ -80,30 +37,34 @@ exports.searchInAppUsers = async (req, res) => {
 };
 
 // Get all messages related to the logged-in user (from the decoded token via middleware)
-exports.sendInAppMessage = async (req, res) => {
-  const { messageBody, receiverUsername } = req.body;
+const sendInAppMessage = async (req, res) => {
+  const { threadId, messageBody, receiverUsername } = req.body;
 
-  if (!messageBody || !receiverUsername) {
-    return res.status(400).json({ error: 'Message body and receiverUsername cannot be empty' });
+  if (!messageBody || !threadId) {
+    return res.status(400).json({ error: 'Message body and threadId are required' });
   }
 
   try {
-    const senderUsername = req.user.username; // Extract sender username from authenticated user via middleware
-
-    // Use getOrCreateThreadId to check if a thread exists or create a new one
-    const threadId = await exports.getOrCreateThreadId(senderUsername, receiverUsername);
-
-    // Create the new message
-    await Message.create({
-      senderUsername,  // Sender's username (admin)
-      receiverUsername, // Receiver's username (from the frontend)
-      messageBody,      // Message content
-      threadId,         // Thread ID
-      createdAt: new Date(),
-      updatedAt: new Date()
+    // Validate that the thread exists
+    const thread = await Thread.findOne({
+      where: { threadId },
     });
 
-    res.status(200).json({ message: 'Message sent successfully', threadId });
+    if (!thread) {
+      return res.status(404).json({ error: 'Thread not found or unauthorized' });
+    }
+
+    // Create the message with senderUsername explicitly set to null
+    await Message.create({
+      senderUsername: null, // Always set senderUsername to null
+      receiverUsername, // Provided by the frontend
+      messageBody,
+      threadId,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+
+    res.status(200).json({ message: 'Message sent successfully' });
   } catch (error) {
     console.error('Error sending message:', error);
     res.status(500).json({ error: 'Failed to send message' });
@@ -112,79 +73,105 @@ exports.sendInAppMessage = async (req, res) => {
 
 
 
-// Fetch all messages for a specific threadId
-exports.fetchAllThreadIds = async (req, res) => {
-  try {
-    // Get the logged-in user's username from the cookie
-    const loggedInUsername = req.user.username;
 
-    // Fetch all unique thread IDs with senderUsername and receiverUsername
-    const threads = await Message.findAll({
-      attributes: [
-        'threadId',
-        'senderUsername',
-        'receiverUsername',
-        [sequelize.fn('MAX', sequelize.col('createdAt')), 'lastMessageTime'], // Time of last message
+
+
+// Fetch all messages for a specific threadId
+const fetchAllThreadIds = async (req, res) => {
+  try {
+    // Fetch threads with sender and receiver details
+    const threads = await Thread.findAll({
+      include: [
+        {
+          model: User,
+          as: 'senderUser',
+          attributes: ['username'], // Sender details
+        },
+        {
+          model: User,
+          as: 'receiverUser',
+          attributes: ['username'], // Receiver details
+        },
       ],
-      group: ['threadId'], // Group by threadId only
-      order: [[sequelize.fn('MAX', sequelize.col('createdAt')), 'DESC']], // Sort by last message time
+      attributes: ['threadId', 'senderEmail', 'receiverEmail'], // Thread attributes
     });
 
-    // Filter and label each thread with the other user's username
-    const filteredThreads = threads.map(thread => {
-      // If the logged-in user is the sender, label the thread with the receiver's username
-      const threadPreviewUsername = thread.senderUsername === loggedInUsername 
-        ? thread.receiverUsername 
-        : thread.senderUsername;
-      
+    // Fetch the latest message for each thread using a subquery for each threadId
+    const latestMessages = await Promise.all(
+      threads.map(async (thread) => {
+        const message = await Message.findOne({
+          where: { threadId: thread.threadId },
+          attributes: ['threadId', 'messageBody', 'createdAt'],
+          order: [['createdAt', 'DESC']], // Ensure the most recent message is fetched
+        });
+
+        return { threadId: thread.threadId, message };
+      })
+    );
+
+    // Map threads to include the latest message
+    const formattedThreads = threads.map((thread) => {
+      const lastMessage = latestMessages.find((msg) => msg.threadId === thread.threadId)?.message;
+
       return {
         threadId: thread.threadId,
-        threadPreviewUsername, // Label the thread with the other user's username
-        lastMessageTime: thread.lastMessageTime
+        senderUsername: thread.senderUser?.username || 'Unknown',
+        receiverUsername: thread.receiverUser?.username || 'Unknown',
+        lastMessage: lastMessage
+          ? {
+              messageBody: lastMessage.messageBody,
+              createdAt: lastMessage.createdAt,
+            }
+          : null,
       };
     });
 
-    res.status(200).json({ threads: filteredThreads });
+    res.status(200).json({ threads: formattedThreads });
   } catch (error) {
-    console.error('Error fetching thread IDs:', error);
-    res.status(500).json({ error: 'Failed to fetch thread IDs' });
+    console.error('Error fetching threads with last message:', error);
+    res.status(500).json({ error: 'Failed to fetch threads with last message' });
   }
 };
 
 
-exports.fetchMessagesByThreadId = async (req, res) => {
+
+
+
+
+
+const fetchMessagesByThreadId = async (req, res) => {
   const { threadId } = req.query;
 
   if (!threadId) {
-    return res.status(400).json({ error: 'threadId is required' });
+    return res.status(400).json({ error: 'Thread ID is required' });
   }
 
   try {
+    // Fetch messages associated with the threadId
     const messages = await Message.findAll({
       where: { threadId },
-      attributes: ['messageBody', 'senderUsername', 'receiverUsername', 'createdAt'],
-      order: [['createdAt', 'ASC']],
+      attributes: ['id', 'threadId', 'messageBody', 'senderUsername', 'receiverUsername', 'createdAt'],
       include: [
         {
           model: User,
-          as: 'sender',
-          attributes: ['role'],
-        },
+          as: 'sender', // Fetch sender details
+          attributes: ['username', 'email']
+        }
       ],
+      order: [['createdAt', 'ASC']] // Ensure chronological order
     });
 
-    // Map messages to include `senderRole` and log the result
-    const messagesWithRole = messages.map((message) => {
-      const role = message.sender?.role || 'user';
-      console.log(`Message ID: ${message.id}, SenderRole: ${role}, MessageBody: ${message.messageBody}`);
-      return {
-        ...message.get(),
-        senderRole: role,
-      };
-    });
+    // Format response for frontend
+    const formattedMessages = messages.map((message) => ({
+      id: message.id,
+      threadId: message.threadId,
+      messageBody: message.messageBody,
+      senderUsername: message.senderUsername || 'Admin', // Default to "Admin" for abstraction
+      receiverUsername: message.receiverUsername || null, // Explicitly show `null` for admins
+      createdAt: message.createdAt
+    }));
 
-    console.log('Messages with roles:', messagesWithRole); // Log entire message array with roles
-    res.status(200).json({ messages: messagesWithRole });
+    res.status(200).json({ messages: formattedMessages });
   } catch (error) {
     console.error('Error fetching messages by threadId:', error);
     res.status(500).json({ error: 'Failed to fetch messages' });
@@ -195,7 +182,7 @@ exports.fetchMessagesByThreadId = async (req, res) => {
 
 
 
-exports.getRolesByThreadId = async (req, res) => {
+const getRolesByThreadId = async (req, res) => {
   const { threadId } = req.params; // Corrected to use params instead of query
 
   if (!threadId) {
@@ -236,7 +223,7 @@ exports.getRolesByThreadId = async (req, res) => {
 
 
 
-exports.getUsernamesByThreadId = async (req, res) => {
+const getUsernamesByThreadId = async (req, res) => {
   const { threadId } = req.params;
 
   try {
@@ -263,42 +250,40 @@ exports.getUsernamesByThreadId = async (req, res) => {
   }
 };
 
-exports.checkThread = async (req, res) => {
-  const { receiverUsername } = req.query; // Get receiver's username from query parameters
-  const senderUsername = req.user.username; // Assuming the middleware attaches user info (admin)
+const checkThread = async (req, res) => {
+  const { receiverUsername } = req.query;
+  const senderUsername = req.user.role === 'admin' ? null : req.user.username;
 
   try {
-    // Check if the receiver exists
     const receiver = await User.findOne({ where: { username: receiverUsername } });
     if (!receiver) {
       return res.status(404).json({ message: 'Receiver not found' });
     }
 
-    // Check if a thread exists between the sender (admin) and receiver (user)
     let thread = await Message.findOne({
       where: {
-        senderUsername,
+        senderUsername: senderUsername, // Handle null for admin
         receiverUsername
       }
     });
 
-    // If no thread exists, create a new one
     if (!thread) {
       thread = await Message.create({
         senderUsername,
-        receiverUsername
+        receiverUsername,
+        threadId: await exports.generateNewThreadId()
       });
     }
 
-    // Return thread ID
-    return res.json({ threadId: thread.id });
+    return res.json({ threadId: thread.threadId });
   } catch (error) {
     console.error('Error checking or creating thread:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
 
-exports.deleteThreadId = async (req, res) => {
+
+const deleteThreadId = async (req, res) => {
   const { threadId } = req.params;
 
   if (!threadId) {
@@ -317,3 +302,15 @@ exports.deleteThreadId = async (req, res) => {
     res.status(500).json({ error: 'Failed to delete thread' });
   }
 };
+
+module.exports = { 
+  getRolesByThreadId,
+  deleteThreadId,
+  checkThread,
+  getUsernamesByThreadId,
+  fetchAllThreadIds,
+  sendInAppMessage,
+  searchInAppUsers,
+  fetchMessagesByThreadId,
+ 
+}

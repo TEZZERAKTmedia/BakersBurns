@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const verifiedController = require('../controllers/verification/verifiedController');
+const verifiedController = require('../controllers/verification/accountCRUDController');
 
 // Route to update user profile
 router.post('/update-profile', verifiedController.updateUserProfile);

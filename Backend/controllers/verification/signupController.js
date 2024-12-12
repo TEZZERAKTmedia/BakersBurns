@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs');
 const PendingUser = require('../../models/pendingUser');
 const User = require('../../models/user');
 const Message = require('../../models/messages');
+const Thread = require('../../models/threads');
 const sendVerificationEmail = require('../../utils/buildEmail'); // Nodemailer utility
 const { v4: uuidv4 } = require('uuid');
 
@@ -10,7 +11,11 @@ const { v4: uuidv4 } = require('uuid');
 // Signup Controller
 const signup = async (req, res) => {
   const { userName, email, password, phoneNumber, isOptedInForPromotions, isOptedInForEmailUpdates } = req.body; // Include the new opt-in fields
+  const RESTRICTED_USERNAMES = ['null', 'NULL', 'admin', 'administrator', 'root'];
 
+if (!userName || RESTRICTED_USERNAMES.includes(userName.toLowerCase())) {
+  return res.status(400).json({ message: 'Invalid username. Please choose another.' });
+}
   try {
     let existingUser = await PendingUser.findOne({ where: { email } });
 
@@ -72,6 +77,12 @@ const signup = async (req, res) => {
 
 const checkUsername = async (req, res) => {
   const { userName } = req.body;
+  const RESTRICTED_USERNAMES = ['null', 'NULL', 'admin', 'administrator', 'root'];
+
+if (!userName || RESTRICTED_USERNAMES.includes(userName.toLowerCase())) {
+  return res.status(400).json({ message: 'Invalid username. Please choose another.' });
+}
+
 
   if (!userName) {
     return res.status(400).json({ message: 'Username is required' });
@@ -105,78 +116,98 @@ const checkUsername = async (req, res) => {
 
 // Verify and Move Controller
 
-const verifyAndMove = async (req, res) => {
+const createAccount = async (req, res) => {
   const { email, token } = req.query;
+
+  console.log("Starting account creation process for email:", email);
 
   try {
     // Step 1: Verify the token
+    console.log("Attempting to verify token...");
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    console.log("Token verified successfully for:", decoded.email);
 
-    // Ensure that the token email matches the query email
     if (decoded.email !== email) {
+      console.warn("Token email mismatch:", decoded.email, "vs", email);
       return res.status(400).json({ message: 'Invalid token or email mismatch.' });
     }
 
     // Find the pending user by email
     const pendingUser = await PendingUser.findOne({ where: { email } });
     if (!pendingUser) {
+      console.warn("Pending user not found for email:", email);
       return res.status(404).json({ message: 'Pending user not found.' });
     }
+    console.log("Pending user found:", pendingUser.userName);
 
     // Check if the user already exists
     const existingUser = await User.findOne({ where: { email } });
     if (existingUser) {
+      console.warn("User with email already exists:", email);
       return res.status(409).json({
         message: 'This email is already registered. Please log in.',
         redirectUrl: process.env.LOGIN_URL || 'http://localhost:3010/login',
       });
     }
 
-    // Move the user to the Users table and retrieve opt-in fields from pendingUser
+    // Move the user to the Users table
     const newUser = await User.create({
       username: pendingUser.userName,
       email: pendingUser.email,
       password: pendingUser.password,
       phoneNumber: pendingUser.phoneNumber,
-      isOptedInForPromotions: pendingUser.isOptedInForPromotions,  // Get from pendingUser
-      isOptedInForEmailUpdates: pendingUser.isOptedInForEmailUpdates,  // Get from pendingUser
+      isOptedInForPromotions: pendingUser.isOptedInForPromotions,
+      isOptedInForEmailUpdates: pendingUser.isOptedInForEmailUpdates,
       isVerified: true,
-      role: 'user', // Default role for new users
+      role: 'user',
     });
+    console.log("User moved to Users table with ID:", newUser.id);
 
     // Delete the pending user entry
     await PendingUser.destroy({ where: { email } });
 
-    // Find the admin user to initiate the messaging thread
-    const adminUser = await User.findOne({ where: { role: 'admin' } });
-    if (!adminUser) {
-      return res.status(500).json({ message: 'Admin user not found.' });
+    // Check if a thread already exists for this user
+    let thread = await Thread.findOne({ 
+      where: { senderEmail: email, receiverEmail: null } // Receiver email is NULL for shared threads
+    });
+
+    // If no thread exists, create a new one with adminId set to NULL
+    if (!thread) {
+      const threadId = uuidv4();
+      thread = await Thread.create({
+        threadId,
+        senderEmail: email,
+        receiverEmail: null, // NULL indicates the thread is accessible to all admins
+        adminId: null, // NULL means it's a shared thread
+      });
+      console.log("New shared thread created with ID:", thread.threadId);
+    } else {
+      console.log("Existing thread found with ID:", thread.threadId);
     }
 
-    // Create a unique thread ID
-    const threadId = uuidv4();
-
-    // Create the initial message in the thread between the admin and the user
-    await Message.create({
-      threadId: threadId,
-      senderUsername: adminUser.username,
+    // Create the initial message in the shared thread
+    const initialMessage = await Message.create({
+      threadId: thread.threadId,
+      senderUsername: 'NULL', // Use a generic sender username
       receiverUsername: newUser.username,
       messageBody: 'Hi, welcome to BakersBurns. How can I help?',
       createdAt: new Date(),
     });
+    console.log("Initial message created with ID:", initialMessage.id);
 
-    // Respond with success, but token generation will happen in the next step
     return res.status(200).json({
-      message: 'User verified, moved to Users table, and initial message created.',
+      message: 'Account created successfully, and initial message created.',
       verified: true,
-      redirectUrl: process.env.DEV_USER_URL || 'http://localhost:4001', // You can still pass this if needed
+      redirectUrl: process.env.DEV_USER_URL || 'http://localhost:4001',
     });
 
   } catch (error) {
-    console.error('Verification error:', error);
+    console.error('Account creation error:', error);
     return res.status(400).json({ message: 'Invalid or expired token.' });
   }
 };
+
+
 
 
 const generateLoginTokenAndSetCookie = async (req, res) => {
@@ -259,7 +290,7 @@ module.exports = {
   signup,
   resendVerificationEmail,
   checkUsername,
-  verifyAndMove,
+  createAccount,
   generateLoginTokenAndSetCookie
 };
 

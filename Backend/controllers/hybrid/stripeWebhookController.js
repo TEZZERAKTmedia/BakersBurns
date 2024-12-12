@@ -2,101 +2,103 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const Order = require('../../models/order');
 const Product = require('../../models/product');
 const Cart = require('../../models/cart');
+const OrderItem = require('../../models/orderItem'); // Assuming you have an OrderItem model
 
-// Handle Stripe Webhooks
+
 const handleWebhook = async (req, res) => {
   const sig = req.headers['stripe-signature'];
 
   try {
     const event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
 
-    // Log the entire event object for debugging
     console.log('Received Stripe event:', event);
 
-    // Handle the checkout session completion
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object;
+
       const userId = session.metadata.userId;
+      const total = session.amount_total ? session.amount_total / 100 : null; // Convert to dollars
 
-      console.log('Checkout session completed for user:', userId);
-      
-      // Fetch cart items for the user and move them to an order
-      const cartItems = await Cart.findAll({ where: { userId } });
+      if (!total) {
+        console.error('Total amount is missing in the session.');
+        return res.status(400).send('Webhook Error: Total amount missing in the session.');
+      }
 
-      // Create a new order
-      const order = await Order.create({
-        userId,
-        status: 'completed',
-        totalAmount: session.amount_total / 100,  // Convert from cents to dollars
-        paymentStatus: 'paid',
+      const cartItems = await Cart.findAll({
+        where: { userId },
+        include: [{ model: Product, as: 'product' }],
       });
 
-      // Move cart items to the order and update product inventory
-      await Promise.all(cartItems.map(async (cartItem) => {
-        const product = await Product.findByPk(cartItem.productId);
-        await order.addProduct(product, { through: { quantity: cartItem.quantity } });
+      if (cartItems.length === 0) {
+        console.error(`No cart items found for userId: ${userId}`);
+        return res.status(400).send('No cart items found for this user.');
+      }
 
-        // Reduce product inventory (if applicable)
-        product.stock -= cartItem.quantity;
-        await product.save();
+      const shippingAddress = session.shipping_details?.address
+        ? JSON.stringify(session.shipping_details.address)
+        : null;
+      const billingAddress = session.customer_details?.address
+        ? JSON.stringify(session.customer_details.address)
+        : null;
 
-        // Remove cart items after they are added to the order
-        await cartItem.destroy();
-      }));
+      const order = await Order.create({
+        userId,
+        total,
+        billingAddress,
+        shippingAddress,
+        status: 'processing',
+      });
 
-      console.log('Order created and cart items moved for user:', userId);
-    }
+      console.log(`Order created with ID: ${order.id}`);
 
-    // Handle payment intent success
-    if (event.type === 'payment_intent.succeeded') {
-      const paymentIntent = event.data.object;
-      const userId = paymentIntent.metadata.userId;
+      await Promise.all(
+        cartItems.map(async (cartItem) => {
+          await OrderItem.create({
+            orderId: order.id,
+            productId: cartItem.productId,
+            quantity: cartItem.quantity,
+            price: cartItem.product.price,
+          });
 
-      console.log('Payment intent succeeded for user:', userId);
+          cartItem.product.stock -= cartItem.quantity;
+          await cartItem.product.save();
 
-      // You could update the order or finalize other logic here
-      await Order.update(
-        { paymentStatus: 'paid' },
-        { where: { userId, status: 'pending' } }  // Update relevant orders for the user
-      );
-    }
-
-    // Handle charge success
-    if (event.type === 'charge.succeeded') {
-      const charge = event.data.object;
-      const userId = charge.metadata.userId;
-
-      console.log('Charge succeeded for user:', userId);
-
-      // Mark the order as fully paid and trigger shipment if needed
-      await Order.update(
-        { paymentStatus: 'paid', status: 'ready_to_ship' },
-        { where: { userId, paymentStatus: 'pending' } }
-      );
-    }
-
-    // Handle charge failure (optional)
-    if (event.type === 'charge.failed') {
-      const charge = event.data.object;
-      const userId = charge.metadata.userId;
-
-      console.log('Charge failed for user:', userId);
-
-      // Update the order status to failed
-      await Order.update(
-        { paymentStatus: 'failed', status: 'payment_failed' },
-        { where: { userId, paymentStatus: 'pending' } }
+          await cartItem.destroy();
+        })
       );
 
-      // Notify the customer (optional)
-      console.log(`Payment failed for user ${userId}, notification sent.`);
+      console.log(`Cart items moved to order for userId: ${userId}`);
     }
 
-    res.status(200).send('Webhook received');
+    res.status(200).send('Webhook received successfully');
   } catch (err) {
     console.error('Error in Stripe webhook:', err);
     res.status(400).send(`Webhook Error: ${err.message}`);
   }
 };
 
-module.exports = { handleWebhook };
+
+// Cancel checkout session (moved outside `handleWebhook`)
+const cancelCheckoutSession = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const cartItems = await Cart.findAll({
+      where: { userId },
+      include: [{ model: Product, as: 'product' }],
+    });
+
+    for (const cartItem of cartItems) {
+      cartItem.product.stock += cartItem.quantity; // Restore stock
+      await cartItem.product.save();
+    }
+
+    console.log(`Stock restored for userId: ${userId} after session cancellation.`);
+    res.status(200).json({ message: 'Checkout session canceled, stock restored.' });
+  } catch (error) {
+    console.error('Error canceling checkout session:', error);
+    res.status(500).json({ message: 'Failed to cancel checkout session.' });
+  }
+};
+
+module.exports = { handleWebhook, cancelCheckoutSession };

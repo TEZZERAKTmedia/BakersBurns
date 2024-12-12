@@ -1,10 +1,11 @@
 .cart-container {
   padding: 20px;
   margin-top: 35%;
-  margin-left: 25%;
+  margin-left: 5%;
   font-size: x-large;
   background-color: #00000032;
-  width: 50vw;
+  width: 90vw;
+  max-width: 500px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   border-radius: 10px;
 }
@@ -79,3 +80,5 @@
   max-height: 100px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
+
+

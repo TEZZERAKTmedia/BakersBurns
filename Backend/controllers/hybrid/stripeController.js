@@ -1,14 +1,14 @@
-const Order = require('../../models/order');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const Cart = require('../../models/cart');
 const Product = require('../../models/product');
+
 
 // Function to generate a custom order number
 function generateOrderNumber(orderId) {
   return `ORD-${orderId}-${Date.now()}`;
 }
 
-// Checkout session creation
+// Checkout shoulsession creation
 const createCheckoutSession = async (req, res) => {
   try {
     const userId = req.user.id; // Assuming userId is attached by your auth middleware
@@ -25,23 +25,30 @@ const createCheckoutSession = async (req, res) => {
       return res.status(400).json({ message: 'No items in cart' });
     }
 
+    for (const cartItem of cartItems) {
+     if (cartItem.quantity > cartItems.product.stock) {
+      return res.status(400).json({ message: `Insufficient stock for product: ${cartItem.product.name}`})
+     }
+     cartItem.product.stock -= cartItem.quantity;
+     await cartItem.product.save();
+    }
+
     // Map cart items to Stripe line items and include product IDs
     const lineItems = cartItems.map(item => ({
       price_data: {
         currency: 'usd',
         product_data: {
           name: item.product.name,
-          images: [`http://localhost:3450/uploads/${item.product.image}`]
+          images: [`${process.env.USER_FRONTEND}/uploads/${item.product.image}`], // Using environment variable
         },
-        
-        unit_amount: item.product.price * 100,  // Convert to cents
+        unit_amount: item.product.price * 100, // Convert to cents
       },
-      quantity: item.quantity
+      quantity: item.quantity,
     }));
 
     // Prepare metadata to be passed to Stripe
     const metadata = {
-      userId: `${userId}`,  // Ensure that userId is passed as a string
+      userId: `${userId}`, // Ensure that userId is passed as a string
       productIds: cartItems.map(item => item.product.id).join(','), // Passing product IDs as a comma-separated string
     };
 
@@ -54,14 +61,24 @@ const createCheckoutSession = async (req, res) => {
       payment_method_types: ['card'],
       line_items: lineItems,
       mode: 'payment',
-      success_url: 'http://localhost:4001/success',
-      cancel_url: 'http://localhost:4001/cancel',
-      payment_intent_data: {
-        metadata: metadata,  // Attach metadata
-      },
-      // Collect shipping and billing address
+      success_url: `${process.env.USER_FRONTEND}/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.USER_FRONTEND}/cancel`,
+      billing_address_collection: 'required', // Ensure billing address is collected
       shipping_address_collection: {
-        allowed_countries: ['US']
+        allowed_countries: ['US'], // Adjust as needed for your use case
+      },
+      payment_intent_data: {
+        metadata: {
+          userId: `${userId}`, // Metadata passed to payment intent
+          productIds: cartItems.map(item => item.product.id).join(','),
+        },
+      },
+      metadata: {
+        userId: `${userId}`, // Metadata for checkout.session.completed
+        productIds: cartItems.map(item => item.product.id).join(','),
+      },
+      shipping_address_collection: {
+        allowed_countries: ['US'],
       },
       billing_address_collection: 'required',
       shipping_options: [
@@ -78,6 +95,7 @@ const createCheckoutSession = async (req, res) => {
         },
       ],
     });
+    
 
     // Respond with the session ID to the frontend
     res.status(200).json({ sessionId: session.id });
@@ -86,12 +104,6 @@ const createCheckoutSession = async (req, res) => {
     res.status(500).json({ message: 'Failed to create checkout session', error: error.message });
   }
 };
-
-
-
-
-
-
 
 // Refund payment
 const refundPayment = async (req, res) => {

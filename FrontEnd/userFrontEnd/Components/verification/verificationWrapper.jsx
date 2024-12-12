@@ -1,116 +1,76 @@
 import React, { useState } from "react";
 import { userApi } from "../../config/axios";
+import { useNotification } from "../notification/notification"; // Import notification context
+import LoadingPage from "../../Components/loading"; // Import your loading page component
+import { Link} from "react-router-dom";
 import '../../Componentcss/verificationwrapper.css';
 
-// This component handles both requesting and verifying a code
-const VerificationWrapper = ({ actionType, children }) => {
+const VerificationWrapper = ({ children }) => {
   const [codeRequested, setCodeRequested] = useState(false);
-  const [code, setCode] = useState(new Array(6).fill(""));
+  const [code, setCode] = useState("");
   const [message, setMessage] = useState("");
-  const [email, setEmail] = useState(""); // Email to request a code (if applicable)
-  const [isSubmitting, setIsSubmitting] = useState(false); // Loading state
-  const [emailSubmitted, setEmailSubmitted] = useState(false); // To track if email was submitted once
-  const [isVerified, setIsVerified] = useState(false); // State to track if verification was successful
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isVerified, setIsVerified] = useState(false);
+  const [isLoading, setIsLoading] = useState(false); // State for showing the loading page
+  const { showNotification } = useNotification(); // Use notification context
 
-  // Function to save the email to localStorage
-  const storeEmailInLocalStorage = (email) => {
-    if (email) {
-      console.log("Storing email in localStorage: ", email);
-      localStorage.setItem("email", email);
-    } else {
-      console.error("No email provided to store in localStorage.");
-    }
-  };
-
-  // Function to initiate verification and request code simultaneously
-  const initiateVerification = async (emailToSend) => {
+  // Request Verification Code
+  const requestVerificationCode = async () => {
     try {
-      const currentPage = window.location.href;  // Capture the current page URL
+      setIsSubmitting(true);
+      setIsLoading(true); // Show the loading page
+      const currentPage = window.location.href;
+
       const response = await userApi.post('/verification/email', {
-        email: emailToSend,
         actionType: 'verification-code',
-        redirectUrl: currentPage // Send the current page to the backend
+        redirectUrl: currentPage,
       });
 
       if (response.data.message) {
-        setEmailSubmitted(true);  // Mark email as submitted
-        setMessage('Verification code sent to your email.');
-        console.log('Verification email sent');
+        showNotification(`Verification code sent to ${response.data.email}.`, "success");
+        setTimeout(() => {
+          setCodeRequested(true);
+          setIsLoading(false); // Hide the loading page after 10 seconds
+        }, 5000);
       }
     } catch (error) {
-      setMessage("Error initiating verification");
+      const errorMessage = error.response?.data?.message || "Error initiating verification.";
+      showNotification(errorMessage, "error");
+      setIsLoading(false); // Stop loading on error
       console.error('Error initiating verification:', error);
-    }
-  };
-
-  // Function to request a verification code from the backend
-  const requestVerificationCode = async () => {
-    if (!email && !emailSubmitted) {
-      setMessage("Please enter a valid email.");
-      return;
-    }
-
-    try {
-      setIsSubmitting(true);
-      const emailToUse = emailSubmitted ? localStorage.getItem("email") : email;
-      if (!emailSubmitted) {
-        storeEmailInLocalStorage(email); // Store the email in local storage
-      }
-      await initiateVerification(emailToUse);
-      setCodeRequested(true);
-    } catch (error) {
-      setMessage("Error sending verification code.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // Handle code input change for each box
-  const handleChange = (element, index) => {
-    const value = element.target.value.replace(/[^0-9]/g, ""); // Only allow digits
-    if (value) {
-      let newCode = [...code];
-      newCode[index] = value;
-      setCode(newCode);
-
-      // Automatically focus the next input field
-      if (element.target.nextSibling) {
-        element.target.nextSibling.focus();
-      }
-    }
-  };
-
-  // Handle code verification
+  // Verify Code
   const verifyCode = async (e) => {
     e.preventDefault();
-    const verificationCode = code.join(""); // Concatenate the 6 input fields
 
-    if (verificationCode.length !== 6) {
-      setMessage("Please complete the code.");
+    if (code.length !== 6) {
+      showNotification("Please enter a 6-digit code.", "error");
       return;
     }
 
     try {
       setIsSubmitting(true);
-      const emailToUse = localStorage.getItem("email"); // Retrieve the stored email
-      console.log("Using email for verification: ", emailToUse);
 
       const response = await userApi.get("/verification/code-verification", {
         params: {
-          email: emailToUse, // Send the previously entered email
-          token: verificationCode, // Send the entered 6-digit token
-          actionType: 'verification-code'
-        }
+          token: code,
+          actionType: 'verification-code',
+        },
       });
 
       if (response.status === 200 && response.data.verified) {
-        setMessage("Code verified successfully!");
-        setIsVerified(true); // Mark the user as verified
+        showNotification("Code verified successfully!", "success");
+        setIsVerified(true);
       } else {
-        setMessage("Invalid or expired code.");
+        showNotification("Invalid or expired code.", "error");
       }
     } catch (error) {
-      setMessage("Error verifying code.");
+      const errorMessage = error.response?.data?.message || "Error verifying code.";
+      showNotification(errorMessage, "error");
       console.error("Error verifying code:", error);
     } finally {
       setIsSubmitting(false);
@@ -118,67 +78,85 @@ const VerificationWrapper = ({ actionType, children }) => {
   };
 
   return (
-    <div>
-      {!isVerified ? (
-        <div>
-          {!codeRequested ? (
-            // Request Code Form
-            <div>
-              <h3>Request Verification Code</h3>
-              {!emailSubmitted ? (
-                <>
-                  <input
-                    type="email"
-                    placeholder="Enter your email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                  <button onClick={requestVerificationCode} disabled={isSubmitting}>
-                    {isSubmitting ? "Requesting..." : "Request Code"}
-                  </button>
-                </>
-              ) : (
-                <>
-                  <p>Email already entered: {localStorage.getItem("email")}</p>
-                  <button onClick={requestVerificationCode} disabled={isSubmitting}>
-                    {isSubmitting ? "Resending..." : "Resend Code"}
-                  </button>
-                </>
-              )}
-            </div>
-          ) : (
-            // Code Input Form
-            <form onSubmit={verifyCode}>
-              <h3>Enter Verification Code</h3>
-              <div className="code-verification">
-                {code.map((digit, index) => (
-                  <input
-                    key={index}
-                    type="text"
-                    value={digit}
-                    onChange={(e) => handleChange(e, index)}
-                    maxLength={1}
-                    required
-                    className="code-box"
-                    onFocus={(e) => e.target.select()}
-                  />
-                ))}
-              </div>
-              <button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Verifying..." : "Verify Code"}
-              </button>
-            </form>
-          )}
-          {message && <p>{message}</p>}
-        </div>
+    <div className="container" style={{ color: 'black', backgroundColor: 'white' }}>
+      {isLoading ? (
+        <LoadingPage />
+        
       ) : (
-        // If verified, render the wrapped route (children) and display the stored email
-        <>
-          {children}
-          <p>Verified Email: {localStorage.getItem("email")}</p>
-        </>
+        !isVerified ? (
+          <div className="verification-wrapper">
+                      <div className="settings-sections">
+          <h2>Legal</h2>
+          <ul>
+              <li>
+                  <Link to="/terms-of-service" className="settings-link">Terms of Service</Link>
+              </li>
+              <li>
+                  <Link to="/privacy-policy" className="settings-link">Privacy Policy</Link>
+              </li>
+          </ul>
+      </div>
+            {!codeRequested ? (
+              <div className="form">
+
+                <h3>Request Verification Code</h3>
+                <button onClick={requestVerificationCode} disabled={isSubmitting}>
+                  {isSubmitting ? "Requesting..." : "Request Code"}
+                </button>
+              </div>
+            ) : (
+              <>
+                <form onSubmit={verifyCode} className="form">
+                  <h3 style={{ fontSize: '3rem' }}>Enter Verification Code</h3>
+                  <input
+                    type="text"
+                    value={code}
+                    onChange={(e) => setCode(e.target.value.replace(/[^0-9]/g, ""))}
+                    maxLength={6}
+                    required
+                    placeholder="Enter 6-digit code"
+                    className="code-input"
+                    autoComplete="one-time-code"
+                  />
+                  <button type="submit" disabled={isSubmitting}>
+                    {isSubmitting ? "Verifying..." : "Verify Code"}
+                  </button>
+                </form>
+                <button
+                  onClick={requestVerificationCode}
+                  disabled={isSubmitting}
+                  className="resend-button"
+                  style={{
+                    marginTop: "1rem",
+                    padding: "10px 20px",
+                    backgroundColor: "#1a73e8",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "5px",
+                    cursor: "pointer",
+                  }}
+                >
+                  {isSubmitting ? "Resending..." : "Resend Code"}
+                </button>
+              </>
+            )}
+          </div>
+        ) : (
+          <div className="settings-sections">
+          <h2>Legal</h2>
+          <ul>
+              <li>
+                  <Link to="/terms-of-service" className="settings-link">Terms of Service</Link>
+              </li>
+              <li>
+                  <Link to="/privacy-policy" className="settings-link">Privacy Policy</Link>
+              </li>
+          </ul>
+      </div>
+        )
       )}
+      {message && <p>{message}</p>}
+      
     </div>
   );
 };

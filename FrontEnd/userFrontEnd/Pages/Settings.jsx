@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { userApi } from '../config/axios'; // Use registerApi if needed for consistency
+import { userApi } from '../config/axios';
 import '../Pagecss/Settings.css';
+import { useNotification } from '../Components/notification/notification'; // Import notification context
 
 const Settings = () => {
   const [formData, setFormData] = useState({
@@ -9,9 +10,6 @@ const Settings = () => {
     confirmPassword: '',
     phoneNumber: ''
   });
-
-  const [errorMessage, setErrorMessage] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
   const [passwordRequirements, setPasswordRequirements] = useState({
     length: false,
     upperLowerCase: false,
@@ -19,6 +17,10 @@ const Settings = () => {
     digit: false
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const { showNotification } = useNotification(); // Use notification context
 
   const handleChange = (e) => {
     setFormData({
@@ -27,7 +29,6 @@ const Settings = () => {
     });
   };
 
-  // Validate password requirements
   useEffect(() => {
     const length = formData.password.length >= 8;
     const upperLowerCase = /(?=.*[a-z])(?=.*[A-Z])/.test(formData.password);
@@ -42,12 +43,11 @@ const Settings = () => {
     });
   }, [formData.password]);
 
-  // Handle password change request
   const handlePasswordChangeRequest = async (e) => {
     e.preventDefault();
   
     if (formData.password !== formData.confirmPassword) {
-      setErrorMessage('Passwords do not match');
+      showNotification('Passwords do not match', 'error');
       return;
     }
   
@@ -57,48 +57,42 @@ const Settings = () => {
       passwordRequirements.digit;
   
     if (!isValidPassword) {
-      setErrorMessage('Password must meet the required criteria.');
+      showNotification('Password must meet the required criteria.', 'error');
       return;
     }
   
     try {
       setIsSubmitting(true);
   
-      // Retrieve email from localStorage
       const email = localStorage.getItem('email');
-  
-      // If email is not found in localStorage, throw an error
       if (!email) {
-        setErrorMessage('No email found. Please verify your email first.');
+        showNotification('No email found. Please verify your email first.', 'error');
         return;
       }
   
-      // Send the email and new password in the request
       const response = await userApi.post('/verified/update-password', {
-        email: email, // Include email in the request
-        newPassword: formData.password // New password
+        email: email,
+        newPassword: formData.password
       });
   
       if (response.status === 200) {
-        setSuccessMessage('Password updated successfully! Redirecting to login...');
-        setTimeout(() => window.location.href = '/login', 2000);
+        showNotification('Password updated successfully! Redirecting to login...', 'success');
+        
       } else {
-        setErrorMessage('Error resetting password');
+        showNotification('Error resetting password', 'error');
       }
     } catch (error) {
-      setErrorMessage(error.response?.data?.message || 'Error resetting password');
+      showNotification(error.response?.data?.message || 'Error resetting password', 'error');
     } finally {
       setIsSubmitting(false);
     }
   };
-  
 
-  // Handle email change request (optional verification for new email)
   const handleEmailChangeRequest = async (e) => {
     e.preventDefault();
 
     if (!formData.newEmail) {
-      setErrorMessage("Please enter a valid email.");
+      showNotification("Please enter a valid email.", 'error');
       return;
     }
 
@@ -109,14 +103,38 @@ const Settings = () => {
       });
 
       if (response.status === 200) {
-        setSuccessMessage('Email updated successfully.');
+        showNotification('Email updated successfully.', 'success');
       } else {
-        setErrorMessage('Error updating email');
+        showNotification('Error updating email', 'error');
       }
     } catch (error) {
-      setErrorMessage(error.response?.data?.message || 'Error updating email');
+      showNotification(error.response?.data?.message || 'Error updating email', 'error');
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleDeleteAccountClick = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleConfirmDelete = async () => {
+    setIsDeleting(true);
+    try {
+      await userApi.post('/verified/delete-account');
+      showNotification('Your account has been deleted. Redirecting to the homepage.', 'success');
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 2000);
+    } catch (error) {
+      showNotification('An error occurred while deleting your account. Please try again.', 'error');
+    } finally {
+      setIsDeleting(false);
+      setIsModalOpen(false);
     }
   };
 
@@ -124,12 +142,11 @@ const Settings = () => {
     <div className="settings-container">
       <h1>Profile Settings</h1>
 
-      {/* Email Change Section */}
       <section className="settings-section">
         <h2>Change Email</h2>
         <form onSubmit={handleEmailChangeRequest}>
           <label>
-            New Email: 
+            New Email:
             <input 
               type="email" 
               name="newEmail" 
@@ -143,16 +160,13 @@ const Settings = () => {
             {isSubmitting ? "Updating..." : "Update Email"}
           </button>
         </form>
-        {errorMessage && <div className="error-message">{errorMessage}</div>}
-        {successMessage && <div className="success-message">{successMessage}</div>}
       </section>
 
-      {/* Password Change Section */}
       <section className="settings-section">
         <h2>Change Password</h2>
         <form onSubmit={handlePasswordChangeRequest}>
           <label>
-            New Password: 
+            New Password:
             <input 
               type="password" 
               name="password" 
@@ -177,7 +191,7 @@ const Settings = () => {
             </li>
           </ul>
           <label>
-            Confirm Password: 
+            Confirm Password:
             <input 
               type="password" 
               name="confirmPassword" 
@@ -189,11 +203,8 @@ const Settings = () => {
           </label>
           <button type="submit" disabled={isSubmitting}>Change Password</button>
         </form>
-        {errorMessage && <div className="error-message">{errorMessage}</div>}
-        {successMessage && <div className="success-message">{successMessage}</div>}
       </section>
 
-      {/* Phone Number Change Section */}
       <section className="settings-section">
         <h2>Change Phone Number</h2>
         <form>
@@ -211,6 +222,81 @@ const Settings = () => {
           <button type="submit">Update Phone Number</button>
         </form>
       </section>
+
+      <div style={{ marginTop: '20px' }}>
+        <button
+          onClick={handleDeleteAccountClick}
+          style={{
+            padding: '10px 20px',
+            backgroundColor: 'red',
+            color: 'white',
+            border: 'none',
+            borderRadius: '5px',
+            cursor: 'pointer',
+            fontFamily: 'Arial, sans-serif'
+          }}
+        >
+          Delete Account
+        </button>
+      </div>
+
+      {isModalOpen && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 1000,
+          fontFamily: 'Ariel, sans-serif'
+        }}>
+          <div style={{
+            backgroundColor: 'white',
+            padding: '20px',
+            borderRadius: '8px',
+            width: '90%',
+            maxWidth: '400px',
+            textAlign: 'center'
+          }}>
+            <h2 style={{ fontSize: '1.5rem', marginBottom: '10px' }}>Are you sure?</h2>
+            <p style={{ fontSize: '1rem', marginBottom: '20px' }}>
+              This action cannot be undone. All order history, message history, and user information will be permanently deleted.
+            </p>
+            <button
+              onClick={handleConfirmDelete}
+              style={{
+                padding: '10px 20px',
+                backgroundColor: 'red',
+                color: 'white',
+                border: 'none',
+                borderRadius: '5px',
+                cursor: 'pointer',
+                marginRight: '10px'
+              }}
+              disabled={isDeleting}
+            >
+              {isDeleting ? 'Deleting...' : 'Yes, Delete My Account'}
+            </button>
+            <button
+              onClick={handleCloseModal}
+              style={{
+                padding: '10px 20px',
+                backgroundColor: '#ccc',
+                color: 'black',
+                border: 'none',
+                borderRadius: '5px',
+                cursor: 'pointer'
+              }}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

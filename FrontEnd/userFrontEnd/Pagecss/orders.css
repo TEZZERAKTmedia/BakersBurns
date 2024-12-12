@@ -87,4 +87,152 @@
       font-size: 0.8rem;
     }
   }
+/* Backdrop for Modal */
+/* Backdrop */
+.backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black */
+  z-index: 999;
+  display: flex;
+  justify-content: center; /* Center horizontally */
+  align-items: flex-start; /* Align to the top */
+  padding-top: 20px; /* Add some padding at the top */
+  overflow-y: hidden; /* Prevent scrolling the backdrop itself */
+}
+
+/* Modal */
+.order-details {
+  position: relative; 
+  background-color: white;
+  color: black;
+  padding: 20px;
+  width: 90%; /* Use 90% of the screen width for smaller devices */
+  max-width: 500px; /* Cap the width for larger devices */
+  max-height: 80%; /* Limit height to 80% of the screen */
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2); /* Subtle shadow */
+  z-index: 1000;
+  display: flex;
+  margin-top: 20%;
+  flex-direction: column; /* Stack content vertically */
+  gap: 15px; /* Space between elements */
+  overflow-y: auto; /* Enable scrolling for overflowing content */
+  scroll-behavior: smooth; /* Smooth scrolling */
+}
+.order-details::-webkit-scrollbar {
+  width: 8px;
+}
+
+.order-details::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 12px;
+}
+
+.order-details::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 12px;
+}
+
+.order-details::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+.detail-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px; /* Space between label, image, and text */
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2); 
+  padding: 15px;
+  margin: 10px;
+  background-color: #f9f9f9;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 300px;
+  margin: 0 auto; /* Center each tile in its column */
+}
+
+.detail-tile label {
+  font-weight: bold;
+  color: #ffffff;
+  background-color: #333;
+  padding: 8px;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.detail-tile p {
+  padding: 10px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin: 0;
+  text-align: center;
+}
+
+/* Close Button */
+.close-button {
+  margin-top: 30%;
+  margin-right: 5%;
+  position: sticky;
+  top: 10px; /* Distance from the top of the modal */
+  margin-left: auto; /* Pushes the button to the right */
+  background-color: #ff5050;
+  color: red;
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  font-size: 1rem;
+  cursor: pointer;
+  z-index: 1001; /* Ensures the button appears above other modal content */
+  display: flex;
+  justify-content: center; /* Centers 'X' horizontally */
+  align-items: center; /* Centers 'X' vertically */
+}
+
+.product-image {
+  height: auto;
+  max-width: 100%; /* Scale image proportionally */
+  object-fit: cover; /* Ensure consistent aspect ratio */
+  border-radius: 8px;
+  margin: 8px 0;
+  
+}
+
+
+/* Responsive Design */
+@media (min-width: 768px) {
+  .order-details {
+    padding: 30px; /* Add more padding for larger screens */
+    max-width: 600px; /* Slightly larger modal for tablets/desktops */
+  }
+  .close-button {
+    margin-top: 10%;
+
+  }
+  .order-details {
+    margin-top: 10%;
+  }
+}
+
+
+/* Tracking Button */
+.tracking-link-button {
+  font-size: 1.5rem;
+  background-color: black;
+  padding: 10px;
+  border-radius: 20px;
+  color: white;
+  text-decoration: none;
+}
+
+.tracking-link-button:hover {
+  background-color: #333; /* Slightly lighter shade */
+}
+
+  
   

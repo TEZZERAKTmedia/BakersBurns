@@ -1,14 +1,17 @@
-import React, { useState, useEffect, useContext } from 'react';
-import '../Componentcss/store.css'; // Import the CSS file
+import React, { useState, useEffect } from 'react';
+import '../Componentcss/store.css';
 import { userApi } from '../config/axios';
-import { Link } from 'react-router-dom'; // Import Link for navigation
+import { Link } from 'react-router-dom';
+import { useNotification } from '../Components/notification/notification';
+
 
 const Store = () => {
   const [products, setProducts] = useState([]);
-  const [authError, setAuthError] = useState(false); // To track authentication errors
-  const [errorMessage, setErrorMessage] = useState(''); // Error message for the user
-  const [cartMessage, setCartMessage] = useState(''); // Message for cart-related actions
-  const [selectedProduct, setSelectedProduct] = useState(null); // State for selected product
+  const [authError, setAuthError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [loading, setLoading] = useState(false); // New loading state
+  const { showNotification } = useNotification();
 
   useEffect(() => {
     fetchProducts();
@@ -16,71 +19,62 @@ const Store = () => {
 
   const fetchProducts = async () => {
     try {
-      const response = await userApi.get('/store'); // Fetch products from store
-      setProducts(response.data);
+      const response = await userApi.get('/store');
+      // Access `products` from the response object
+      const { products } = response.data;
+  
+      setProducts(products || []); // Safeguard against undefined
     } catch (error) {
       console.error('Error fetching products:', error);
       if (error.response && error.response.status === 401) {
-        // If a 401 Unauthorized error is returned, set the auth error state
         setAuthError(true);
         setErrorMessage("Your session may have expired or you may not have an account with us. Please click here to register or login.");
       }
     }
   };
+  
 
   const openProductModal = (product) => {
-    setSelectedProduct(product); // Set the selected product
+    setSelectedProduct(product);
   };
 
   const closeProductModal = () => {
-    setSelectedProduct(null); // Clear the selected product to close modal
+    setSelectedProduct(null);
   };
 
   const handleAddToCart = async (productId) => {
-    const userId = 'userIdFromContext';
-    const token = 'tokenFromContext'; // Replace with actual token from AuthContext or state
+    if (loading) return; // Prevent further clicks if already loading
+    setLoading(true); // Set loading state to true
 
-    
+    const userId = 'userIdFromContext';
+    const token = 'tokenFromContext';
 
     if (!userId) {
-      console.error('User not authenticated');
-      setAuthError(true);
-      setErrorMessage("You need to log in to add products to your cart.");
+      showNotification("You need to log in to add products to your cart.", "error");
+      setLoading(false); // Reset loading state
       return;
     }
 
     try {
-      const response = await userApi.post('/cart/add-to-cart', { userId, productId, quantity: 1 }, {
+      await userApi.post('/cart/add-to-cart', { userId, productId, quantity: 1 }, {
         headers: {
-          'Authorization': `Bearer ${token}` // Include the token in the Authorization header
+          'Authorization': `Bearer ${token}`
         }
       });
-      console.log('Product added to cart');
-      setCartMessage('Product added to cart successfully.');
+      showNotification('Product added to cart successfully.', 'success');
+      closeProductModal();
     } catch (error) {
-      console.error('Error adding to cart:', error);
+      const errorMsg = error.response && error.response.status === 400 && error.response.data.message === 'Item already in cart'
+        ? 'Item is already in the cart.'
+        : 'An error occurred while adding the product to the cart.';
       
-      // Check if the error is due to the product already being in the cart
-      if (error.response && error.response.status === 400 && error.response.data.message === 'Item already in cart') {
-        setCartMessage('Item is already in the cart.');
-      } else if (error.response && error.response.status === 401) {
-        setAuthError(true);
-        setErrorMessage("Your session may have expired or you may not have an account with us. Please click here to register or login.");
-      } else {
-        setCartMessage('An error occurred while adding the product to the cart.');
-      }
+      showNotification(errorMsg, 'error');
+      closeProductModal();
+      
+    } finally {
+      setLoading(false); // Reset loading state
     }
   };
-
-  // Optionally clear the cart message after a few seconds
-  useEffect(() => {
-    if (cartMessage) {
-      const timer = setTimeout(() => {
-        setCartMessage('');
-      }, 3000); // Clear message after 3 seconds
-      return () => clearTimeout(timer); // Cleanup the timer
-    }
-  }, [cartMessage]);
 
   return (
     <div className="store-container">
@@ -95,63 +89,51 @@ const Store = () => {
         <div className="product-grid">
           {products.map((product) => (
             <div className="product-tile" key={product.id} onClick={() => openProductModal(product)}>
-              <div className="product-image">
-                <img src={`${import.meta.env.VITE_IMAGE_BASE_URL}/${product.image}`} alt={product.name} />
-              </div>
               <div className="product-info">
-                <h3 style={{ fontFamily: '"Dancing Script", cursive', fontSize: '1.8rem' }}>{product.name}</h3>
+                <img
+                  src={`${import.meta.env.VITE_IMAGE_BASE_URL}/${product.image}`}
+                  alt={product.name}
+                  
+                />
+                <h3 >{product.name}</h3>
+                <p >${product.price}</p>
               </div>
-              <div className="product-description">
-                <p style={{ fontFamily: 'Arial, sans-serif', fontSize: '1rem', color: '#555' }}>{product.description}</p>
-              </div>
-              <p style={{ fontFamily: 'Arial, sans-serif', fontSize: '1rem', color: 'white' }}>${product.price}</p>
-              <button onClick={(e) => { e.stopPropagation(); handleAddToCart(product.id); }}>Add to Cart</button>
             </div>
           ))}
-
-          {cartMessage && (
-            <div className="cart-message">
-              <p>{cartMessage}</p>
-            </div>
-          )}
         </div>
       )}
 
       {/* Modal for displaying selected product */}
       {selectedProduct && (
-        <div className="modal-overlay" onClick={closeProductModal} >
-          <div style={{backgroundColor:'#555555ce'}} className="modal-content" onClick={(e) => e.stopPropagation()} >
+        <div className="modal-overlay" onClick={closeProductModal}>
+          <div  className="modal-content" onClick={(e) => e.stopPropagation()}>
             <span className="close-modal" onClick={closeProductModal}>&times;</span>
-            <h3 style={{ fontFamily: '"Dancing Script", cursive', fontSize: '2.5rem', textAlign: 'center' }}>
+            <h3 style={{ color: 'black'}}>
               {selectedProduct.name}
             </h3>
             <img
               src={`${import.meta.env.VITE_IMAGE_BASE_URL}/${selectedProduct.image}`}
               alt={selectedProduct.name}
-              style={{ width: '100%', borderRadius: '8px' }}
+              
             />
-            <p style={{ fontFamily: 'Arial, sans-serif', fontSize: '1.2rem', color: 'white', margin: '15px 0' }}>
-              {selectedProduct.description}
-            </p>
-            <p style={{ fontFamily: 'Arial, sans-serif', fontSize: '1.5rem', color: 'white' ,textAlign: 'center' }}>
-              ${selectedProduct.price}
-            </p>
+            <div className='modal-descriptor'>
+              <h4 >Description:</h4>
+              <p >
+                {selectedProduct.description}
+              </p>
+            </div>
+            <div className='modal-descriptor'>
+              <h4>Price: USD</h4>
+              <p >
+                ${selectedProduct.price}
+              </p>
+            </div>
             <button
-              style={{
-                fontFamily: '"Dancing Script", cursive',
-                fontSize: '1.2rem',
-                color: '#fff',
-                backgroundColor: '#ff6347',
-                padding: '8px 16px',
-                borderRadius: '5px',
-                border: 'none',
-                cursor: 'pointer',
-                display: 'block',
-                margin: '0 auto'
-              }}
+             
               onClick={() => handleAddToCart(selectedProduct.id)}
+              disabled={loading} // Disable button when loading
             >
-              Add to Cart
+              {loading ? "Adding..." : "Add to Cart"} {/* Show loading state */}
             </button>
           </div>
         </div>

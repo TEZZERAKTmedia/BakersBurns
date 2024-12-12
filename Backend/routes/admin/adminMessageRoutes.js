@@ -5,31 +5,21 @@ const {
   sendMessage,       // In-app and email messaging
   getMessages        // In-app and email messaging
 } = require('../../controllers/admin/messagingController');
-const { 
-    searchInAppUsers,  // Search users by username/email
-    sendInAppMessage,       // In-app and email messaging 
-    getOrCreateThreadId,       // In-app and email messaging
-    fetchAllThreadIds,
-    fetchMessagesByThreadId,
-    getRolesByThreadId,
-    getUsernamesByThreadId,
-    checkThread,
-    deleteThreadId
-
-  } = require('../../controllers/admin/inAppMessagingController');
+const inAppMessagingController = require('../../controllers/admin/inAppMessagingController');
 
 //GET
-router.get('/search', searchInAppUsers);
-router.get('/fetch-all-threads', adminAuthMiddleware(), fetchAllThreadIds);
-router.get('/fetch-messages-by-thread',adminAuthMiddleware(), fetchMessagesByThreadId);
-router.get('/threads', adminAuthMiddleware(), getOrCreateThreadId);
-router.get('/get-roles-thread/:threadId', adminAuthMiddleware(), getRolesByThreadId);
-router.get('/get-usernames-by-thread/:threadId', adminAuthMiddleware(), getUsernamesByThreadId);
-router.get('/check-thread', adminAuthMiddleware(), checkThread);
+router.get('/search', inAppMessagingController.searchInAppUsers);
+router.get('/fetch-all-threads', adminAuthMiddleware(), inAppMessagingController.fetchAllThreadIds);
+router.get('/fetch-messages-by-thread', adminAuthMiddleware(), inAppMessagingController.fetchMessagesByThreadId);
+
+
+router.get('/get-roles-thread/:threadId', adminAuthMiddleware(), inAppMessagingController.getRolesByThreadId);
+router.get('/get-usernames-by-thread/:threadId', adminAuthMiddleware(), inAppMessagingController.getUsernamesByThreadId);
+router.get('/check-thread', adminAuthMiddleware(), inAppMessagingController.checkThread);
 //POST
-router.post('/messages/send', adminAuthMiddleware(), sendInAppMessage);
+router.post('/messages/send', adminAuthMiddleware(), inAppMessagingController.sendInAppMessage);
 //DELETE
-router.delete('/delete-thread/:threadId',adminAuthMiddleware(), deleteThreadId);
+router.delete('/delete-thread/:threadId',adminAuthMiddleware(), inAppMessagingController.deleteThreadId);
 
 
 // EMAIL 

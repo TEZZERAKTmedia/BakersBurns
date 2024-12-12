@@ -1,27 +1,68 @@
 const Order = require('../../models/order');
+const OrderItem = require('../../models/orderItem');
 const User = require('../../models/user');
 const Product = require('../../models/product');
-// Import the tracking link generator
+const {sendEmailNotification } = require('../../utils/statusEmail');
 
+const sendStatusNotification = async (order, status) => {
+    const user = await User.findByPk(order.userId);
+    if (!user) {
+      console.error(`User not found for order ID: ${order.id}`);
+      return;
+    }
+  
+    let emailStatus = status;
+    if (status === 'Processing' && order.trackingNumber) {
+      emailStatus = 'Tracking Added';
+    }
+  
+    sendEmailNotification(user.email, order.trackingNumber || 'N/A', emailStatus);
+  };
 // Create a new order
 const createOrder = async (req, res) => {
-    try {
-        const { userId, productId, quantity, shippingAddress, billingAddress, trackingNumber, carrier, total } = req.body;
-        const newOrder = await Order.create({
-            userId,
-            productId,
-            quantity,
-            shippingAddress,
-            billingAddress,
-            trackingNumber,
-            carrier,
-            total
-        });
-        res.status(201).json({ message: 'Order created successfully', order: newOrder });
-    } catch (error) {
-        res.status(500).json({ message: 'Error creating order', error });
+  const { username, shippingAddress, orderItems, trackingNumber, carrier, total } = req.body;
+
+  try {
+    // Step 1: Find the user by username
+    const user = await User.findOne({ where: { username } });
+    if (!user) {
+      return res.status(400).json({ message: 'User not found. Please check the username and try again.' });
     }
+
+    // Step 2: Determine initial order status
+    const initialStatus = trackingNumber ? 'Shipped' : 'Processing';
+
+    // Step 3: Create the main order
+    const newOrder = await Order.create({
+      userId: user.id,
+      shippingAddress,
+      trackingNumber,
+      carrier,
+      total,
+      status: initialStatus, // Set status based on tracking number presence
+    });
+
+    // Step 4: Create associated order items
+    const items = orderItems.map((item) => ({
+      orderId: newOrder.id,
+      productId: item.productId,
+      quantity: item.quantity,
+      total: item.total,
+    }));
+
+    await OrderItem.bulkCreate(items);
+
+    // Step 5: Send email notification
+    await sendStatusNotification(newOrder, initialStatus);
+
+    res.status(201).json({ message: 'Order created successfully.', order: newOrder });
+  } catch (error) {
+    console.error('Error creating order:', error);
+    res.status(500).json({ message: 'Error creating order', error });
+  }
 };
+
+
 const generateTrackingLink = (carrier, trackingNumber) => {
     let baseUrl;
     switch (carrier.toLowerCase()) {
@@ -47,90 +88,46 @@ const generateTrackingLink = (carrier, trackingNumber) => {
 // Get all orders
 const getAllOrders = async (req, res) => {
     try {
-        const { status, userId } = req.query;
-        const filter = {};
-        if (status) filter.status = status;
-        if (userId) filter.userId = userId;
-
-        // Step 1: Fetch all orders
-        const orders = await Order.findAll({
-            where: filter,
+      const orders = await Order.findAll({
+        include: [
+          {
+            model: User,
+            as: 'user',
+            attributes: ['username', 'email'],
+          },
+          {
+            model: OrderItem,
+            as: 'items',
             include: [
-                {
-                    model: User,
-                    as: 'user', // This should match the alias defined in the association
-                    attributes: ['username', 'email'] // Fetch only the required user fields
-                },
-                {
-                    model: Product, // Assuming this is the correct model for your products
-                    as: 'product',  // Assuming this is the correct alias for the association
-                    attributes: ['image', 'name'] // Fetch image and name from the Products table
-                },
+              {
+                model: Product,
+                as: 'product',
+                attributes: ['name', 'image', 'price'],
+              },
             ],
-            attributes: [
-                'id',
-                'userId',
-                'productId',
-                'quantity',
-                'shippingAddress',
-                'billingAddress',
-                'trackingNumber',
-                'carrier',
-                'total',
-                'status',
-                'createdAt',
-                'updatedAt'
-            ]
-        });
-
-        // Logging the raw orders fetched from the database to inspect user association
-        console.log('Fetched orders:', JSON.stringify(orders, null, 2));
-
-        // Step 2: For each order, fetch associated User information (username, email)
-        const ordersWithUserDetails = await Promise.all(
-            orders.map(async (order) => {
-                // Logging the user attached to the order
-                console.log('Order User:', JSON.stringify(order.user, null, 2));
-                console.log('Order Product:', JSON.stringify(order.product, null, 2));
-
-                // Generate tracking link if tracking info is available
-                let trackingLink = null;
-                if (order.trackingNumber && order.carrier) {
-                    trackingLink = generateTrackingLink(order.carrier, order.trackingNumber);
-                }
-
-                return {
-                    id: order.id,
-                    userId: order.userId,
-                    productId: order.productId,
-                    quantity: order.quantity,
-                    shippingAddress: order.shippingAddress,
-                    billingAddress: order.billingAddress,
-                    trackingNumber: order.trackingNumber,
-                    carrier: order.carrier,
-                    total: order.total,
-                    status: order.status,
-                    createdAt: order.createdAt,
-                    updatedAt: order.updatedAt,
-                    trackingLink: trackingLink || 'Tracking info not available',
-                    username: order.user ? order.user.username : 'Unknown', // Attach username from associated user
-                    email: order.user ? order.user.email : 'Unknown',       // Attach email from associated user
-                    productImage: order.product ? order.product.image : null, // Attach product image
-                    productName: order.product ? order.product.name : 'Unknown', // Attach product name
-                };
-            })
-        );
-
-        // Step 3: Return orders with user details
-        res.status(200).json({ message: 'Orders fetched successfully', orders: ordersWithUserDetails });
+          },
+        ],
+        attributes: [
+          'id',
+          'userId',
+          'shippingAddress',
+          'trackingNumber',
+          'carrier',
+          'total',
+          'status',
+          'createdAt',
+          'updatedAt',
+        ],
+      });
+  
+      res.status(200).json({ message: 'Orders fetched successfully.', orders });
     } catch (error) {
-        console.error('Error fetching orders:', error);
-        res.status(500).json({ message: 'Error fetching orders', error });
+      console.error('Error fetching orders:', error);
+      res.status(500).json({ message: 'Error fetching orders', error });
     }
-};
+  };
 
-
-// Get order by ID
+// Get order by IDx
 const getOrderById = async (req, res) => {
     try {
         const { orderId } = req.params;
@@ -157,32 +154,53 @@ const getOrderById = async (req, res) => {
 
 // Update an existing order
 const updateOrder = async (req, res) => {
-    try {
-        const { orderId } = req.params;
-        const { status, shippingAddress, billingAddress, trackingNumber, carrier } = req.body;
+  const { orderId } = req.params;
+  const { status, trackingNumber, carrier, shippingAddress } = req.body;
 
-        const order = await Order.findByPk(orderId);
-        if (!order) return res.status(404).json({ message: 'Order not found' });
+  try {
+      const order = await Order.findByPk(orderId);
+      if (!order) return res.status(404).json({ message: 'Order not found' });
 
-        // Update the order fields
-        await order.update({
-            status,
-            shippingAddress,
-            billingAddress,
-            trackingNumber,
-            carrier
-        });
+      // Determine if subscription is needed
+      const shouldSubscribe = trackingNumber && (!order.trackingNumber || order.carrier !== carrier);
 
-        // Generate tracking link if the tracking number and carrier are provided
-        let trackingLink;
-        if (trackingNumber && carrier) {
-            trackingLink = generateTrackingLink(carrier, trackingNumber);
-        }
+      // Update the order fields
+      let newStatus = status || order.status;
+      if (trackingNumber && !order.trackingNumber) {
+          newStatus = 'Shipped'; // Automatically set status to "Shipped" when tracking is added
+      }
 
-        res.status(200).json({ message: 'Order updated successfully', trackingLink });
-    } catch (error) {
-        res.status(500).json({ message: 'Error updating order', error });
-    }
+      await order.update({
+          trackingNumber,
+          carrier,
+          shippingAddress,
+          status: newStatus,
+      });
+
+      // Send email notification if the status has changed
+      if (newStatus !== order.status) {
+          await sendStatusNotification(order, newStatus);
+      }
+
+      // Subscribe to carrier if a new tracking number or carrier is added
+      if (shouldSubscribe) {
+          try {
+              await subscribeToCarrier({ carrier, trackingNumber });
+              console.log(`Successfully subscribed to ${carrier} for tracking number: ${trackingNumber}`);
+          } catch (error) {
+              console.error(`Failed to subscribe to ${carrier}:`, error.message);
+              // Optional: Notify admin or log the error for later handling
+          }
+      }
+
+      res.status(200).json({
+          message: 'Order updated successfully.',
+          order: { ...order.toJSON() },
+      });
+  } catch (error) {
+      console.error('Error updating order:', error.message);
+      res.status(500).json({ message: 'Error updating order', error });
+  }
 };
 
 // Delete an order
@@ -199,12 +217,28 @@ const deleteOrder = async (req, res) => {
     }
 };
 
+const getUsers = async (req, res) => {
+    try {
+        const users = await User.findAll({
+            attributes: ['username'], // Only fetch the username field
+            order: [['username', 'ASC']], // Sort alphabetically by username
+        });
+        res.status(200).json({ message: 'Users fetched successfully', users });
+    } catch (error) {
+        console.error('Error fetching users:', error);
+        res.status(500).json({ message: 'Error fetching users', error });
+    }
+};
+
+
+
+
 module.exports = {
     createOrder,
     getAllOrders,
     getOrderById,
     updateOrder,
     deleteOrder,
-   
+    getUsers,
     generateTrackingLink,
 };

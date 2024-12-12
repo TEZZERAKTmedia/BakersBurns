@@ -6,10 +6,20 @@ body {
   background: url('your-background-image.jpg') no-repeat center center fixed; /* Use your background image */
   background-size: cover; /* Make sure the background covers the entire area */
   overflow: hidden; /* Prevent the body itself from scrolling */
-  font-family: 'Dancing Script', cursive;
+  font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
   
 }
 
+.page-header {
+  font-size: 5rem;
+  margin-top: 10%;
+}
+@media (max-width: 768px) {
+  .page-header {
+    margin-top: 15%;
+    font-size: 3rem;/* 1 column on small screens */
+  }
+}
 /* Main content container to scroll over the background */
 .product-manager-container {
   
@@ -166,12 +176,14 @@ body {
   padding: 5px 0;
   font-size: 12px;
   z-index: 1;
+  
 }
 
 /* Original and discounted price styling */
 .price {
   font-size: 16px;
   margin: 5px 0;
+  
 }
 .price.original-price {
   color: #999;
@@ -257,6 +269,9 @@ body {
   position: relative; /* Ensure absolute positioned discount banner is relative to the product card */
   vertical-align: top; /* Align cards to the top */
   font-size: large;
+  overflow: hidden;
+  font-family:'Courier New';
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
 }
 
 /* Responsive adjustments for larger screens */

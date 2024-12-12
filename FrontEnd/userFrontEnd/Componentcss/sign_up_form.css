@@ -6,16 +6,15 @@ body {
     align-items: center;
     height: 100vh;
     margin: 0;
+    padding: 10px; /* Add padding to avoid cut-off on smaller screens */
 }
 
 .container {
-    
     background: #fff;
-    padding: 2rem;
+    padding: 1.5rem;
     border-radius: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    
-    max-width: 400px;
+    max-width: 90%; /* Adjust to fit smaller screens */
     text-align: center;
 }
 
@@ -25,24 +24,20 @@ h2 {
 }
 
 form {
-    margin-top: 20%;
+    margin-top: 0; /* Centered vertically without extra spacing */
     background: #fff;
-    padding: 2rem;
+    padding: 1.5rem;
     border-radius: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    
-    max-width: 400px;
+    max-width: 90%; /* Adjust to fit the viewport */
     text-align: center;
-    
 }
 
 form ul li {
     color: #333;
-    
 }
 
 label {
-    
     text-align: left;
     color: #333;
     font-weight: bold;
@@ -59,7 +54,6 @@ input {
     border-radius: 5px;
     font-size: 1rem;
     transition: border-color 0.3s ease;
-    
 }
 
 input:focus {
@@ -93,4 +87,4 @@ p {
     display: inline-block; 
     width: 1em; /* Space between bullet and text */
     margin-left: -1em; /* Align bullets */
-  }
+}

@@ -11,7 +11,7 @@ const About = () => {
                 style={styles.image}
             />
             <p style={styles.text}>
-                Welcome to the world of woodburning art by Kalea Baker. With a passion for creating intricate and expressive pieces, Kalea Baker has been mastering the craft of pyrography for over [number] years. Inspired by the natural beauty of wood and the endless possibilities of this unique medium, each piece tells a story and captures the essence of the artist's vision.
+                Welcome to the world of woodburning art by Kalea Baker. With a passion for creating intricate and expressive pieces, Kalea Baker has been mastering the craft of pyrography for over 3 years. Inspired by the natural beauty of wood and the endless possibilities of this unique medium, each piece tells a story and captures the essence of the artist's vision.
             </p>
             <h2 style={styles.subheading}>Our Work</h2>
             <p style={styles.text}>
@@ -19,11 +19,11 @@ const About = () => {
             </p>
             <h2 style={styles.subheading}>Our Process</h2>
             <p style={styles.text}>
-                The process of woodburning, also known as pyrography, involves using a heated tool to burn designs onto wood surfaces. [Artist's Name] begins with a careful selection of high-quality wood, followed by sketching the initial design. Using various tips and techniques, the design is then burned onto the wood, creating a permanent and lasting piece of art. The final step includes sealing and finishing the artwork to enhance its durability and beauty.
+                The process of woodburning, also known as pyrography, involves using a heated tool to burn designs onto wood surfaces. Kalea Baker begins with a careful selection of high-quality wood, followed by sketching the initial design. Using various tips and techniques, the design is then burned onto the wood, creating a permanent and lasting piece of art. The final step includes sealing and finishing the artwork to enhance its durability and beauty.
             </p>
             <h2 style={styles.subheading}>Get in Touch</h2>
             <p style={styles.text}>
-                If you are interested in commissioning a custom piece or learning more about woodburning art, please don't hesitate to contact us. Follow [Artist's Name] on social media to stay updated on the latest creations and upcoming exhibitions.
+                If you are interested in commissioning a custom piece or learning more about woodburning art, please don't hesitate to contact us. Follow Kalea Baker on social media to stay updated on the latest creations and upcoming exhibitions.
             </p>
             <button style={styles.button} >
                 <Link to="/login">

@@ -28,7 +28,12 @@ const AdminNavbar = () => {
         <li className="nav-item" onClick={closeMenu}><Link to="/product-manager">Product Manager</Link></li>
         <li className="nav-item" onClick={closeMenu}><Link to="/gallery">Gallery Manager</Link></li>
         <li className="nav-item" onClick={closeMenu}><Link to="/event-manager">Event Manager</Link></li>
-        <li className="nav-item" onClick={closeMenu}><Link to="/layout">User App Layout</Link></li>
+        <li className="nav-item" onClick={closeMenu}>
+          {/* Use environment variable for User Preview link */}
+          <a href={import.meta.env.VITE_USER} target="_blank" rel="noopener noreferrer">
+            User Preview
+          </a>
+        </li>
         <li className="nav-item" onClick={closeMenu}><Link to="/orders">Orders</Link></li>
         <li className="nav-item" onClick={closeMenu}><Link to="/messaging">Messages</Link></li>
         

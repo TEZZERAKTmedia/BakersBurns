@@ -1,12 +1,17 @@
 const nodemailer = require('nodemailer');
 require('dotenv').config();
 
+// Configure nodemailer transporter with your Hostinger email settings
 const transporter = nodemailer.createTransport({
-  service: process.env.EMAIL_SERVICE,
+  host: process.env.EMAIL_HOST, // Hostinger's SMTP server (e.g., smtp.hostinger.com)
+  port: process.env.EMAIL_PORT, // Port (e.g., 465 for SSL, 587 for TLS)
+  secure: process.env.EMAIL_SECURE === 'true', // true for SSL, false for TLS
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  }
+    user: process.env.EMAIL_USER, // Your Hostinger email address
+    pass: process.env.EMAIL_PASS  // Your Hostinger email password
+  },
+  logger: true, // Log SMTP communication
+  debug: true,  // Enable debugging
 });
 
 // Function to build email content based on actionType
@@ -35,34 +40,31 @@ const buildEmailContent = (actionType, to, token) => {
       verificationLink = `${process.env.DEV_USER_URL}/userDashboard?email=${to}&token=${token}`;
       break;
 
-      case 'verification-code':
+    case 'verification-code':
       subject = 'Your Email Verification Code';
       message = `Please use the following 6-digit code to verify your email address: ${token}`;
-      buttonText = '';  // No button needed for code verification
-      verificationLink = '';  // No link needed for code verification
-      break;  
+      buttonText = ''; // No button needed for code verification
+      verificationLink = ''; // No link needed for code verification
+      break;
 
     default:
       throw new Error('Invalid action type');
   }
 
-  // Return the HTML and subject dynamically based on action type
   return {
     subject,
     html: `
       <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
         <h2 style="color: #4CAF50;">${subject}</h2>
-        <p style="font-size: 16px;">
-          ${message}
-        </p>
-        <p style="font-size: 16px; text-align: center;">
-          <a href="${verificationLink}" style="background-color: #1a73e8; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block; font-size: 16px;">
-            ${buttonText}
-          </a>
-        </p>
-        <p style="font-size: 14px; color: #888;">
-          If you did not request this, please ignore it.
-        </p>
+        <p style="font-size: 16px;">${message}</p>
+        ${buttonText && verificationLink ? `
+          <p style="text-align: center;">
+            <a href="${verificationLink}" style="background-color: #1a73e8; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block; font-size: 16px;">
+              ${buttonText}
+            </a>
+          </p>
+        ` : ''}
+        <p style="font-size: 14px; color: #888;">If you did not request this, please ignore it.</p>
         <footer style="margin-top: 20px; padding-top: 10px; border-top: 1px solid #eee;">
           <p style="font-size: 12px; color: #aaa;">&copy; 2024 BakerBurns. All rights reserved.</p>
         </footer>
@@ -73,11 +75,10 @@ const buildEmailContent = (actionType, to, token) => {
 
 // Main function to send the email
 const sendVerificationEmail = async (to, token, actionType) => {
-  // Build email content based on the action type
   const { subject, html } = buildEmailContent(actionType, to, token);
 
   const mailOptions = {
-    from: process.env.EMAIL_USER,
+    from: `BakerBurns <${process.env.EMAIL_USER}>`,
     to: to,
     subject: subject,
     html: html

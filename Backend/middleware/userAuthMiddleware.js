@@ -1,11 +1,7 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/user'); // Assuming you need to check the user's role
 
-const userAuthMiddleware = (roles = []) => {
-  if (typeof roles === 'string') {
-    roles = [roles];
-  }
-
+const userAuthMiddleware = () => {
   return async (req, res, next) => {
     console.log('Cookies received:', req.cookies); // Debugging the received cookies
 
@@ -20,16 +16,13 @@ const userAuthMiddleware = (roles = []) => {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       console.log('Decoded token:', decoded); // Debugging decoded token
 
-      if (roles.length && !roles.includes(decoded.role)) {
-        return res.status(403).json({ message: 'Access Denied. Insufficient permissions.' });
-      }
-
       const user = await User.findByPk(decoded.id);
       if (!user) {
         console.log('User not found in the database');
         return res.status(404).json({ message: 'User not found' });
       }
 
+      // Attach the user to the request object
       req.user = decoded;
       console.log('Middleware passed, user attached:', req.user); // Debugging the user attached to req
       next();
@@ -39,6 +32,5 @@ const userAuthMiddleware = (roles = []) => {
     }
   };
 };
-
 
 module.exports = userAuthMiddleware;
