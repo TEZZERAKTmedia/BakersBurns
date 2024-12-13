@@ -40,7 +40,21 @@ const User = sequelize.define('User', {
   isOptedInForEmailUpdates: {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
-  }
+  },
+  hasAcceptedPrivacyPolicy: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false, // Default to false until explicitly accepted
+  },
+  privacyPolicyAcceptedAt: {
+      type: DataTypes.DATE, // Stores the timestamp of when privacy policy was accepted
+  },
+  hasAcceptedTermsOfService: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false, // Default to false until explicitly accepted
+  },
+  termsAcceptedAt: {
+      type: DataTypes.DATE, // Stores the timestamp of when terms were accepted
+  },
 }, {
   hooks: {
     beforeValidate: (user) => {

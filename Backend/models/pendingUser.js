@@ -36,7 +36,21 @@ const PendingUsers = sequelize.define('PendingUsers', {
   isOptedInForEmailUpdates: {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
-  }
+  },
+  hasAcceptedPrivacyPolicy: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+},
+privacyPolicyAcceptedAt: {
+    type: DataTypes.DATE,
+},
+hasAcceptedTermsOfService: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+},
+termsAcceptedAt: {
+    type: DataTypes.DATE,
+},
 }, {
   hooks: {
     beforeValidate: (pendingUser) => {
@@ -47,6 +61,7 @@ const PendingUsers = sequelize.define('PendingUsers', {
       pendingUser.verificationToken = xss(pendingUser.verificationToken);
       pendingUser.isOptedInForPromotions = xss(pendingUser.isOptedInForPromotions);
       pendingUser.isOptedInForEmailUpdates = xss(pendingUser.isOptedInForEmailUpdates);
+      
     }
   }
 });

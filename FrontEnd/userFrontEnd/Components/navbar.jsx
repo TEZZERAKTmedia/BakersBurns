@@ -28,7 +28,7 @@ const Navbar = () => {
 
       {/* Navbar links */}
       <ul className={`nav-list ${menuOpen ? 'show' : ''}`}>
-        <li className="nav-item" onClick={closeMenu}><Link to="/">Home</Link></li>
+        <li className="nav-item" onClick={closeMenu}><Link to="/" >Home</Link></li>
         <li className="nav-item" onClick={closeMenu}><Link to="/store">Store</Link></li>
         {/*<li className="nav-item" onClick={closeMenu}><Link to="/create">Create</Link></li>*/}
         <li className="nav-item" onClick={closeMenu}><Link to="/about">About</Link></li>
@@ -43,7 +43,7 @@ const Navbar = () => {
       {/* Settings icon at the bottom of the navbar, visible only when menu is open */}
       {menuOpen &&
       <div className={`settings-icon ${menuOpen ? 'show' : ''}`} onClick={closeMenu} >
-        <Link to="/settings">
+        <Link to="/settings" style={{marginRight: '30px'}}>
           <FaCog  size={24} /> {/* Adjust the icon size as needed */}
         </Link>
       </div>

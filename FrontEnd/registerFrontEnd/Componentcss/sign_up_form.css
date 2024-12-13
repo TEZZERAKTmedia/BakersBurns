@@ -19,7 +19,19 @@ body {
     width: 100%; /* Responsive width */
     text-align: center;
     
+
 }
+.center-container {
+    display: flex;
+    justify-content: center; /* Horizontally center the content */
+    align-items: center;    /* Vertically center the content */
+    flex-direction: column; /* Stack inputs vertically */
+    min-height: 100vh;      /* Full viewport height */
+    width: 100%;            /* Full width of the container */
+    padding: .5rem;          /* Add some padding for mobile screens */
+    box-sizing: border-box; /* Ensure padding doesn’t affect width/height */
+}
+
 
 h2 {
     margin-bottom: 1.5rem;
@@ -28,6 +40,7 @@ h2 {
 
 form ul li {
     color: #333;
+    margin-left: 5%;
 }
 
 label {
@@ -46,16 +59,28 @@ label {
     border-radius: 10px;
     margin: 20px;
 }
-input {
-    margin: 5px;
-    margin-bottom: 1rem;
-    width: 90%;
+input, select {
+    width: 100%;             /* Ensure inputs/buttons stretch to container width */
+    max-width: 400px;        /* Optional: Limit width for readability */
+    margin-bottom: 1rem;     /* Space between form elements */
+    padding: 0.75rem;
+    font-size: 1rem;
     border: 1px solid #ccc;
     border-radius: 5px;
-    margin-left: 0;
-    font-size: 1rem;
-    transition: border-color 0.3s ease;
+    box-sizing: border-box;
 }
+
+
+button {
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:disabled {
+    background-color: grey;
+    cursor: not-allowed;
+}
+
 
 .success-message {
     padding: 20px;
@@ -78,6 +103,7 @@ input {
     border-radius: 4px;
     cursor: pointer;
     transition: background-color 0.3s ease;
+    margin-bottom: 50%;
 }
 
 .signup-button:disabled {

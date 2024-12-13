@@ -169,7 +169,7 @@ const UserEvents = () => {
   return (
     <div style={{ marginTop: '100px' }} className='events-body'>
       <div className="min-h-screen bg-gray-100 p-6">
-        <h1 className="text-4xl font-bold text-center mb-8">Events Calendar</h1>
+        <h1 className="text-4xl font-bold text-center mb-8" style={{fontFamily: 'Dancing Script'}}>Events Calendar</h1>
         {loading && <p className="text-center">Loading...</p>}
         {error && <p className="text-center text-red-500">{error}</p>}
 

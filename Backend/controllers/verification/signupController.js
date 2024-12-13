@@ -10,11 +10,16 @@ const { v4: uuidv4 } = require('uuid');
 
 // Signup Controller
 const signup = async (req, res) => {
-  const { userName, email, password, phoneNumber, isOptedInForPromotions, isOptedInForEmailUpdates } = req.body; // Include the new opt-in fields
+  const { userName, email, password, phoneNumber, isOptedInForPromotions, isOptedInForEmailUpdates, hasAcceptedPrivacyPolicy, hasAcceptedTermsOfService, } = req.body; // Include the new opt-in fields
+  console.log("Received signup request body:", req.body);
+
   const RESTRICTED_USERNAMES = ['null', 'NULL', 'admin', 'administrator', 'root'];
 
 if (!userName || RESTRICTED_USERNAMES.includes(userName.toLowerCase())) {
   return res.status(400).json({ message: 'Invalid username. Please choose another.' });
+}
+if (!hasAcceptedPrivacyPolicy || !hasAcceptedTermsOfService) {
+  return res.status(400).json({ message: 'You must accept the Privacy Policy and Terms of Service.' });
 }
   try {
     let existingUser = await PendingUser.findOne({ where: { email } });
@@ -62,6 +67,10 @@ if (!userName || RESTRICTED_USERNAMES.includes(userName.toLowerCase())) {
         role: 'user',  // Assign a default role to the user during sign-up
         isOptedInForPromotions: isOptedInForPromotions, // Default to false if not provided
         isOptedInForEmailUpdates: isOptedInForEmailUpdates,  // Default to false if not provided
+        hasAcceptedPrivacyPolicy: hasAcceptedPrivacyPolicy === true, // Ensure it's a boolean
+        hasAcceptedTermsOfService: hasAcceptedTermsOfService === true, // Ensure it's a boolean
+        privacyPolicyAcceptedAt: hasAcceptedPrivacyPolicy ? new Date() : null, // Set timestamp only if accepted
+        termsAcceptedAt: hasAcceptedTermsOfService ? new Date() : null, 
         createdAt: new Date() // Store creation time for expiration check
       });
 
@@ -77,40 +86,31 @@ if (!userName || RESTRICTED_USERNAMES.includes(userName.toLowerCase())) {
 
 const checkUsername = async (req, res) => {
   const { userName } = req.body;
+
   const RESTRICTED_USERNAMES = ['null', 'NULL', 'admin', 'administrator', 'root'];
 
-if (!userName || RESTRICTED_USERNAMES.includes(userName.toLowerCase())) {
-  return res.status(400).json({ message: 'Invalid username. Please choose another.' });
-}
-
-
-  if (!userName) {
-    return res.status(400).json({ message: 'Username is required' });
+  if (!userName || RESTRICTED_USERNAMES.includes(userName.toLowerCase())) {
+    return res.status(400).json({ message: 'Invalid username. Please choose another.' });
   }
 
   try {
-    // Check if the username exists in the PendingUser table
     const pendingUser = await PendingUser.findOne({ where: { userName } });
-    
     if (pendingUser) {
       return res.status(400).json({ message: 'Username is already taken (Pending verification)' });
     }
 
-    // Check if the username exists in the User table (for already registered users)
     const existingUser = await User.findOne({ where: { userName } });
-    
     if (existingUser) {
       return res.status(400).json({ message: 'Username is already taken (Registered)' });
     }
 
-    // If username does not exist in both tables
     return res.status(200).json({ message: 'Username is available' });
-
   } catch (error) {
     console.error('Error checking username:', error);
     return res.status(500).json({ message: 'Server error checking username' });
   }
 };
+
 
 
 
@@ -158,10 +158,15 @@ const createAccount = async (req, res) => {
       phoneNumber: pendingUser.phoneNumber,
       isOptedInForPromotions: pendingUser.isOptedInForPromotions,
       isOptedInForEmailUpdates: pendingUser.isOptedInForEmailUpdates,
-      isVerified: true,
-      role: 'user',
-    });
-    console.log("User moved to Users table with ID:", newUser.id);
+      hasAcceptedPrivacyPolicy: !!pendingUser.privacyPolicyAcceptedAt, // True if timestamp exists
+      privacyPolicyAcceptedAt: pendingUser.privacyPolicyAcceptedAt || null, // Set the actual timestamp or null
+      hasAcceptedTermsOfService: !!pendingUser.termsAcceptedAt, // True if timestamp exists
+      termsAcceptedAt: pendingUser.termsAcceptedAt || null, // Set the actual timestamp or null
+      isVerified: true, // This user is verified after the email verification process
+      role: 'user', // Default role for the user
+  });
+  console.log("User moved to Users table with ID:", newUser.id);
+  
 
     // Delete the pending user entry
     await PendingUser.destroy({ where: { email } });

@@ -55,13 +55,14 @@ body {
 
 /* Navigation List (Mobile Dropdown) */
 .nav-list {
+  font-family: 'Dancing Script', cursive;
   list-style: none;
   display: flex;
   flex-direction: column;
   justify-content: center; /* Center items vertically */
   align-items: center; /* Center items horizontally */
   position: fixed;
-  top: 60px;
+  top: 55px;
   left: 0;
   width: 100vw;
   height: 100vh;
@@ -70,6 +71,7 @@ body {
   display: none;
   z-index: 1000;
   transition: all 0.3s ease-in-out;
+  
 }
 
 .nav-list.show {
@@ -78,19 +80,26 @@ body {
 
 /* Nav Item Styling */
 .nav-item {
-  margin: 10px 0;
+  margin-top: 20px;
+  width: 90%;
+  
 }
 
 .nav-item a {
-  color: #fff;
+  color: black;
   text-decoration: none;
   text-align: center;
+  border-radius: 20px;
   padding: 8px 12px;
-  border-radius: 4px;
+  background-color: #fff;
   font-size: 2rem;
+  margin-top: -100px;
+  width: 90%;
   transition: background-color 0.3s;
   opacity: 0; /* Initially hidden for animation */
   transform: translateX(-20px); /* Slide in from the left */
+  border-bottom: 1px solid white;
+  
 }
 
 .nav-item a:hover {
@@ -160,10 +169,14 @@ body {
     height: auto;
     background-color: transparent;
     padding: 0;
+    
   }
 
   .nav-item {
     margin: 0 15px;
+
+    
+    
   }
 
   .nav-item a {
@@ -171,6 +184,7 @@ body {
     color: white;
     padding: 10px 15px;
     font-size: 1.2em;
+    
   }
 
   .nav-item a:hover {
@@ -183,11 +197,13 @@ body {
 /* Additional styling for settings icon */
 .settings-icon {
  padding: 10px;
+ 
 }
 
 /* Show settings icon when navbar is open in mobile view */
 .settings-icon.show {
   display: block;
+  
 }
 
 /* Desktop View - Adjust settings icon visibility and position */
@@ -195,8 +211,8 @@ body {
   .settings-icon {
     display: inline-block; /* Make it visible in desktop view */
     position: relative; /* Relative position aligns with desktop layout */
-    right: 0;
-    padding-left: 15px;
+    
+    
   }
 
   .nav-list {
@@ -217,6 +233,7 @@ body {
     color: white;
     padding: 10px 15px;
     font-size: 1.2em;
+    
   }
 
   .nav-item a:hover {

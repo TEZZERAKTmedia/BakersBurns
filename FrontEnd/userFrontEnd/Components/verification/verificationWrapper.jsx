@@ -77,6 +77,10 @@ const VerificationWrapper = ({ children }) => {
     }
   };
 
+  if(isVerified) {
+    return <>{children}</>;
+  }
+
   return (
     <div className="container" style={{ color: 'black', backgroundColor: 'white' }}>
       {isLoading ? (
@@ -100,6 +104,7 @@ const VerificationWrapper = ({ children }) => {
               <div className="form">
 
                 <h3>Request Verification Code</h3>
+                <p>To access sensitive setting and to change passwords you must request a verificaiton code.</p>
                 <button onClick={requestVerificationCode} disabled={isSubmitting}>
                   {isSubmitting ? "Requesting..." : "Request Code"}
                 </button>
@@ -107,7 +112,7 @@ const VerificationWrapper = ({ children }) => {
             ) : (
               <>
                 <form onSubmit={verifyCode} className="form">
-                  <h3 style={{ fontSize: '3rem' }}>Enter Verification Code</h3>
+                  <h3 style={{ fontSize: '2rem' }}>Enter Verification Code</h3>
                   <input
                     type="text"
                     value={code}

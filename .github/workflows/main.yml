@@ -18,8 +18,8 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          source: "frontend/registerFrontEnd/dist"
-          target: "/home/bakersburns/"
+          source: "frontend/registerFrontEnd/dist/"
+          target: "/home/bakersburns/htdocs/bakersburns.com/"
 
   deploy-backend:
     name: Deploy Backend
@@ -34,7 +34,7 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           source: "backend/"
-          target: "/home/bakersburns-api/"
+          target: "/home/bakersburns-api/backend/"
 
   deploy-admin:
     name: Deploy Admin
@@ -48,8 +48,8 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          source: "frontend/adminFrontEnd/dist"
-          target: "/home/bakersburns-admin/"
+          source: "frontend/adminFrontEnd/dist/"
+          target: "/home/bakersburns-admin/htdocs/admin.bakersburns.com/"
 
   deploy-user:
     name: Deploy User Interface
@@ -63,5 +63,5 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          source: "frontend/userFrontEnd/dist"
-          target: "/home/bakersburns-user/"
+          source: "frontend/userFrontEnd/dist/"
+          target: "/home/bakersburns-user/htdocs/user.bakersburns.com/"

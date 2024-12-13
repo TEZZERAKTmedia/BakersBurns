@@ -23,6 +23,9 @@ const Home = () => {
     getFeaturedProducts();
     fetchUpcomingEvent();
   }, []);
+  useEffect(() => {
+    window.scrollTo(0,0)
+  })
 
   const fetchFeaturedProducts = async () => {
     try {
@@ -51,7 +54,7 @@ const Home = () => {
   };
 
   return (
-    <div className="home-container">
+    <div className="home-container" >
       
       {/* Hero Section */}
       <motion.section 

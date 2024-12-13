@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { userApi } from '../config/axios';
 import '../Pagecss/Settings.css';
-import { useNotification } from '../Components/notification/notification'; // Import notification context
+import { useNotification } from '../Components/notification/notification'; // Import notification contex
 
 const Settings = () => {
   const [formData, setFormData] = useState({
@@ -114,8 +115,41 @@ const Settings = () => {
     }
   };
 
+  const [preferences, setPreferences] = useState({
+    isOptedInForPromotions: false,
+    isOptedInForEmailUpdates: false,
+  });
+
+  useEffect(() => {
+    const fetchPreferences = async () => {
+      try {
+        const response = await userApi.get('/user/preferences');
+        const { isOptedInForPromotions, isOptedInForEmailUpdates } = response.data;
+        setPreferences({ isOptedInForPromotions, isOptedInForEmailUpdates });
+      } catch (error) {
+        showNotification('Error fetching preferences.', 'error');
+      }
+    };
+    fetchPreferences();
+  }, []);
   const handleDeleteAccountClick = () => {
     setIsModalOpen(true);
+  };
+
+  const updatePreferences = async () => {
+    try {
+      setIsSubmitting(true);
+      const response = await userApi.post('/user/preferences/update', preferences);
+      if (response.status === 200) {
+        showNotification('Preferences updated successfully.', 'success');
+      } else {
+        showNotification('Error updating preferences.', 'error');
+      }
+    } catch (error) {
+      showNotification(error.response?.data?.message || 'Error updating preferences.', 'error');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleCloseModal = () => {
@@ -140,6 +174,40 @@ const Settings = () => {
 
   return (
     <div className="settings-container">
+       <section className="settings-section">
+        <h2>Update Preferences</h2>
+        <form>
+          <label>
+            <input
+              type="checkbox"
+              name="isOptedInForPromotions"
+              checked={preferences.isOptedInForPromotions}
+              onChange={handleChange}
+            />
+            Opt-in for Promotions
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              name="isOptedInForEmailUpdates"
+              checked={preferences.isOptedInForEmailUpdates}
+              onChange={handleChange}
+            />
+            Opt-in for Email Updates
+          </label>
+          <button
+            type="button"
+            onClick={updatePreferences}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Updating...' : 'Update Preferences'}
+          </button>
+        </form>
+        <div className="links">
+          <Link to="/privacy-policy" className="settings-link">Privacy Policy</Link>
+          <Link to="/terms-of-service" className="settings-link">Terms of Service</Link>
+        </div>
+      </section>
       <h1>Profile Settings</h1>
 
       <section className="settings-section">

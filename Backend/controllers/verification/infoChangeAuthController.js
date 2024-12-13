@@ -26,6 +26,31 @@ exports.verifyChange = async (req, res) => {
   }
 };
 
+exports.getPreferences = async (req, res) => {
+  try {
+    const { email } = req.user; // Extract email from req.user added by the middleware
+
+    if (!email) {
+      return res.status(400).json({ message: 'Email is missing from request.' });
+    }
+
+    const user = await User.findOne({
+      where: { email },
+      attributes: ['isOptedInForPromotions', 'isOptedInForEmailUpdates'],
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    return res.status(200).json(user);
+  } catch (error) {
+    console.error('Error fetching preferences:', error);
+    return res.status(500).json({ message: 'Error fetching preferences.' });
+  }
+};
+
+
 exports.updateInfo = async (req, res) => {
   const { userId } = req.user;
   const { newUsername, newPassword, newEmail } = req.body;

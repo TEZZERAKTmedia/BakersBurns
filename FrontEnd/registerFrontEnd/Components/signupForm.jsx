@@ -78,7 +78,9 @@ const SignUpForm = () => {
         phoneNumber: '',
         countryCode: '+1',  // Default country code (US)
         isOptedInForPromotions: false, 
-        isOptedInForEmailUpdates: false 
+        isOptedInForEmailUpdates: false ,
+        hasAcceptedTermsOfService: false,
+        hasAcceptedPrivacyPolicy: false
     });
 
     const [hasAcceptedPrivacyPolicy, setHasAcceptedPrivacyPolicy] = useState(false);
@@ -100,7 +102,7 @@ const SignUpForm = () => {
     });
 
     const areTermsAccepted = () => {
-        return hasAcceptedPrivacyPolicy && hasAcceptedTermsOfService;
+        return formData.hasAcceptedPrivacyPolicy && formData.hasAcceptedTermsOfService;
       };
       
       // ... rest of your component code
@@ -168,6 +170,8 @@ const SignUpForm = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        
+        console.log("Form data before submission:", formData);
     
         if (formData.password !== formData.confirmPassword) {
             setErrorMessage("Passwords do not match");
@@ -198,6 +202,8 @@ const SignUpForm = () => {
                 phoneNumber: `${formData.countryCode} ${sanitizedPhoneNumber}`, // Combine country code and phone number
                 isOptedInForPromotions: formData.isOptedInForPromotions,
                 isOptedInForEmailUpdates: formData.isOptedInForEmailUpdates,
+                hasAcceptedPrivacyPolicy: formData.hasAcceptedPrivacyPolicy,
+                hasAcceptedTermsOfService: formData.hasAcceptedTermsOfService,
                 actionType: 'sign-up'
             });
     
@@ -245,7 +251,7 @@ const SignUpForm = () => {
     };
 
     return (
-        <div style={{marginTop:'50%'}}>
+        <div >
             {emailSent ? (
     <div className="success-message" style={{color: 'black'}}>
     Registration successful! A verification email has been sent to your inbox: 
@@ -254,9 +260,17 @@ const SignUpForm = () => {
     <p style={{backgroundColor:'black',color: 'white', padding:'10px' , borderRadius:'10px'}}>If this email is incorrect please sign up again</p>
 </div>
             ) : (
+                <div className="center-container" style={{marginTop:'20vh'}}>
                 <form onSubmit={handleSubmit}>
                     {errorMessage && <div className="error-message" style={{padding:'20%'}}>{errorMessage}</div>}
                     <button style={{margin: '5px'}} ><Link to="/login">Already have an account? Click here to log in</Link></button>
+
+                    <div id="g_id_onload"
+                        data-client_id="YOUR_GOOGLE_CLIENT_ID"
+                        data-login_uri="https://your.domain/your_login_endpoint"
+                        data-your_own_param_1_to_login="any_value"
+                        data-your_own_param_2_to_login="any_value">
+                    </div>
                     <label className='username'>
                         <input 
                         type="text" 
@@ -265,7 +279,9 @@ const SignUpForm = () => {
                         onChange={handleChange}
                         onBlur={checkUsername}
                         placeholder="Username"
-                        required />
+                        required 
+                        style={inputStyle}
+                        />
                     </label>
                     {userNameError && <div className="error-message">{userNameError}</div>}
                     
@@ -276,16 +292,18 @@ const SignUpForm = () => {
                         value={formData.email} 
                         onChange={handleChange}
                         placeholder="Email" 
-                        required />
+                        required 
+                        style={inputStyle}/>
                     </label>
 
                     {/* Group the country code dropdown and phone number input */}
-                    <div className="phone-input-wrapper">
+                    <div className="phone-input-wrapper" style={inputStyle}>
                         <select 
                             name="countryCode" 
                             value={formData.countryCode} 
                             onChange={handleChange}
                             className='country-code'
+                            
                         >
                             <option value="+1">+1 (US)</option>
                             <option value="+44">+44 (UK)</option>
@@ -293,6 +311,7 @@ const SignUpForm = () => {
                         </select>
 
                         <input
+                        
                             type="tel"
                             name="phoneNumber"
                             value={formData.phoneNumber}
@@ -305,15 +324,41 @@ const SignUpForm = () => {
 
                     {/* Password input with toggle visibility */}
                     <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                        <input 
+                    <div style={{ position: 'relative', width: '100%', maxWidth: '300px' }}>
+                        <input
                             type={passwordVisible ? 'text' : 'password'}
                             name="password"
                             value={formData.password}
                             onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                             placeholder="Password"
-                            required 
-                            style={{ paddingRight: '40px', height:'30px'}} 
+                            required
+                            style={{
+                                height: '40px',
+                                width: '100%',
+                                paddingRight: '40px', // Creates space for the icon
+                                paddingLeft: '10px',
+                                boxSizing: 'border-box', // Ensures padding doesn't affect the width
+                                border: '1px solid #ccc',
+                                borderRadius: '5px',
+                                fontSize: '16px',
+                            }}
                         />
+                        <img
+                            src={animationState ? eyeCloseIcon : eyeOpenIcon}
+                            alt="Toggle Password Visibility"
+                            onClick={togglePasswordVisibility}
+                            style={{
+                                position: 'absolute',
+                                top: '50%', // Vertically centers the icon
+                                right: '20px', // Positions the icon inside the input
+                                transform: 'translateY(-50%)', // Adjusts for vertical centering
+                                width: '24px',
+                                height: '24px',
+                                cursor: 'pointer',
+                            }}
+                        />
+                    </div>
+
                         <button 
                             type="button" 
                             onClick={togglePasswordVisibility} 
@@ -326,12 +371,7 @@ const SignUpForm = () => {
 
                             }}
                         >
-                            <img
-                                className='visibility-animation'
-                                src={animationState ? eyeCloseIcon : eyeOpenIcon} // Toggle between icons
-                                alt="Toggle Password Visibility"
-                                style={{ width: '24px', height: '24px' }}
-                            />
+
                         </button>
                     </div>
 
@@ -358,7 +398,7 @@ const SignUpForm = () => {
                         onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                         placeholder="Confirm Password"
                         required 
-                        style={{ height:'30px',paddingRight: '40px', marginTop: '10px' }}
+                        style={inputStyle}
                     />
 
                     <div className='check-boxes' style={{ marginBottom: '1rem', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.6)', margin:'20px', padding:'2vw' }}>
@@ -392,55 +432,66 @@ const SignUpForm = () => {
                     
                     <Modal isVisible={isModalVisible} content={modalContent} onClose={handleCloseModal} />
 
-                    <div style={{ marginBottom: '1rem', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.6)', margin:'20px', padding:'2vw' }}>
-                    <div className="check-boxes">
-                        <input
-                            type="checkbox"
-                            name="hasAcceptedPrivacyPolicy"
-                            checked={hasAcceptedPrivacyPolicy}
-                            onChange={(e) => setHasAcceptedPrivacyPolicy(e.target.checked)}
-                            id="acceptPrivacyPolicy"
-                            className="toggle-input"
-                        />
-                        <label htmlFor="acceptPrivacyPolicy" className="toggle-label">
-                            <p style={{color:'black'}}>I have read and agree to the </p>
-                            <div onClick={() => handleOpenModal(<PrivacyPolicy />)} style={linkStyles}>
-                                Privacy Policy
-                            </div>
-                            
-                        </label>
+                    <div style={{ marginBottom: '1rem', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.6)', margin: '20px', padding: '2vw' }}>
+                        <div className="check-boxes">
+                            {/* Privacy Policy Checkbox */}
+                            <input
+                                type="checkbox"
+                                name="hasAcceptedPrivacyPolicy"
+                                checked={formData.hasAcceptedPrivacyPolicy} // Directly bind to formData
+                                onChange={(e) =>
+                                    setFormData({
+                                        ...formData,
+                                        hasAcceptedPrivacyPolicy: e.target.checked, // Update formData directly
+                                    })
+                                }
+                                id="acceptPrivacyPolicy"
+                                className="toggle-input"
+                            />
+                            <label htmlFor="acceptPrivacyPolicy" className="toggle-label">
+                                <p style={{ color: 'black' }}>I have read and agree to the</p>
+                                <div onClick={() => handleOpenModal(<PrivacyPolicy />)} style={linkStyles}>
+                                    Privacy Policy
+                                </div>
+                            </label>
+                        </div>
                     </div>
-                    </div>
-                    <div style={{ marginBottom: '1rem', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.6)', margin:'20px', padding:'2vw' }}>
-                    <div className="check-boxes">
-                        <input
-                            type="checkbox"
-                            name="hasAcceptedTermsOfService"
-                            checked={hasAcceptedTermsOfService}
-                            onChange={(e) => setHasAcceptedTermsOfService(e.target.checked)}
-                            id="acceptTermsOfService"
-                            className="toggle-input"
-                        />
-                        <label htmlFor="acceptTermsOfService" className="toggle-label">
-                            <p style={{color:'black'}}>I have read and agree to the </p>
-                            <div onClick={() => handleOpenModal(<TermsOfService />)} style={linkStyles}>
-                                Terms of Service
-                            </div>
-                            .
-                        </label>
-                    </div>
+                    <div style={{ marginBottom: '1rem', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.6)', margin: '20px', padding: '2vw' }}>
+                        <div className="check-boxes">
+                            {/* Terms of Service Checkbox */}
+                            <input
+                                type="checkbox"
+                                name="hasAcceptedTermsOfService"
+                                checked={formData.hasAcceptedTermsOfService} // Directly bind to formData
+                                onChange={(e) =>
+                                    setFormData({
+                                        ...formData,
+                                        hasAcceptedTermsOfService: e.target.checked, // Update formData directly
+                                    })
+                                }
+                                id="acceptTermsOfService"
+                                className="toggle-input"
+                            />
+                            <label htmlFor="acceptTermsOfService" className="toggle-label">
+                                <p style={{ color: 'black' }}>I have read and agree to the</p>
+                                <div onClick={() => handleOpenModal(<TermsOfService />)} style={linkStyles}>
+                                    Terms of Service
+                                </div>
+                            </label>
+                        </div>
                     </div>
 
                     <button
     type="submit"
-    disabled={!hasAcceptedPrivacyPolicy || !hasAcceptedTermsOfService}
+    disabled={!formData.hasAcceptedPrivacyPolicy || !formData.hasAcceptedTermsOfService}
     className="signup-button"
 >
-    {hasAcceptedPrivacyPolicy && hasAcceptedTermsOfService
+    {formData.hasAcceptedPrivacyPolicy && formData.hasAcceptedTermsOfService
         ? 'Sign Up'
         : 'Accept Terms and Conditions'}
 </button>
                 </form>
+                </div>
             )}
         </div>
     );
@@ -481,21 +532,7 @@ const buttonStyles = {
     width: '100%',
 };
 
-const modalCloseButtonStyles = {
-    position: 'absolute',
-    top: '1rem',
-    right: '1rem',
-    background: 'none',
-    border: 'none',
-    fontSize: '1.5rem',
-    cursor: 'pointer',
-};
-
-const modalContentStyles = {
-    fontSize: '1.2rem',
-    lineHeight: '1.6',
-};
-
+ 
 const linkStyles = {
     color: 'white',
     backgroundColor: '#007BFF',
@@ -537,16 +574,14 @@ const scrollPromptStyles = {
     color: '#888',
     textAlign: 'center',
 };
-const headerStyles = {
-    display: 'flex',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    position: 'sticky',
-    top: 0,
-    backgroundColor: 'white',
-    padding: '0.5rem',
-    borderBottom: '1px solid #ddd',
-    zIndex: 10,
+
+const inputStyle = {
+    height: '50px',
+    maxWidth: '300px',
+    width: '80%',  /* Ensures inputs scale with the parent */
+    padding: '5px',
+    marginBottom: '20px', /* Add spacing between inputs */
+    boxSizing: 'border-box', /* Prevents padding from affecting input size */
 };
 
 

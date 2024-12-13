@@ -15,42 +15,38 @@ const generateVerificationToken = () => {
 // Controller function to handle sending a verification email
 const sendEmailVerification = async (req, res) => {
   try {
-    // Extract email from authMiddleware
-    const email = req.user.email;
+    const email = req.user?.email; // Email from the middleware
+    if (!email) {
+      return res.status(400).json({ message: 'Email not found in the request.' });
+    }
+
     const { actionType } = req.body;
 
-    console.log('Authenticated user email:', email, 'and actionType:', actionType);
+    console.log('Authenticated user email:', email);
 
-    // Check if the user exists
+    // Check if the user exists in the database
     const user = await User.findOne({ where: { email } });
     if (!user) {
-      console.log('User not found for email:', email);
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ message: 'User not found.' });
     }
 
-    let token;
-    // Generate either a verification token or a 6-digit code based on actionType
-    if (actionType === 'verification-code') {
-      token = generateVerificationCode(); // Use the 6-digit code for verification code action
-    } else {
-      token = generateVerificationToken(); // Use the longer token for other actions
-    }
+    // Generate the token or verification code
+    const token = actionType === 'verification-code'
+      ? generateVerificationCode()
+      : generateVerificationToken();
 
-    console.log('Generated token:', token);
+    // Save the token in the database
+    await User.update({ verificationToken: token }, { where: { email } });
 
-    // Store the token in the database (associated with the user)
-    const result = await User.update({ verificationToken: token }, { where: { email } });
-    console.log('Token update result:', result);
-
-    // Send the email with the token (or code) and action type
+    // Send the email
     const emailSent = await sendVerificationEmail(email, token, actionType);
 
-    // Check if the email was successfully sent
     if (emailSent) {
-      console.log('Verification email successfully sent to:', email);
-      return res.status(200).json({ message: 'Verification email sent!' });
+      return res.status(200).json({
+        message: 'Verification email sent!',
+        email, // Include the email in the response for frontend notifications
+      });
     } else {
-      console.log('Failed to send verification email to:', email);
       throw new Error('Email sending failed');
     }
   } catch (error) {
@@ -58,6 +54,7 @@ const sendEmailVerification = async (req, res) => {
     return res.status(500).json({ message: 'Error sending verification email.', error: error.message });
   }
 };
+
 
 // Function to verify the token and handle different action types
 const verifyToken = async (req, res) => {
