@@ -55,7 +55,8 @@ const Modal = ({ isVisible, content, onClose, requireScroll }) => {
             )}
 
             {/* If no scroll requirement, show close button normally */}
-            {!requireScroll && (
+            <div style={{backgroundColor:'black'}}>
+        {!requireScroll && (
                 <button
                     onClick={onClose}
                     style={closeButtonStyles}
@@ -64,7 +65,12 @@ const Modal = ({ isVisible, content, onClose, requireScroll }) => {
                 </button>
             )}
         </div>
+
+        </div>
+       
+        
     </div>
+    
     );
 };
 

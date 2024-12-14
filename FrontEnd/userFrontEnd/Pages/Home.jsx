@@ -67,7 +67,7 @@ const Home = () => {
           <motion.h1 
             style={{
               fontFamily: '"Dancing Script", cursive',
-              fontSize: '10vw',
+              fontSize: '13vw',
               color: 'Black',
               
             }}
@@ -104,7 +104,7 @@ const Home = () => {
               fontFamily: '"Dancing Script", cursive',
               fontSize: '2.5rem',
               color: '#ffeb3b',
-              textShadow: '2px 4px 10px rgba(0, 0, 0, 0.6)',
+              
             }}
           >
             Upcoming Event
@@ -153,7 +153,7 @@ const Home = () => {
               fontFamily: '"Dancing Script", cursive',
               fontSize: '3rem',
               color: 'Black',
-              textShadow: '2px 4px 10px rgba(0, 0, 0, 0.6)',
+              
             }}
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -182,7 +182,7 @@ const Home = () => {
         fontFamily: '"Dancing Script", cursive',
         fontSize: '4rem',
         color: 'Black',
-        textShadow: '2px 4px 10px rgba(0, 0, 0, 0.6)',
+        
       }}
       initial={{ scale: 0.8, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
@@ -232,7 +232,7 @@ const Home = () => {
             fontFamily: '"Dancing Script", cursive',
             fontSize: '2.5rem',
             color: 'black',
-            textShadow: '2px 4px 10px rgba(0, 0, 0, 0.6)',
+            
           }}>Get In Touch</h2>
         <p style={{ color: 'black'}}>
           For commissions, inquiries, or collaborations, feel free to contact me. Let's create something beautiful together!

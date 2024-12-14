@@ -38,7 +38,7 @@ const Gallery = () => {
               fontFamily: '"Dancing Script", cursive',
               fontSize: '5rem',
               color: 'Black',
-              textShadow: '2px 4px 10px rgba(0, 0, 0, 0.6)',
+              textShadow: '2px 4px 10px rgba(0, 0, 0, 0.3)',
             }}
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
