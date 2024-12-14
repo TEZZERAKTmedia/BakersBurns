@@ -18,8 +18,10 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          source: "frontend/registerFrontEnd/dist/"
-          target: "/home/bakersburns/htdocs/bakersburns.com/"
+          port: 22
+          script: |
+            mkdir -p /home/bakersburns/htdocs/bakersburns.com/
+            rsync -avz ./frontend/registerFrontEnd/dist/ /home/bakersburns/htdocs/bakersburns.com/
 
   deploy-backend:
     name: Deploy Backend
@@ -33,8 +35,10 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          source: "backend/"
-          target: "/home/bakersburns-api/backend/"
+          port: 22
+          script: |
+            mkdir -p /home/bakersburns-api/backend/
+            rsync -avz ./Backend/ /home/bakersburns-api/backend/
 
   deploy-admin:
     name: Deploy Admin
@@ -48,8 +52,10 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          source: "frontend/adminFrontEnd/dist/"
-          target: "/home/bakersburns-admin/htdocs/admin.bakersburns.com/"
+          port: 22
+          script: |
+            mkdir -p /home/bakersburns-admin/htdocs/admin.bakersburns.com/
+            rsync -avz ./frontend/adminFrontEnd/dist/ /home/bakersburns-admin/htdocs/admin.bakersburns.com/
 
   deploy-user:
     name: Deploy User Interface
@@ -63,5 +69,7 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          source: "frontend/userFrontEnd/dist/"
-          target: "/home/bakersburns-user/htdocs/user.bakersburns.com/"
+          port: 22
+          script: |
+            mkdir -p /home/bakersburns-user/htdocs/user.bakersburns.com/
+            rsync -avz ./frontend/userFrontEnd/dist/ /home/bakersburns-user/htdocs/user.bakersburns.com/
