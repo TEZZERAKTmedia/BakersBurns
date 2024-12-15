@@ -269,7 +269,7 @@ const SignUpForm = () => {
                 <div className="center-container" style={{marginTop:'20vh'}}>
                 <form onSubmit={handleSubmit}>
                     {errorMessage && <div className="error-message" style={{padding:'20%'}}>{errorMessage}</div>}
-                    <button style={{margin: '5px'}} ><Link to="/login">Already have an account? Click here to log in</Link></button>
+                    
 
                     <div id="g_id_onload"
                         data-client_id="YOUR_GOOGLE_CLIENT_ID"

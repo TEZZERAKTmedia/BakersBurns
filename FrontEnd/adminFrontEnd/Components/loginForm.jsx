@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { adminApi } from '../config/axios';
-import LoadingPage from './loading'; // Import the loading component
+import LoadingPage from './loading';
 import '../Componentcss/login.css';
 import eyeOpenIcon from '../assets/password-visibility-icon.png';
 import eyeCloseIcon from '../assets/password-visibility-icon-reverse.png';
@@ -11,36 +11,38 @@ const AdminLoginForm = ({ onLoginSuccess }) => {
   const [message, setMessage] = useState('');
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [animationState, setAnimationState] = useState(false);
-  const [loading, setLoading] = useState(false); // Loading state
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true); // Start loading animation
-  
+    setLoading(true);
+
     try {
       const response = await adminApi.post(
         '/auth/admin-login',
         { identifier, password },
-        { withCredentials: true } // Ensures the cookie is stored in the browser
+        { withCredentials: true }
       );
-  
-      // If login is successful, trigger the login success callback
+
+      // Pass the admin role to the parent
       onLoginSuccess(response.data.role);
     } catch (error) {
-      console.error('Login error:', error);
-  
-      // Extract error message from the response
       const errorMessage =
-        error.response?.data?.error || // Check if error is nested under 'error'
-        error.response?.data?.message || // Check if error is under 'message'
-        'An unexpected error occurred. Please try again.'; // Fallback message
-  
+        error.response?.data?.error ||
+        error.response?.data?.message ||
+        'An unexpected error occurred. Please try again.';
       setMessage(errorMessage);
     } finally {
-      setLoading(false); // Stop loading after the request
+      setLoading(false);
     }
   };
-  
+
+  const redirectToUserApp = () => {
+    const userAppUrl = `${import.meta.env.VITE_USER}`;
+
+    // Redirect to the user app with admin credentials
+    window.location.href = userAppUrl;
+  };
 
   const togglePasswordVisibility = () => {
     setPasswordVisible(!passwordVisible);
@@ -53,7 +55,7 @@ const AdminLoginForm = ({ onLoginSuccess }) => {
         <LoadingPage />
       ) : (
         <div className="login-form-container">
-          <h2 style={{ color: 'black' }}>Admin Login</h2>
+          <h2>Admin Login</h2>
           <form onSubmit={handleSubmit}>
             <input
               type="text"
@@ -61,10 +63,7 @@ const AdminLoginForm = ({ onLoginSuccess }) => {
               onChange={(e) => setIdentifier(e.target.value)}
               placeholder="Enter your username or email"
               required
-              style={{ padding: '10px' }}
             />
-  
-            {/* Password input with visibility toggle button */}
             <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
               <input
                 type={passwordVisible ? 'text' : 'password'}
@@ -72,7 +71,7 @@ const AdminLoginForm = ({ onLoginSuccess }) => {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter your password"
                 required
-                style={{ paddingRight: '40px' }} // Add space for the eye icon
+                style={{ paddingRight: '40px' }}
               />
               <button
                 type="button"
@@ -86,23 +85,35 @@ const AdminLoginForm = ({ onLoginSuccess }) => {
                 }}
               >
                 <img
-                  src={animationState ? eyeCloseIcon : eyeOpenIcon} // Toggle between icons
+                  src={animationState ? eyeCloseIcon : eyeOpenIcon}
                   alt="Toggle Password Visibility"
                   style={{ width: '24px', height: '24px' }}
                 />
               </button>
             </div>
-  
             <button type="submit">Login</button>
           </form>
-          {message && (
-            <p style={{ color: 'red', marginTop: '10px' }}>{message}</p>
-          )}
+          {message && <p style={{ color: 'red', marginTop: '10px' }}>{message}</p>}
+
+          {/* Button to redirect to user app */}
+          <button
+            onClick={redirectToUserApp}
+            style={{
+              marginTop: '20px',
+              padding: '10px 20px',
+              backgroundColor: '#007bff',
+              color: 'white',
+              border: 'none',
+              borderRadius: '5px',
+              cursor: 'pointer',
+            }}
+          >
+            Access User App
+          </button>
         </div>
       )}
     </div>
   );
-  
 };
 
 export default AdminLoginForm;

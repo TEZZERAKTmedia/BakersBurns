@@ -318,6 +318,7 @@ const Events = () => {
   const renderEventPreview = (event) => {
     if (editEventId === event.id) {
       return (
+
         <div className="event-preview-tile p-4 mb-2 border rounded-lg flex flex-col" >
           
           <input
@@ -402,54 +403,24 @@ const Events = () => {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setShowAddEventForm(true)}
+            style={{margin: '20px'}}
           >
             Add Event
           </motion.button>
         </div>
-
-        {/* Custom Calendar */}
-            <div className="calendar-container">
-      <div className="calendar-header">
-        <button onClick={handlePrevMonth}>&lt;</button>
-        <h2 style={{letterSpacing:'.1em'}}>{currentDate.format("MMMM YYYY")}</h2>
-        <button onClick={handleNextMonth}>&gt;</button>
-      </div>
-
-      <div className="calendar-grid">
-        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
-          <div key={day} className="calendar-day-header">
-            {day}
-          </div>
-        ))}
-        
-
-        {isMobileView ? renderCalendarDaysMobile() : renderCalendarDaysDesktop()}
-
-      </div>
-    </div>
-                {/* Event Preview Section */}
-                <div className="event-preview-section bg-white p-6 shadow-md rounded-lg mb-8" style={{ backgroundColor: 'black', borderRadius: '20px' }}>
-        <h2 style={{ fontFamily: 'Dancing Script', fontSize: '2rem', color: 'white',letterSpacing:'.1em' }}>Event Previews</h2>
-        {validationError && <p className="text-center text-red-500">{validationError}</p>}
-        {events.length === 0 && <p>No events to display</p>}
-        {events.map((event) => (
-          <div key={event.id} style={{letterSpacing:'.1em'}}>
-            {renderEventPreview(event)}
-          </div>
-        ))}
-      </div>
-    
-{showAddEventForm && (
+        {showAddEventForm && (
           <motion.div
             className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            style={{boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.3)', margin: '5%', padding:'5%'}}
           >
             <div className="bg-white p-6 rounded-lg shadow-lg w-80 max-w-md">
               <button
                 className="absolute top-2 right-2 text-gray-500"
                 onClick={() => setShowAddEventForm(false)}
+                style={{ padding:'5px', margin: '10px'}}
               >
                 Close
               </button>
@@ -528,32 +499,104 @@ const Events = () => {
               />
             </label>
 
-              <div className="mb-4">
-                <label className="form-label">Select Days of the Week</label>
-                <div className="grid grid-cols-7 gap-2">
-                  {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map(day => (
-                    <label key={day} className="flex items-center">
-                      <input
-                        type="checkbox"
-                        value={day}
-                        checked={newEvent.days.includes(day)}
-                        onChange={() => handleDayChange(day)}
-                        className="mr-2"
-                      />
-                      {day}
-                    </label>
-                  ))}
-                </div>
-              </div>
+            <div
+  className="mb-4"
+  style={{
+    boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.3)',
+    margin: '5px',
+    padding: '10px',
+  }}
+>
+  <label
+    className="form-label"
+    style={{
+      fontWeight: 'bold',
+      marginBottom: '10px',
+      display: 'block',
+      textAlign: 'center',
+    }}
+  >
+    Select Days of the Week
+  </label>
+  <div
+    className="grid"
+    
+  >
+    {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map(
+      (day) => (
+        <label
+          key={day}
+          className="day-item"
+          style={{
+            boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.3)',
+            padding: '10px',
+            borderRadius: '8px',
+            backgroundColor: '#f9f9f9',
+            textAlign: 'center',
+          }}
+        >
+          <input
+            type="checkbox"
+            value={day}
+            checked={newEvent.days.includes(day)}
+            onChange={() => handleDayChange(day)}
+            className="checkbox"
+            style={{
+              width: '20px',
+              height: '20px',
+              cursor: 'pointer',
+              marginBottom: '5px',
+            }}
+          />
+          <span style={{ fontSize: '14px', fontWeight: '500', color: '#333' }}>{day}</span>
+        </label>
+      )
+    )}
+  </div>
+</div>
+
 
               <div className="flex justify-end">
-                <button className="bg-blue-500 text-white px-4 py-2 rounded-md" onClick={handleAddEvent}>
+                <button className="bg-blue-500 text-white px-4 py-2 rounded-md" onClick={handleAddEvent} style={{margin: '20px'}}>
                   Add Event
                 </button>
               </div>
             </div>
           </motion.div>
         )}
+        {/* Custom Calendar */}
+            <div className="calendar-container">
+      <div className="calendar-header">
+        <button onClick={handlePrevMonth}>&lt;</button>
+        <h2 style={{letterSpacing:'.1em'}}>{currentDate.format("MMMM YYYY")}</h2>
+        <button onClick={handleNextMonth}>&gt;</button>
+      </div>
+
+      <div className="calendar-grid">
+        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
+          <div key={day} className="calendar-day-header">
+            {day}
+          </div>
+        ))}
+        
+
+        {isMobileView ? renderCalendarDaysMobile() : renderCalendarDaysDesktop()}
+
+      </div>
+    </div>
+                {/* Event Preview Section */}
+        <div className="event-preview-section bg-white p-6 shadow-md rounded-lg mb-8" style={{ backgroundColor: 'black', borderRadius: '20px' }}>
+        <h2 style={{ fontFamily: 'Dancing Script', fontSize: '2rem', color: 'white',letterSpacing:'.1em' }}>Event Previews</h2>
+        {validationError && <p className="text-center text-red-500">{validationError}</p>}
+        {events.length === 0 && <p>No events to display</p>}
+        {events.map((event) => (
+          <div key={event.id} style={{letterSpacing:'.1em'}}>
+            {renderEventPreview(event)}
+          </div>
+        ))}
+      </div>
+    
+
       </div>
 
     </div>

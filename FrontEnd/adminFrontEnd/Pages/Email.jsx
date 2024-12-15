@@ -2,8 +2,11 @@ import React, { useState } from 'react';
 import { adminApi } from '../config/axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import '../Pagecss/email.css';
+import LoadingPage from '../Components/loading';
 
 const AdminEmailComponent = () => {
+
+  const [loading, setLoading] = useState(false)
   const [searchTerm, setSearchTerm] = useState('');
   const [recipients, setRecipients] = useState([]);
   const [searchResults, setSearchResults] = useState([]);
@@ -95,6 +98,7 @@ const AdminEmailComponent = () => {
   // Dynamic send function based on email type
   const handleSendEmail = async () => {
     const recipientIds = recipients.map(user => user.id);  // Send IDs of recipients
+    setLoading(true);
     try {
       const response = await adminApi.post(previewData.url, {
         recipientIds,
@@ -102,18 +106,44 @@ const AdminEmailComponent = () => {
         messageBody: previewData.messageBody,
       });
 
-      alert(response.data.message);  // Success message
+       // Success message
       setShowPreview(false);  // Close the preview after sending
+      
     } catch (error) {
       if (error.response && error.response.data.message) {
         alert(error.response.data.message);  // Error message with specific user not opted-in
       } else {
         console.error('Error sending email:', error);
-      }
+      } 
+
+    } finally {
+      setLoading(false); // Hide loading
     }
   };
 
+  const sendUpdateEmail = async (type) => {
+    setLoading(true);
+    try {
+     const endpoint =
+      type === 'privacyPolicy'
+        ? 'admin-mail/send-privacy-email'
+        : '/admin-mail/send-terms-of-service'; 
+
+        const response = await adminApi.post(endpoint);
+
+        alert(response.data.message || `${type === 'privacyPolicy' ? 'Privacy Policy' : 'Terms of Service'} email sent successfully`)
+    } catch (error) {
+      console.error(`Error sending ${type} email:`, error);
+      alert(`Failed to send ${type === 'privacyPolicy' ? 'Privacy Policy' : 'Terms of Service'} email sent successfully`)
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
+
+    <div>
+    {loading && <LoadingPage />}
     <motion.div className="email-app"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -182,6 +212,7 @@ const AdminEmailComponent = () => {
           </motion.div>
         ))}
       </div>
+      
 
       {/* Display Selected Recipients */}
       <div className="recipients-container">
@@ -207,6 +238,7 @@ const AdminEmailComponent = () => {
           </motion.div>
         ))}
       </div>
+      <div className="email-form">
           <input
             type="text"
             placeholder="Custom Subject"
@@ -217,14 +249,18 @@ const AdminEmailComponent = () => {
             placeholder="Custom Message Body"
             value={customMessageBody}
             onChange={(e) => setCustomMessageBody(e.target.value)}
+            style={{height: '100px'}}
           ></textarea>
           <motion.button
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
             onClick={handleShowCustomPreview}
+            style={{width: '100%'}}
           >
+            
             Preview & Send Custom Email
           </motion.button>
+          </div>
         </motion.section>
       </motion.section>
 
@@ -261,7 +297,52 @@ const AdminEmailComponent = () => {
             Preview & Send Promotional Email
           </motion.button>
         </div>
+        
       </motion.section>
+      <motion.section className="section" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
+          <motion.h3 initial={{ opacity: 0, x: -50 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }}>
+            Send Privacy Policy Update
+          </motion.h3>
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => sendUpdateEmail('privacyPolicy')}
+            style={{
+              marginTop: '15px',
+              padding: '10px 20px',
+              backgroundColor: '#007bff',
+              color: 'white',
+              border: 'none',
+              borderRadius: '5px',
+              cursor: 'pointer',
+            }}
+          >
+            Send Privacy Policy Update
+          </motion.button>
+        </motion.section>
+
+        {/* Terms of Service Email Section */}
+        <motion.section className="section" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
+          <motion.h3 initial={{ opacity: 0, x: -50 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }}>
+            Send Terms of Service Update
+          </motion.h3>
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => sendUpdateEmail('termsOfService')}
+            style={{
+              marginTop: '15px',
+              padding: '10px 20px',
+              backgroundColor: '#007bff',
+              color: 'white',
+              border: 'none',
+              borderRadius: '5px',
+              cursor: 'pointer',
+            }}
+          >
+            Send Terms of Service Update
+          </motion.button>
+        </motion.section>
 
       {/* Preview Modal */}
       {showPreview && (
@@ -305,6 +386,7 @@ const AdminEmailComponent = () => {
         </AnimatePresence>
       )}
     </motion.div>
+    </div>
   );
 };
 

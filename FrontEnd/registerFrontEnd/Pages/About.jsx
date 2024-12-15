@@ -11,11 +11,11 @@ const About = () => {
                 style={styles.image}
             />
             <p style={styles.text}>
-                Welcome to the world of woodburning art by Kalea Baker. With a passion for creating intricate and expressive pieces, Kalea Baker has been mastering the craft of pyrography for over 3 years. Inspired by the natural beauty of wood and the endless possibilities of this unique medium, each piece tells a story and captures the essence of the artist's vision.
+                Welcome to the world of woodburning art by Kalea. With a passion for creating intricate and expressive pieces, Kalea Baker has been mastering the craft of pyrography for over 3 years. Inspired by the natural beauty of wood and the endless possibilities of this unique medium, each piece tells a story and captures the essence of the artist's vision.
             </p>
             <h2 style={styles.subheading}>Our Work</h2>
             <p style={styles.text}>
-                [Artist's Name] specializes in creating custom woodburned art, ranging from detailed portraits and landscapes to abstract designs and personalized gifts. Every piece is meticulously crafted, ensuring that no two artworks are the same. The natural grain and texture of the wood are embraced, adding depth and character to each creation.
+                Kalea specializes in creating custom woodburned art, ranging from detailed portraits and landscapes to abstract designs and personalized gifts. Every piece is meticulously crafted, ensuring that no two artworks are the same. The natural grain and texture of the wood are embraced, adding depth and character to each creation.
             </p>
             <h2 style={styles.subheading}>Our Process</h2>
             <p style={styles.text}>
@@ -44,13 +44,16 @@ const styles = {
         backgroundColor: '#fafafa',
         borderRadius: '8px',
         boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
+        
     },
     heading: {
         fontSize: '2.8em',
         textAlign: 'center',
         fontWeight: '300',
+        marginTop:'10%',
         color: '#333',
         marginBottom: '25px',
+        fontFamily: 'Dancing Script'
     },
     subheading: {
         fontSize: '1.75em',

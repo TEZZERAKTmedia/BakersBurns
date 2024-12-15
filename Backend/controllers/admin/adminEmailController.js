@@ -181,6 +181,136 @@ const searchUsers = async (req, res) => {
     res.status(500).json({ message: 'Failed to search users', error: error.message });
   }
 };
+// Function to send Privacy Policy Update email
+const sendPrivacyPolicyUpdateEmail = async (req, res) => {
+  const { subject, messageBody } = req.body;
+
+  try {
+    // Get the current date
+    const currentDate = new Date().toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+
+    // Generate dynamic Privacy Policy link using environment variable
+    const privacyPolicyLink = `${process.env.FRONTEND_REGISTER_APP_BASE_URL}/privacy-policy`;
+
+    // Fetch all active users from the database
+    const users = await User.findAll({
+      where: {
+        isActive: true, // Ensure only active users receive the email
+      },
+      attributes: ['email', 'username'], // Include username for personalization if needed
+    });
+
+    if (users.length === 0) {
+      return res.status(404).json({ message: 'No users found in the database.' });
+    }
+
+    const recipientEmails = users.map((user) => user.email);
+
+    const emailSubject = subject || 'We’ve Updated Our Privacy Policy';
+    const emailTextContent = `
+      Dear user,
+
+      We’ve made important updates to our Privacy Policy, which will take effect on ${currentDate}.
+      Please take a moment to review the updated policy here:
+
+      ${privacyPolicyLink}
+
+      If you have any questions, please contact us at [support_email].
+
+      Thank you,
+      Your Team
+    `;
+    const emailHtmlContent = `
+      <p>Dear user,</p>
+      <p>We’ve made important updates to our Privacy Policy, which will take effect on <strong>${currentDate}</strong>. Please take a moment to review the updated policy here:</p>
+      <a href="${privacyPolicyLink}">View Privacy Policy</a>
+      <p>If you have any questions, please contact us at <a href="mailto:[support_email]">[support_email]</a>.</p>
+      <p>Thank you,<br>Your Team</p>
+    `;
+
+    await transporter.sendMail({
+      from: `Bakers Burns <${process.env.EMAIL_USER}>`,
+      to: recipientEmails.join(','),
+      subject: emailSubject,
+      text: emailTextContent,
+      html: emailHtmlContent,
+    });
+
+    res.status(200).json({ message: 'Privacy Policy update email sent successfully!' });
+  } catch (error) {
+    console.error('Error sending Privacy Policy update email:', error);
+    res.status(500).json({ message: 'Failed to send Privacy Policy update email', error: error.message });
+  }
+};
+
+const sendTermsOfServiceUpdateEmail = async (req, res) => {
+  const { subject, messageBody } = req.body;
+
+  try {
+    // Get the current date
+    const currentDate = new Date().toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+
+    // Generate dynamic Terms of Service link using environment variable
+    const termsOfServiceLink = `${process.env.FRONTEND_REGISTER_APP_BASE_URL}/terms-of-service`;
+
+    // Fetch all active users from the database
+    const users = await User.findAll({
+      where: {
+        isActive: true, // Ensure only active users receive the email
+      },
+      attributes: ['email', 'username'], // Include username for personalization if needed
+    });
+
+    if (users.length === 0) {
+      return res.status(404).json({ message: 'No users found in the database.' });
+    }
+
+    const recipientEmails = users.map((user) => user.email);
+
+    const emailSubject = subject || 'We’ve Updated Our Terms of Service';
+    const emailTextContent = `
+      Dear user,
+
+      We’ve made important updates to our Terms of Service, which will take effect on ${currentDate}.
+      Please take a moment to review the updated terms here:
+
+      ${termsOfServiceLink}
+
+      If you have any questions, please contact us at [support_email].
+
+      Thank you,
+      Your Team
+    `;
+    const emailHtmlContent = `
+      <p>Dear user,</p>
+      <p>We’ve made important updates to our Terms of Service, which will take effect on <strong>${currentDate}</strong>. Please take a moment to review the updated terms here:</p>
+      <a href="${termsOfServiceLink}">View Terms of Service</a>
+      <p>If you have any questions, please contact us at <a href="mailto:[support_email]">[support_email]</a>.</p>
+      <p>Thank you,<br>Your Team</p>
+    `;
+
+    await transporter.sendMail({
+      from: `Bakers Burns <${process.env.EMAIL_USER}>`,
+      to: recipientEmails.join(','),
+      subject: emailSubject,
+      text: emailTextContent,
+      html: emailHtmlContent,
+    });
+
+    res.status(200).json({ message: 'Terms of Service update email sent successfully!' });
+  } catch (error) {
+    console.error('Error sending Terms of Service update email:', error);
+    res.status(500).json({ message: 'Failed to send Terms of Service update email', error: error.message });
+  }
+};
 
 module.exports = {
   sendCustomEmail,
@@ -188,4 +318,6 @@ module.exports = {
   sendOrderUpdateEmail,
   sendNewsletterEmail,
   searchUsers,
+  sendPrivacyPolicyUpdateEmail,
+  sendTermsOfServiceUpdateEmail,
 };

@@ -6,7 +6,7 @@ import { registerApi } from '../config/axios';
 import moment from 'moment';
 
 const Home = () => {
-  const [featuredProducts, setFeaturedProducts] = useState([]);
+  const [featuredProducts, setFeaturedProducts] = useState([]);                       
   const [upcomingEvent, setUpcomingEvent] = useState(null);
 
   useEffect(() => {

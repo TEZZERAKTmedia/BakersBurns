@@ -7,6 +7,12 @@
   --bg-color: #000;
   --text-color: #fff;
 }
+@font-face {
+  font-family: 'Dancing Script';
+  src: url('../assets/CarnivaleeFreakshow-DLrm.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
 
 body {
   margin: 0;

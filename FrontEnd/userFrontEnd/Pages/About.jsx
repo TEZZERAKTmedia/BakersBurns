@@ -10,7 +10,7 @@ const About = () => {
     return (
         <div className="body" style={{ padding: '1rem', maxWidth: '800px', margin: '0 auto' }}>
             <div>
-                <h1 style={{ marginTop: '2rem', textAlign: 'center', fontSize: '2rem' }}>
+                <h1 style={{ marginTop: '100px', textAlign: 'center', fontSize: '2rem' , fontFamily:'Dancing Script'}}>
                     About the Artist
                 </h1>
                 <img

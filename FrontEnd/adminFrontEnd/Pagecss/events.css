@@ -19,6 +19,30 @@ html, body {
   display: flex;
   flex-direction: column; /* Stack content vertically */
 }
+.grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr); /* Default: 7 columns (desktop) */
+  gap: 10px;
+}
+
+@media (max-width: 900px) {
+  .grid {
+  display: grid;
+  grid-template-columns: 1fr; /* Single column */
+  grid-template-rows: repeat(7, auto); /* 7 rows, each height auto */
+  gap: 10px;
+}
+  .day-item {
+    text-align: left; /* Align text to the left */
+    display: flex; /* Flex layout for checkbox and text alignment */
+    align-items: center; /* Vertically center checkbox and text */
+    padding: 10px;
+  }
+  .checkbox {
+    margin-right: 10px; /* Space between checkbox and text */
+  }
+}
+
 
 
 

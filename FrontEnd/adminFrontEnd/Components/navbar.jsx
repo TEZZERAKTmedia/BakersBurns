@@ -36,6 +36,7 @@ const AdminNavbar = () => {
         </li>
         <li className="nav-item" onClick={closeMenu}><Link to="/orders">Orders</Link></li>
         <li className="nav-item" onClick={closeMenu}><Link to="/messaging">Messages</Link></li>
+        <li className="nav-item" onClick={closeMenu}><Link to="/email">Email</Link></li>
         
       </ul>
     </nav>
