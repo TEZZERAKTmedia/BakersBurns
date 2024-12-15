@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { userApi } from "../../config/axios";
 import { useNotification } from "../notification/notification"; // Import notification context
-import LoadingPage from "../../Components/loading"; // Import your loading page component
+import LoadingPage from "../loading"; // Import your loading page component
 import { Link} from "react-router-dom";
 import '../../Componentcss/verificationwrapper.css';
 

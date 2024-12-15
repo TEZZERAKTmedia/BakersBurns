@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { registerApi } from '../config/axios';
-import LoadingPage from '../Components/loading'; // Import the loading component
+import LoadingPage from './loading'; // Import the loading component
 import '../Componentcss/login.css';
 import eyeOpenIcon from '../assets/password-visibility-icon.png';
 import eyeCloseIcon from '../assets/password-visibility-icon-reverse.png';

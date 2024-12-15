@@ -2,7 +2,7 @@ import React, { useState, useRef } from "react";
 import Cropper from "react-easy-crop";
 import getCroppedImg from "../util/cropImage";
 import { adminApi } from "../config/axios";
-import  {useNotification}  from "../Components/notification/notification";
+import  {useNotification}  from "./notification/notification";
 import "react-easy-crop/react-easy-crop.css";
 import "../Componentcss/add_product_form.css";
 
