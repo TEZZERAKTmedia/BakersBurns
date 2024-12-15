@@ -12,13 +12,14 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+
       - name: Deploy Frontend to VPS
-        uses: appleboy/ssh-action@v0.1.2
+        uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          source: "/frontend/registerFrontEnd/dist/"
+          source: "frontend/registerFrontEnd/dist/*"
           target: "/home/bakersburns/htdocs/bakersburns.com/"
 
   deploy-backend:
@@ -27,13 +28,14 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+
       - name: Deploy Backend to VPS
-        uses: appleboy/ssh-action@v0.1.2
+        uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          source: "backend/"
+          source: "backend/*"
           target: "/home/bakersburns-api/backend/"
 
   deploy-admin:
@@ -42,13 +44,14 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+
       - name: Deploy Admin to VPS
-        uses: appleboy/ssh-action@v0.1.2
+        uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          source: "frontend/adminFrontEnd/dist/"
+          source: "frontend/adminFrontEnd/dist/*"
           target: "/home/bakersburns-admin/htdocs/admin.bakersburns.com/"
 
   deploy-user:
@@ -57,11 +60,12 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+
       - name: Deploy User Interface to VPS
-        uses: appleboy/ssh-action@v0.1.2
+        uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          source: "frontend/userFrontEnd/dist/"
+          source: "frontend/userFrontEnd/dist/*"
           target: "/home/bakersburns-user/htdocs/user.bakersburns.com/"
