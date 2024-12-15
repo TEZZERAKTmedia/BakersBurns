@@ -13,6 +13,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Verify Source Directory
+        run: ls -R Frontend/registerFrontEnd/dist/ || echo "Directory not found"
+
       - name: Deploy Frontend to VPS
         uses: appleboy/ssh-action@master
         with:
@@ -20,12 +23,15 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
-            # Create target directory if it doesn't exist
-            mkdir -p /home/bakersburns/htdocs/bakersburns.com/
-            # Sync frontend files to the VPS
+            # Ensure the target directory exists
+            if [ ! -d /home/bakersburns/htdocs/bakersburns.com/ ]; then
+              echo "Target directory does not exist: /home/bakersburns/htdocs/bakersburns.com/"
+              exit 1
+            fi
+            # Sync frontend files to the existing directory
             rsync -avz Frontend/registerFrontEnd/dist/ /home/bakersburns/htdocs/bakersburns.com/
-            # Optionally, restart web server if needed
-            sudo systemctl restart nginx
+            
+            
 
   deploy-backend:
     name: Deploy Backend
@@ -34,6 +40,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Verify Source Directory
+        run: ls -R Backend/ || echo "Directory not found"
+
       - name: Deploy Backend to VPS
         uses: appleboy/ssh-action@master
         with:
@@ -41,11 +50,16 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
-            # Replace backend files with new ones
+            # Ensure the target directory exists
+            if [ ! -d /home/bakersburns-api/backend/ ]; then
+              echo "Target directory does not exist: /home/bakersburns-api/backend/"
+              exit 1
+            fi
+            # Clear existing backend files and sync new ones
             rm -rf /home/bakersburns-api/backend/*
             rsync -avz Backend/ /home/bakersburns-api/backend/
             # Restart backend service
-            sudo systemctl restart backend-service
+            pm2 restart bakersburns
 
   deploy-admin:
     name: Deploy Admin
@@ -54,6 +68,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Verify Source Directory
+        run: ls -R Frontend/adminFrontEnd/dist/ || echo "Directory not found"
+
       - name: Deploy Admin to VPS
         uses: appleboy/ssh-action@master
         with:
@@ -61,12 +78,14 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
-            # Create target directory if it doesn't exist
-            mkdir -p /home/bakersburns-admin/htdocs/admin.bakersburns.com/
-            # Sync admin frontend files to the VPS
+            # Ensure the target directory exists
+            if [ ! -d /home/bakersburns-admin/htdocs/admin.bakersburns.com/ ]; then
+              echo "Target directory does not exist: /home/bakersburns-admin/htdocs/admin.bakersburns.com/"
+              exit 1
+            fi
+            # Sync admin frontend files
             rsync -avz Frontend/adminFrontEnd/dist/ /home/bakersburns-admin/htdocs/admin.bakersburns.com/
-            # Optionally, restart web server if needed
-            sudo systemctl restart nginx
+            
 
   deploy-user:
     name: Deploy User Interface
@@ -75,6 +94,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Verify Source Directory
+        run: ls -R Frontend/userFrontEnd/dist/ || echo "Directory not found"
+
       - name: Deploy User Interface to VPS
         uses: appleboy/ssh-action@master
         with:
@@ -82,9 +104,11 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
-            # Create target directory if it doesn't exist
-            mkdir -p /home/bakersburns-user/htdocs/user.bakersburns.com/
-            # Sync user frontend files to the VPS
+            # Ensure the target directory exists
+            if [ ! -d /home/bakersburns-user/htdocs/user.bakersburns.com/ ]; then
+              echo "Target directory does not exist: /home/bakersburns-user/htdocs/user.bakersburns.com/"
+              exit 1
+            fi
+            # Sync user frontend files
             rsync -avz Frontend/userFrontEnd/dist/ /home/bakersburns-user/htdocs/user.bakersburns.com/
-            # Optionally, restart web server if needed
-            sudo systemctl restart nginx
+            
