@@ -17,11 +17,7 @@ jobs:
 
       - name: Debug Repository Files
         run: |
-          echo "Current directory:"
-          pwd
           echo "Listing all files in repo..."
-          ls -R
-          echo "Checking Frontend/registerFrontEnd/dist/"
           ls -R Frontend/registerFrontEnd/dist || echo "dist folder not found"
 
       - name: Deploy Frontend to VPS
@@ -45,7 +41,9 @@ jobs:
           clean: true
 
       - name: Verify Source Directory
-        run: ls -R Backend/ || echo "Directory not found"
+        run: |
+          echo "Verifying Backend source directory..."
+          ls -R Backend/ || echo "Backend directory not found"
 
       - name: Deploy Backend to VPS
         uses: appleboy/scp-action@master
@@ -77,8 +75,10 @@ jobs:
         with:
           clean: true
 
-      - name: Verify Source Directory
-        run: ls -R Frontend/adminFrontEnd/dist/ || echo "Directory not found"
+      - name: Debug Admin Source
+        run: |
+          echo "Listing adminFrontEnd dist folder..."
+          ls -R Frontend/adminFrontEnd/dist || echo "dist folder not found"
 
       - name: Deploy Admin to VPS
         uses: appleboy/scp-action@master
@@ -100,8 +100,10 @@ jobs:
         with:
           clean: true
 
-      - name: Verify Source Directory
-        run: ls -R Frontend/userFrontEnd/dist/ || echo "Directory not found"
+      - name: Debug User Source
+        run: |
+          echo "Listing userFrontEnd dist folder..."
+          ls -R Frontend/userFrontEnd/dist || echo "dist folder not found"
 
       - name: Deploy User Interface to VPS
         uses: appleboy/scp-action@master
