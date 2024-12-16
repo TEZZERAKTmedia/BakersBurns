@@ -58,7 +58,7 @@ jobs:
             fi
             # Clear existing backend files and sync new ones
             rm -rf /home/bakersburns-api/backend/*
-            rsync -avz Backend/ /home/bakersburns-api/htdocs/api.bakersburns.com/backend/
+            rsync -avz  --exclude=".env" Backend/ /home/bakersburns-api/htdocs/api.bakersburns.com/backend/
 
             # Restart backend service
             pm2 restart bakersburns
