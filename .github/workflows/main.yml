@@ -15,6 +15,11 @@ jobs:
 
       - name: Verify Source Directory
         run: ls -R Frontend/registerFrontEnd/dist/ || echo "Directory not found"
+      - name: Debug Repository Files
+        run: |
+          echo "Listing all files..."
+          ls -R Frontend/registerFrontEnd
+      
 
       - name: Deploy Frontend to VPS
         uses: appleboy/ssh-action@master
