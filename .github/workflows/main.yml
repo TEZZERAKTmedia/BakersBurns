@@ -26,7 +26,7 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           source: "Frontend/registerFrontEnd/dist/*"
           target: "/home/bakersburns/htdocs/bakersburns.com/"
-          strip_components: 1
+          strip_components: 3
           rm: true
 
   deploy-backend:
@@ -77,7 +77,7 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           source: "Frontend/adminFrontEnd/dist/*"
           target: "/home/bakersburns-admin/htdocs/admin.bakersburns.com/"
-          strip_components: 1
+          strip_components: 3
           rm: true
 
   deploy-user:
@@ -100,5 +100,5 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           source: "Frontend/userFrontEnd/dist/*"
           target: "/home/bakersburns-user/htdocs/user.bakersburns.com/"
-          strip_components: 1
+          strip_components: 3
           rm: true
