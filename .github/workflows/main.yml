@@ -46,6 +46,18 @@ jobs:
           target: "/home/bakersburns-api/htdocs/api.bakersburns.com/backend/"
           strip_components: 1
           rm: true
+      - name: Install Dependencies on VPS
+        uses: appleboy/ssh-action@master
+        with:
+            host: ${{ secrets.VPS_HOST }}
+            username: ${{ secrets.VPS_USER }}
+            key: ${{ secrets.VPS_SSH_KEY }}
+            script: |
+              echo "Installing dependencies..."
+              cd /home/bakersburns-api/htdocs/api.bakersburns.com/backend
+              npm install --production
+              echo "Restarting backend service..."
+              pm2 restart bakersburns
 
       - name: Restart Backend Service
         uses: appleboy/ssh-action@master
