@@ -65,7 +65,7 @@ jobs:
             fi
             # Clear existing backend files and sync new ones
             rm -rf /home/bakersburns-api/htdocs/api.bakersburns.com/backend/*
-            rsync -avz --exclude=".env" Backend/** /home/bakersburns-api/htdocs/api.bakersburns.com/backend/
+            rsync -avz --exclude=".env" Backend/**/* /home/bakersburns-api/htdocs/api.bakersburns.com/backend/
             
             # Restart backend service
             pm2 restart bakersburns
@@ -95,7 +95,7 @@ jobs:
               exit 1
             fi
             # Sync admin frontend files
-            rsync -avz Frontend/adminFrontEnd/dist/** /home/bakersburns-admin/htdocs/admin.bakersburns.com/
+            rsync -avz Frontend/adminFrontEnd/dist/**/* /home/bakersburns-admin/htdocs/admin.bakersburns.com/
 
   deploy-user:
     name: Deploy User Interface
@@ -122,4 +122,4 @@ jobs:
               exit 1
             fi
             # Sync user frontend files
-            rsync -avz Frontend/userFrontEnd/dist/** /home/bakersburns-user/htdocs/user.bakersburns.com/
+            rsync -avz Frontend/userFrontEnd/dist/**/* /home/bakersburns-user/htdocs/user.bakersburns.com/
