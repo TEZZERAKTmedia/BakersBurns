@@ -10,16 +10,19 @@ jobs:
     name: Deploy Frontend
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - name: Checkout Code
+        uses: actions/checkout@v3
+        with:
+          clean: true
 
-      - name: Verify Source Directory
-        run: ls -R Frontend/registerFrontEnd/dist/ || echo "Directory not found"
       - name: Debug Repository Files
         run: |
-          echo "Listing all files..."
-          ls -R Frontend/registerFrontEnd
-      
+          echo "Current directory:"
+          pwd
+          echo "Listing all files in repo..."
+          ls -R
+          echo "Checking Frontend/registerFrontEnd/dist/"
+          ls -R Frontend/registerFrontEnd/dist || echo "dist folder not found"
 
       - name: Deploy Frontend to VPS
         uses: appleboy/ssh-action@master
@@ -30,20 +33,20 @@ jobs:
           script: |
             # Ensure the target directory exists
             if [ ! -d /home/bakersburns/htdocs/bakersburns.com/ ]; then
-              echo "Target directory does not exist: /home/bakersburns/htdocs/bakersburns.com/"
+              echo "ERROR: Target directory does not exist: /home/bakersburns/htdocs/bakersburns.com/"
               exit 1
             fi
             # Sync frontend files to the existing directory
             rsync -avz Frontend/registerFrontEnd/dist/ /home/bakersburns/htdocs/bakersburns.com/
-            
-            
 
   deploy-backend:
     name: Deploy Backend
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - name: Checkout Code
+        uses: actions/checkout@v3
+        with:
+          clean: true
 
       - name: Verify Source Directory
         run: ls -R Backend/ || echo "Directory not found"
@@ -56,15 +59,14 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
             # Ensure the target directory exists
-            if [ ! -d /home/bakersburns-api/backend/ ]; then
-              echo "Target directory does not exist: /home/bakersburns-api/htdocs/api.bakersburns.com/backend/
-              "
+            if [ ! -d /home/bakersburns-api/htdocs/api.bakersburns.com/backend/ ]; then
+              echo "ERROR: Target directory does not exist: /home/bakersburns-api/htdocs/api.bakersburns.com/backend/"
               exit 1
             fi
             # Clear existing backend files and sync new ones
-            rm -rf /home/bakersburns-api/backend/*
-            rsync -avz  --exclude=".env" Backend/ /home/bakersburns-api/htdocs/api.bakersburns.com/backend/
-
+            rm -rf /home/bakersburns-api/htdocs/api.bakersburns.com/backend/*
+            rsync -avz --exclude=".env" Backend/ /home/bakersburns-api/htdocs/api.bakersburns.com/backend/
+            
             # Restart backend service
             pm2 restart bakersburns
 
@@ -72,8 +74,10 @@ jobs:
     name: Deploy Admin
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - name: Checkout Code
+        uses: actions/checkout@v3
+        with:
+          clean: true
 
       - name: Verify Source Directory
         run: ls -R Frontend/adminFrontEnd/dist/ || echo "Directory not found"
@@ -87,19 +91,20 @@ jobs:
           script: |
             # Ensure the target directory exists
             if [ ! -d /home/bakersburns-admin/htdocs/admin.bakersburns.com/ ]; then
-              echo "Target directory does not exist: /home/bakersburns-admin/htdocs/admin.bakersburns.com/"
+              echo "ERROR: Target directory does not exist: /home/bakersburns-admin/htdocs/admin.bakersburns.com/"
               exit 1
             fi
             # Sync admin frontend files
             rsync -avz Frontend/adminFrontEnd/dist/ /home/bakersburns-admin/htdocs/admin.bakersburns.com/
-            
 
   deploy-user:
     name: Deploy User Interface
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - name: Checkout Code
+        uses: actions/checkout@v3
+        with:
+          clean: true
 
       - name: Verify Source Directory
         run: ls -R Frontend/userFrontEnd/dist/ || echo "Directory not found"
@@ -113,9 +118,8 @@ jobs:
           script: |
             # Ensure the target directory exists
             if [ ! -d /home/bakersburns-user/htdocs/user.bakersburns.com/ ]; then
-              echo "Target directory does not exist: /home/bakersburns-user/htdocs/user.bakersburns.com/"
+              echo "ERROR: Target directory does not exist: /home/bakersburns-user/htdocs/user.bakersburns.com/"
               exit 1
             fi
             # Sync user frontend files
             rsync -avz Frontend/userFrontEnd/dist/ /home/bakersburns-user/htdocs/user.bakersburns.com/
-            
