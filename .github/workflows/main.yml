@@ -13,12 +13,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Install Dependencies
-        run: npm install --prefix Frontend/registerFrontEnd
-      
-      - name: Build Frontend
-        run: npm run build --prefix Frontend/registerFrontEnd
-
       - name: Verify Source Directory
         run: ls -R Frontend/registerFrontEnd/dist/ || echo "Directory not found"
       - name: Debug Repository Files
