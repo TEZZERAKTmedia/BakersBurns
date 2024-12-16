@@ -12,13 +12,11 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
-        with:
-          clean: true
 
       - name: Debug Repository Files
         run: |
-          echo "Listing all files in repo..."
-          ls -R Frontend/registerFrontEnd/dist || echo "dist folder not found"
+          echo "Listing all files..."
+          ls -R Frontend/registerFrontEnd/dist/
 
       - name: Deploy Frontend to VPS
         uses: appleboy/scp-action@master
@@ -28,7 +26,7 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           source: "Frontend/registerFrontEnd/dist/*"
           target: "/home/bakersburns/htdocs/bakersburns.com/"
-          strip_components: 0
+          strip_components: 1
           rm: true
 
   deploy-backend:
@@ -37,13 +35,6 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
-        with:
-          clean: true
-
-      - name: Verify Source Directory
-        run: |
-          echo "Verifying Backend source directory..."
-          ls -R Backend/ || echo "Backend directory not found"
 
       - name: Deploy Backend to VPS
         uses: appleboy/scp-action@master
@@ -72,13 +63,11 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
-        with:
-          clean: true
 
-      - name: Debug Admin Source
+      - name: Debug Admin Files
         run: |
-          echo "Listing adminFrontEnd dist folder..."
-          ls -R Frontend/adminFrontEnd/dist || echo "dist folder not found"
+          echo "Listing Admin Frontend dist folder..."
+          ls -R Frontend/adminFrontEnd/dist/
 
       - name: Deploy Admin to VPS
         uses: appleboy/scp-action@master
@@ -88,7 +77,7 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           source: "Frontend/adminFrontEnd/dist/*"
           target: "/home/bakersburns-admin/htdocs/admin.bakersburns.com/"
-          strip_components: 0
+          strip_components: 1
           rm: true
 
   deploy-user:
@@ -97,13 +86,11 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
-        with:
-          clean: true
 
-      - name: Debug User Source
+      - name: Debug User Files
         run: |
-          echo "Listing userFrontEnd dist folder..."
-          ls -R Frontend/userFrontEnd/dist || echo "dist folder not found"
+          echo "Listing User Frontend dist folder..."
+          ls -R Frontend/userFrontEnd/dist/
 
       - name: Deploy User Interface to VPS
         uses: appleboy/scp-action@master
@@ -113,5 +100,5 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           source: "Frontend/userFrontEnd/dist/*"
           target: "/home/bakersburns-user/htdocs/user.bakersburns.com/"
-          strip_components: 0
+          strip_components: 1
           rm: true
