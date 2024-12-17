@@ -1,10 +1,4 @@
-if (process.env.NODE_ENV === 'production') {
-  dotenv.config({ path: path.resolve(__dirname, '../../.env') });
-  console.log('Production environment: Loading ../../.env');
-} else {
-  dotenv.config();
-  console.log('Development environment: Loading default .env');
-}
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
