@@ -1,8 +1,17 @@
-require('dotenv').config();
+const path = require('path');
+
+// Load dotenv with environment-specific configuration
+if (process.env.NODE_ENV === 'production') {
+  require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
+  console.log('Running in Production Mode');
+} else {
+  require('dotenv').config(); // Defaults to .env in the same directory
+  console.log('Running in Development Mode');
+}
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const path = require('path');
+
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
 const jwt = require('jsonwebtoken'); // Assuming JWT is used for auth
