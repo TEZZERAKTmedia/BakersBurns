@@ -34,7 +34,7 @@ const VerifyEmail = () => {
         
           if (response.status === 200 && response.data.verified) {
             setVerificationStatus('success');
-            setMessage(`Verification successful. User ${email} moved to permanent table.`);
+            setMessage(`Verification successful. User ${email} moved to permanent table. You can now log in.`);
           } else if (response.status === 409) {
             // Handle case where email is already registered
             setVerificationStatus('email_registered');

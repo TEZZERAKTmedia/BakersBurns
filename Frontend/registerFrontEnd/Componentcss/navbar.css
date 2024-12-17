@@ -83,6 +83,22 @@ body {
 .nav-item {
   margin: 10px 0;
 }
+.nav-item-privacy {
+  margin: 10px 0;
+  padding: 10px;
+  background-color: rgb(0, 153, 255);
+  color: white;
+  text-decoration: none;
+  border-radius: 20px;
+}
+.nav-item-terms {
+  margin: 10px 0;
+  padding: 10px;
+  background-color: rgb(0, 153, 255);
+  color: white;
+  text-decoration: none;
+  border-radius: 20px;
+}
 
 .nav-item a {
   color: #fff;
