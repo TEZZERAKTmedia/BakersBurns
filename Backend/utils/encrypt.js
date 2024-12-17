@@ -1,8 +1,4 @@
 const crypto = require('crypto');
-require('dotenv').config({ path: '../.env' });
-
-
-
 // Set the encryption key as a 32-byte buffer from the hex string
 const encryptionKey = Buffer.from(process.env.ENCRYPTION_KEY, 'hex');
 
