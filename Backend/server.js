@@ -53,16 +53,18 @@ const app = express();
 
 // Set allowed origins based on environment
 const allowedOrigins = process.env.NODE_ENV === 'production' 
-  ? [process.env.PROD_USER_FRONTEND, process.env.PROD_ADMIN_FRONTEND, process.env.PROD_REGISTER_FRONTEND]
+  ? [] // Leave empty since CORS is handled at NGINX level
   : [process.env.USER_FRONTEND, process.env.ADMIN_FRONTEND, process.env.REGISTER_FRONTEND, 'http://localhost:8080'];
 
-// Configure CORS middleware with dynamic origins
-app.use(cors({
-  origin: allowedOrigins,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  credentials: true,
-}));
-
+if (process.env.NODE_ENV !== 'production') {
+  // Only enable CORS middleware in development
+  app.use(cors({
+    origin: allowedOrigins,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    credentials: true,
+  }));
+  console.log('CORS middleware enabled for development');
+}
 
 
 app.use('/stripe-webhooks', express.raw({ type: 'application/json' }), stripeWebhookRoutes);
