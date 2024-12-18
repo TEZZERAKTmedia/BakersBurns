@@ -9,7 +9,11 @@ import LoadingPage from '../Components/loading';
 
 const ProductManagement = () => {
   const [products, setProducts] = useState([]);
-  const [newProduct, setNewProduct] = useState({ name: '', description: '', price: 0, image: null, type: '', quantity: 1 });
+  const [newProduct, setNewProduct] = useState({ name: '', description: '', price: 0, image: null, type: '', quantity: 1,  length: 0, // Default value
+  width: 0,  // Default value
+  height: 0, // Default value
+  weight: 0, // Default value
+  measurementUnit: '', });
   const [productTypes, setProductTypes] = useState([]); // Initialize product types
   const [selectedType, setSelectedType] = useState(''); 
   const [isNewType, setIsNewType] = useState(false);
@@ -117,6 +121,12 @@ const ProductManagement = () => {
       image: product.image,
       type: product.type,
       quantity: product.quantity,
+      length: product.length,
+      width: product.width,
+      height: product.height,
+      weight: product.weight,
+      measurementUnit: product.measurementUnit
+
     });
     setEditingProductId(product.id);
     setEditingDiscountId(null); // Hide discount form if open
@@ -143,6 +153,11 @@ const ProductManagement = () => {
     if (!newProduct.price || newProduct.price <= 0) missing.push('price');
     if (!newProduct.type) missing.push('type');
     if (newProduct.quantity <= 0) missing.push('quantity');
+    if (!newProduct.length || newProduct.length <= 0) missing.push('length');
+    if (!newProduct.width || newProduct.width <= 0) missing.push('width');
+    if (!newProduct.height || newProduct.height <= 0) missing.push('height');
+    if (!newProduct.weight || newProduct.weight <= 0) missing.push('weight');
+    if (!newProduct.measurementUnit) missing.push('measurementUnit');
   
     if (missing.length > 0) {
       setMissingFields(missing);
@@ -150,34 +165,46 @@ const ProductManagement = () => {
     }
   
     setMissingFields([]);
-    setLoading(true); // Show loading screen
+    setLoading(true);
   
     try {
-      // Perform cropping unconditionally
+      // Always force crop the image
       const croppedImage = await getCroppedImg(imagePreview, croppedAreaPixels);
-      const imageFile = new File([croppedImage], newProduct.image.name, { type: 'image/png' });
+      const imageFile = new File([croppedImage], "cropped.png", { type: 'image/png' });
   
       const formData = new FormData();
       formData.append('name', newProduct.name);
       formData.append('description', newProduct.description);
       formData.append('price', newProduct.price);
       formData.append('type', newProduct.type);
-      formData.append('image', imageFile);
+      formData.append('image', imageFile); // Always use the cropped image
       formData.append('quantity', newProduct.quantity);
+      formData.append('length', newProduct.length || 0);
+      formData.append('width', newProduct.width || 0);
+      formData.append('height', newProduct.height || 0);
+      formData.append('weight', newProduct.weight || 0);
+      formData.append('measurementUnit', newProduct.measurementUnit || '');
+  
+      console.log('FormData entries:');
+      for (let pair of formData.entries()) {
+        console.log(pair[0], pair[1]);
+      }
   
       await adminApi.post('/api/products', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
+  
       fetchProducts();
       resetForms();
     } catch (error) {
       console.error('Error adding product:', error);
     } finally {
-      setLoading(false); // Hide loading screen
+      setLoading(false);
     }
   };
+  
   
   
   
@@ -190,6 +217,11 @@ const ProductManagement = () => {
     if (newProduct.price) formData.append('price', newProduct.price);
     if (newProduct.type) formData.append('type', newProduct.type);
     if (newProduct.quantity) formData.append('quantity', newProduct.quantity);
+    if (!newProduct.length || newProduct.length <= 0) missing.push('length'); // Ensure positive length
+    if (!newProduct.width || newProduct.width <= 0) missing.push('width');   // Ensure positive width
+    if (!newProduct.height || newProduct.height <= 0) missing.push('height'); // Ensure positive height
+    if (!newProduct.weight || newProduct.weight <= 0) missing.push('weight'); // Ensure positive weight
+    if (!newProduct.measurementUnit) missing.push('measurementUnit');      
   
     // Append the image only if it's updated
     if (newProduct.image) {
@@ -371,7 +403,7 @@ const removeDiscountByType = async (productType) => {
     : products;
 
   const resetForms = () => {
-    setNewProduct({ name: '', description: '', price: 0, image: null, type: '' });
+    setNewProduct({ name: '', description: '', price: 0, image: null, type: '',  length: 0, width: 0,height: 0, weight: 0, measurementUnit: '', });
     setDiscount({ type: 'percentage', amount: 0, startDate: '', endDate: '' });
     setEditingProductId(null);
     setEditingDiscountId(null);
@@ -379,6 +411,7 @@ const removeDiscountByType = async (productType) => {
     setShowAddDiscountForm(false);
     setImagePreview('');
     setSelectedType('');
+    
 
   };
   if (isLoading) {
@@ -448,7 +481,55 @@ const removeDiscountByType = async (productType) => {
       value={newProduct.quantity || 1}
       onChange={(e) => setNewProduct({ ...newProduct, quantity: e.target.value })}
     />
+    {/* Dimensions */}
+    <label>Dimensions (inches/cm):</label>
+    <div className="dimensions-inputs">
+      <input
+        type="number"
+        step="0.01" // Allow fractional values
+        placeholder="Length"
+        value={newProduct.length}
+        onChange={(e) => setNewProduct({ ...newProduct, length: e.target.value })}
+      />
+      <input
+        type="number"
+        step="0.01"
+        placeholder="Width"
+        value={newProduct.width}
+        onChange={(e) => setNewProduct({ ...newProduct, width: e.target.value })}
+      />
+      <input
+        type="number"
+        step="0.01"
+        placeholder="Height"
+        value={newProduct.height}
+        onChange={(e) => setNewProduct({ ...newProduct, height: e.target.value })}
+      />
+    </div>
 
+    {/* Weight */}
+    <label>Weight (lbs/kg):</label>
+    <input
+      type="number"
+      step="0.01"
+      placeholder="Weight"
+      value={newProduct.weight}
+      onChange={(e) => setNewProduct({ ...newProduct, weight: e.target.value })}
+    />
+
+    {/* Measurement Unit */}
+    <div style={{padding: '10px'}}>
+    <label>Measurement Unit:</label>
+    <select
+      value={newProduct.measurementUnit || ''}
+      onChange={(e) => setNewProduct({ ...newProduct, measurementUnit: e.target.value })}
+    >
+      <option value="">Select Unit</option>
+      <option value="metric">Metric</option>
+      <option value="standard">Standard</option>
+    </select>
+    </div>
+    <div style={{padding: '10px'}}>
     <label>
       Product Type {missingFields.includes('type') && <span className="error-dot">*</span>}
     </label>
@@ -461,6 +542,7 @@ const removeDiscountByType = async (productType) => {
       ))}
       <option value="new">Enter a New Type</option>
     </select>
+    </div>
 
     {isNewType && (
       <input
@@ -506,7 +588,7 @@ const removeDiscountByType = async (productType) => {
             onCropComplete={onCropComplete}
             onZoomChange={setZoom}
           />
-          <button onClick={handleCrop}>Crop Image</button>
+          <button onClick={handleCrop} style={{zIndex:'9999', height: '10%', fontSize:'5%'}}>Crop Image</button>
         </div>
       )}
     </div>
@@ -660,6 +742,50 @@ const removeDiscountByType = async (productType) => {
                                   value={newProduct.quantity}
                                   onChange={(e) => setNewProduct({ ...newProduct, quantity: e.target.value })}
                                 />
+                                 <label>Dimensions (inches/cm):</label>
+    <div className="dimensions-inputs">
+      <input
+        type="number"
+        step="0.01"
+        placeholder="Length"
+        value={newProduct.length || ''}
+        onChange={(e) => setNewProduct({ ...newProduct, length: e.target.value })}
+      />
+      <input
+        type="number"
+        step="0.01"
+        placeholder="Width"
+        value={newProduct.width || ''}
+        onChange={(e) => setNewProduct({ ...newProduct, width: e.target.value })}
+      />
+      <input
+        type="number"
+        step="0.01"
+        placeholder="Height"
+        value={newProduct.height || ''}
+        onChange={(e) => setNewProduct({ ...newProduct, height: e.target.value })}
+      />
+    </div>
+
+    <label>Weight (lbs/kg):</label>
+    <input
+      type="number"
+      step="0.01"
+      placeholder="Weight"
+      value={newProduct.weight || ''}
+      onChange={(e) => setNewProduct({ ...newProduct, weight: e.target.value })}
+    />
+
+    <label>Measurement Unit:</label>
+    <select
+      value={newProduct.measurementUnit || ''}
+      onChange={(e) => setNewProduct({ ...newProduct, measurementUnit: e.target.value })}
+    >
+      <option value="">Select Unit</option>
+      <option value="metric">Metric</option>
+      <option value="standard">Standard</option>
+    </select>
+
 
                           {/* Drag-and-drop or choose file for image */}
                                 <div {...getRootProps()} className="image-dropzone">

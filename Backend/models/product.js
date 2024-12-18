@@ -2,8 +2,6 @@ const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 const xss = require('xss'); // Import xss library
 
-
-
 const Product = sequelize.define('Product', {
   name: {
     type: DataTypes.STRING,
@@ -24,9 +22,9 @@ const Product = sequelize.define('Product', {
   quantity: {
     type: DataTypes.INTEGER,
     allowNull: false,
-      validate: {
-    min: 0 // Ensure quantity is never negative
-  }
+    validate: {
+      min: 0 // Ensure quantity is never negative
+    }
   },
   type: {
     type: DataTypes.STRING,
@@ -55,6 +53,40 @@ const Product = sequelize.define('Product', {
   discountEndDate: {
     type: DataTypes.DATE,
     allowNull: true, // Fixed typo and made it nullable if not always used
+  },
+  // New fields for dimensions and weight
+  length: {
+    type: DataTypes.FLOAT,
+    allowNull: true, // Nullable in case some products don't have dimensions
+    validate: {
+      min: 0, // Ensure non-negative values
+    }
+  },
+  width: {
+    type: DataTypes.FLOAT,
+    allowNull: true,
+    validate: {
+      min: 0, // Ensure non-negative values
+    }
+  },
+  height: {
+    type: DataTypes.FLOAT,
+    allowNull: true,
+    validate: {
+      min: 0, // Ensure non-negative values
+    }
+  },
+  weight: {
+    type: DataTypes.FLOAT,
+    allowNull: true, // Nullable in case weight is not provided
+    validate: {
+      min: 0, // Ensure non-negative values
+    },
+    measurementUnit: {
+      type: DataTypes.ENUM('metric', 'standard'),
+      allowNull: false,
+      defaultValue: 'metric', // Default to metric if not specified
+    }
   }
 }, {
   timestamps: false,
@@ -77,6 +109,5 @@ Product.associate = (models) => {
     as: 'orders'
   });
 };
-
 
 module.exports = Product;

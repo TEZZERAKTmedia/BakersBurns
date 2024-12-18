@@ -16,26 +16,48 @@ const getProducts = async (req, res) => {
 
 // Add a new product (existing)
 const addProduct = async (req, res) => {
-  const { name, description, price, type, quantity } = req.body;
-  const image = req.file ? req.file.filename : null; // Save the filename
-
   try {
-    console.log('Adding new product');
+    const { name, description, price, type, quantity, length, width, height, weight, measurementUnit } = req.body;
+
+    console.log('Received File:', req.file);
+
+    if (!name || !description || !price || !type || !quantity) {
+      return res.status(400).json({ message: 'Missing required fields' });
+    }
+    const imageFileName = req.file.filename; 
+
+    // Ensure numeric values
+    const lengthValue = parseFloat(length) || 0;
+    const widthValue = parseFloat(width) || 0;
+    const heightValue = parseFloat(height) || 0;
+    const weightValue = parseFloat(weight) || 0;
+
+    // Prepare the BLOB
+    const imageBlob = req.file ? req.file.buffer : null;
+
+    // Insert product into the database
     const newProduct = await Product.create({
       name,
       description,
       price,
-      image,
       type,
-      quantity 
+      image: imageFileName, // Store the binary data as BLOB
+      quantity,
+      length: lengthValue,
+      width: widthValue,
+      height: heightValue,
+      weight: weightValue,
+      measurementUnit,
     });
-    console.log('Product added');
+
     res.status(201).json(newProduct);
   } catch (error) {
     console.error('Error adding product:', error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ message: 'Error adding product', error });
   }
 };
+
+
 
 // Update a product (existing)
 const updateProduct = async (req, res) => {
@@ -59,6 +81,11 @@ const updateProduct = async (req, res) => {
       product.image = image || product.image;
       product.type = type || product.type;
       product.quantity = quantity || product.quantity;
+      product.length = length !== undefined ? length : product.length;
+      product.width = width !== undefined ? width : product.width;
+      product.height = height !== undefined ? height : product.height;
+      product.weight = weight !== undefined ? weight : product.weight;
+      product.measurementUnit = measurementUnit || product.measurementUnit;
 
       await product.save();
       console.log('Product updated successfully', product);
@@ -213,7 +240,23 @@ const getDiscountedProducts = async (req, res) => {
     console.log('Fetching discounted products');
     const discountedProducts = await Product.findAll({
       where: { isDiscounted: true },
-      attributes: ['id', 'name', 'price', 'discountPrice', 'discountType', 'discountAmount', 'discountStartDate', 'discountEndDate'] // Specify the columns to retrieve
+      attributes: [
+        'id',
+        'name',
+        'price',
+        'discountPrice',
+        'discountType',
+        'discountAmount',
+        'discountStartDate',
+        'discountEndDate',
+        'length',
+        'width',
+        'height',
+        'weight',
+        'measurementUnit',
+        
+        
+      ]
     });
     console.log('Discounted products fetched successfully');
     res.json(discountedProducts);
@@ -222,6 +265,7 @@ const getDiscountedProducts = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
 
 // In productController.js
 const getProductTypes = async (req, res) => {
