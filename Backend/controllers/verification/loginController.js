@@ -57,7 +57,7 @@ const loginUser = async (req, res) => {
       secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
       maxAge: 60 * 60 * 1000, // 1 hour
       sameSite: sameSiteSetting, // Use the SameSite value
-      domain: process.env.NODE_ENV === 'production' ? '.bakersburns.com' : 'localhost', // Shared across subdomains in production
+      domain: process.env.NODE_ENV === 'production' ? 'bakersburns.com' : 'localhost', // Shared across subdomains in production
     });
 
     // Log the cookie information for debugging purposes
