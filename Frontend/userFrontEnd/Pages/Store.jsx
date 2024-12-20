@@ -22,6 +22,7 @@ const Store = () => {
       const response = await userApi.get('/store');
       // Access `products` from the response object
       const { products } = response.data;
+      console.log(response.data)
   
       setProducts(products || []); // Safeguard against undefined
     } catch (error) {
@@ -128,6 +129,24 @@ const Store = () => {
                 ${selectedProduct.price}
               </p>
             </div>
+            <div className="modal-descriptor">
+              <h4>Dimensions:</h4>
+              <div className="dimensions-container">
+                <div className="dimensions-column">
+                  <p><strong>Inches:</strong></p>
+                  <p>Length: {selectedProduct.length} in</p>
+                  <p>Width: {selectedProduct.width} in</p>
+                  <p>Height: {selectedProduct.height} in</p>
+                </div>
+                <div className="dimensions-column">
+                  <p><strong>Centimeters:</strong></p>
+                  <p>Length: {(selectedProduct.length * 2.54).toFixed(2)} cm</p>
+                  <p>Width: {(selectedProduct.width * 2.54).toFixed(2)} cm</p>
+                  <p>Height: {(selectedProduct.height * 2.54).toFixed(2)} cm</p>
+                </div>
+              </div>
+            </div>
+
             <button
              
               onClick={() => handleAddToCart(selectedProduct.id)}

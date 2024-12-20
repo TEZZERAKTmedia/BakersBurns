@@ -19,7 +19,13 @@
 .logo.react:hover {
   filter: drop-shadow(0 0 2em #61dafbaa);
 }
-
+body {
+  background-image: url('./assets/Floral1x1metallix.png');/* Replace with the actual path to your image */
+  background-size: cover; /* Ensures the image covers the entire container */
+  background-position: center; /* Centers the image */
+  background-repeat: no-repeat; 
+  z-index: 100;
+}
 
 
 .card {

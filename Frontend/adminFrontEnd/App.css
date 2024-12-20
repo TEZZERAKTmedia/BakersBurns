@@ -34,6 +34,11 @@
 }
 body {
   letter-spacing: 0.1em; /* Increases spacing across the entire app */
+  background-image: url('./assets/Floral1x1metallix.png');/* Replace with the actual path to your image */
+  background-size: cover; /* Ensures the image covers the entire container */
+  background-position: center; /* Centers the image */
+  background-repeat: no-repeat; 
+  z-index: 100;
 }
 
 

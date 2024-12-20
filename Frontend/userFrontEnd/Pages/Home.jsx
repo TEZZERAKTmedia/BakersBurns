@@ -4,6 +4,7 @@ import '../Pagecss/Home.css';
 import { Link } from 'react-router-dom'; 
 import { userApi } from '../config/axios';
 import moment from 'moment';
+import Background from '../../media/Background.png';
 
 const Home = () => {
   const [featuredProducts, setFeaturedProducts] = useState([]);
@@ -55,6 +56,20 @@ const Home = () => {
 
   return (
     <div className="home-container" >
+      <motion.h1 
+            style={{
+              fontFamily: '"Dancing Script", cursive',
+              fontSize: '13vw',
+              color: 'white',
+              marginTop: '30%'
+              
+            }}
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 1 }}
+          >
+            BakersBurns
+          </motion.h1>
       
       {/* Hero Section */}
       <motion.section 
@@ -64,19 +79,7 @@ const Home = () => {
         variants={fadeIn}
       >
         <div className="hero-content">
-          <motion.h1 
-            style={{
-              fontFamily: '"Dancing Script", cursive',
-              fontSize: '13vw',
-              color: 'Black',
-              
-            }}
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 1 }}
-          >
-            BakersBurns
-          </motion.h1>
+          
           <p className="hero-description">Unique Wood Burning Art by Kalea Baker</p>
           <Link to="/store" className="hero-btn">Shop Now</Link>
         </div>

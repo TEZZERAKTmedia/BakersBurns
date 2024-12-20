@@ -17,7 +17,7 @@ const getProducts = async (req, res) => {
 // Add a new product (existing)
 const addProduct = async (req, res) => {
   try {
-    const { name, description, price, type, quantity, length, width, height, weight, measurementUnit } = req.body;
+    const { name, description, price, type, quantity, length, width, height, weight, unit } = req.body;
 
     console.log('Received File:', req.file);
 
@@ -47,7 +47,7 @@ const addProduct = async (req, res) => {
       width: widthValue,
       height: heightValue,
       weight: weightValue,
-      measurementUnit,
+      unit,
     });
 
     res.status(201).json(newProduct);
@@ -62,12 +62,12 @@ const addProduct = async (req, res) => {
 // Update a product (existing)
 const updateProduct = async (req, res) => {
   const { id } = req.params;
-  
+
   // Log req.body and req.file to see what data is coming in
   console.log('Request Body:', req.body);
   console.log('Request File:', req.file);
 
-  const { name, description, price, type, quantity } = req.body;
+  const { name, description, price, type, quantity, length, width, height, weight, unit } = req.body; // Safely destructure all fields
   const image = req.file ? req.file.filename : null;
 
   try {
@@ -75,17 +75,19 @@ const updateProduct = async (req, res) => {
     const product = await Product.findByPk(id);
     if (product) {
       console.log('Product found:', product);
+
+      // Update only if the fields are provided in the request
       product.name = name || product.name;
       product.description = description || product.description;
       product.price = price || product.price;
       product.image = image || product.image;
       product.type = type || product.type;
       product.quantity = quantity || product.quantity;
-      product.length = length !== undefined ? length : product.length;
-      product.width = width !== undefined ? width : product.width;
-      product.height = height !== undefined ? height : product.height;
-      product.weight = weight !== undefined ? weight : product.weight;
-      product.measurementUnit = measurementUnit || product.measurementUnit;
+      product.length = length !== undefined ? parseFloat(length) : product.length; // Safely handle `length`
+      product.width = width !== undefined ? parseFloat(width) : product.width;     // Safely handle `width`
+      product.height = height !== undefined ? parseFloat(height) : product.height; // Safely handle `height`
+      product.weight = weight !== undefined ? parseFloat(weight) : product.weight; // Safely handle `weight`
+      product.unit = unit || product.unit;
 
       await product.save();
       console.log('Product updated successfully', product);
@@ -99,6 +101,7 @@ const updateProduct = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
 
 // Delete a product (existing)
 const deleteProduct = async (req, res) => {
@@ -253,7 +256,7 @@ const getDiscountedProducts = async (req, res) => {
         'width',
         'height',
         'weight',
-        'measurementUnit',
+        'unit',
         
         
       ]

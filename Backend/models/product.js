@@ -82,11 +82,12 @@ const Product = sequelize.define('Product', {
     validate: {
       min: 0, // Ensure non-negative values
     },
-    measurementUnit: {
-      type: DataTypes.ENUM('metric', 'standard'),
-      allowNull: false,
-      defaultValue: 'metric', // Default to metric if not specified
-    }
+    
+  },
+  unit: {
+    type: DataTypes.ENUM('metric', 'standard'),
+    allowNull: false,
+    defaultValue: 'standard', // Default to metric if not specified
   }
 }, {
   timestamps: false,

@@ -3,7 +3,7 @@ body {
   margin: 0;
   padding: 0;
   height: 100vh;
-  background: url('your-background-image.jpg') no-repeat center center fixed; /* Use your background image */
+  background: url('../assets/Floral1x1metallix.png') no-repeat center center fixed; /* Use your background image */
   background-size: cover; /* Make sure the background covers the entire area */
   overflow: hidden; /* Prevent the body itself from scrolling */
   font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
@@ -39,6 +39,79 @@ body {
   display: flex;
   justify-content: space-between;
   margin-bottom: 20px;
+}
+
+
+
+.form-section {
+  border: 5px solid #333; /* Solid border */
+  border-radius: 30px; /* Rounded corners */
+  padding: 20px; /* Add padding for spacing inside */
+  background: linear-gradient(145deg, #ffffff, #d3d3d3); /* Soft gradient background */
+  box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.2), inset 0px -5px 15px rgba(255, 255, 255, 0.4); /* Outer and inner shadows */
+  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth transition on hover */
+  margin: 10px;
+}
+
+.form-section:hover {
+  transform: scale(1.05); /* Slightly enlarge on hover */
+  box-shadow: 0px 20px 30px rgba(0, 0, 0, 0.3), inset 0px -5px 15px rgba(255, 255, 255, 0.5); /* Enhanced shadow on hover */
+}
+
+/* Animated glow effect */
+@keyframes glow {
+  0% {
+    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.2), 0 0 10px rgba(255, 255, 255, 0.3);
+  }
+  50% {
+    box-shadow: 0px 15px 25px rgba(0, 0, 0, 0.3), 0 0 20px rgba(255, 255, 255, 0.6);
+  }
+  100% {
+    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.2), 0 0 10px rgba(255, 255, 255, 0.3);
+  }
+}
+
+.form-section.glow {
+  animation: glow 1.5s infinite alternate; /* Pulsating glow effect */
+}
+
+/* Input fields styling */
+.form-section input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-section input:focus {
+  border-color: #007bff; /* Highlight border color on focus */
+  box-shadow: 0 0 8px rgba(0, 123, 255, 0.6); /* Glowing shadow on focus */
+  outline: none; /* Remove default outline */
+}
+
+/* Button styling */
+.form-section button {
+  padding: 10px 20px;
+  font-size: 18px;
+  color: #fff;
+  background: linear-gradient(145deg, #007bff, #0056b3);
+  border: none;
+  border-radius: 10px;
+  box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.form-section button:hover {
+  background: linear-gradient(145deg, #0056b3, #007bff);
+  transform: translateY(-2px); /* Slight lift on hover */
+}
+
+.form-section button:active {
+  transform: translateY(2px); /* Pressed effect */
 }
 
 .add-buttons button {

@@ -4,6 +4,7 @@ html, body {
   padding: 0;
   overflow-y: auto; /* Enable vertical scrolling */
   overflow-x: hidden; /* Prevent horizontal scrolling */
+  background: url('../assets/Floral1x1metallix.png') no-repeat center center fixed; 
 }
 .events-body {
   position: fixed; /* Overlay the body */
@@ -13,7 +14,7 @@ html, body {
   bottom: 0;
   overflow-y: auto; /* Enable vertical scrolling */
   overflow-x: hidden; /* Prevent horizontal scrolling */
-  background-color: #f4f6f9; /* Set a background color if needed */
+  background-color: #f4f6f99a; /* Set a background color if needed */
   z-index: 1; /* Ensure it's above other elements */
   padding: 20px;
   display: flex;

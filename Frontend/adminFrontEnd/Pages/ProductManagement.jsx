@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef} from 'react';
 import { adminApi } from '../config/axios';
 import Cropper from 'react-easy-crop';
 import getCroppedImg from '../util/cropImage'; // Assuming you have a utility to crop images
@@ -13,7 +13,7 @@ const ProductManagement = () => {
   width: 0,  // Default value
   height: 0, // Default value
   weight: 0, // Default value
-  measurementUnit: '', });
+  unit: '', });
   const [productTypes, setProductTypes] = useState([]); // Initialize product types
   const [selectedType, setSelectedType] = useState(''); 
   const [isNewType, setIsNewType] = useState(false);
@@ -34,6 +34,7 @@ const ProductManagement = () => {
   const [cropping, setCropping] = useState(false);
   const [fileSize, setFileSize] = useState(0); // To track file size
   const [maxFileSize] = useState(50 * 1024 * 1024);
+  const inputRefs = useRef([]);
 
   useEffect(() => {
     fetchProducts();
@@ -96,6 +97,15 @@ const ProductManagement = () => {
     }
   };
 
+  const handleKeyPress = (e, index) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (inputRefs.current[index + 1]) {
+        inputRefs.current[index + 1].focus()
+      }
+    } 
+  }
+
   const handleRemoveDiscount = async (productId) => {
     if (window.confirm('Are you sure you want to remove the discount from this product?')) {
       try {
@@ -125,7 +135,7 @@ const ProductManagement = () => {
       width: product.width,
       height: product.height,
       weight: product.weight,
-      measurementUnit: product.measurementUnit
+      unit: product.unit
 
     });
     setEditingProductId(product.id);
@@ -157,7 +167,7 @@ const ProductManagement = () => {
     if (!newProduct.width || newProduct.width <= 0) missing.push('width');
     if (!newProduct.height || newProduct.height <= 0) missing.push('height');
     if (!newProduct.weight || newProduct.weight <= 0) missing.push('weight');
-    if (!newProduct.measurementUnit) missing.push('measurementUnit');
+    if (!newProduct.unit) missing.push('unit');
   
     if (missing.length > 0) {
       setMissingFields(missing);
@@ -183,7 +193,7 @@ const ProductManagement = () => {
       formData.append('width', newProduct.width || 0);
       formData.append('height', newProduct.height || 0);
       formData.append('weight', newProduct.weight || 0);
-      formData.append('measurementUnit', newProduct.measurementUnit || '');
+      formData.append('unit', newProduct.unit || 'unit');
   
       console.log('FormData entries:');
       for (let pair of formData.entries()) {
@@ -209,43 +219,57 @@ const ProductManagement = () => {
   
   
   const handleUpdateProduct = async (productId) => {
-    // Create formData and append fields only if they are filled in, otherwise fallback to existing product data
-    const formData = new FormData();
-  
-    if (newProduct.name) formData.append('name', newProduct.name);
-    if (newProduct.description) formData.append('description', newProduct.description);
-    if (newProduct.price) formData.append('price', newProduct.price);
-    if (newProduct.type) formData.append('type', newProduct.type);
-    if (newProduct.quantity) formData.append('quantity', newProduct.quantity);
-    if (!newProduct.length || newProduct.length <= 0) missing.push('length'); // Ensure positive length
-    if (!newProduct.width || newProduct.width <= 0) missing.push('width');   // Ensure positive width
-    if (!newProduct.height || newProduct.height <= 0) missing.push('height'); // Ensure positive height
-    if (!newProduct.weight || newProduct.weight <= 0) missing.push('weight'); // Ensure positive weight
-    if (!newProduct.measurementUnit) missing.push('measurementUnit');      
-  
-    // Append the image only if it's updated
-    if (newProduct.image) {
-      formData.append('image', newProduct.image);
+    const missing = [];
+    
+    if (!newProduct.name) missing.push('name');
+    if (!newProduct.description) missing.push('description');
+    if (!newProduct.price || newProduct.price <= 0) missing.push('price');
+    if (!newProduct.type) missing.push('type');
+    if (!newProduct.unit) missing.push('unit');
+    
+    // Do not flag optional fields as "missing"
+    if (missing.length > 0) {
+      console.warn('Missing fields:', missing);
+      setMissingFields(missing);
+      return;
     }
   
-    // Log formData content to the console
+    const formData = new FormData();
+    formData.append('name', newProduct.name);
+    formData.append('description', newProduct.description);
+    formData.append('price', newProduct.price);
+    formData.append('type', newProduct.type);
+    formData.append('quantity', newProduct.quantity);
+  
+    if (newProduct.length) formData.append('length', newProduct.length);
+    if (newProduct.width) formData.append('width', newProduct.width);
+    if (newProduct.height) formData.append('height', newProduct.height);
+    if (newProduct.weight) formData.append('weight', newProduct.weight);
+    if (newProduct.unit) formData.append('unit', newProduct.unit);
+  
+    if (newProduct.image) formData.append('image', newProduct.image);
+  
+    console.log('FormData content:');
     for (const [key, value] of formData.entries()) {
-      console.log(`${key}: ${value}`);
+      console.log(`${key}:`, value);
     }
   
     try {
-      await adminApi.put(`/api/products/${productId}`, formData, {
+      console.log('Sending PUT request to update product...');
+      const response = await adminApi.put(`/api/products/${productId}`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
-  
-      fetchProducts(); // Fetch the updated list of products
-      resetForms(); // Reset form after success
+      console.log('Product updated successfully:', response.data);
+      fetchProducts();
+      resetForms();
     } catch (error) {
       console.error('Error updating product:', error);
+      console.error('Response data:', error.response?.data);
     }
   };
+  
 
   
   const calculateDiscountedPrice = (price, discountType, discountAmount) => {
@@ -396,6 +420,9 @@ const removeDiscountByType = async (productType) => {
     setSelectedType(e.target.value); // Set the new type being typed
     setNewProduct({ ...newProduct, type: e.target.value }); // Update product type
   };
+  const allowOnlyNumbers = (e) => {
+    e.target.value = e.target.value.replace(/[^0-9.]/g, '');
+  }
 
   // Filter products by selected type
   const filteredProducts = selectedType
@@ -403,7 +430,7 @@ const removeDiscountByType = async (productType) => {
     : products;
 
   const resetForms = () => {
-    setNewProduct({ name: '', description: '', price: 0, image: null, type: '',  length: 0, width: 0,height: 0, weight: 0, measurementUnit: '', });
+    setNewProduct({ name: '', description: '', price: 0, image: null, type: '',  length: 0, width: 0,height: 0, weight: 0, unit: '', });
     setDiscount({ type: 'percentage', amount: 0, startDate: '', endDate: '' });
     setEditingProductId(null);
     setEditingDiscountId(null);
@@ -441,95 +468,129 @@ const removeDiscountByType = async (productType) => {
     {showAddProductForm && (
   <div className="product-form-section">
     <h2>Add New Product</h2>
-
+    <div className='form-section'>
     <label>
       Product Name {missingFields.includes('name') && <span className="error-dot">*</span>}
     </label>
     <input
+      ref={(el) => (inputRefs.current[0] = el)}
       type="text"
       placeholder="Product Name"
       value={newProduct.name}
       onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
-    />
+      onKeyDown={(e) => handleKeyPress(e, 0)}
 
+    />
+    </div>
+    <div className='form-section'>
     <label>
       Product Description {missingFields.includes('description') && <span className="error-dot">*</span>}
     </label>
     <input
+      ref={(el) => (inputRefs.current[1] = el)}
       type="text"
       placeholder="Product Description"
       value={newProduct.description}
       onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })}
+      onKeyDown={(e) => handleKeyPress(e, 1)}
     />
-
+    </div>
+    <div className='form-section'>
     <label>
       Price (USD) {missingFields.includes('price') && <span className="error-dot">*</span>}
     </label>
     <input
+      ref={(el) => (inputRefs.current[2] = el)}
       type="number"
       placeholder="Price (USD)"
       value={newProduct.price}
       onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
+      onInput={allowOnlyNumbers}
+      onKeyDown={(e) => handleKeyPress(e, 2)}
     />
-
+    </div>
+    <div className='form-section'>
     <label>
       Quantity {missingFields.includes('quantity') && <span className="error-dot">*</span>}
+      
     </label>
     <input
+    ref={(el) => (inputRefs.current[3] = el)}
       type="number"
       placeholder="Quantity"
       value={newProduct.quantity || 1}
       onChange={(e) => setNewProduct({ ...newProduct, quantity: e.target.value })}
+      onInput={allowOnlyNumbers}
+      onKeyDown={(e) => handleKeyPress(e, 3)}
     />
+    </div>
     {/* Dimensions */}
+    <div className='form-section'>
     <label>Dimensions (inches/cm):</label>
     <div className="dimensions-inputs">
       <input
+        ref={(el) => (inputRefs.current[4] = el)}
         type="number"
         step="0.01" // Allow fractional values
         placeholder="Length"
         value={newProduct.length}
         onChange={(e) => setNewProduct({ ...newProduct, length: e.target.value })}
+        onInput={allowOnlyNumbers}
+        onKeyDown={(e) => handleKeyPress(e, 4)}
       />
       <input
+        ref={(el) => (inputRefs.current[5] = el)}
         type="number"
         step="0.01"
         placeholder="Width"
         value={newProduct.width}
         onChange={(e) => setNewProduct({ ...newProduct, width: e.target.value })}
+        onInput={allowOnlyNumbers}
+        onKeyDown={(e) => handleKeyPress(e, 5)}
       />
       <input
+        ref={(el) => (inputRefs.current[6] = el)}
         type="number"
         step="0.01"
         placeholder="Height"
         value={newProduct.height}
         onChange={(e) => setNewProduct({ ...newProduct, height: e.target.value })}
+        onInput={allowOnlyNumbers}
+        onKeyDown={(e) => handleKeyPress(e, 6)}
       />
     </div>
+    </div>
+    <div className='form-section'>
 
     {/* Weight */}
     <label>Weight (lbs/kg):</label>
     <input
+      ref={(el) => (inputRefs.current[7] = el)}
       type="number"
       step="0.01"
       placeholder="Weight"
       value={newProduct.weight}
       onChange={(e) => setNewProduct({ ...newProduct, weight: e.target.value })}
+      onInput={allowOnlyNumbers}
+      onKeyDown={(e) => handleKeyPress(e, 7)}
     />
+    </div>
 
     {/* Measurement Unit */}
+    <div className='form-section'>
     <div style={{padding: '10px'}}>
     <label>Measurement Unit:</label>
     <select
-      value={newProduct.measurementUnit || ''}
-      onChange={(e) => setNewProduct({ ...newProduct, measurementUnit: e.target.value })}
+      value={newProduct.unit || ''}
+      onChange={(e) => setNewProduct({ ...newProduct, unit: e.target.value })}
     >
       <option value="">Select Unit</option>
       <option value="metric">Metric</option>
       <option value="standard">Standard</option>
     </select>
     </div>
-    <div style={{padding: '10px'}}>
+    </div>
+    <div className='form-section'>
     <label>
       Product Type {missingFields.includes('type') && <span className="error-dot">*</span>}
     </label>
@@ -542,7 +603,7 @@ const removeDiscountByType = async (productType) => {
       ))}
       <option value="new">Enter a New Type</option>
     </select>
-    </div>
+   
 
     {isNewType && (
       <input
@@ -552,7 +613,8 @@ const removeDiscountByType = async (productType) => {
         onChange={handleNewTypeChange}
       />
     )}
-
+     </div>
+    <div className='form-section'>
     <label>
       Image {missingFields.includes('image') && <span className="error-dot">*</span>}
     </label>
@@ -591,6 +653,7 @@ const removeDiscountByType = async (productType) => {
           <button onClick={handleCrop} style={{zIndex:'9999', height: '10%', fontSize:'5%'}}>Crop Image</button>
         </div>
       )}
+      </div>
     </div>
 
     <button onClick={() => handleAddProduct(null)}>Add Product</button>
@@ -613,6 +676,7 @@ const removeDiscountByType = async (productType) => {
               placeholder="Discount Amount"
               value={discount.amount}
               onChange={(e) => setDiscount({ ...discount, amount: parseFloat(e.target.value) || 0 })}
+              onInput={allowOnlyNumbers}
             />
             <label>Start Date:
               <input type="date" name="startDate" value={discount.startDate} onChange={(e) => setDiscount({ ...discount, startDate: e.target.value })} />
@@ -657,7 +721,9 @@ const removeDiscountByType = async (productType) => {
         style={{ backgroundColor: product.isDiscounted ? 'orange' : 'white' }}
       >
         <div className="product-details">
+          <div className='form-section'>
           <h3 className="product-title">{product.name}</h3>
+          </div>
 
           {/* Conditionally render the image only when the product is not being edited */}
           {editingProductId !== product.id && editingDiscountId !== product.id && product.image && (
@@ -688,35 +754,51 @@ const removeDiscountByType = async (productType) => {
               <p>Discount End: {product.discountEndDate ? product.discountEndDate.split('T')[0] : 'N/A'}</p>
             </>
           ) : (
-            <>
+            <div className='form-section'>
+              
+
               <p className="price">Price: ${parseFloat(product.price).toFixed(2)}</p>
               <div className="additional-info">
-                <p>Type: {product.type || 'N/A'}</p>
-                <p>Availability: {product.quantity > 0 ? 'In Stock' : 'Out of Stock'}</p>
+                <p className='detail'>Type: {product.type || 'N/A'}</p>
+                <p className='detail'>Quantity: {product.quantity > 0 ? product.quantity : 'Out of Stock'}</p>
+                <p className='detail'></p>
               </div>
-            </>
+            </ div>
           )}
           {/* EDIT PRODUCT FORM */}
                     {editingProductId === product.id && (
                               <div className="product-edit-form">
+                                <div className='form-section'>
+                                <label>Product Name</label>
                                 <input
                                   type="text"
                                   placeholder="Product Name"
                                   value={newProduct.name}
                                   onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
                                 />
+                                </div>
+                                <div className='form-section'>
+                                <label>Product Description</label>
                                 <input
                                   type="text"
                                   placeholder="Product Description"
                                   value={newProduct.description}
                                   onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })}
                                 />
+                                </div>
+                                <div className='form-section'>
+                                <label>
+                                  Price (USD) {missingFields.includes('price') && <span className="error-dot">*</span>}
+                                </label>
                                 <input
                                   type="number"
                                   placeholder="Price (USD)"
                                   value={newProduct.price}
                                   onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
+                                  onInput={allowOnlyNumbers}
                                 />
+                                </div>
+                                <div className='form-section'>
                                 <label>Product Type:</label>
                                 <select value={selectedType} onChange={handleTypeChange}>
                                   <option value="">Select a Type</option>
@@ -742,49 +824,72 @@ const removeDiscountByType = async (productType) => {
                                   value={newProduct.quantity}
                                   onChange={(e) => setNewProduct({ ...newProduct, quantity: e.target.value })}
                                 />
+                                </div>
+                                <div className='form-section'>
                                  <label>Dimensions (inches/cm):</label>
-    <div className="dimensions-inputs">
-      <input
-        type="number"
-        step="0.01"
-        placeholder="Length"
-        value={newProduct.length || ''}
-        onChange={(e) => setNewProduct({ ...newProduct, length: e.target.value })}
-      />
-      <input
-        type="number"
-        step="0.01"
-        placeholder="Width"
-        value={newProduct.width || ''}
-        onChange={(e) => setNewProduct({ ...newProduct, width: e.target.value })}
-      />
-      <input
-        type="number"
-        step="0.01"
-        placeholder="Height"
-        value={newProduct.height || ''}
-        onChange={(e) => setNewProduct({ ...newProduct, height: e.target.value })}
-      />
-    </div>
+                                <div className="dimensions-inputs">
+                                  <input
+                                    type="number"
+                                    step="0.01"
+                                    placeholder="Length"
+                                    value={newProduct.length || ''}
+                                    onChange={(e) => setNewProduct({ ...newProduct, length: e.target.value })}
+                                    onInput={allowOnlyNumbers}
+            
+                                  />
+                                  <input
+                                    type="number"
+                                    step="0.01"
+                                    placeholder="Width"
+                                    value={newProduct.width || ''}
+                                    onChange={(e) => setNewProduct({ ...newProduct, width: e.target.value })}
+                                    onInput={allowOnlyNumbers}
+                                  />
+                                  <input
+                                    type="number"
+                                    step="0.01"
+                                    placeholder="Height"
+                                    value={newProduct.height || ''}
+                                    onChange={(e) => setNewProduct({ ...newProduct, height: e.target.value })}
+                                    onInput={allowOnlyNumbers}
+                                  />
+                                </div>
 
-    <label>Weight (lbs/kg):</label>
-    <input
-      type="number"
-      step="0.01"
-      placeholder="Weight"
-      value={newProduct.weight || ''}
-      onChange={(e) => setNewProduct({ ...newProduct, weight: e.target.value })}
-    />
+                                <label>Weight (lbs/kg):</label>
+                                <input
+                                  type="number"
+                                  step="0.01"
+                                  placeholder="Weight"
+                                  value={newProduct.weight || ''}
+                                  onChange={(e) => setNewProduct({ ...newProduct, weight: e.target.value })}
+                                  onInput={allowOnlyNumbers}
+                                />
+                                </div>
+                                <div className="form-section">
+                                  <label>Measurement Unit:</label>
+                                  <select
+                                    value={newProduct.unit || ''}
+                                    onChange={(e) => {
+                                      const selectedUnit = e.target.value;
+                                      setNewProduct({ ...newProduct, unit: selectedUnit });
+                                    }}
+                                  >
+                                    <option value="">Select Unit</option>
+                                    <option value="metric">Metric</option>
+                                    <option value="standard">Standard</option>
+                                  </select>
 
-    <label>Measurement Unit:</label>
-    <select
-      value={newProduct.measurementUnit || ''}
-      onChange={(e) => setNewProduct({ ...newProduct, measurementUnit: e.target.value })}
-    >
-      <option value="">Select Unit</option>
-      <option value="metric">Metric</option>
-      <option value="standard">Standard</option>
-    </select>
+                                  {/* Render examples based on selected unit */}
+                                  {newProduct.unit && (
+                                    <div className="measurement-examples">
+                                      {newProduct.unit === 'metric' ? (
+                                        <p>Kilograms, Meters, Centimeters</p>
+                                      ) : newProduct.unit === 'standard' ? (
+                                        <p>Pounds, Inches, Feet</p>
+                                      ) : null}
+                                    </div>
+                                  )}
+                                </div>
 
 
                           {/* Drag-and-drop or choose file for image */}
