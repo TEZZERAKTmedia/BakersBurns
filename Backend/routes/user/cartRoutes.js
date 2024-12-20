@@ -7,5 +7,6 @@ const userAuthMiddleware = require('../../middleware/userAuthMiddleware');
 router.get('/', userAuthMiddleware(), cartController.getCart); // Use middleware to get user ID from the token
 router.post('/add-to-cart', userAuthMiddleware(), cartController.addToCart);
 router.delete('/:productId', userAuthMiddleware(), cartController.removeFromCart);
+router.get('/details/:productId', userAuthMiddleware(''), cartController.getProductDetails);
 
 module.exports = router;

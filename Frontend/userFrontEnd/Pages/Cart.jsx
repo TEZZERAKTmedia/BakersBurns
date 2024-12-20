@@ -4,6 +4,7 @@ import { loadStripe } from '@stripe/stripe-js';
 import '../Componentcss/cart.css';
 import LoadingPage from '../Components/loading'; // Import the loading component
 import { useNotification } from '../Components/notification/notification'; // Import notification context
+import Modal from '../Components/modalProductDetails'; // Import the modal component
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
@@ -12,6 +13,8 @@ const Cart = () => {
   const [totalAmount, setTotalAmount] = useState(0);
   const [loading, setLoading] = useState(true); // Add loading state
   const { showNotification } = useNotification(); // Use notification context
+  const [selectedProductId, setSelectedProductId] = useState(null); // State to track selected product for the modal
+  const [isModalOpen, setModalOpen] = useState(false); // State to control modal visibility
 
   useEffect(() => {
     getCart();
@@ -19,19 +22,19 @@ const Cart = () => {
 
   // Fetch cart items from the backend
   const getCart = async () => {
-    setLoading(true); // Start loading
+    setLoading(true);
     try {
       const response = await userApi.get('/cart');
+      console.log('Cart items response:', response.data); // Debug log
       setCartItems(response.data);
       calculateTotal(response.data);
     } catch (error) {
       console.error('Error fetching cart items:', error);
-      showNotification('Failed to load cart items.', 'error');
     } finally {
-      setLoading(false); // Stop loading
+      setLoading(false);
     }
   };
-
+  
   // Calculate the total amount of the cart
   const calculateTotal = (items) => {
     const total = items.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
@@ -79,14 +82,38 @@ const Cart = () => {
     }
   };
 
+  // Open modal and set selected product
+  const openProductModal = (productId) => {
+    console.log('Clicked product ID:', productId); // Debug log
+    setSelectedProductId(productId);
+    setModalOpen(true);
+  };
+  
+  // Close modal
+  const closeProductModal = () => {
+    setSelectedProductId(null);
+    setModalOpen(false);
+  };
+
   return loading ? (
     <LoadingPage /> // Display loading page while loading
   ) : (
-    <div className="cart-container">
+    <div className="cart-container" >
       <h2>Your Cart</h2>
       <div className="cart-items">
         {cartItems.map(item => (
-          <div key={item.id} className="cart-item">
+          <div
+          key={item.id}
+          className="cart-item"
+          onClick={() => {
+            console.log('Cart Item:', item); // Check the structure of `item`
+            console.log('Product ID:', item.productId); // Specifically log the `productId`
+            openProductModal(item.productId); // Pass `productId` instead of `product.id`
+          }}
+          style={{ cursor: 'pointer' }}
+        >
+        
+        
             {item.product.image ? (
               <img
                 className="product-image"
@@ -101,7 +128,10 @@ const Cart = () => {
             <p>Price: ${item.product.price}</p>
             <p>Quantity: {item.quantity}</p>
             <button
-              onClick={() => deleteCartItem(item.productId)}
+              onClick={(e) => {
+                e.stopPropagation(); // Prevent modal opening on button click
+                deleteCartItem(item.productId);
+              }}
               className="delete-button"
             >
               Remove
@@ -115,6 +145,13 @@ const Cart = () => {
       <button onClick={handleCheckout} className="checkout-button">
         Proceed to Checkout
       </button>
+
+      {/* Modal Component */}
+      <Modal
+        isOpen={isModalOpen}
+        productId={selectedProductId}
+        onClose={closeProductModal}
+      />
     </div>
   );
 };

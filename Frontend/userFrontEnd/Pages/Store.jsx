@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { useNotification } from '../Components/notification/notification';
 
 
+
 const Store = () => {
   const [products, setProducts] = useState([]);
   const [authError, setAuthError] = useState(false);
@@ -104,48 +105,68 @@ const Store = () => {
         </div>
       )}
 
-      {/* Modal for displaying selected product */}
-      {selectedProduct && (
-        <div className="modal-overlay" onClick={closeProductModal}>
-          <div  className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <span className="close-modal" onClick={closeProductModal}>&times;</span>
-            <h3 style={{ color: 'black'}}>
-              {selectedProduct.name}
-            </h3>
-            <img
-              src={`${import.meta.env.VITE_IMAGE_BASE_URL}/${selectedProduct.image}`}
-              alt={selectedProduct.name}
-              
-            />
-            <div className='modal-descriptor'>
-              <h4 >Description:</h4>
-              <p >
-                {selectedProduct.description}
-              </p>
-            </div>
-            <div className='modal-descriptor'>
-              <h4>Price: USD</h4>
-              <p >
-                ${selectedProduct.price}
-              </p>
-            </div>
-            <div className="modal-descriptor">
+                  {/* Modal for displaying selected product */}
+                  {selectedProduct && (
+                    <div className="modal-overlay" onClick={closeProductModal}>
+                      <div  className="modal-content" onClick={(e) => e.stopPropagation()}>
+                        <span className="close-modal" onClick={closeProductModal}>&times;</span>
+                        <h3 style={{ color: 'black'}}>
+                          {selectedProduct.name}
+                        </h3>
+                        <img
+                          src={`${import.meta.env.VITE_IMAGE_BASE_URL}/${selectedProduct.image}`}
+                          alt={selectedProduct.name}
+                          
+                        />
+                        <div className='modal-descriptor'>
+                          <h4 >Description:</h4>
+                          <p >
+                            {selectedProduct.description}
+                          </p>
+                        </div>
+                        <div className='modal-descriptor'>
+                          <h4>Price: USD</h4>
+                          <p >
+                            ${selectedProduct.price}
+                          </p>
+                        </div>
+                        <div className="modal-descriptor">
               <h4>Dimensions:</h4>
               <div className="dimensions-container">
                 <div className="dimensions-column">
-                  <p><strong>Inches:</strong></p>
-                  <p>Length: {selectedProduct.length} in</p>
-                  <p>Width: {selectedProduct.width} in</p>
-                  <p>Height: {selectedProduct.height} in</p>
+                  <p><strong>Metric</strong></p>
+                  <p>Length:</p>
+                  <p>Width:</p>
+                  <p>Height:</p>
                 </div>
                 <div className="dimensions-column">
-                  <p><strong>Centimeters:</strong></p>
-                  <p>Length: {(selectedProduct.length * 2.54).toFixed(2)} cm</p>
-                  <p>Width: {(selectedProduct.width * 2.54).toFixed(2)} cm</p>
-                  <p>Height: {(selectedProduct.height * 2.54).toFixed(2)} cm</p>
+                  <p><strong>IN:</strong></p>
+                  <p>{selectedProduct.length} </p>
+                  <p>{selectedProduct.width} </p>
+                  <p>{selectedProduct.height}</p>
+                </div>
+                <div className="dimensions-column">
+                  <p><strong>CM:</strong></p>
+                  <p>{(selectedProduct.length * 2.54).toFixed(2)} </p>
+                  <p>{(selectedProduct.width * 2.54).toFixed(2)} </p>
+                  <p>{(selectedProduct.height * 2.54).toFixed(2)} </p>
                 </div>
               </div>
             </div>
+            <div className='modal-descriptor'>
+              <h4>Weight</h4>
+              <p >
+                {selectedProduct.weight}
+              </p>
+            </div>
+            <div className='modal-descriptor'>
+              <h4>Quantity Available</h4>
+              
+              <p>
+                {selectedProduct.quantity}
+              </p>
+            </div>
+
 
             <button
              

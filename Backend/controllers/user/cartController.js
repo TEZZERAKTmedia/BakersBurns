@@ -96,6 +96,27 @@ const removeFromCart = async (req, res) => {
   }
 };
 
+const getProductDetails = async (req, res) => {
+  const { productId } = req.params;
+
+  try {
+    // Fetch product by ID
+    const product = await Product.findByPk(productId, {
+      attributes: ['id', 'name', 'description', 'price', 'image', 'length', 'width', 'height', 'weight'], // Include necessary fields
+    });
+
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+
+    res.status(200).json({ product });
+  } catch (error) {
+    console.error('Error fetching product details:', error);
+    res.status(500).json({ message: 'Error fetching product details', error });
+  }
+};
 
 
-module.exports = { getCart, addToCart, removeFromCart };
+
+
+module.exports = { getCart, addToCart, removeFromCart, getProductDetails };

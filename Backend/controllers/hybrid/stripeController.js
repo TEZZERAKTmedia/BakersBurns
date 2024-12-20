@@ -17,8 +17,19 @@ const createCheckoutSession = async (req, res) => {
     // Fetch cart items for the user
     const cartItems = await Cart.findAll({
       where: { userId },
-      include: [{ model: Product, as: 'product', attributes: ['id', 'name', 'price', 'image'] }]
+      include: [{
+        model: Product,
+        as: 'product',
+        attributes: [
+          'id',
+          'name',
+          'price',
+          'image',
+          ['quantity', 'stock'] // Alias 'quantity' as 'stock'
+        ]
+      }]
     });
+    
 
     if (cartItems.length === 0) {
       console.log('No items in cart for userId:', userId);
@@ -26,12 +37,13 @@ const createCheckoutSession = async (req, res) => {
     }
 
     for (const cartItem of cartItems) {
-     if (cartItem.quantity > cartItems.product.stock) {
-      return res.status(400).json({ message: `Insufficient stock for product: ${cartItem.product.name}`})
-     }
-     cartItem.product.stock -= cartItem.quantity;
-     await cartItem.product.save();
+      if (cartItem.quantity > cartItem.product.stock) {
+        return res.status(400).json({ message: `Insufficient stock for product: ${cartItem.product.name}` });
+      }
+      cartItem.product.stock -= cartItem.quantity;
+      await cartItem.product.save();
     }
+    
 
     // Map cart items to Stripe line items and include product IDs
     const lineItems = cartItems.map(item => ({

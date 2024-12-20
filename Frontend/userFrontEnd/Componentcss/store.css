@@ -2,6 +2,7 @@
 .store-container {
   padding: 2%;
   margin-top: 10%;
+  height: 100% ;
 }
 
 .store-container h2 {
@@ -35,7 +36,7 @@
 
 /* Product Info */
 .product-info img {
-  width: 80%;
+  
   max-width: 200px;
   max-height: 200px;
   object-fit: cover;
@@ -54,40 +55,96 @@
 }
 
 /* Modal Styling */
+/* Modal Overlay */
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.6);
+  background-color: rgba(0, 0, 0, 0.6); /* Dimmed background */
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 1000;
 }
 
+/* Modal Content */
 .modal-content {
   background-color: #555555ce;
   padding: 20px;
-  border-radius: 8px;
+  border-radius: 12px;
   max-width: 500px;
-  width: 90%;
-  text-align: center;
+  max-height: 500px; /* Ensures a square modal */
+  width: 90vw; /* Responsive width */
+  height: 90vw; /* Responsive height, limited by max-height */
+  overflow-y: auto; /* Scroll inside if content overflows */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+  position: relative;
 }
 
+/* Close Button */
+.modal-content .close-modal {
+  font-size: 1.5rem;
+  cursor: pointer;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  color: white;
+  background-color: rgba(0, 0, 0, 0.5);
+  border: none;
+  border-radius: 50%;
+  padding: 5px 10px;
+  z-index: 1101;
+}
+
+/* Modal Title */
 .modal-content h3 {
   font-family: "Dancing Script", cursive;
-  font-size: 4rem;
+  font-size: 2rem;
   color: white;
+  margin-top: 10px;
 }
 
+/* Modal Image */
 .modal-content img {
-  width: 100%;
-  height: auto;
-  max-height: 400px;
+  width: 200px;
+  height: 200px;
+  
   object-fit: cover;
   border-radius: 8px;
 }
+
+/* Modal Text */
+.modal-content p {
+  font-family: Arial, sans-serif;
+  font-size: 1rem;
+  color: black;
+  background-color: white;
+  padding: 10px;
+  border-radius: 5px;
+  margin: 10px 0;
+  text-align: left;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .modal-content {
+    max-width: 90%;
+    max-height: 90%;
+    width: 90vw;
+    height: 90vw;
+  }
+
+  .modal-content h3 {
+    font-size: 1.5rem;
+  }
+
+  .modal-content img {
+    max-height: 150px;
+  }
+}
+
 
 .modal-content .close-modal {
   font-size: 1.5rem;
@@ -108,7 +165,14 @@
   font-size: 1.2rem;
   color: black;
   background-color: white;
+  padding: 10px;
+  border-radius: 5px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+  margin: 10px auto; /* Centers the element horizontally */
+  text-align: center; /* Centers the text inside the <p> element */
+  width: fit-content; /* Ensures it doesn't stretch beyond its content */
 }
+
 
 /* Button Styling */
 button {
@@ -203,4 +267,40 @@ button:hover:not(:disabled) {
   text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7); /* Adds a stronger shadow to the price */
   text-align: center;
   margin-top: 10px;
+}
+
+.dimensions-container {
+  display: flex; /* Aligns columns side-by-side */
+  justify-content: space-between; /* Ensures space between columns */
+  gap: 20px; /* Adds spacing between the columns */
+  padding: 20px; /* Adds padding inside the container */
+  background-color: #f8f9fa; /* Light background for contrast */
+  border-radius: 8px; /* Smooth corners */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+}
+
+.dimensions-column {
+  flex: 1; /* Ensures columns take equal width */
+  text-align: left; /* Aligns text to the left */
+}
+
+.dimensions-column p {
+  margin: 5px 0; /* Adds spacing between the rows */
+  font-family: Arial, sans-serif; /* Sets a clean font */
+  font-size: 1rem; /* Adjusts font size */
+  color: #333; /* Dark text for readability */
+}
+
+.dimensions-column strong {
+  font-size: 1.2rem; /* Highlights the column headers */
+  color: #555; /* Slightly lighter color for differentiation */
+  text-transform: uppercase; /* Optional: Makes headers uppercase */
+}
+
+.dimensions-container p:first-of-type {
+  margin-top: 0; /* Removes extra margin for the first item */
+}
+
+.dimensions-container p:last-of-type {
+  margin-bottom: 0; /* Removes extra margin for the last item */
 }

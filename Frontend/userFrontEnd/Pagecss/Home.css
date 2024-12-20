@@ -13,19 +13,26 @@ body {
 }
 
 /* Home container */
-.home-container {
-  font-family: 'Arial', sans-serif;
-  width: 100vw;
+.hero-section {
   height: 100vh;
-  padding-top: 60px; /* Adjust the padding for spacing instead */
-  overflow-x: hidden; /* Prevent horizontal scrolling */
-  background-image: url('../assets/Background.png');/* Replace with the actual path to your image */
-  background-size: cover; /* Ensures the image covers the entire container */
-  background-position: center; /* Centers the image */
-  background-repeat: no-repeat; 
-
-  
+  margin-top: -50%;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 20px;
+  color: #fff;
 }
+
+/* Media query for screens wider than 1200px */
+@media (min-width: 1200px) {
+  .hero-section {
+    margin-top: -25%; /* Adjust this value as needed */
+  }
+}
+
 
 
 /* Hero Section */
