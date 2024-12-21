@@ -9,8 +9,14 @@
 
 
 body {
-  font-family: 'Dancing Script', cursive;
+  background-image: url('./assets/Floral1x1metallix.png');/* Replace with the actual path to your image */
+  background-size: cover; /* Ensures the image covers the entire container */
+  background-position: center; /* Centers the image */
+  background-repeat: no-repeat; 
+  z-index: 100;
+  
 }
+
 
 /* Home container */
 .hero-section {
@@ -24,12 +30,13 @@ body {
   text-align: center;
   padding: 20px;
   color: #fff;
+  
 }
 
 /* Media query for screens wider than 1200px */
 @media (min-width: 1200px) {
   .hero-section {
-    margin-top: -25%; /* Adjust this value as needed */
+    /* Adjust this value as needed */
   }
 }
 
@@ -38,7 +45,7 @@ body {
 /* Hero Section */
 .hero-section {
   height: 100vh;
-  margin-top: -50%;
+  margin-top: -20%;
   background-size: cover;
   background-position: center;
   display: flex;
@@ -47,6 +54,7 @@ body {
   text-align: center;
   padding: 20px;
   color: #fff;
+  
 
 }
 
@@ -61,7 +69,8 @@ body {
 .hero-title {
   font-size: 10vw;
   letter-spacing: 2px;
-  margin-bottom: 20px;
+ 
+  
   
 }
 

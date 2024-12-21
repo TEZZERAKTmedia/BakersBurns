@@ -153,6 +153,7 @@ const UserMessaging = () => {
           }}
           style={{ fontFamily: 'Arial, sans-serif' }}
         >
+          <div>
           <input
             type="text"
             value={messageBody}
@@ -173,6 +174,7 @@ const UserMessaging = () => {
           >
             {sending ? 'Sending...' : 'Send'}
           </button>
+          </div>
         </form>
       </div>
     </div>

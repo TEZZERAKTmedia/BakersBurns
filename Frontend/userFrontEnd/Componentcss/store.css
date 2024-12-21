@@ -3,6 +3,7 @@
   padding: 2%;
   margin-top: 10%;
   height: 100% ;
+  
 }
 
 .store-container h2 {
@@ -16,6 +17,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); /* Responsive columns */
   gap: 16px;
+  
 }
 
 /* Product Tile */
@@ -43,8 +45,17 @@
   border-radius: 8px;
 }
 
+.tile-section {
+  background-color: #f8f9fac3; /* Fallback color for browsers that don't support gradients */
+  padding: 3px;
+  margin: 10px;
+  color: black;
+  border-radius: 20px;
+  background: linear-gradient(to bottom, #909090, #f9f9f9); /* Remove the trailing comma */
+}
+
 .product-info h3 {
-  font-family: "Dancing Script", cursive;
+  color: white;
   font-size: 1.8rem;
 }
 
@@ -218,24 +229,7 @@ button:hover:not(:disabled) {
 }
 
 /* Media Queries */
-@media (max-width: 768px) {
-  .store-container {
-    padding: 1%;
-    margin-top: 5%;
-  }
 
-  .product-grid {
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  }
-
-  .product-info img {
-    width: 100%;
-  }
-
-  .modal-content h3 {
-    font-size: 3rem;
-  }
-}
 
 .modal-content h4 {
   background-color: rgba(0, 0, 0, 0.61);

@@ -8,7 +8,7 @@ const About = () => {
     }, []);
 
     return (
-        <div className="body" style={{ padding: '1rem', maxWidth: '800px', margin: '0 auto' }}>
+        <div className="body" style={{ padding: '1rem', maxWidth: '800px', margin: '0 auto', backgroundColor:'#ffffffbe'}}>
             <div>
                 <h1 style={{ marginTop: '100px', textAlign: 'center', fontSize: '2rem' , fontFamily:'Dancing Script'}}>
                     About the Artist

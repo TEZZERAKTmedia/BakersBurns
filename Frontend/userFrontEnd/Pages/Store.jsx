@@ -79,7 +79,7 @@ const Store = () => {
   };
 
   return (
-    <div className="store-container">
+    <div className="store-container" >
       <h2>Store</h2>
 
       {authError ? (
@@ -88,7 +88,7 @@ const Store = () => {
           <Link to={`${import.meta.env.VITE_LOG_IN_REDIRECTION}`}>Click here to login or register</Link>
         </div>
       ) : (
-        <div className="product-grid">
+        <div className="product-grid" style={{paddingBottom:'20%'}}>
           {products.map((product) => (
             <div className="product-tile" key={product.id} onClick={() => openProductModal(product)}>
               <div className="product-info">
@@ -97,8 +97,16 @@ const Store = () => {
                   alt={product.name}
                   
                 />
-                <h3 >{product.name}</h3>
-                <p >${product.price}</p>
+                <div className='tile-section'>
+                <h3 style={{color:'black'}}>{product.name}</h3>
+                </div>
+                <div className='tile-section'>
+                <p style={{color:'black'}}>{product.description}</p>
+                </div>
+                <div className='tile-section'>
+                <p style={{color:'black'}}>${product.price}</p>
+                </div>
+
               </div>
             </div>
           ))}

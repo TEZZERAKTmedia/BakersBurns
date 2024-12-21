@@ -82,7 +82,7 @@ const VerificationWrapper = ({ children }) => {
   }
 
   return (
-    <div className="container" style={{ color: 'black', backgroundColor: 'white' }}>
+    <div className="container" style={{ color: 'black' }}>
       {isLoading ? (
         <LoadingPage />
         

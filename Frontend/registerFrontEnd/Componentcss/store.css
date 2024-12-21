@@ -19,7 +19,7 @@
   
   /* Product Tile */
   .product-tile {
-    background-color: #000000ab;
+    background-color: rgba(0, 0, 0, 0.618);
     border: 1px solid #dddddd59;
     border-radius: 8px;
     padding: 16px;

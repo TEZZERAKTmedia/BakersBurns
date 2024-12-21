@@ -99,7 +99,7 @@ const Cart = () => {
     <LoadingPage /> // Display loading page while loading
   ) : (
     <div className="cart-container" >
-      <h2>Your Cart</h2>
+      <h2 style={{backgroundColor: 'white', padding: '20px', borderRadius: '20px'}}>Your Cart</h2>
       <div className="cart-items">
         {cartItems.map(item => (
           <div

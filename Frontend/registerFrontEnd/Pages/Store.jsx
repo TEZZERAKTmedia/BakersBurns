@@ -140,7 +140,7 @@ const Store = () => {
                 overflow: 'hidden',
                 boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
                 borderRadius: '8px',
-                backgroundColor: 'black',
+                backgroundColor: '#0000009e',
                 color: '#333',
                 display: 'flex',
                 flexDirection: 'column',
@@ -161,7 +161,7 @@ const Store = () => {
                   }}
                 />
               </div>
-              <h3 style={{ fontSize: '1.25rem', margin: '10px 0', color:'#cecece', border: "2px solid #333"}}>{product.name}</h3>
+              <h3 style={{ fontSize: '1.25rem', margin: '10px 0', color:'black', backgroundColor:'white', padding: '10px', borderRadius:'10px'}}>{product.name}</h3>
               <p style={{
                 fontSize: '1.5rem',
                 fontWeight: 'bold',
@@ -194,12 +194,14 @@ const ProductModal = ({ product, onClose }) => {
         justifyContent: "center",
         zIndex: 1000,
         padding: "20px",
+        
       }}
     >
       <div
         onClick={(e) => e.stopPropagation()}
         style={{
-          background: "linear-gradient(to bottom, #f5f5f5, #ffffff)", // Gradient background
+          
+          backgrouondColor: "#ffffffad",
           borderRadius: "20px",
           width: "80%",
           maxWidth: "600px",
@@ -215,7 +217,7 @@ const ProductModal = ({ product, onClose }) => {
           <h2
             style={{
               fontSize: "2rem",
-              color: "#333",
+              color: "white",
               marginBottom: "10px",
             }}
           >

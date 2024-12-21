@@ -4,7 +4,7 @@ import '../Pagecss/Home.css';
 import { Link } from 'react-router-dom'; 
 import { userApi } from '../config/axios';
 import moment from 'moment';
-import Background from '../../media/Background.png';
+
 
 const Home = () => {
   const [featuredProducts, setFeaturedProducts] = useState([]);
@@ -61,7 +61,8 @@ const Home = () => {
               fontFamily: '"Dancing Script", cursive',
               fontSize: '13vw',
               color: 'white',
-              marginTop: '30%'
+              marginTop: '40%'
+
               
             }}
             initial={{ scale: 0.8, opacity: 0 }}
