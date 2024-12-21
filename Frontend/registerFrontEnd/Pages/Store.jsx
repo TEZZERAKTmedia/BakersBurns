@@ -180,32 +180,222 @@ const Store = () => {
 
 const ProductModal = ({ product, onClose }) => {
   return (
-    <div className="modal-overlay" onClick={onClose} style={{zIndex:1000, marginTop:'20%'}}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        <h2>{product.name}</h2>
-        <img 
-          src={`${import.meta.env.VITE_IMAGE_BASE_URL}/uploads/${product.image}`} 
-          alt={product.name} 
-          style={{ width: '100%', height: 'auto', borderRadius: '8px' }} 
-        />
-        <p style={{ marginTop: '10px', fontSize: '1.2rem',color:'black', marginLeft:'40%'}}>${product.price}</p>
-        <Link to='/login'>
-          <button 
-            onClick={onClose} 
+    <div
+      onClick={onClose}
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        width: "100%",
+        height: "100%",
+        backgroundColor: "rgba(0, 0, 0, 0.7)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        zIndex: 1000,
+        padding: "20px",
+      }}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          background: "linear-gradient(to bottom, #f5f5f5, #ffffff)", // Gradient background
+          borderRadius: "20px",
+          width: "80%",
+          maxWidth: "600px",
+          maxHeight: "80vh",
+          overflowY: "auto", // Scrollable if content overflows
+          boxShadow: "0 10px 30px rgba(0, 0, 0, 0.3)",
+          padding: "20px",
+          animation: "fadeIn 0.4s ease-in-out", // Smooth fade-in animation
+        }}
+      >
+        {/* Modal Header */}
+        <div style={{ textAlign: "center", marginBottom: "20px" }}>
+          <h2
             style={{
-              marginTop: '20px',
-              padding: '10px 20px',
-              fontSize: '1rem',
-              color: '#fff',
-              backgroundColor: '#333',
-              border: 'none',
-              borderRadius: '5px',
-              cursor: 'pointer'
+              fontSize: "2rem",
+              color: "#333",
+              marginBottom: "10px",
             }}
           >
-            Purchase
-          </button>
-        </Link>
+            {product.name}
+          </h2>
+        </div>
+
+        {/* Product Image */}
+        <div style={{ textAlign: "center", marginBottom: "20px" }}>
+          <img
+            src={`${import.meta.env.VITE_IMAGE_BASE_URL}/uploads/${product.image}`}
+            alt={product.name}
+            style={{
+              display: "block",
+              width: "100%",
+              height: "auto",
+              borderRadius: "15px",
+              boxShadow: "0 8px 20px rgba(0, 0, 0, 0.2)",
+            }}
+          />
+        </div>
+
+        {/* Product Price */}
+        <div
+          style={{
+            textAlign: "center",
+            marginBottom: "20px",
+          }}
+        >
+          <p
+            style={{
+              fontSize: "1.5rem",
+              color: "#444",
+            }}
+          >
+            ${product.price}
+          </p>
+        </div>
+
+        {/* Modal Body */}
+        <div>
+          {/* Description Section */}
+          <div
+            style={{
+              background: "linear-gradient(to bottom, #e0e0e0, #f9f9f9)", // Gradient section
+              boxShadow: "0 4px 10px rgba(0, 0, 0, 0.15)",
+              borderRadius: "20px",
+              padding: "20px",
+              marginBottom: "20px",
+              textAlign: "center",
+            }}
+          >
+            <h4
+              style={{
+                fontSize: "1.2rem",
+                color: "#555",
+                marginBottom: "10px",
+              }}
+            >
+              Description:
+            </h4>
+            <p style={{ fontSize: "1rem", color: "#333" }}>{product.description}</p>
+          </div>
+
+          {/* Dimensions Section */}
+          <div
+            style={{
+              background: "linear-gradient(to bottom, #e0e0e0, #f9f9f9)",
+              boxShadow: "0 4px 10px rgba(0, 0, 0, 0.15)",
+              borderRadius: "20px",
+              padding: "20px",
+              marginBottom: "20px",
+              textAlign: "center",
+            }}
+          >
+            <h4
+              style={{
+                fontSize: "1.2rem",
+                color: "#555",
+                marginBottom: "10px",
+              }}
+            >
+              Dimensions:
+            </h4>
+            <div
+              style={{
+                display: "flex",
+                gap: "20px",
+                justifyContent: "space-between",
+              }}
+            >
+              <div style={{ flex: "1", fontSize: "0.9rem", color: "#444" }}>
+                <p><strong>Metric (CM):</strong></p>
+                <p>Length: {(product.length * 2.54).toFixed(2)} cm</p>
+                <p>Width: {(product.width * 2.54).toFixed(2)} cm</p>
+                <p>Height: {(product.height * 2.54).toFixed(2)} cm</p>
+              </div>
+              <div style={{ flex: "1", fontSize: "0.9rem", color: "#444" }}>
+                <p><strong>Imperial (IN):</strong></p>
+                <p>Length: {product.length} in</p>
+                <p>Width: {product.width} in</p>
+                <p>Height: {product.height} in</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Weight Section */}
+          <div
+            style={{
+              background: "linear-gradient(to bottom, #e0e0e0, #f9f9f9)",
+              boxShadow: "0 4px 10px rgba(0, 0, 0, 0.15)",
+              borderRadius: "20px",
+              padding: "20px",
+              marginBottom: "20px",
+              textAlign: "center",
+            }}
+          >
+            <h4
+              style={{
+                fontSize: "1.2rem",
+                color: "#555",
+                marginBottom: "10px",
+              }}
+            >
+              Weight:
+            </h4>
+            <p style={{ fontSize: "1rem", color: "#333" }}>{product.weight} lbs</p>
+          </div>
+
+          {/* Quantity Section */}
+          <div
+            style={{
+              background: "linear-gradient(to bottom, #e0e0e0, #f9f9f9)",
+              boxShadow: "0 4px 10px rgba(0, 0, 0, 0.15)",
+              borderRadius: "20px",
+              padding: "20px",
+              marginBottom: "20px",
+              textAlign: "center",
+            }}
+          >
+            <h4
+              style={{
+                fontSize: "1.2rem",
+                color: "#555",
+                marginBottom: "10px",
+              }}
+            >
+              Quantity Available:
+            </h4>
+            <p style={{ fontSize: "1rem", color: "#333" }}>{product.quantity}</p>
+          </div>
+        </div>
+
+        {/* Purchase Button */}
+        <div
+          style={{
+            textAlign: "center",
+            marginTop: "20px",
+          }}
+        >
+          <Link to="/login">
+            <button
+              onClick={onClose}
+              style={{
+                display: "inline-block",
+                padding: "10px 20px",
+                background: "linear-gradient(to right, #007bff, #0056b3)", // Gradient button
+                color: "#fff",
+                fontSize: "1rem",
+                border: "none",
+                borderRadius: "5px",
+                cursor: "pointer",
+                boxShadow: "0 4px 10px rgba(0, 0, 0, 0.2)", // Button shadow
+                transition: "transform 0.3s ease, background 0.3s ease", // Smooth hover effect
+              }}
+            >
+              Purchase
+            </button>
+          </Link>
+        </div>
       </div>
     </div>
   );
