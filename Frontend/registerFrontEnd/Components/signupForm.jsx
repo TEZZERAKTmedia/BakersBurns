@@ -243,6 +243,16 @@ const SignUpForm = () => {
         }
     };
 
+    const handleKeyDown = (e, index) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const nextInput = document.querySelector(`[data-index="${index + 1}"]`);
+            if (nextInput) {
+                nextInput.focus();
+            }
+        }
+    }
+
     const resetForm = () => {
         setFormData({
             userName: '',
@@ -277,7 +287,7 @@ const SignUpForm = () => {
                         data-your_own_param_1_to_login="any_value"
                         data-your_own_param_2_to_login="any_value">
                     </div>
-                    <label className='username'>
+                    
                         <input 
                         type="text" 
                         name="userName" 
@@ -287,11 +297,13 @@ const SignUpForm = () => {
                         placeholder="Username"
                         required 
                         style={inputStyle}
+                        data-index="0"
+                        onKeyDown={(e) => handleKeyDown(e, 0)}
                         />
-                    </label>
-                    {userNameError && <div className="error-message">{userNameError}</div>}
                     
-                    <label className='email'>
+                    {userNameError && <div className="error-message" style={{marginLeft:'20%', padding:'10px', margin:'10px', backgroundColor: '#ffffffd1', borderRadius:'10px'}}>{userNameError}</div>}
+                    
+                    
                         <input 
                         type="email" 
                         name="email" 
@@ -299,8 +311,11 @@ const SignUpForm = () => {
                         onChange={handleChange}
                         placeholder="Email" 
                         required 
-                        style={inputStyle}/>
-                    </label>
+                        style={inputStyle}
+                        data-index="1"
+                        onKeyDown={(e) => handleKeyDown(e, 1)}
+                        />
+                    
 
                     {/* Group the country code dropdown and phone number input */}
                     <div className="phone-input-wrapper" style={inputStyle}>
@@ -325,12 +340,14 @@ const SignUpForm = () => {
                             placeholder="Phone Number"
                             maxLength={14}  // Limiting to the format: (XXX) XXX-XXXX
                             required
+                            data-index="2"
+                            onKeyDown={(e) => handleKeyDown(e, 2)}
                         />
                     </div>
 
                     {/* Password input with toggle visibility */}
-                    <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                    <div style={{ position: 'relative', width: '100%', maxWidth: '300px' }}>
+                    
+                    <div style={{ position: 'relative' }}>
                         <input
                             type={passwordVisible ? 'text' : 'password'}
                             name="password"
@@ -338,16 +355,10 @@ const SignUpForm = () => {
                             onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                             placeholder="Password"
                             required
-                            style={{
-                                height: '40px',
-                                width: '100%',
-                                paddingRight: '40px', // Creates space for the icon
-                                paddingLeft: '10px',
-                                boxSizing: 'border-box', // Ensures padding doesn't affect the width
-                                border: '1px solid #ccc',
-                                borderRadius: '5px',
-                                fontSize: '16px',
-                            }}
+                            style={inputStyle}
+                            data-index="3"
+                            onKeyDown={(e) => handleKeyDown(e, 3)}
+                            
                         />
                         <img
                             src={animationState ? eyeCloseIcon : eyeOpenIcon}
@@ -356,14 +367,14 @@ const SignUpForm = () => {
                             style={{
                                 position: 'absolute',
                                 top: '50%', // Vertically centers the icon
-                                right: '20px', // Positions the icon inside the input
-                                transform: 'translateY(-50%)', // Adjusts for vertical centering
+                                right: '20vw', // Positions the icon inside the input
+                                transform: 'translateY(-70%)', // Adjusts for vertical centering
                                 width: '24px',
                                 height: '24px',
                                 cursor: 'pointer',
                             }}
                         />
-                    </div>
+                    
 
                         <button 
                             type="button" 
@@ -405,9 +416,11 @@ const SignUpForm = () => {
                         placeholder="Confirm Password"
                         required 
                         style={inputStyle}
+                        data-index="4"
+                            onKeyDown={(e) => handleKeyDown(e, 4)}
                     />
 
-                    <div className='check-boxes' style={{ marginBottom: '1rem', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.6)', margin:'20px', padding:'2vw' }}>
+                    <div className='check-boxes' style={{ marginBottom: '1rem', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.6)', margin:'20px', padding:'2vw', backgroundColor:'#ffffffd1' }}>
                         <input 
                             type="checkbox" 
                             name="isOptedInForPromotions" 
@@ -418,7 +431,7 @@ const SignUpForm = () => {
                         <label htmlFor="optInPromotions" className="opt-in-description"><p>Opt-in for Promotions</p></label>
                     </div>
 
-                    <div className='check-boxes' style={{ marginBottom: '1rem', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.6)', margin:'20px', padding:'2vw' }}>
+                    <div className='check-boxes' style={{ marginBottom: '1rem', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.6)', margin:'20px', padding:'2vw', backgroundColor:'#ffffffd1' }}>
                         <input 
                             type="checkbox" 
                             name="isOptedInForEmailUpdates" 
@@ -438,7 +451,7 @@ const SignUpForm = () => {
                     
                     <Modal isVisible={isModalVisible} content={modalContent} onClose={handleCloseModal} />
 
-                    <div style={{ marginBottom: '1rem', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.6)', margin: '20px', padding: '2vw' }}>
+                    <div style={{ marginBottom: '1rem', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.6)', margin: '20px', padding: '2vw', backgroundColor:'#ffffffd1' }}>
                         <div className="check-boxes">
                             {/* Privacy Policy Checkbox */}
                             <input
@@ -462,7 +475,7 @@ const SignUpForm = () => {
                             </label>
                         </div>
                     </div>
-                    <div style={{ marginBottom: '1rem', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.6)', margin: '20px', padding: '2vw' }}>
+                    <div style={{ marginBottom: '1rem', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.6)', margin: '20px', padding: '2vw', backgroundColor:'#ffffffd1' }}>
                         <div className="check-boxes">
                             {/* Terms of Service Checkbox */}
                             <input
@@ -586,6 +599,7 @@ const inputStyle = {
     maxWidth: '300px',
     width: '80%',  /* Ensures inputs scale with the parent */
     padding: '5px',
+    marginLeft: '10%',
     marginBottom: '20px', /* Add spacing between inputs */
     boxSizing: 'border-box', /* Prevents padding from affecting input size */
 };
