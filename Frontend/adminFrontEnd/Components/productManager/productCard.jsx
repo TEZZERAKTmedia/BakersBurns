@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import EditProductForm from './editProduct';
 import DiscountByProductForm from './discountForm';
 import { useProductContext } from '../../Components/productManager/ProductsContext'; // Import context
+import './product_card.css';
 
 const ProductCard = ({ product, onDeleteProduct }) => {
   const [isEditingProduct, setIsEditingProduct] = useState(false);
@@ -17,7 +18,7 @@ const ProductCard = ({ product, onDeleteProduct }) => {
       setIsLoadingMedia(true);
       try {
         const productDetails = await getProductDetails(product.id); // Use context to fetch product details
-        setMedia(productDetails.media || []);
+        setMedia(productDetails.media || []); // Store media files
       } catch (error) {
         console.error('Error fetching media:', error);
       } finally {
@@ -29,7 +30,7 @@ const ProductCard = ({ product, onDeleteProduct }) => {
   }, [product.id, getProductDetails]);
 
   return (
-    <div className="product-card">
+    <div className="product-tile">
       {isEditingProduct ? (
         <EditProductForm
           productId={product.id}
@@ -37,9 +38,20 @@ const ProductCard = ({ product, onDeleteProduct }) => {
         />
       ) : (
         <>
-          <h3>{product.name}</h3>
-          <p>{product.description}</p>
-          <p>${product.price}</p>
+          <div className="product-info">
+            {/* Display thumbnail */}
+            {product.thumbnail ? (
+              <img
+                src={`${import.meta.env.VITE_BACKEND}/uploads/${product.thumbnail}`}
+                alt={`${product.name} Thumbnail`}
+                className="thumbnail-image"
+              />
+            ) : (
+              <p>No thumbnail available</p>
+            )}
+            <h3>{product.name}</h3>
+            <p>${product.price.toFixed(2)}</p>
+          </div>
 
           {/* Display media */}
           <div className="product-media">
@@ -72,7 +84,7 @@ const ProductCard = ({ product, onDeleteProduct }) => {
             )}
           </div>
 
-          <button onClick={() => setIsEditingProduct(true)}>Edit Product</button>
+          <button className='product-card-buttons' onClick={() => setIsEditingProduct(true)}>Edit Product</button>
         </>
       )}
 
@@ -83,7 +95,7 @@ const ProductCard = ({ product, onDeleteProduct }) => {
           onSuccess={() => setIsEditingDiscount(false)}
         />
       ) : (
-        <button onClick={() => setIsEditingDiscount(true)}>Edit Discount</button>
+        <button className='product-card-buttons' onClick={() => setIsEditingDiscount(true)}>Edit Discount</button>
       )}
 
       <button onClick={() => onDeleteProduct(product.id)}>Delete</button>

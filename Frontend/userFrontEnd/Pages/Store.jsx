@@ -93,7 +93,7 @@ const Store = () => {
             <div className="product-tile" key={product.id} onClick={() => openProductModal(product)}>
               <div className="product-info">
                 <img
-                  src={`${import.meta.env.VITE_IMAGE_BASE_URL}/${product.image}`}
+                  src={`${import.meta.env.VITE_IMAGE_BASE_URL}/${product.thumbnail}`}
                   alt={product.name}
                   
                 />
@@ -122,7 +122,7 @@ const Store = () => {
                           {selectedProduct.name}
                         </h3>
                         <img
-                          src={`${import.meta.env.VITE_IMAGE_BASE_URL}/${selectedProduct.image}`}
+                          src={`${import.meta.env.VITE_IMAGE_BASE_URL}/${selectedProduct.thumbnail}`}
                           alt={selectedProduct.name}
                           
                         />

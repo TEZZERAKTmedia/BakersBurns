@@ -152,7 +152,7 @@ const Store = () => {
             >
               <div style={{ height: '150px', overflow: 'hidden' }}>
                 <img
-                  src={`${import.meta.env.VITE_IMAGE_BASE_URL}/uploads/${product.image}`}
+                  src={`${import.meta.env.VITE_IMAGE_BASE_URL}/uploads/${product.thumbnail}`}
                   alt={product.name}
                   style={{
                     width: '100%',
@@ -228,7 +228,7 @@ const ProductModal = ({ product, onClose }) => {
         {/* Product Image */}
         <div style={{ textAlign: "center", marginBottom: "20px" }}>
           <img
-            src={`${import.meta.env.VITE_IMAGE_BASE_URL}/uploads/${product.image}`}
+            src={`${import.meta.env.VITE_IMAGE_BASE_URL}/uploads/${product.thumbnail}`}
             alt={product.name}
             style={{
               display: "block",

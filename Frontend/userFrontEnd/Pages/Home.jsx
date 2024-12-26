@@ -31,6 +31,7 @@ const Home = () => {
   const fetchFeaturedProducts = async () => {
     try {
       const response = await userApi.get('/store/get-featured-products');
+      console.log("featured product api response:",response.data)
       return response.data;
     } catch (error) {
       console.error('Error fetching featured products:', error);
@@ -206,10 +207,10 @@ const Home = () => {
           className="product-card"
           variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
         >
-          {product.image ? (
+          {product.thumbnail ? (
             <img
               className="product-image"
-              src={`${import.meta.env.VITE_IMAGE_BASE_URL}/${product.image}`}
+              src={`${import.meta.env.VITE_IMAGE_BASE_URL}/${product.thumbnail}`}
               alt={product.name}
             />
           ) : (
