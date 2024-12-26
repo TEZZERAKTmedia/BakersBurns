@@ -1,0 +1,133 @@
+/* Modal Styling */
+.image-uploader-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  .image-uploader-modal-content {
+    background: white;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 600px;
+    padding: 20px;
+    position: relative;
+    padding-top: 10%;
+  }
+  
+  .image-uploader-close-modal-button {
+    position: absolute;
+    top: -10px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+  }
+  
+  .image-uploader-header {
+    text-align: center;
+    font-size: 24px;
+    margin-bottom: 20px;
+  }
+  
+  /* Grid Styling */
+  .image-uploader-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 0px;
+    margin-top: 10px;
+    width: 100%;
+  }
+  
+  .image-uploader-grid-item {
+    position: relative;
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    overflow: hidden;
+    width: 100%;
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .image-uploader-grid-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .image-uploader-grid-item button {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: rgba(255, 0, 0, 0.564);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    
+    font-size: 1rem;
+    cursor: pointer;
+  }
+  
+  /* Add Image Button Styling */
+  .image-grid-item-add-image {
+    background-color: #e0e0e0;
+    border: 2px dashed #ccc;
+    cursor: pointer;
+  }
+  
+  .image-grid-item-add-image label {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
+    color: #555;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+  }
+  
+  .image-grid-item-add-image input {
+    display: none;
+  }
+  
+  /* Button to Open Modal */
+  .open-image-uploader-modal-button {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  /* Responsive Scaling */
+  @media (max-width: 768px) {
+    .image-uploader-modal-content {
+      width: 95%;
+    }
+  
+    .image-uploader-grid {
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(4, 1fr);
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .image-uploader-grid {
+      grid-template-columns: repeat(2, 1fr);
+      grid-template-rows: repeat(5, 1fr);
+    }
+  }
+  

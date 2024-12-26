@@ -9,7 +9,7 @@ import Email from './Pages/Email';
 import Layout from './Pages/Layout';
 import Orders from './Pages/Orders';
 import Events from './Pages/newEvents';
-import ProductManagement from './Pages/ProductManagement';
+import ProductManagement from './Pages/Products';
 import { ScannerProvider } from './context/scannerContext';
 import AdminLoginForm from './Components/loginForm';
 

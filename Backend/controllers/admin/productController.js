@@ -1,56 +1,102 @@
 const Product = require('../../models/product');
+const Media = require('../../models/media');
+const path = require('path');
+const fs = require('fs'); // Correct way to import the file system module
+
+
+
 const { Sequelize } = require('sequelize');
 
 // Get all products (existing)
 const getProducts = async (req, res) => {
   try {
-    console.log('Fetching all products');
-    const products = await Product.findAll();
-    console.log('Products fetched successfully');
+    console.log('Fetching all products with media');
+    
+    const products = await Product.findAll({
+      include: [
+        {
+          model: Media,
+          as: 'media', // Use the alias defined in your association, if any
+          attributes: ['id', 'type', 'url'], // Fetch specific fields from the Media table
+        },
+      ],
+    });
+    
+    console.log('Products with media fetched successfully');
     res.json(products);
   } catch (error) {
-    console.error('Error fetching products');
+    console.error('Error fetching products with media:', error);
     res.status(500).json({ error: error.message });
   }
 };
-
 // Add a new product (existing)
 const addProduct = async (req, res) => {
   try {
-    const { name, description, price, type, quantity, length, width, height, weight, unit } = req.body;
+    const {
+      name,
+      description,
+      price,
+      type,
+      quantity,
+      length,
+      width,
+      height,
+      weight,
+      unit,
+    } = req.body;
 
-    console.log('Received File:', req.file);
-
+    // Validate required fields
     if (!name || !description || !price || !type || !quantity) {
       return res.status(400).json({ message: 'Missing required fields' });
     }
-    const imageFileName = req.file.filename; 
 
-    // Ensure numeric values
+    // Ensure numeric values for optional fields
     const lengthValue = parseFloat(length) || 0;
     const widthValue = parseFloat(width) || 0;
     const heightValue = parseFloat(height) || 0;
     const weightValue = parseFloat(weight) || 0;
 
-    // Prepare the BLOB
-    const imageBlob = req.file ? req.file.buffer : null;
+    // Extract files from the request
+    const thumbnailFile = req.files?.thumbnail?.[0];
+    const mediaFiles = req.files?.media || [];
 
-    // Insert product into the database
+    if (!thumbnailFile) {
+      return res.status(400).json({ message: 'Thumbnail is required' });
+    }
+
+    // Step 1: Create the product and store the thumbnail in the Products table
     const newProduct = await Product.create({
       name,
       description,
       price,
       type,
-      image: imageFileName, // Store the binary data as BLOB
       quantity,
       length: lengthValue,
       width: widthValue,
       height: heightValue,
       weight: weightValue,
       unit,
+      thumbnail: thumbnailFile.filename, // Save thumbnail file name
     });
 
-    res.status(201).json(newProduct);
+    // Step 2: Add media (images/videos) to the Media table
+    if (mediaFiles.length > 0) {
+      const mediaEntries = mediaFiles.map((file, index) => ({
+        productId: newProduct.id,
+        url: file.filename, // Store the file path or name
+        type: file.mimetype.startsWith('video/') ? 'video' : 'image', // Determine type
+        isDefault: index === 0, // Optionally mark the first as default
+      }));
+
+      await Media.bulkCreate(mediaEntries);
+    }
+
+    // Step 3: Fetch and return the created product with its media
+    const productWithMedia = await Product.findByPk(newProduct.id, {
+      include: [{ model: Media, as: 'media' }],
+    });
+
+    res.status(201).json(productWithMedia);
   } catch (error) {
     console.error('Error adding product:', error);
     res.status(500).json({ message: 'Error adding product', error });
@@ -59,35 +105,45 @@ const addProduct = async (req, res) => {
 
 
 
+
+
+
 // Update a product (existing)
 const updateProduct = async (req, res) => {
   const { id } = req.params;
 
-  // Log req.body and req.file to see what data is coming in
   console.log('Request Body:', req.body);
   console.log('Request File:', req.file);
 
-  const { name, description, price, type, quantity, length, width, height, weight, unit } = req.body; // Safely destructure all fields
+  const {
+    name, description, price, type, quantity,
+    length, width, height, weight, unit,
+  } = req.body;
   const image = req.file ? req.file.filename : null;
 
   try {
     console.log('Updating product with id:', id);
     const product = await Product.findByPk(id);
+
     if (product) {
       console.log('Product found:', product);
 
-      // Update only if the fields are provided in the request
-      product.name = name || product.name;
-      product.description = description || product.description;
-      product.price = price || product.price;
-      product.image = image || product.image;
-      product.type = type || product.type;
-      product.quantity = quantity || product.quantity;
-      product.length = length !== undefined ? parseFloat(length) : product.length; // Safely handle `length`
-      product.width = width !== undefined ? parseFloat(width) : product.width;     // Safely handle `width`
-      product.height = height !== undefined ? parseFloat(height) : product.height; // Safely handle `height`
-      product.weight = weight !== undefined ? parseFloat(weight) : product.weight; // Safely handle `weight`
-      product.unit = unit || product.unit;
+      // Update fields
+      product.set({
+        name: name || product.name,
+        description: description || product.description,
+        price: price || product.price,
+        image: image || product.image,
+        type: type || product.type,
+        quantity: quantity || product.quantity,
+        length: length !== undefined ? parseFloat(length) : product.length,
+        width: width !== undefined ? parseFloat(width) : product.width,
+        height: height !== undefined ? parseFloat(height) : product.height,
+        weight: weight !== undefined ? parseFloat(weight) : product.weight,
+        unit: unit || product.unit,
+      });
+
+      console.log('Changed fields:', product.changed());
 
       await product.save();
       console.log('Product updated successfully', product);
@@ -102,28 +158,119 @@ const updateProduct = async (req, res) => {
   }
 };
 
+const updateThumbnail = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const product = await Product.findByPk(id);
+
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ message: 'Thumbnail image is required' });
+    }
+
+    // Delete the old thumbnail file if it exists
+    if (product.thumbnail) {
+      fs.unlink(`uploads/${product.thumbnail}`, (err) => {
+        if (err) console.error('Error deleting old thumbnail:', err);
+      });
+    }
+
+    // Update the thumbnail field
+    product.thumbnail = req.file.filename;
+    await product.save();
+
+    res.status(200).json({ message: 'Thumbnail updated successfully', product });
+  } catch (error) {
+    console.error('Error updating thumbnail:', error);
+    res.status(500).json({ message: 'Error updating thumbnail', error });
+  }
+};
+
+// Update product media
+const updateMedia = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const product = await Product.findByPk(id);
+
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+
+    if (!req.files || !req.files.media) {
+      return res.status(400).json({ message: 'Media files are required' });
+    }
+
+    // Process new media files
+    const newMediaEntries = req.files.media.map((file) => ({
+      productId: product.id,
+      url: file.filename,
+      type: file.mimetype.startsWith('video/') ? 'video' : 'image',
+      isDefault: false, // Default logic can be adjusted if needed
+    }));
+
+    // Add new media to the Media table
+    await Media.bulkCreate(newMediaEntries);
+
+    res.status(200).json({ message: 'Media updated successfully', product });
+  } catch (error) {
+    console.error('Error updating media:', error);
+    res.status(500).json({ message: 'Error updating media', error });
+  }
+};
 
 // Delete a product (existing)
 const deleteProduct = async (req, res) => {
   const { id } = req.params;
 
   try {
+    // Find the product by ID
     const product = await Product.findByPk(id);
-    console.log('Deleting product with ID:', id);
-    if (product) {
-      console.log('Product found:', product);
-      await product.destroy();
-      console.log('Product has been deleted:', product);
-      res.json({ message: 'Product deleted' });
-    } else {
-      console.warn('Product not found with Id:', id);
-      res.status(404).json({ error: 'Product not found' });
+
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
     }
+
+    // Delete associated files
+    const uploadsPath = path.join(__dirname, '../../uploads');
+
+    // Delete thumbnail
+    if (product.thumbnail) {
+      const thumbnailPath = path.join(uploadsPath, product.thumbnail);
+      if (fs.existsSync(thumbnailPath)) {
+        fs.unlinkSync(thumbnailPath);
+      }
+    }
+
+    // Fetch media files associated with the product
+    const mediaFiles = await Media.findAll({ where: { productId: id } });
+
+    // Delete media files
+    for (const media of mediaFiles) {
+      const mediaPath = path.join(uploadsPath, media.url); // Use `url` as per your Media model
+      if (fs.existsSync(mediaPath)) {
+        fs.unlinkSync(mediaPath);
+      }
+    }
+
+    // Delete media records from the database
+    await Media.destroy({ where: { productId: id } });
+
+    // Delete the product from the database
+    await product.destroy();
+
+    res.status(200).json({ message: 'Product and associated files deleted successfully' });
   } catch (error) {
-    console.warn('Error deleting product:', error);
-    res.status(500).json({ error: error.message });
+    console.error('Error deleting product:', error);
+    res.status(500).json({ message: 'An error occurred while deleting the product' });
   }
 };
+
+
 
 // Add discount to an existing product
 // Add discount to an existing product
@@ -284,12 +431,84 @@ const getProductTypes = async (req, res) => {
 };
 
 // Add this route to your routes file
+const getProductDetails = async (req, res) => {
+  const { id } = req.params;
 
+  if (!id) {
+    return res.status(400).json({ message: 'Product ID is required' });
+  }
 
+  try {
+    const productWithMedia = await Product.findOne({
+      where: { id },
+      include: [
+        {
+          model: Media,
+          as: 'media', // Use the alias defined in associations
+          attributes: ['id', 'url', 'type', 'isDefault'],
+        },
+      ],
+    });
+
+    if (!productWithMedia) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+
+    res.status(200).json(productWithMedia);
+  } catch (error) {
+    console.error('Error fetching product with media:', error);
+    res.status(500).json({ message: 'Error fetching product details' });
+  }
+};
+
+const applyDiscountByType = async (req, res) => {
+  const { type, discountType, discountAmount, discountStartDate, discountEndDate } = req.body;
+
+  if (!type || !discountStartDate || !discountEndDate) {
+    return res.status(400).json({ error: 'Type, start date, and end date are required' });
+  }
+
+  try {
+    const products = await Product.findAll({ where: { type } });
+
+    if (!products.length) {
+      return res.status(404).json({ message: 'No products found for the given type' });
+    }
+
+    const updatedProducts = [];
+    for (const product of products) {
+      let discountPrice = product.price;
+
+      if (discountType === 'percentage') {
+        discountPrice = product.price - (product.price * discountAmount) / 100;
+      } else if (discountType === 'fixed') {
+        discountPrice = product.price - discountAmount;
+      }
+
+      product.set({
+        discountType,
+        discountAmount,
+        discountStartDate,
+        discountEndDate,
+        discountPrice: discountPrice > 0 ? discountPrice : 0,
+        isDiscounted: true,
+      });
+
+      await product.save();
+      updatedProducts.push(product);
+    }
+
+    res.status(200).json({ message: 'Discount applied to all products of the specified type', updatedProducts });
+  } catch (error) {
+    console.error('Error applying discount by type:', error);
+    res.status(500).json({ error: 'Error applying discount by type' });
+  }
+};
 
 
 module.exports = {
   getProducts,
+  getProductDetails,
   addProduct,
   updateProduct,
   deleteProduct,
@@ -298,4 +517,7 @@ module.exports = {
   removeDiscount,
   getDiscountedProducts,
   getProductTypes,    // New function for removing discount
+  updateThumbnail,
+  updateMedia,
+  applyDiscountByType,
 };

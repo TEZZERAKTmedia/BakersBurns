@@ -6,10 +6,11 @@ import 'react-easy-crop/react-easy-crop.css';
 import '../Componentcss/product_management.css';
 import { useDropzone } from 'react-dropzone';
 import LoadingPage from '../Components/loading';
+import ImageUploader from '../Components/imageUploader';
 
 const ProductManagement = () => {
   const [products, setProducts] = useState([]);
-  const [newProduct, setNewProduct] = useState({ name: '', description: '', price: 0, image: null, type: '', quantity: 1,  length: 0, // Default value
+  const [newProduct, setNewProduct] = useState({ name: '', description: '', price: 0, images: [], type: '', quantity: 1,  length: 0, // Default value
   width: 0,  // Default value
   height: 0, // Default value
   weight: 0, // Default value
@@ -27,7 +28,10 @@ const ProductManagement = () => {
   const [sortOrder, setSortOrder] = useState('asc'); // Default order asc
   const [missingFields, setMissingFields] = useState([]);
   const [isLoading, setLoading] = useState(false);
-  const [imagePreview, setImagePreview] = useState('');
+  const [imagePreview, setImagePreview] = useState();
+  const [croppedImagePreview, setCroppedImagePreview] = useState(null);
+  const [mediaPreviews, setMediaPreviews] = useState([]);
+
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
@@ -60,9 +64,23 @@ const ProductManagement = () => {
       console.error('Error fetching product types:', error);
     }
   };
-
+  const handleThumbnailChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setNewProduct({ ...newProduct, thumbnail: file }); // Save thumbnail file
+      setImagePreview(URL.createObjectURL(file)); // Update thumbnail preview
+    }
+  };
   
-
+  // Handle media changes from ImageUploader
+  const handleMediaChange = (files) => {
+    const mediaFiles = Array.from(files).map((file) => ({
+      file,
+      preview: URL.createObjectURL(file), // Preview for UI
+    }));
+    setMediaPreviews(mediaFiles); // Save previews for UI
+  };
+  
   // Sorting logic
   const handleSort = (criteria) => {
     const sortedProducts = [...products].sort((a, b) => {
@@ -163,31 +181,21 @@ const ProductManagement = () => {
     if (!newProduct.price || newProduct.price <= 0) missing.push('price');
     if (!newProduct.type) missing.push('type');
     if (newProduct.quantity <= 0) missing.push('quantity');
-    if (!newProduct.length || newProduct.length <= 0) missing.push('length');
-    if (!newProduct.width || newProduct.width <= 0) missing.push('width');
-    if (!newProduct.height || newProduct.height <= 0) missing.push('height');
-    if (!newProduct.weight || newProduct.weight <= 0) missing.push('weight');
-    if (!newProduct.unit) missing.push('unit');
   
     if (missing.length > 0) {
       setMissingFields(missing);
       return;
     }
   
-    setMissingFields([]);
     setLoading(true);
-  
     try {
-      // Always force crop the image
-      const croppedImage = await getCroppedImg(imagePreview, croppedAreaPixels);
-      const imageFile = new File([croppedImage], "cropped.png", { type: 'image/png' });
-  
       const formData = new FormData();
+  
+      // Add basic product details
       formData.append('name', newProduct.name);
       formData.append('description', newProduct.description);
       formData.append('price', newProduct.price);
       formData.append('type', newProduct.type);
-      formData.append('image', imageFile); // Always use the cropped image
       formData.append('quantity', newProduct.quantity);
       formData.append('length', newProduct.length || 0);
       formData.append('width', newProduct.width || 0);
@@ -195,18 +203,29 @@ const ProductManagement = () => {
       formData.append('weight', newProduct.weight || 0);
       formData.append('unit', newProduct.unit || 'unit');
   
-      console.log('FormData entries:');
-      for (let pair of formData.entries()) {
-        console.log(pair[0], pair[1]);
+      // Add the thumbnail
+      if (newProduct.thumbnail) {
+        formData.append('thumbnail', newProduct.thumbnail); // Key matches backend
+      }
+  
+      // Add media files and their order
+      if (mediaPreviews.length > 0) {
+        mediaPreviews.forEach((media, index) => {
+          formData.append(`media`, media.file); // File itself
+          formData.append(`mediaOrder_${index}`, index + 1); // Include the order, starting from 1
+        });
+      }
+  
+      // Debugging FormData
+      for (const [key, value] of formData.entries()) {
+        console.log(key, value);
       }
   
       await adminApi.post('/api/products', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+        headers: { 'Content-Type': 'multipart/form-data' },
       });
   
-      fetchProducts();
+      fetchProducts(); // Refresh products after adding
       resetForms();
     } catch (error) {
       console.error('Error adding product:', error);
@@ -214,6 +233,7 @@ const ProductManagement = () => {
       setLoading(false);
     }
   };
+  
   
   
   
@@ -357,11 +377,9 @@ const removeDiscountByType = async (productType) => {
   const handleCrop = async () => {
     try {
       const croppedImage = await getCroppedImg(imagePreview, croppedAreaPixels);
-      const file = new File([croppedImage], newProduct.image.name, { type: 'image/png' });
-      setNewProduct({ ...newProduct, image: file });
-      setCropping(false); // Close the cropping interface
-    } catch (e) {
-      console.error(e);
+      setCroppedImagePreview(URL.createObjectURL(croppedImage)); // Create a URL for the cropped image
+    } catch (error) {
+      console.error('Error cropping image:', error);
     }
   };
 
@@ -524,7 +542,9 @@ const removeDiscountByType = async (productType) => {
       onKeyDown={(e) => handleKeyPress(e, 3)}
     />
     </div>
+    
     {/* Dimensions */}
+    
     <div className='form-section'>
     <label>Dimensions (inches/cm):</label>
     <div className="dimensions-inputs">
@@ -614,50 +634,87 @@ const removeDiscountByType = async (productType) => {
       />
     )}
      </div>
-    <div className='form-section'>
-    <label>
-      Image {missingFields.includes('image') && <span className="error-dot">*</span>}
-    </label>
-    <div className="image-upload">
-      <input type="file" accept="image/*" onChange={handleImageChange} />
-      {fileSize > 0 && (
-        <div>
-          <p>File size: {(fileSize / 1024).toFixed(2)} KB</p>
-          {fileSize > maxFileSize && (
-            <p style={{ color: 'red' }}>File size exceeds the maximum allowed size of 2MB!</p>
-          )}
-          <div className="file-size-progress-bar">
-            <div
-              style={{
-                width: `${Math.min(fileSizePercentage, 100)}%`,
-                backgroundColor: fileSize > maxFileSize ? 'red' : 'green',
-                height: '10px',
-              }}
-            />
-          </div>
-          <p>{Math.min(fileSizePercentage, 100).toFixed(2)}% of allowed file size used</p>
-        </div>
-      )}
-
-      {cropping && (
-        <div className="cropper-container">
-          <Cropper
-            image={imagePreview}
-            crop={crop}
-            zoom={zoom}
-            aspect={1}
-            onCropChange={setCrop}
-            onCropComplete={onCropComplete}
-            onZoomChange={setZoom}
-          />
-          <button onClick={handleCrop} style={{zIndex:'9999', height: '10%', fontSize:'5%'}}>Crop Image</button>
-        </div>
-      )}
-      </div>
+    {/* Thumbnail Upload Section */}
+<div className="thumbnail-upload">
+  <label>Thumbnail</label>
+  <input type="file" accept="image/*" onChange={handleThumbnailChange} />
+  {imagePreview && (
+    <div className="thumbnail-preview">
+      <h3>Thumbnail Preview:</h3>
+      <img src={imagePreview} alt="Thumbnail Preview" style={{ maxWidth: '100%', marginTop: '10px' }} />
     </div>
+  )}
+</div>
 
-    <button onClick={() => handleAddProduct(null)}>Add Product</button>
-    <button onClick={resetForms}>Cancel</button>
+{/* Media Upload Section */}
+<div className="form-section">
+  <ImageUploader maxMedia={10} onMediaChange={(files) => handleMediaChange(files)} />
+</div>
+
+{/* Progress and Crop Section for Thumbnail */}
+<div className="image-upload">
+  {fileSize > 0 && (
+    <div>
+      <p>File size: {(fileSize / 1024).toFixed(2)} KB</p>
+      {fileSize > maxFileSize && (
+        <p style={{ color: 'red' }}>File size exceeds the maximum allowed size of 2MB!</p>
+      )}
+      <div className="file-size-progress-bar">
+        <div
+          style={{
+            width: `${Math.min(fileSizePercentage, 100)}%`,
+            backgroundColor: fileSize > maxFileSize ? 'red' : 'green',
+            height: '10px',
+          }}
+        />
+      </div>
+      <p>{Math.min(fileSizePercentage, 100).toFixed(2)}% of allowed file size used</p>
+    </div>
+  )}
+
+  {cropping && (
+    <div className="cropper-container" style={{ position: 'relative', width: '100%' }}>
+      <Cropper
+        image={imagePreview}
+        crop={crop}
+        zoom={zoom}
+        aspect={1}
+        onCropChange={setCrop}
+        onCropComplete={onCropComplete}
+        onZoomChange={setZoom}
+      />
+      <button
+        onClick={handleCrop}
+        style={{
+          position: 'absolute',
+          top: '10px', // Adjust as needed
+          right: '10px', // Adjust as needed
+          zIndex: 9999,
+          backgroundColor: '#fff',
+          padding: '10px',
+          border: '1px solid #ccc',
+          cursor: 'pointer',
+        }}
+      >
+        Crop Image
+      </button>
+    </div>
+  )}
+
+  {croppedImagePreview && (
+    <div className="cropped-image-preview">
+      <h3>Cropped Image Preview:</h3>
+      <img src={croppedImagePreview} alt="Cropped Preview" style={{ maxWidth: '100%', marginTop: '10px' }} />
+    </div>
+  )}
+</div>
+
+{/* Add and Cancel Buttons */}
+<div className="action-buttons">
+  <button onClick={() => handleAddProduct(null)}>Add Product</button>
+  <button onClick={resetForms}>Cancel</button>
+</div>
+
   </div>
 )}
 
@@ -726,9 +783,9 @@ const removeDiscountByType = async (productType) => {
           </div>
 
           {/* Conditionally render the image only when the product is not being edited */}
-          {editingProductId !== product.id && editingDiscountId !== product.id && product.image && (
+          {editingProductId !== product.id && editingDiscountId !== product.id && product.thumbnail && (
             <div className="product-image">
-              <img src={`${import.meta.env.VITE_BACKEND}/uploads/${product.image}`} alt={product.name} />
+              <img src={`${import.meta.env.VITE_BACKEND}/uploads/${product.thumbnail}`} alt={product.name} />
             </div>
           )}
 

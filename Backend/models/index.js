@@ -7,6 +7,7 @@ const Order = require('./order');
 const Message = require('./messages');
 const Thread = require('./threads');
 const OrderItem = require('./orderItem');
+const Media = require('./media');
 const RateLimiterLogs = require("./rateLimiterLogs");
 
 // Define the models within an object for easier association management
@@ -18,6 +19,7 @@ const db = {
   Thread,
   OrderItem,
   RateLimiterLogs,
+  Media,
 };
 
 // Manually define associations within each model
@@ -85,6 +87,15 @@ Thread.associate = (models) => {
     targetKey: 'email', // Match with User's email field
   });
 };
+Product.hasMany(Media, {
+  foreignKey: 'productId',
+  as: 'media', // Alias for the relationship
+});
+
+Media.belongsTo(Product, {
+  foreignKey: 'productId',
+  as: 'mediaProduct', // Unique alias for Media -> Product association
+});
 
 // Call the associate method to set up relationships for each model
 Object.keys(db).forEach((modelName) => {
@@ -92,6 +103,7 @@ Object.keys(db).forEach((modelName) => {
     db[modelName].associate(db);
   }
 });
+
 
 // Export Sequelize instance and models
 db.sequelize = sequelize;

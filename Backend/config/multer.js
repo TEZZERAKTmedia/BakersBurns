@@ -1,54 +1,66 @@
 const multer = require('multer');
 const path = require('path');
 
-// MIME type validation function
-const imageFileFilter = (req, file, cb) => {
-  const allowedTypes = /jpeg|jpg|png/;
-  const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-  const mimetype = allowedTypes.test(file.mimetype);
+// MIME type validation function for product media
+const productFileFilter = (req, file, cb) => {
+  const allowedMimeTypes = [
+      'image/jpeg',
+      'image/png',
+      'image/jpg',
+      'video/mp4',
+      'video/quicktime', // MIME type for MOV files
+      'video/x-msvideo'  // MIME type for AVI files
+  ];
 
-  if (mimetype && extname) {
-    return cb(null, true);
+  if (allowedMimeTypes.includes(file.mimetype)) {
+      cb(null, true);
   } else {
-    cb('Error: Only images are allowed (JPEG, JPG, PNG)!');
+      cb(new Error('Only images (JPEG, JPG, PNG) and videos (MP4, MOV, AVI) are allowed!'), false);
   }
 };
 
-// Configure storage for product images
+
+// Configure storage for product media
 const productStorage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, 'uploads/'); // Destination folder for product images
+    cb(null, 'uploads/'); // Destination folder for product media
   },
   filename: function (req, file, cb) {
-    cb(null, Date.now() + path.extname(file.originalname)); // Append timestamp and file extension
-  }
+    cb(null, `${Date.now()}_${file.originalname}`); // Append timestamp to prevent conflicts
+  },
 });
 
-const productUpload = multer({ 
+// Middleware for handling both thumbnail and media files dynamically
+const productUploadMiddleware = multer({
   storage: productStorage,
-  fileFilter: imageFileFilter, // File type validation
-  limits: { fileSize: 50 * 1024 * 1024 } // File size limit (2 MB example)
-});
+  fileFilter: productFileFilter,
+  limits: { fileSize: 50 * 1024 * 1024 }, // File size limit (50 MB)
+}).fields([
+  { name: 'thumbnail', maxCount: 1 }, // Single thumbnail
+  { name: 'media', maxCount: 10 },   // Up to 10 media files
+]);
+
+// Middleware for handling both `thumbnail` and `media` fields
 
 
-// Configure storage for gallery images
+// Middleware for gallery uploads
 const galleryStorage = multer.diskStorage({
-  destination: function (req, file, cb) {
+  destination: (req, file, cb) => {
     cb(null, 'galleryuploads/'); // Destination folder for gallery images
   },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + path.extname(file.originalname)); // Append timestamp and file extension
-  }
+  filename: (req, file, cb) => {
+    cb(null, `${Date.now()}_${file.originalname}`); // Append timestamp and file extension
+  },
 });
 
-const galleryUpload = multer({ 
+const galleryUpload = multer({
   storage: galleryStorage,
-  fileFilter: imageFileFilter, // File type validation
-  limits: { fileSize: 50 * 1024 * 1024 } // File size limit (2 MB example)
+  fileFilter: productFileFilter,
+  limits: { fileSize: 50 * 1024 * 1024 }, // File size limit (50 MB)
 });
 
-// Export both configurations
 module.exports = {
-  productUpload,
-  galleryUpload
+  // Use for single file uploads
+  productUploadMiddleware, // Use for multiple file uploads
+  galleryUpload, // Use for gallery images
 };
