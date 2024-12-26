@@ -50,6 +50,7 @@ const Cart = () => {
         productId: item.product.id,
         quantity: item.quantity,
         price: item.product.price,
+        thumbnail: item.product.thumbnail,
       }));
 
       const response = await userApi.post('/stripe/create-checkout-session', { cartItems: cartData, totalAmount });
@@ -114,10 +115,10 @@ const Cart = () => {
         >
         
         
-            {item.product.image ? (
+            {item.product.thumbnail ? (
               <img
                 className="product-image"
-                src={`${import.meta.env.VITE_IMAGE_BASE_URL}/${item.product.image}`}
+                src={`${import.meta.env.VITE_IMAGE_BASE_URL}/${item.product.thumbnail}`}
                 alt={item.product.name}
                 style={{ width: '100px', height: '100px' }}
               />

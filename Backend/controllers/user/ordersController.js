@@ -24,7 +24,7 @@ const getOrdersForUser = async (req, res) => {
               {
                 model: Product,
                 as: 'product',
-                attributes: ['name', 'image', 'price'],
+                attributes: ['name', 'thumbnail', 'price'],
               },
             ],
           },
@@ -72,7 +72,7 @@ const getOrderForUserById = async (req, res) => {
                         {
                             model: Product,
                             as: 'product',
-                            attributes: ['id', 'name', 'image', 'price'], // Include Product details
+                            attributes: ['id', 'name', 'thumbnail', 'price'], // Include Product details
                         },
                     ],
                 },
@@ -88,8 +88,8 @@ const getOrderForUserById = async (req, res) => {
         const items = order.items.map(orderItem => ({
             productId: orderItem.product?.id || null,
             productName: orderItem.product?.name || 'Unknown',
-            productImage: orderItem.product?.image 
-                ? `${process.env.BASE_URL}/uploads/${orderItem.product.image}` // Generate full URL
+            productImage: orderItem.product?.thumbnail 
+                ? `${process.env.BASE_URL}/uploads/${orderItem.product.thumbnail}` // Generate full URL
                 : null, // Use null if no image
             quantity: orderItem.quantity,
             price: orderItem.product?.price || 0,

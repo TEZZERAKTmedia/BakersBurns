@@ -1,6 +1,7 @@
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const Cart = require('../../models/cart');
 const Product = require('../../models/product');
+const sequelize = require('../../config/database');
 
 
 // Function to generate a custom order number
@@ -23,7 +24,7 @@ const createCheckoutSession = async (req, res) => {
         {
           model: Product,
           as: 'product',
-          attributes: ['id', 'name', 'price', 'image', 'quantity'],
+          attributes: ['id', 'name', 'price', 'thumbnail', 'quantity'],
         },
       ],
       lock: transaction.LOCK.UPDATE, // Lock rows to prevent concurrent modifications
@@ -58,7 +59,7 @@ const createCheckoutSession = async (req, res) => {
         currency: 'usd',
         product_data: {
           name: item.product.name,
-          images: [`${process.env.USER_FRONTEND}/uploads/${item.product.image}`],
+          images: [`${process.env.USER_FRONTEND}/uploads/${item.product.thumbnail}`],
         },
         unit_amount: item.product.price * 100, // Convert to cents
       },
