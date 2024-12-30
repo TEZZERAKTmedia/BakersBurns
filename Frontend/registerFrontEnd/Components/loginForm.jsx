@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { registerApi } from '../config/axios';
 import LoadingPage from './loading'; // Import the loading component
+import GoogleSignInButton from '../Components/googleSignup'; // Import GoogleSignInButton
 import '../Componentcss/login.css';
 import eyeOpenIcon from '../assets/password-visibility-icon.png';
 import eyeCloseIcon from '../assets/password-visibility-icon-reverse.png';
@@ -14,23 +15,45 @@ const LoginForm = () => {
   const [animationState, setAnimationState] = useState(false);
   const [loading, setLoading] = useState(false); // Loading state
 
+  const handleGoogleSuccess = async (token) => {
+    console.log('Google Sign-In successful! Token:', token);
+
+    setLoading(true); // Start loading animation
+    try {
+      await registerApi.post('/google', { idToken: token });
+      // Redirect to the user URL upon success
+      window.location.href = import.meta.env.VITE_USER_URL;
+    } catch (error) {
+      console.error('Google Sign-In error:', error);
+      setMessage(
+        'Error logging in: ' +
+          (error.response ? error.response.data.message : error.message)
+      );
+    } finally {
+      setLoading(false); // Stop loading
+    }
+  };
+
+  const handleGoogleFailure = (error) => {
+    console.error('Google Sign-In failed:', error);
+    setMessage('Google Sign-In failed.');
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true); // Start loading animation
     try {
-      const response = await registerApi.post('/auth/login', { identifier, password });
-      const { token, redirectUrl } = response.data;
-
-      if (token) localStorage.setItem('authToken', token);
-      if (redirectUrl) window.location.href = redirectUrl;
-      else {
-        setMessage('Login successful, but no redirection URL was provided.');
-        setLoading(false); // Stop loading if no redirect
-      }
+      await registerApi.post('/auth/login', { identifier, password });
+      // Redirect to the user URL upon success
+      window.location.href = import.meta.env.VITE_USER_URL;
     } catch (error) {
       console.error('Login error:', error);
-      setMessage('Error logging in: ' + (error.response ? error.response.data.message : error.message));
-      setLoading(false); // Stop loading on error
+      setMessage(
+        'Error logging in: ' +
+          (error.response ? error.response.data.message : error.message)
+      );
+    } finally {
+      setLoading(false); // Stop loading
     }
   };
 
@@ -41,7 +64,7 @@ const LoginForm = () => {
 
   return (
     <div className="log-in-container">
-      {loading ? ( // Show loading animation if loading is true
+      {loading ? (
         <LoadingPage />
       ) : (
         <>
@@ -55,7 +78,6 @@ const LoginForm = () => {
               required
               className="login-input"
             />
-            
             <div className="password-container">
               <input
                 type={passwordVisible ? 'text' : 'password'}
@@ -65,7 +87,11 @@ const LoginForm = () => {
                 required
                 className="login-input password-input"
               />
-              <button type="button" onClick={togglePasswordVisibility} className="toggle-password">
+              <button
+                type="button"
+                onClick={togglePasswordVisibility}
+                className="toggle-password"
+              >
                 <img
                   src={animationState ? eyeCloseIcon : eyeOpenIcon}
                   alt="Toggle Password Visibility"
@@ -73,12 +99,25 @@ const LoginForm = () => {
                 />
               </button>
             </div>
-            
-            <button type="submit" className="login-button">Login</button>
 
-            <Link to="/forgotpassword" className="forgot-password-link">Forgot Password?</Link>
-            <Link to='/sign-up' className="sign-up-link">Don't have an account? Click here to sign up</Link>
+            <button type="submit" className="login-button">
+              Login
+            </button>
+
+            <Link to="/forgotpassword" className="forgot-password-link">
+              Forgot Password?
+            </Link>
+            <Link to="/sign-up" className="sign-up-link">
+              Don't have an account? Click here to sign up
+            </Link>
           </form>
+
+          <div style={{ marginTop: '1rem' }}>
+            <GoogleSignInButton
+              onSuccess={handleGoogleSuccess}
+              onFailure={handleGoogleFailure}
+            />
+          </div>
 
           {message && <p className="login-message">{message}</p>}
         </>

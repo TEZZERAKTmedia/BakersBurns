@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import ImageUploader from '../../Components/imageUploader';
+import ImageUploader from '../mediaUploader';
 import { adminApi } from '../../config/axios';
 import { useProductContext } from './ProductsContext';
 

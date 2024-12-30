@@ -7,6 +7,7 @@ import eyeOpenIcon from '../assets/password-visibility-icon.png';
 import eyeCloseIcon from '../assets/password-visibility-icon-reverse.png';
 import PrivacyPolicy from './Privacy&Terms/privacyPolicy';
 import TermsOfService from './Privacy&Terms/termsOfService';
+import GoogleSignInButton from './googleSignup';
 
 
 const Modal = ({ isVisible, content, onClose, requireScroll }) => {
@@ -32,6 +33,7 @@ const Modal = ({ isVisible, content, onClose, requireScroll }) => {
             >
                 {content}
             </div>
+            
 
             {/* Scroll Prompt and Close Button - Only show if requireScroll is true */}
             {requireScroll && (
@@ -510,6 +512,7 @@ const SignUpForm = () => {
         : 'Accept Terms and Conditions'}
 </button>
                 </form>
+                <GoogleSignInButton />
                 </div>
             )}
         </div>

@@ -46,6 +46,11 @@ const userGalleryRoutes = require('./routes/user/galleryRoutes');
 const carrierRoutes = require('./routes/carrier/carrierRoutes');
 const { handleDhlWebhook, handleFedexWebhook, handleUpsWebhook, handleUspsWebhook} = require('./webhooks/carrierWebhooks');
 const { rateLimiter } = require('./utils/rateLimiter');
+const googleRoutes = require('./routes/register/googleRoutes');
+
+ // Assuming passport.js is in the same directory
+
+
 
 
 // Initialize Express app
@@ -125,6 +130,9 @@ app.use('/user-gallery', userAuthMiddleware('user'), rateLimiter('user-gallery')
 //STRIPE ROUTES
 app.use('/stripe', rateLimiter('stripe'),stripeRoutes); 
 app.use('/carriers', carrierRoutes);
+
+
+app.use('/google', googleRoutes);
 
 
 

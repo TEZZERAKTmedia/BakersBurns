@@ -104,7 +104,7 @@ const VerificationWrapper = ({ children }) => {
               <div className="form">
 
                 <h3>Request Verification Code</h3>
-                <p>To access sensitive setting and to change passwords you must request a verificaiton code.</p>
+                <p>To access sensitive settings and to change passwords you must request a verificaiton code.</p>
                 <button onClick={requestVerificationCode} disabled={isSubmitting}>
                   {isSubmitting ? "Requesting..." : "Request Code"}
                 </button>
