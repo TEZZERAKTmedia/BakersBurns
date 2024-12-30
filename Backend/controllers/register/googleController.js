@@ -7,6 +7,8 @@ const Message = require("../../models/messages"); // Message model
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
+const allowedSameSiteValues = ['Strict', 'Lax', 'None'];
+
 async function handleGoogleAuth(req, res) {
   try {
     const { idToken, hasAcceptedPrivacyPolicy, hasAcceptedTermsOfService } = req.body;
