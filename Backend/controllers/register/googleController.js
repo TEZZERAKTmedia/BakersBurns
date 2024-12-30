@@ -87,6 +87,12 @@ async function handleGoogleAuth(req, res) {
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
+    let sameSiteSetting = process.env.SAMESITE_COOKIE;
+    if (!allowedSameSiteValues.includes(sameSiteSetting)) {
+      console.warn(`Invalid sameSite value: ${sameSiteSetting}. Defaulting to 'Lax'.`);
+      sameSiteSetting = 'Lax';  // Default to 'Lax' if not set or invalid for cross-domain
+    }
+
 
     // Set a secure cookie
     res.cookie('authToken', token, {
@@ -263,6 +269,12 @@ async function updateTermsAcceptance(req, res) {
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
+    let sameSiteSetting = process.env.SAMESITE_COOKIE;
+    if (!allowedSameSiteValues.includes(sameSiteSetting)) {
+      console.warn(`Invalid sameSite value: ${sameSiteSetting}. Defaulting to 'Lax'.`);
+      sameSiteSetting = 'Lax';  // Default to 'Lax' if not set or invalid for cross-domain
+    }
+
 
     // Set the authentication cookie
     res.cookie('authToken', token, {
