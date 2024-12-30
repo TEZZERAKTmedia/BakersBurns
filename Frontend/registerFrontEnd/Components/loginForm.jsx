@@ -15,24 +15,7 @@ const LoginForm = () => {
   const [animationState, setAnimationState] = useState(false);
   const [loading, setLoading] = useState(false); // Loading state
 
-  const handleGoogleSuccess = async (token) => {
-    console.log('Google Sign-In successful! Token:', token);
 
-    setLoading(true); // Start loading animation
-    try {
-      await registerApi.post('/google', { idToken: token });
-      // Redirect to the user URL upon success
-      window.location.href = import.meta.env.VITE_USER_URL;
-    } catch (error) {
-      console.error('Google Sign-In error:', error);
-      setMessage(
-        'Error logging in: ' +
-          (error.response ? error.response.data.message : error.message)
-      );
-    } finally {
-      setLoading(false); // Stop loading
-    }
-  };
 
   const handleGoogleFailure = (error) => {
     console.error('Google Sign-In failed:', error);
@@ -114,7 +97,7 @@ const LoginForm = () => {
 
           <div style={{ marginTop: '1rem' }}>
             <GoogleSignInButton
-              onSuccess={handleGoogleSuccess}
+              
               onFailure={handleGoogleFailure}
             />
           </div>
