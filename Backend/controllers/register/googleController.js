@@ -89,12 +89,12 @@ async function handleGoogleAuth(req, res) {
     );
 
     // Set a secure cookie
-    res.cookie("authToken", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+    res.cookie('authToken', token, {
+      httpOnly: true, // Prevent JavaScript access
+      secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
       maxAge: 60 * 60 * 1000, // 1 hour
-      sameSite: "Lax",
-      domain: process.env.COOKIE_DOMAIN || "localhost",
+      sameSite: sameSiteSetting, // Use the SameSite value
+      domain: process.env.NODE_ENV === 'production' ? 'bakersburns.com' : 'localhost', // Shared across subdomains in production
     });
 
     console.log("Cookie set for user:", user.email);
@@ -265,12 +265,12 @@ async function updateTermsAcceptance(req, res) {
     );
 
     // Set the authentication cookie
-    res.cookie("authToken", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "Lax",
+    res.cookie('authToken', token, {
+      httpOnly: true, // Prevent JavaScript access
+      secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
       maxAge: 60 * 60 * 1000, // 1 hour
-      domain: process.env.COOKIE_DOMAIN || "localhost",
+      sameSite: sameSiteSetting, // Use the SameSite value
+      domain: process.env.NODE_ENV === 'production' ? 'bakersburns.com' : 'localhost', // Shared across subdomains in production
     });
 
     console.log("Cookie set for user:", newUser.email);
