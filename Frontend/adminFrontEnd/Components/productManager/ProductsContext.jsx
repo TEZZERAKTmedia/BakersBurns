@@ -126,6 +126,18 @@ export const ProductsProvider = ({ children }) => {
     }
   };
 
+  const deleteProduct = async (productId) => {
+    try {
+      await adminApi.delete(`/products/${productId}`); // Adjust the API call based on your backend
+      setProducts((prevProducts) => prevProducts.filter((p) => p.id !== productId)); // Remove the product from state
+      console.log(`Product ${productId} deleted successfully`);
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      alert('Failed to delete product. Please try again.');
+    }
+  };
+  
+
   // Delete media by ID
   const deleteMedia = async (mediaId) => {
     try {
@@ -194,7 +206,7 @@ export const ProductsProvider = ({ children }) => {
         fetchProducts,
         fetchProductDetails,
         fetchProductTypes,
-        
+        deleteProduct,
         fetchProductMedia,
         addProductWithMedia,
         updateProductAndMedia,

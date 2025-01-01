@@ -29,6 +29,14 @@ const Media = sequelize.define('Media', {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
   },
+  order: {
+    type: DataTypes.TINYINT,
+    allowNull: false,
+    validate: {
+      min: 1,
+      max: 10,
+      isInt: true, // Ensures the value is an integer
+    }},
 }, {
   tableName: 'Media',
   timestamps: true,

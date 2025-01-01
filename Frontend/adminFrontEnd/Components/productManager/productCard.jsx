@@ -5,7 +5,7 @@ import { useProductContext } from '../../Components/productManager/ProductsConte
 import './product_card.css';
 import MediaUploader from '../mediaUploader';
 
-const ProductCard = ({ product, onDeleteProduct }) => {
+const ProductCard = ({ product }) => {
   const [isEditingProduct, setIsEditingProduct] = useState(false);
   const [isEditingDiscount, setIsEditingDiscount] = useState(false);
   const [media, setMedia] = useState([]); // State to hold media files
@@ -13,7 +13,7 @@ const ProductCard = ({ product, onDeleteProduct }) => {
   const [productDetails, setProductDetails] = useState(null); // State to hold product details
   const [isLoadingDetails, setIsLoadingDetails] = useState(false);
 
-  const { fetchProductDetails, fetchProductMedia } = useProductContext(); // Fetch functions from context
+  const { fetchProductDetails, fetchProductMedia, deleteProduct } = useProductContext(); // Fetch functions and delete function from context
 
   // Fetch media files on mount
   useEffect(() => {
@@ -50,6 +50,16 @@ const ProductCard = ({ product, onDeleteProduct }) => {
 
     fetchDetails();
   }, [product.id, fetchProductDetails]);
+
+  const handleDelete = async () => {
+    try {
+      await deleteProduct(product.id); // Use deleteProduct from context
+      console.log(`Product ${product.id} deleted successfully`);
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      alert('Failed to delete product. Please try again.');
+    }
+  };
 
   return (
     <div className="product-tile">
@@ -144,7 +154,8 @@ const ProductCard = ({ product, onDeleteProduct }) => {
         </button>
       )}
 
-      <button onClick={() => onDeleteProduct(product.id)}>Delete</button>
+      {/* Use delete function */}
+      <button onClick={handleDelete}>Delete</button>
     </div>
   );
 };

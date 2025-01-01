@@ -209,15 +209,23 @@ const addMedia = async (req, res) => {
   console.log('addMedia endpoint hit');
   console.log('Files:', req.files);
   console.log('Body:', req.body);
+  console.log('Query:', req.query);
 
-  const { productId } = req.body;
+  // Support both body and query parameter for productId
+  const productId = req.body.productId || req.query.productId;
   if (!productId) {
     return res.status(400).json({ message: 'Product ID is required' });
   }
 
   try {
+    // Ensure `productId` is treated as a number
+    const parsedProductId = parseInt(productId, 10);
+    if (isNaN(parsedProductId)) {
+      return res.status(400).json({ message: 'Invalid Product ID' });
+    }
+
     const mediaFiles = req.files.media.map((file) => ({
-      productId,
+      productId: parsedProductId,
       url: file.filename,
       type: file.mimetype.startsWith('video/') ? 'video' : 'image',
     }));
@@ -229,6 +237,7 @@ const addMedia = async (req, res) => {
     res.status(500).json({ message: 'Error adding media', details: error.message });
   }
 };
+
 
 
 
