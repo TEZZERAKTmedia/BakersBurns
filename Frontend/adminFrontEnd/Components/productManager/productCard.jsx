@@ -3,22 +3,26 @@ import EditProductForm from './editProduct';
 import DiscountByProductForm from './discountForm';
 import { useProductContext } from '../../Components/productManager/ProductsContext'; // Import context
 import './product_card.css';
+import MediaUploader from '../mediaUploader';
 
 const ProductCard = ({ product, onDeleteProduct }) => {
   const [isEditingProduct, setIsEditingProduct] = useState(false);
   const [isEditingDiscount, setIsEditingDiscount] = useState(false);
   const [media, setMedia] = useState([]); // State to hold media files
   const [isLoadingMedia, setIsLoadingMedia] = useState(false);
+  const [productDetails, setProductDetails] = useState(null); // State to hold product details
+  const [isLoadingDetails, setIsLoadingDetails] = useState(false);
 
-  const { getProductDetails } = useProductContext(); // Fetch details from context
+  const { fetchProductDetails, fetchProductMedia } = useProductContext(); // Fetch functions from context
 
   // Fetch media files on mount
   useEffect(() => {
     const fetchMedia = async () => {
       setIsLoadingMedia(true);
       try {
-        const productDetails = await getProductDetails(product.id); // Use context to fetch product details
-        setMedia(productDetails.media || []); // Store media files
+        const mediaData = await fetchProductMedia(product.id); // Fetch media by product ID
+        console.log('Fetched media:', mediaData); // Debugging log
+        setMedia(mediaData || []); // Store media files
       } catch (error) {
         console.error('Error fetching media:', error);
       } finally {
@@ -27,7 +31,25 @@ const ProductCard = ({ product, onDeleteProduct }) => {
     };
 
     fetchMedia();
-  }, [product.id, getProductDetails]);
+  }, [product.id, fetchProductMedia]);
+
+  // Fetch product details on mount
+  useEffect(() => {
+    const fetchDetails = async () => {
+      setIsLoadingDetails(true);
+      try {
+        const details = await fetchProductDetails(product.id); // Fetch product details
+        console.log('Fetched product details:', details); // Debugging log
+        setProductDetails(details); // Store product details
+      } catch (error) {
+        console.error('Error fetching product details:', error);
+      } finally {
+        setIsLoadingDetails(false);
+      }
+    };
+
+    fetchDetails();
+  }, [product.id, fetchProductDetails]);
 
   return (
     <div className="product-tile">
@@ -52,6 +74,20 @@ const ProductCard = ({ product, onDeleteProduct }) => {
             <h3>{product.name}</h3>
             <p>${product.price.toFixed(2)}</p>
           </div>
+
+          {/* Display additional product details */}
+          {isLoadingDetails ? (
+            <p>Loading product details...</p>
+          ) : productDetails ? (
+            <div className="product-details">
+              <p><strong>Description:</strong> {productDetails.description}</p>
+              <p><strong>Type:</strong> {productDetails.type}</p>
+              <p><strong>Quantity:</strong> {productDetails.quantity}</p>
+              {/* Add any other product details you need to display */}
+            </div>
+          ) : (
+            <p>No additional details available</p>
+          )}
 
           {/* Display media */}
           <div className="product-media">
@@ -84,7 +120,12 @@ const ProductCard = ({ product, onDeleteProduct }) => {
             )}
           </div>
 
-          <button className='product-card-buttons' onClick={() => setIsEditingProduct(true)}>Edit Product</button>
+          <button
+            className="product-card-buttons"
+            onClick={() => setIsEditingProduct(true)}
+          >
+            Edit Product
+          </button>
         </>
       )}
 
@@ -95,7 +136,12 @@ const ProductCard = ({ product, onDeleteProduct }) => {
           onSuccess={() => setIsEditingDiscount(false)}
         />
       ) : (
-        <button className='product-card-buttons' onClick={() => setIsEditingDiscount(true)}>Edit Discount</button>
+        <button
+          className="product-card-buttons"
+          onClick={() => setIsEditingDiscount(true)}
+        >
+          Edit Discount
+        </button>
       )}
 
       <button onClick={() => onDeleteProduct(product.id)}>Delete</button>

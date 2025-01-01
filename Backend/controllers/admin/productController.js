@@ -56,15 +56,13 @@ const addProduct = async (req, res) => {
     const heightValue = parseFloat(height) || 0;
     const weightValue = parseFloat(weight) || 0;
 
-    // Extract files from the request
+    // Extract thumbnail file
     const thumbnailFile = req.files?.thumbnail?.[0];
-    const mediaFiles = req.files?.media || [];
-
     if (!thumbnailFile) {
       return res.status(400).json({ message: 'Thumbnail is required' });
     }
 
-    // Step 1: Create the product and store the thumbnail in the Products table
+    // Create the product
     const newProduct = await Product.create({
       name,
       description,
@@ -79,19 +77,7 @@ const addProduct = async (req, res) => {
       thumbnail: thumbnailFile.filename, // Save thumbnail file name
     });
 
-    // Step 2: Add media (images/videos) to the Media table
-    if (mediaFiles.length > 0) {
-      const mediaEntries = mediaFiles.map((file, index) => ({
-        productId: newProduct.id,
-        url: file.filename, // Store the file path or name
-        type: file.mimetype.startsWith('video/') ? 'video' : 'image', // Determine type
-        isDefault: index === 0, // Optionally mark the first as default
-      }));
-
-      await Media.bulkCreate(mediaEntries);
-    }
-
-    // Step 3: Fetch and return the created product with its media
+    // Fetch and return the created product without handling media
     const productWithMedia = await Product.findByPk(newProduct.id, {
       include: [{ model: Media, as: 'media' }],
     });
@@ -102,6 +88,7 @@ const addProduct = async (req, res) => {
     res.status(500).json({ message: 'Error adding product', error });
   }
 };
+
 
 
 
@@ -189,6 +176,64 @@ const updateThumbnail = async (req, res) => {
     res.status(500).json({ message: 'Error updating thumbnail', error });
   }
 };
+
+// Fetch media for a specific product by ID
+const getProductMedia = async (req, res) => {
+  const { id } = req.params; // Product ID from the request parameters
+
+  if (!id) {
+    return res.status(400).json({ message: 'Product ID is required' });
+  }
+
+  try {
+    // Fetch media associated with the product ID
+    const mediaFiles = await Media.findAll({
+      where: { productId: id }, // Use productId to filter records
+      attributes: ['id', 'url', 'type', 'isDefault'], // Only fetch specific fields
+    });
+
+    if (!mediaFiles.length) {
+      // No media found, return an empty array
+      return res.status(200).json([]);
+    }
+
+    res.status(200).json(mediaFiles); // Return media files as JSON
+  } catch (error) {
+    console.error(`Error fetching media for product ${id}:`, error);
+    res.status(500).json({ message: 'Error fetching media', error });
+  }
+};
+
+
+const addMedia = async (req, res) => {
+  console.log('addMedia endpoint hit');
+  console.log('Files:', req.files);
+  console.log('Body:', req.body);
+
+  const { productId } = req.body;
+  if (!productId) {
+    return res.status(400).json({ message: 'Product ID is required' });
+  }
+
+  try {
+    const mediaFiles = req.files.media.map((file) => ({
+      productId,
+      url: file.filename,
+      type: file.mimetype.startsWith('video/') ? 'video' : 'image',
+    }));
+
+    await Media.bulkCreate(mediaFiles);
+    res.status(201).json({ message: 'Media uploaded successfully', media: mediaFiles });
+  } catch (error) {
+    console.error('Error in addMedia:', error);
+    res.status(500).json({ message: 'Error adding media', details: error.message });
+  }
+};
+
+
+
+
+
 
 // Update product media
 const updateMedia = async (req, res) => {
@@ -355,6 +400,7 @@ const updateDiscount = async (req, res) => {
   }
 };
 
+
 // Remove discount from a product
 const removeDiscount = async (req, res) => {
   const { id } = req.params;
@@ -510,6 +556,7 @@ module.exports = {
   getProducts,
   getProductDetails,
   addProduct,
+  addMedia,
   updateProduct,
   deleteProduct,
   addDiscount,       // New function for adding discount
@@ -520,4 +567,5 @@ module.exports = {
   updateThumbnail,
   updateMedia,
   applyDiscountByType,
+  getProductMedia
 };

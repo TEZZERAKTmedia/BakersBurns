@@ -19,7 +19,7 @@ export const ProductsProvider = ({ children }) => {
   // Fetch all products
   const fetchProducts = async () => {
     try {
-      const response = await adminApi.get('/api/products/');
+      const response = await adminApi.get('/products/');
       setProducts(response.data);
       setIsLoading(false);
     } catch (error) {
@@ -30,7 +30,7 @@ export const ProductsProvider = ({ children }) => {
   // Fetch product details by ID
   const fetchProductDetails = async (id) => {
     try {
-      const response = await adminApi.get(`/api/products/${id}/details`);
+      const response = await adminApi.get(`/products/${id}/details`);
       return response.data;
     } catch (error) {
       console.error(`Error fetching details for product ${id}:`, error);
@@ -41,54 +41,98 @@ export const ProductsProvider = ({ children }) => {
   // Fetch all product types
   const fetchProductTypes = async () => {
     try {
-      const response = await adminApi.get('/api/products/types');
+      const response = await adminApi.get('/products/types');
       setProductTypes(response.data);
     } catch (error) {
       console.error('Error fetching product types:', error);
     }
   };
 
-  // Fetch all discounted products
-  const fetchDiscountedProducts = async () => {
+  // Fetch discounted products
+  const addProductWithMedia = async (productData, mediaFiles) => {
     try {
-      const response = await adminApi.get('/api/products/discounted');
-      setDiscountedProducts(response.data);
+      // Step 1: Add the product and wait for the product ID
+      const productResponse = await adminApi.post('/products', productData);
+  
+      const productId = productResponse.data.id; // Assuming the backend returns the product ID
+  
+      if (!productId) {
+        throw new Error('Failed to retrieve product ID after creating product.');
+      }
+  
+      // Step 2: Add media using the productId
+      if (mediaFiles && mediaFiles.length > 0) {
+        const mediaFormData = new FormData();
+        mediaFiles.forEach((media, index) => {
+          mediaFormData.append('media', media.file);
+          mediaFormData.append(`mediaOrder_${index}`, index + 1);
+        });
+  
+        // Pass the productId as a query parameter or part of the body (based on backend logic)
+        await adminApi.post(`/products/add-media?productId=${productId}`, mediaFormData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+      }
+  
+      // Step 3: Refresh the products list
+      fetchProducts();
+  
+      return { product: productResponse.data };
     } catch (error) {
-      console.error('Error fetching discounted products:', error);
+      console.error('Error adding product or media:', error);
+      throw error;
     }
   };
+  
+  
 
-  // Add a new product
-  const addProduct = async (productData) => {
+  // Update a product and media
+  const updateProductAndMedia = async (productId, updatedProductData, updatedMedia) => {
     try {
-      const response = await adminApi.post('/api/products/', productData);
-      fetchProducts(); // Refresh products after addition
+      const mediaFormData = new FormData();
+  
+      // Use `map` to build the FormData object instead of `forEach`
+      updatedMedia.map((media, index) => {
+        mediaFormData.append('media', media.file);
+        mediaFormData.append(`mediaOrder_${index}`, index + 1);
+      });
+  
+      const [productResponse, mediaResponse] = await Promise.all([
+        adminApi.put(`/products/${productId}`, updatedProductData),
+        adminApi.put(`/products/${productId}/update-media`, mediaFormData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        }),
+      ]);
+  
+      fetchProducts(); // Refresh product list
+      return { product: productResponse.data, media: mediaResponse.data };
+    } catch (error) {
+      console.error('Error updating product or media:', error);
+      throw error;
+    }
+  };
+  
+  
+  
+
+  // Fetch product media
+  const fetchProductMedia = async (productId) => {
+    try {
+      const response = await adminApi.get(`/products/${productId}/media`);
       return response.data;
     } catch (error) {
-      console.error('Error adding product:', error);
+      console.error(`Error fetching media for product ${productId}:`, error);
       throw error;
     }
   };
 
-  // Update a product
-  const updateProduct = async (id, updatedData) => {
+  // Delete media by ID
+  const deleteMedia = async (mediaId) => {
     try {
-      const response = await adminApi.put(`/api/products/${id}`, updatedData);
-      fetchProducts(); // Refresh products after update
+      const response = await adminApi.delete(`/products/media/${mediaId}`);
       return response.data;
     } catch (error) {
-      console.error('Error updating product:', error);
-      throw error;
-    }
-  };
-
-  // Delete a product
-  const deleteProduct = async (id) => {
-    try {
-      await adminApi.delete(`/api/products/${id}`);
-      fetchProducts(); // Refresh products after deletion
-    } catch (error) {
-      console.error('Error deleting product:', error);
+      console.error(`Error deleting media with ID ${mediaId}:`, error);
       throw error;
     }
   };
@@ -96,8 +140,8 @@ export const ProductsProvider = ({ children }) => {
   // Apply a discount to a product
   const applyDiscount = async (productId, discountData) => {
     try {
-      const response = await adminApi.post(`/api/products/${productId}/discount`, discountData);
-      fetchProducts(); // Refresh products after applying the discount
+      const response = await adminApi.post(`/products/${productId}/discount`, discountData);
+      fetchProducts();
       return response.data;
     } catch (error) {
       console.error('Error applying discount:', error);
@@ -108,8 +152,8 @@ export const ProductsProvider = ({ children }) => {
   // Update a discount on a product
   const updateDiscount = async (productId, discountData) => {
     try {
-      const response = await adminApi.put(`/api/products/${productId}/discount`, discountData);
-      fetchProducts(); // Refresh products after updating the discount
+      const response = await adminApi.put(`/products/${productId}/discount`, discountData);
+      fetchProducts();
       return response.data;
     } catch (error) {
       console.error('Error updating discount:', error);
@@ -120,8 +164,8 @@ export const ProductsProvider = ({ children }) => {
   // Remove a discount from a product
   const removeDiscount = async (productId) => {
     try {
-      await adminApi.delete(`/api/products/${productId}/discount`);
-      fetchProducts(); // Refresh products after removing discount
+      await adminApi.delete(`/products/${productId}/discount`);
+      fetchProducts();
     } catch (error) {
       console.error('Error removing discount:', error);
       throw error;
@@ -131,8 +175,8 @@ export const ProductsProvider = ({ children }) => {
   // Apply a discount by type
   const applyDiscountByType = async (discountData) => {
     try {
-      const response = await adminApi.post('/api/products/discounts-by-type', discountData);
-      fetchProducts(); // Refresh products after applying the discount by type
+      const response = await adminApi.post('/products/discounts-by-type', discountData);
+      fetchProducts();
       return response.data;
     } catch (error) {
       console.error('Error applying discount by type:', error);
@@ -150,10 +194,11 @@ export const ProductsProvider = ({ children }) => {
         fetchProducts,
         fetchProductDetails,
         fetchProductTypes,
-        fetchDiscountedProducts,
-        addProduct,
-        updateProduct,
-        deleteProduct,
+        
+        fetchProductMedia,
+        addProductWithMedia,
+        updateProductAndMedia,
+        deleteMedia,
         applyDiscount,
         updateDiscount,
         removeDiscount,

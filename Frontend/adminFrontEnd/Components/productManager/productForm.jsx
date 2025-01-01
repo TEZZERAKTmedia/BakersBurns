@@ -1,11 +1,18 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import ImageUploader from '../mediaUploader';
+import MediaUploader from '../mediaUploader';
 import { adminApi } from '../../config/axios';
 import { useProductContext } from './ProductsContext';
 
+
+
+
 const ProductForm = ({ productTypes, product = {}, onClose }) => {
-  const {fetchProducts} = useProductContext();
+  const {fetchProducts,} = useProductContext();
+  const {addProductWithMedia} =useProductContext();
+  const [thumbnailPreview, setThumbnailPreview] = useState(null);
+
+  
   const [newProduct, setNewProduct] = useState({
     name: product.name || '',
     description: product.description || '',
@@ -65,59 +72,118 @@ const ProductForm = ({ productTypes, product = {}, onClose }) => {
     formData.append('weight', newProduct.weight || 0);
     formData.append('unit', newProduct.unit || 'unit');
     if (newProduct.thumbnail) formData.append('thumbnail', newProduct.thumbnail);
-    mediaPreviews.forEach((media, index) => {
-      formData.append('media', media.file);
-      formData.append(`mediaOrder_${index}`, index + 1);
-    });
+  
+    // Ensure mediaPreviews is valid before iterating
+    if (Array.isArray(mediaPreviews)) {
+      mediaPreviews.forEach((media, index) => {
+        console.log(`Adding media file:`, media.file);
+        formData.append('media', media.file);
+        formData.append(`mediaOrder_${index}`, index + 1);
+      });
+    } else {
+      console.warn('mediaPreviews is not an array or undefined:', mediaPreviews);
+    }
+  
     return formData;
   };
+  
+  const handleThumbnailChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const previewUrl = URL.createObjectURL(file); // Generate a preview URL
+      setThumbnailPreview(previewUrl); // Store the preview URL
+      setNewProduct({ ...newProduct, thumbnail: file });
+      console.log('Thumbnail file selected:', file); // Debugging
+    }
+  };
+  
+  
+  
 
+  
+  const handleMediaChange = (updatedMedia) => {
+    if (!Array.isArray(updatedMedia)) {
+      console.warn('Invalid media passed to handleMediaChange');
+      return;
+    }
+    setMediaPreviews(updatedMedia);
+  };
+  
   const handleSave = async () => {
     const missing = validateFields();
     if (missing.length > 0) {
       setMissingFields(missing);
       return;
     }
-
+  
     setIsLoading(true);
     try {
-      const formData = createFormData();
-      if (product.id) {
-        await adminApi.put(`/api/products/${product.id}`, formData, {
+      let productId;
+  
+      // Step 1: Add the product
+      if (!product.id) {
+        // Create the product first and extract the ID
+        const productFormData = new FormData();
+  
+        // Add product data
+        productFormData.append('name', newProduct.name);
+        productFormData.append('description', newProduct.description);
+        productFormData.append('price', newProduct.price);
+        productFormData.append('type', newProduct.type);
+        productFormData.append('quantity', newProduct.quantity);
+        productFormData.append('length', newProduct.length || 0);
+        productFormData.append('width', newProduct.width || 0);
+        productFormData.append('height', newProduct.height || 0);
+        productFormData.append('weight', newProduct.weight || 0);
+        productFormData.append('unit', newProduct.unit || 'unit');
+        if (newProduct.thumbnail) {
+          productFormData.append('thumbnail', newProduct.thumbnail);
+        }
+  
+        // Send product creation request
+        const productResponse = await adminApi.post('/products', productFormData, {
           headers: { 'Content-Type': 'multipart/form-data' },
         });
+  
+        productId = productResponse.data.id;
+  
+        if (!productId) {
+          throw new Error('Failed to retrieve product ID after creating product.');
+        }
       } else {
-        await adminApi.post('/api/products', formData, {
+        // Use existing product ID if updating
+        productId = product.id;
+      }
+  
+      // Step 2: Add media if any
+      if (mediaPreviews && mediaPreviews.length > 0) {
+        const mediaFormData = new FormData();
+        mediaPreviews.forEach((media, index) => {
+          mediaFormData.append('media', media.file);
+          mediaFormData.append(`mediaOrder_${index}`, index + 1);
+        });
+  
+        // Attach the product ID to the media upload request
+        await adminApi.post(`/products/add-media?productId=${productId}`, mediaFormData, {
           headers: { 'Content-Type': 'multipart/form-data' },
         });
       }
+  
+      // Step 3: Refresh products list
       fetchProducts();
       resetForm();
       onClose();
     } catch (error) {
-      console.error('Error saving product:', error);
-      alert('Failed to save product. Please try again.');
+      console.error('Error saving product or media:', error);
+      alert('Failed to save product or media. Please try again.');
     } finally {
       setIsLoading(false);
     }
   };
   
-
-  const handleThumbnailChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setNewProduct({ ...newProduct, thumbnail: file });
-    }
-  };
-
-  const handleMediaChange = (files) => {
-    const mediaFiles = Array.from(files).map((file, index) => ({
-      file,
-      preview: URL.createObjectURL(file),
-      order: index + 1,
-    }));
-    setMediaPreviews(mediaFiles);
-  };
+  
+  
+  
 
   return (
     <div className="product-form-section">
@@ -233,9 +299,32 @@ const ProductForm = ({ productTypes, product = {}, onClose }) => {
         Thumbnail:
         <input type="file" accept="image/*" onChange={handleThumbnailChange} />
       </label>
+      <div className="form-section">
+  <label>
+    Thumbnail:
+    
+  </label>
+  {thumbnailPreview && (
+    <div style={{ marginTop: '10px' }}>
+      <img
+        src={thumbnailPreview}
+        alt="Thumbnail Preview"
+        style={{ width: '100px', height: 'auto', border: '1px solid #ccc' }}
+      />
+    </div>
+  )}
+</div>
+
       </div>
       <div className='form-section'>
-      <ImageUploader maxMedia={10} onMediaChange={handleMediaChange} />
+      <MediaUploader
+        mode="add"
+        maxMedia={10}
+        initialMedia={Array.isArray(mediaPreviews) ? mediaPreviews : []}
+        onMediaChange={handleMediaChange}
+      />
+
+
       </div>
       <div style={{ marginTop: '20px' }}>
         <button onClick={handleSave} disabled={isLoading}>

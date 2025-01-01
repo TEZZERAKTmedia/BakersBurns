@@ -33,6 +33,7 @@
     "jwt-decode": "^4.0.0",
     "node-cron": "^3.0.3",
     "postman": "^0.2.0",
+    "react-beautiful-dnd": "^13.1.1",
     "react-big-calendar": "^1.15.0",
     "react-calendar": "^5.0.0",
     "react-datepicker": "^7.5.0",

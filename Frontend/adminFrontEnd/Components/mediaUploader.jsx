@@ -1,159 +1,141 @@
-import React, { useState } from 'react';
-import '../Componentcss/image_uploader.css'; // Import the CSS file
+import React, { useState, useRef, useEffect } from 'react';
+import '../Componentcss/image_uploader.css'; // Use your existing CSS
 
-const ImageUploader = ({ maxMedia = 10, onMediaChange }) => {
-  const [mediaPreviews, setMediaPreviews] = useState([]); // Updated state name
-  const [isModalOpen, setIsModalOpen] = useState(false); // For toggling the upload modal
-  const [isHelpModalOpen, setIsHelpModalOpen] = useState(false); // For toggling the help modal
+const MediaUploader = ({
+  mode = 'view', // Modes: 'view', 'edit', 'add'
+  initialMedia = [],
+  maxMedia = 10,
+  onMediaChange,
+}) => {
+  const [mediaPreviews, setMediaPreviews] = useState(
+    Array.isArray(initialMedia)
+      ? initialMedia.map((media, index) => ({
+          id: media.id || `${Date.now()}-${index}`,
+          file: media.file || null,
+          src: media.src || media.url || '',
+          order: index + 1,
+        }))
+      : []
+  );
 
-  const handleMediaChange = (e) => {
-    const files = Array.from(e.target.files);
+  const [draggedIndex, setDraggedIndex] = useState(null);
+  const dragImageRef = useRef(null);
 
-    if (files.length + mediaPreviews.length > maxMedia) {
-      alert(`You can upload a maximum of ${maxMedia} media files.`);
+  const handleMediaChange = (event) => {
+    const files = event.target.files;
+
+    if (!files || files.length === 0) {
+      console.warn('No files selected or invalid input.');
       return;
     }
 
-    const newPreviews = files.map((file, index) => {
-      const reader = new FileReader();
-      const preview = {
-        id: Date.now() + file.name,
-        file,
-        src: '',
-        order: mediaPreviews.length + index, // Assign an initial order
-      };
-      reader.onloadend = () => {
-        preview.src = reader.result;
-        setMediaPreviews((prev) => [...prev, preview]);
-      };
-      reader.readAsDataURL(file);
-      return preview;
-    });
+    const mediaFiles = Array.from(files)
+      .map((file, index) => {
+        if (file instanceof File) {
+          try {
+            const preview = URL.createObjectURL(file); // Catch errors here
+            return {
+              id: `${Date.now()}-${file.name}`,
+              file,
+              src: preview,
+              order: mediaPreviews.length + index + 1,
+            };
+          } catch (err) {
+            console.error('Error generating preview for file:', file, err);
+            return null;
+          }
+        } else {
+          console.warn('Invalid file type:', file);
+          return null;
+        }
+      })
+      .filter(Boolean);
 
-    onMediaChange([...mediaPreviews, ...newPreviews]); // Pass updated previews with order to parent
+    setMediaPreviews((prev) => [...prev, ...mediaFiles]);
+    if (onMediaChange) onMediaChange([...mediaPreviews, ...mediaFiles]);
   };
+
+  useEffect(() => {
+    // Clean up object URLs when the component unmounts
+    return () => {
+      mediaPreviews.forEach((media) => {
+        if (media.src) {
+          URL.revokeObjectURL(media.src);
+        }
+      });
+    };
+  }, [mediaPreviews]);
 
   const handleRemoveMedia = (index) => {
     const updatedPreviews = mediaPreviews.filter((_, i) => i !== index);
+    updatedPreviews.forEach((item, i) => (item.order = i + 1));
     setMediaPreviews(updatedPreviews);
-    onMediaChange(updatedPreviews.map((p) => p.file)); // Update parent component
+    if (onMediaChange) onMediaChange(updatedPreviews);
   };
 
-  const handleDragStart = (e, index) => {
-    e.dataTransfer.setData('text/plain', index);
+  const renderMediaGrid = () => {
+    return (
+      <div className="image-uploader-grid">
+        {mediaPreviews.map((preview, index) => (
+          <div key={preview.id} className="image-uploader-grid-item">
+            <div className="drag-handle">
+              <span className="image-order-number">{preview.order}</span>
+              {preview.src.endsWith('.mp4') || preview.src.endsWith('.avi') ? (
+                <video
+                  controls
+                  className="media-preview"
+                  src={preview.src}
+                  alt={`Video ${index + 1}`}
+                  draggable={false}
+                />
+              ) : (
+                <img
+                  className="media-preview"
+                  src={preview.src}
+                  alt={`Preview ${index + 1}`}
+                  draggable={false}
+                />
+              )}
+            </div>
+            {(mode === 'edit' || mode === 'add') && (
+              <button
+                className="remove-media-button minus-symbol"
+                onClick={() => handleRemoveMedia(index)}
+              >
+                -
+              </button>
+            )}
+          </div>
+        ))}
+      </div>
+    );
   };
 
-  const handleDragOver = (e) => {
-    e.preventDefault(); // Necessary to allow dropping
-  };
-
-  const handleDrop = (e, dropIndex) => {
-    e.preventDefault();
-    const dragIndex = parseInt(e.dataTransfer.getData('text/plain'), 10);
-
-    const updatedPreviews = Array.from(mediaPreviews);
-    const [movedItem] = updatedPreviews.splice(dragIndex, 1);
-    updatedPreviews.splice(dropIndex, 0, movedItem);
-
-    // Reassign order numbers
-    updatedPreviews.forEach((item, index) => {
-      item.order = index;
-    });
-
-    setMediaPreviews(updatedPreviews);
-    onMediaChange(updatedPreviews); // Update parent with new order
-  };
-
-  const openModal = () => setIsModalOpen(true);
-  const closeModal = () => setIsModalOpen(false);
-
-  const openHelpModal = () => setIsHelpModalOpen(true);
-  const closeHelpModal = () => setIsHelpModalOpen(false);
-
-  const handleModalClick = (e) => {
-    // Check if the clicked element is the modal's parent
-    if (e.target.classList.contains('image-uploader-modal')) {
-      closeModal();
-    }
+  const renderAddMediaSection = () => {
+    return (
+      mode === 'add' && (
+        <div className="image-grid-item-add-image">
+          <label>
+            +
+            <input
+              type="file"
+              accept="image/*,video/*"
+              onChange={handleMediaChange}
+              multiple
+              hidden
+            />
+          </label>
+        </div>
+      )
+    );
   };
 
   return (
-    <div>
-      <button onClick={openModal} className="open-image-uploader-modal-button">
-        Upload Media
-      </button>
-      <button onClick={openHelpModal} className="image-uploader-help-button">?</button>
-
-      {/* Upload Modal */}
-      {isModalOpen && (
-        <div className="image-uploader-modal" onClick={handleModalClick}>
-          <div
-            className="image-uploader-modal-content"
-            onClick={(e) => e.stopPropagation()} // Prevent click inside modal from closing it
-          >
-            <button className="image-uploader-close-modal-button" onClick={closeModal}>
-              &times;
-            </button>
-            <h2 className="image-uploader-header">Upload Media</h2>
-            <div className="image-uploader-grid">
-              {mediaPreviews.map((preview, index) => (
-                <div
-                  key={preview.id}
-                  className="image-uploader-grid-item"
-                  draggable
-                  onDragStart={(e) => handleDragStart(e, index)}
-                  onDragOver={handleDragOver}
-                  onDrop={(e) => handleDrop(e, index)}
-                >
-                  <span className="image-order-number">{index + 1}</span> {/* Number for order */}
-                  <img src={preview.src} alt={`Preview ${index + 1}`} />
-                  <button onClick={() => handleRemoveMedia(index)}>✖</button>
-                </div>
-              ))}
-              {mediaPreviews.length < maxMedia && (
-                <div className="image-grid-item-add-image">
-                  <label>
-                    +
-                    <input
-                      type="file"
-                      accept="image/*,video/*"
-                      onChange={handleMediaChange}
-                      multiple
-                      hidden
-                    />
-                  </label>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Help Modal */}
-      {isHelpModalOpen && (
-        <div className="image-uploader-help-modal">
-          <div className="image-uploader-help-modal-content">
-            <button className="image-uploader-close-modal-button" onClick={closeHelpModal}>
-              &times;
-            </button>
-            <h2>Media Upload Guidelines</h2>
-            <p>Supported File Types:</p>
-            <ul>
-              <li>Images: JPEG, PNG</li>
-              <li>Videos: MP4, AVI</li>
-            </ul>
-            <p>
-              Drag and drop the media to reorder the items in the grid. The order
-              follows a top-to-bottom, left-to-right flow.
-            </p>
-            <div className="example-grid">
-              1-10
-            </div>
-          </div>
-        </div>
-      )}
+    <div className="media-uploader">
+      {renderMediaGrid()}
+      {renderAddMediaSection()}
     </div>
   );
 };
 
-export default ImageUploader;
+export default MediaUploader;

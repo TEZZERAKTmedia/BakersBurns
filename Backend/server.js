@@ -137,7 +137,7 @@ app.use('/google', googleRoutes);
 
 
 // Admin routes (protected by adminAuthMiddleware)
-app.use('/api/products', adminAuthMiddleware('admin'), rateLimiter('admin-products'), productRoutes);
+app.use('/products', adminAuthMiddleware('admin'), rateLimiter('admin-products'), productRoutes);
 app.use('/gallery-manager', adminAuthMiddleware('admin'), rateLimiter('gallery-manager'), galleryRoutes);
 app.use('/admin-mail', adminAuthMiddleware('admin'), rateLimiter('admin-mail'), adminEmailRoutes);
 app.use('/orders', adminAuthMiddleware('admin'), rateLimiter('orders'), ordersRoutes);

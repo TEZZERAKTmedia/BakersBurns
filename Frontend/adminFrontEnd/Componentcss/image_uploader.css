@@ -47,7 +47,28 @@
     margin-top: 10px;
     width: 100%;
   }
+  .image-uploader-grid-item:active {
+    cursor: grabbing;
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
   
+  .media-preview {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: cover;
+  }
+  
+  .image-order-number {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    padding: 2px 5px;
+    border-radius: 3px;
+    font-size: 12px;
+  }
   .image-uploader-grid-item {
     position: relative;
     background-color: #f0f0f0;
@@ -66,6 +87,18 @@
     height: 100%;
     object-fit: cover;
   }
+  .drag-handle {
+    width: 100%; /* Make handle larger for easier grabbing */
+    height: 100%; /* Handle spans the entire grid item */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    cursor: grab;
+  }
+
+  
+  
   
   .image-uploader-grid-item button {
     position: absolute;

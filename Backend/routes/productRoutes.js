@@ -6,6 +6,7 @@ const {
   getProductDetails,
   applyDiscountByType,
   addProduct,
+  addMedia,
   updateProduct,
   deleteProduct,
   addDiscount,
@@ -13,6 +14,7 @@ const {
   removeDiscount,
   getDiscountedProducts,
   getProductTypes,
+  getProductMedia
 } = require('../controllers/admin/productController');
 
 // Product routes
@@ -20,6 +22,9 @@ router.get('/', getProducts);
 router.post('/discounts-by-type', applyDiscountByType);
 
 router.get('/:id/details', getProductDetails);
+router.get('/:id/media', getProductMedia);
+router.post('/add-media', productUploadMiddleware, addMedia);
+
 
 // Unified route for adding a product
 router.post('/', productUploadMiddleware, addProduct);
