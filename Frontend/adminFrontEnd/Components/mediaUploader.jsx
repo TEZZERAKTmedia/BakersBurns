@@ -122,7 +122,6 @@ const MediaUploader = ({
               <span className="image-order-number">{preview.order}</span>
               {preview.src.endsWith('.mp4') || preview.src.endsWith('.avi') ? (
                <video
-               autoPlay
                loop
                muted
                playsInline
