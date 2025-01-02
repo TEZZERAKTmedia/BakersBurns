@@ -22,6 +22,19 @@ const MediaUploader = ({
   const [draggedIndex, setDraggedIndex] = useState(null);
   const dragImageRef = useRef(null);
 
+  const preventFullscreen = (videoElement) => {
+    const preventFullscreenHandler = (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+    };
+    videoElement.addEventListener('fullscreenchange', preventFullscreenHandler);
+    videoElement.addEventListener('webkitfullscreenchange', preventFullscreenHandler);
+    return () => {
+      videoElement.removeEventListener('fullscreenchange', preventFullscreenHandler);
+      videoElement.removeEventListener('webkitfullscreenchange', preventFullscreenHandler);
+    };
+  };
+
   const handleMediaChange = (event) => {
     const files = event.target.files;
 
@@ -80,7 +93,7 @@ const MediaUploader = ({
 
   const handleRemoveMedia = (index) => {
     const mediaToRemove = mediaPreviews[index];
-    console.log('Removing media:', mediaToRemove)
+    console.log('Removing media:', mediaToRemove);
     // If in edit mode and the media has an `id`, call the delete function
     if (mode === 'edit' && mediaToRemove.id && onMediaDelete) {
       onMediaDelete(mediaToRemove.id);
@@ -93,7 +106,6 @@ const MediaUploader = ({
   };
 
   useEffect(() => {
-    // Clean up object URLs when the component unmounts
     return () => {
       mediaPreviews.forEach((media) => {
         if (media.src) {
@@ -121,16 +133,18 @@ const MediaUploader = ({
             <div className="drag-handle">
               <span className="image-order-number">{preview.order}</span>
               {preview.src.endsWith('.mp4') || preview.src.endsWith('.avi') ? (
-               <video
-               loop
-               muted
-               playsInline
-               webkit-playsinline="true"
-               disablePictureInPicture
-               className="media-preview"
-               src={preview.src}
-               alt={`Video ${index + 1}`}
-             />
+                <video
+                  loop
+                  muted
+                  playsInline
+                  webkit-playsinline="true"
+                  disablePictureInPicture
+                  className="media-preview"
+                  src={preview.src}
+                  alt={`Video ${index + 1}`}
+                  controls
+                  ref={(el) => el && preventFullscreen(el)}
+                />
               ) : (
                 <img
                   className="media-preview"
