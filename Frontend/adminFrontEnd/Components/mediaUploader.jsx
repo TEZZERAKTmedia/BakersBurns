@@ -121,14 +121,17 @@ const MediaUploader = ({
             <div className="drag-handle">
               <span className="image-order-number">{preview.order}</span>
               {preview.src.endsWith('.mp4') || preview.src.endsWith('.avi') ? (
-                <video
-                  autoPlay
-                  loop
-                  muted
-                  className="media-preview"
-                  src={preview.src}
-                  alt={`Video ${index + 1}`}
-                />
+               <video
+               autoPlay
+               loop
+               muted
+               playsInline
+               webkit-playsinline="true"
+               disablePictureInPicture
+               className="media-preview"
+               src={preview.src}
+               alt={`Video ${index + 1}`}
+             />
               ) : (
                 <img
                   className="media-preview"
