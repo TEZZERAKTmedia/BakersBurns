@@ -102,19 +102,20 @@ const EditProductForm = ({ productId, onUpdate, onCancel }) => {
   
       // Prepare media data
       const mediaFormData = new FormData();
-      const mediaToKeep = mediaPreviews.filter((media) => !media.file).map((media) => media.id);
+      const mediaToKeep = mediaPreviews
+        .filter((media) => !media.file)
+        .map((media) => ({ id: media.id, order: media.order }));
   
       mediaPreviews.forEach((media, index) => {
         if (media.file) {
           mediaFormData.append('media', media.file);
-          mediaFormData.append(`mediaOrder_${index}`, index + 1);
+          mediaFormData.append(`mediaOrder_${index}`, index + 1); // Send new order for new files
         }
       });
   
-      // Add `mediaToKeep` to mediaFormData
+      // Add `mediaToKeep` to mediaFormData for existing media
       mediaFormData.append('mediaToKeep', JSON.stringify(mediaToKeep));
   
-      // Log Media FormData Entries Before Adding Removed Media
       console.log('Media FormData Entries before removedMedia:', [...mediaFormData.entries()]);
   
       // Add removedMedia if there are any
@@ -131,12 +132,15 @@ const EditProductForm = ({ productId, onUpdate, onCancel }) => {
   
       if (onUpdate) onUpdate(); // Notify parent of successful update
       console.log('Product and media updated successfully');
+      onCancel(); // Close the form
+      fetchProducts(); // Refresh product list
     } catch (error) {
       console.error('Error updating product and media:', error);
     } finally {
       setIsSubmitting(false);
     }
   };
+  
   
   
   
