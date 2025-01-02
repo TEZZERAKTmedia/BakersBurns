@@ -99,51 +99,85 @@ const addProduct = async (req, res) => {
 const updateProduct = async (req, res) => {
   const { id } = req.params;
 
-  console.log('Request Body:', req.body);
-  console.log('Request File:', req.file);
-
-  const {
-    name, description, price, type, quantity,
-    length, width, height, weight, unit,
-  } = req.body;
-  const image = req.file ? req.file.filename : null;
-
   try {
-    console.log('Updating product with id:', id);
     const product = await Product.findByPk(id);
-
-    if (product) {
-      console.log('Product found:', product);
-
-      // Update fields
-      product.set({
-        name: name || product.name,
-        description: description || product.description,
-        price: price || product.price,
-        image: image || product.image,
-        type: type || product.type,
-        quantity: quantity || product.quantity,
-        length: length !== undefined ? parseFloat(length) : product.length,
-        width: width !== undefined ? parseFloat(width) : product.width,
-        height: height !== undefined ? parseFloat(height) : product.height,
-        weight: weight !== undefined ? parseFloat(weight) : product.weight,
-        unit: unit || product.unit,
-      });
-
-      console.log('Changed fields:', product.changed());
-
-      await product.save();
-      console.log('Product updated successfully', product);
-      res.json(product);
-    } else {
-      console.warn('Product not found with ID:', id);
-      res.status(404).json({ error: 'Product not found' });
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
     }
+
+    // Update product fields
+    const { name, description, price, type, quantity, length, width, height, weight, unit } = req.body;
+    product.set({
+      name: name || product.name,
+      description: description || product.description,
+      price: price || product.price,
+      type: type || product.type,
+      quantity: quantity || product.quantity,
+      length: length !== undefined ? parseFloat(length) : product.length,
+      width: width !== undefined ? parseFloat(width) : product.width,
+      height: height !== undefined ? parseFloat(height) : product.height,
+      weight: weight !== undefined ? parseFloat(weight) : product.weight,
+      unit: unit || product.unit,
+    });
+
+    if (req.files && req.files.thumbnail) {
+      const uploadsPath = path.join(__dirname, '../../uploads');
+      if (product.thumbnail) {
+        const thumbnailPath = path.join(uploadsPath, product.thumbnail);
+        if (fs.existsSync(thumbnailPath)) {
+          fs.unlinkSync(thumbnailPath);
+        }
+      }
+      product.thumbnail = req.files.thumbnail[0].filename;
+    }
+
+    await product.save();
+
+    res.status(200).json({ message: 'Product updated successfully', product });
   } catch (error) {
     console.error('Error updating product:', error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ message: 'Error updating product', error });
   }
 };
+
+
+// Helper function for media synchronization
+const updateMediaInternal = async (productId, mediaFiles) => {
+  try {
+    // Fetch and delete all existing media for the product
+    const existingMedia = await Media.findAll({ where: { productId } });
+    const uploadsPath = path.join(__dirname, '../../uploads');
+
+    // Delete media files from the file system
+    for (const media of existingMedia) {
+      const mediaPath = path.join(uploadsPath, media.url);
+      if (fs.existsSync(mediaPath)) {
+        fs.unlinkSync(mediaPath); // Delete the file
+      }
+    }
+
+    // Remove media records from the database
+    await Media.destroy({ where: { productId } });
+
+    // Process and save new media
+    if (mediaFiles) {
+      const newMediaEntries = mediaFiles.map((file) => ({
+        productId,
+        url: file.filename,
+        type: file.mimetype.startsWith('video/') ? 'video' : 'image',
+      }));
+
+      const newMedia = await Media.bulkCreate(newMediaEntries); // Add new media records
+      return newMedia;
+    }
+
+    return [];
+  } catch (error) {
+    console.error('Error in updateMediaInternal:', error);
+    throw error;
+  }
+};
+
 
 const updateThumbnail = async (req, res) => {
   const { id } = req.params;
@@ -246,36 +280,50 @@ const addMedia = async (req, res) => {
 
 // Update product media
 const updateMedia = async (req, res) => {
-  const { id } = req.params;
+  const { id } = req.params; // Product ID
+  const { mediaToKeep = [] } = req.body; // Array of media IDs to keep
 
   try {
     const product = await Product.findByPk(id);
-
     if (!product) {
       return res.status(404).json({ message: 'Product not found' });
     }
 
-    if (!req.files || !req.files.media) {
-      return res.status(400).json({ message: 'Media files are required' });
+    const uploadsPath = path.join(__dirname, '../../uploads');
+
+    // Fetch all existing media for the product
+    const existingMedia = await Media.findAll({ where: { productId: id } });
+
+    // Delete media not included in `mediaToKeep`
+    for (const media of existingMedia) {
+      if (!mediaToKeep.includes(media.id)) {
+        const mediaPath = path.join(uploadsPath, media.url);
+        if (fs.existsSync(mediaPath)) {
+          fs.unlinkSync(mediaPath); // Delete the file from the file system
+        }
+        await media.destroy(); // Delete the record from the database
+      }
     }
 
-    // Process new media files
-    const newMediaEntries = req.files.media.map((file) => ({
-      productId: product.id,
-      url: file.filename,
-      type: file.mimetype.startsWith('video/') ? 'video' : 'image',
-      isDefault: false, // Default logic can be adjusted if needed
-    }));
+    // Process and add new media files
+    if (req.files && req.files.media) {
+      const newMediaEntries = req.files.media.map((file) => ({
+        productId: product.id,
+        url: file.filename,
+        type: file.mimetype.startsWith('video/') ? 'video' : 'image',
+      }));
 
-    // Add new media to the Media table
-    await Media.bulkCreate(newMediaEntries);
+      await Media.bulkCreate(newMediaEntries); // Add new media records
+    }
 
-    res.status(200).json({ message: 'Media updated successfully', product });
+    res.status(200).json({ message: 'Media updated successfully' });
   } catch (error) {
     console.error('Error updating media:', error);
     res.status(500).json({ message: 'Error updating media', error });
   }
 };
+
+
 
 // Delete a product (existing)
 const deleteProduct = async (req, res) => {

@@ -138,7 +138,7 @@ const DiscountForm = ({ productId = null, productTypes = [], onClose, onSuccess 
 };
 
 DiscountForm.propTypes = {
-  productId: PropTypes.string, // For individual product discounts
+  productId: PropTypes.number.isRequired, // For individual product discounts
   productTypes: PropTypes.array, // For type-based discounts
   onClose: PropTypes.func.isRequired,
   onSuccess: PropTypes.func, // Callback for successful discount application

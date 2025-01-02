@@ -87,30 +87,27 @@ export const ProductsProvider = ({ children }) => {
   
 
   // Update a product and media
-  const updateProductAndMedia = async (productId, updatedProductData, updatedMedia) => {
+  const updateProductAndMedia = async (productId, productFormData, mediaFormData) => {
     try {
-      const mediaFormData = new FormData();
-  
-      // Use `map` to build the FormData object instead of `forEach`
-      updatedMedia.map((media, index) => {
-        mediaFormData.append('media', media.file);
-        mediaFormData.append(`mediaOrder_${index}`, index + 1);
-      });
-  
       const [productResponse, mediaResponse] = await Promise.all([
-        adminApi.put(`/products/${productId}`, updatedProductData),
-        adminApi.put(`/products/${productId}/update-media`, mediaFormData, {
+        adminApi.put(`/products/update-product/${productId}`, productFormData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        }),
+        adminApi.put(`/products/update-media/${productId}`, mediaFormData, {
           headers: { 'Content-Type': 'multipart/form-data' },
         }),
       ]);
   
-      fetchProducts(); // Refresh product list
+      console.log('Product Response:', productResponse.data);
+      console.log('Media Response:', mediaResponse.data);
+  
       return { product: productResponse.data, media: mediaResponse.data };
     } catch (error) {
-      console.error('Error updating product or media:', error);
+      console.error('Error in updateProductAndMedia:', error);
       throw error;
     }
   };
+  
   
   
   

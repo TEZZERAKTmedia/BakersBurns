@@ -3,28 +3,30 @@ import EditProductForm from './editProduct';
 import DiscountByProductForm from './discountForm';
 import { useProductContext } from '../../Components/productManager/ProductsContext'; // Import context
 import './product_card.css';
-import MediaUploader from '../mediaUploader';
 
 const ProductCard = ({ product }) => {
   const [isEditingProduct, setIsEditingProduct] = useState(false);
   const [isEditingDiscount, setIsEditingDiscount] = useState(false);
-  const [media, setMedia] = useState([]); // State to hold media files
+  const [media, setMedia] = useState([]);
   const [isLoadingMedia, setIsLoadingMedia] = useState(false);
-  const [productDetails, setProductDetails] = useState(null); // State to hold product details
+  const [productDetails, setProductDetails] = useState(null);
   const [isLoadingDetails, setIsLoadingDetails] = useState(false);
 
-  const { fetchProductDetails, fetchProductMedia, deleteProduct } = useProductContext(); // Fetch functions and delete function from context
+  const { fetchProducts, fetchProductDetails, fetchProductMedia, deleteProduct } = useProductContext();
 
-  // Fetch media files on mount
+  // Function to handle canceling edit mode
+  const handleCancelEdit = () => {
+    setIsEditingProduct(false);
+  };
+
   useEffect(() => {
     const fetchMedia = async () => {
       setIsLoadingMedia(true);
       try {
-        const mediaData = await fetchProductMedia(product.id); // Fetch media by product ID
-        console.log('Fetched media:', mediaData); // Debugging log
-        setMedia(mediaData || []); // Store media files
+        const mediaData = await fetchProductMedia(product.id);
+        setMedia(mediaData || []);
       } catch (error) {
-        console.error('Error fetching media:', error);
+        console.error("Error fetching media:", error);
       } finally {
         setIsLoadingMedia(false);
       }
@@ -33,16 +35,14 @@ const ProductCard = ({ product }) => {
     fetchMedia();
   }, [product.id, fetchProductMedia]);
 
-  // Fetch product details on mount
   useEffect(() => {
     const fetchDetails = async () => {
       setIsLoadingDetails(true);
       try {
-        const details = await fetchProductDetails(product.id); // Fetch product details
-        console.log('Fetched product details:', details); // Debugging log
-        setProductDetails(details); // Store product details
+        const details = await fetchProductDetails(product.id);
+        setProductDetails(details);
       } catch (error) {
-        console.error('Error fetching product details:', error);
+        console.error("Error fetching product details:", error);
       } finally {
         setIsLoadingDetails(false);
       }
@@ -53,11 +53,11 @@ const ProductCard = ({ product }) => {
 
   const handleDelete = async () => {
     try {
-      await deleteProduct(product.id); // Use deleteProduct from context
+      await deleteProduct(product.id);
       console.log(`Product ${product.id} deleted successfully`);
     } catch (error) {
-      console.error('Error deleting product:', error);
-      alert('Failed to delete product. Please try again.');
+      console.error("Error deleting product:", error);
+      alert("Failed to delete product. Please try again.");
     }
   };
 
@@ -66,12 +66,13 @@ const ProductCard = ({ product }) => {
       {isEditingProduct ? (
         <EditProductForm
           productId={product.id}
-          onCancel={() => setIsEditingProduct(false)}
+          fetchProducts={fetchProducts}
+          onClose={() => setIsEditingProduct(false)}
+          onCancel={handleCancelEdit}
         />
       ) : (
         <>
           <div className="product-info">
-            {/* Display thumbnail */}
             {product.thumbnail ? (
               <img
                 src={`${import.meta.env.VITE_BACKEND}/uploads/${product.thumbnail}`}
@@ -85,46 +86,49 @@ const ProductCard = ({ product }) => {
             <p>${product.price.toFixed(2)}</p>
           </div>
 
-          {/* Display additional product details */}
           {isLoadingDetails ? (
             <p>Loading product details...</p>
           ) : productDetails ? (
             <div className="product-details">
-              <p><strong>Description:</strong> {productDetails.description}</p>
-              <p><strong>Type:</strong> {productDetails.type}</p>
-              <p><strong>Quantity:</strong> {productDetails.quantity}</p>
-              {/* Add any other product details you need to display */}
+              <p>
+                <strong>Description:</strong> {productDetails.description}
+              </p>
+              <p>
+                <strong>Type:</strong> {productDetails.type}
+              </p>
+              <p>
+                <strong>Quantity:</strong> {productDetails.quantity}
+              </p>
             </div>
           ) : (
             <p>No additional details available</p>
           )}
 
-          {/* Display media */}
-          <div className="product-media">
+          <div className="image-uploader-grid">
             {isLoadingMedia ? (
               <p>Loading media...</p>
             ) : media.length > 0 ? (
-              <div className="media-grid">
-                {media.map((item, index) => (
-                  <div key={item.id} className="media-item">
-                    {item.type === 'image' ? (
-                      <img
-                        src={`${import.meta.env.VITE_BACKEND}/uploads/${item.url}`}
-                        alt={`Media ${index + 1}`}
-                        className="media-preview"
-                      />
-                    ) : (
-                      <video
-                        controls
-                        className="media-preview"
-                        src={`${import.meta.env.VITE_BACKEND}/uploads/${item.url}`}
-                      >
-                        Your browser does not support the video tag.
-                      </video>
-                    )}
-                  </div>
-                ))}
-              </div>
+              media.map((item, index) => (
+                <div key={item.id} className="image-uploader-grid-item">
+                  {item.type === "image" ? (
+                    <img
+                      src={`${import.meta.env.VITE_BACKEND}/uploads/${item.url}`}
+                      alt={`Media ${index + 1}`}
+                      className="media-preview"
+                    />
+                  ) : (
+                    <video
+                      className="media-preview"
+                      src={`${import.meta.env.VITE_BACKEND}/uploads/${item.url}`}
+                      autoPlay
+                      loop
+                      muted
+                    >
+                      Your browser does not support the video tag.
+                    </video>
+                  )}
+                </div>
+              ))
             ) : (
               <p>No media available</p>
             )}
@@ -154,10 +158,10 @@ const ProductCard = ({ product }) => {
         </button>
       )}
 
-      {/* Use delete function */}
       <button onClick={handleDelete}>Delete</button>
     </div>
   );
 };
 
 export default ProductCard;
+

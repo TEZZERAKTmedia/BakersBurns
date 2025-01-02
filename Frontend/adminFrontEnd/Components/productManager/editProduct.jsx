@@ -1,24 +1,24 @@
-import React, { useState, useEffect,useContext  } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { adminApi } from '../../config/axios'; // Axios config for API calls
-
+import { adminApi } from '../../config/axios';
 import { useProductContext } from './ProductsContext';
-
+import MediaUploader from '../mediaUploader';
 
 const EditProductForm = ({ productId, onUpdate, onCancel }) => {
-    const { fetchProducts } = useProductContext();
-  const [productData, setProductData] = useState(null); // Initialize as null
+  const { fetchProducts, fetchProductMedia, updateProductAndMedia } = useProductContext();
+  const [productData, setProductData] = useState(null); 
+  const [mediaPreviews, setMediaPreviews] = useState([]);
   const [imagePreview, setImagePreview] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [missingFields, setMissingFields] = useState([]);
+  const [removedMedia, setRemovedMedia] = useState([]);
+
   
 
-
-  // Fetch product data when the component mounts
   useEffect(() => {
     const fetchProductData = async () => {
       try {
-        const response = await adminApi.get(`/api/products/${productId}/details`);
+        const response = await adminApi.get(`/products/${productId}/details`);
         setProductData(response.data);
         if (response.data.thumbnail) {
           setImagePreview(`${import.meta.env.VITE_BACKEND}/uploads/${response.data.thumbnail}`);
@@ -27,17 +27,32 @@ const EditProductForm = ({ productId, onUpdate, onCancel }) => {
         console.error('Error fetching product data:', error);
       }
     };
-    fetchProducts();
-    fetchProductData();
-  }, [productId]);
 
-  // Handle input changes
+    const fetchMedia = async () => {
+      try {
+        const media = await fetchProductMedia(productId);
+        const formattedMedia = media.map((item, index) => ({
+          id: item.id,
+          src: `${import.meta.env.VITE_BACKEND}/uploads/${item.url}`,
+          type: item.type,
+          file: null,
+          order: index + 1,
+        }));
+        setMediaPreviews(formattedMedia);
+      } catch (error) {
+        console.error('Error fetching media:', error);
+      }
+    };
+
+    fetchProductData();
+    fetchMedia();
+  }, [productId, fetchProductMedia]);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setProductData({ ...productData, [name]: value });
   };
 
-  // Handle thumbnail change
   const handleThumbnailChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -46,44 +61,88 @@ const EditProductForm = ({ productId, onUpdate, onCancel }) => {
     }
   };
 
-  // Handle form submission
+  const handleMediaChange = (updatedMedia) => {
+    console.log('Updated media received in EditProductForm', updatedMedia);
+
+    const currentMediaIds = mediaPreviews.map((media) => media.id);
+    const updatedMediaIds = updatedMedia.map((media) => media.id);
+  
+    // Track removed media
+    const removed = currentMediaIds.filter((id) => !updatedMediaIds.includes(id));
+    setRemovedMedia((prev) => [...prev, ...removed]);
+  
+    // Update the media previews
+    setMediaPreviews(updatedMedia);
+  };
+  
+
   const handleSubmit = async () => {
     if (!productData) return;
-
+  
     const missing = [];
     if (!productData.name) missing.push('name');
     if (!productData.description) missing.push('description');
     if (!productData.price || productData.price <= 0) missing.push('price');
     if (!productData.type) missing.push('type');
-
+  
     setMissingFields(missing);
-
+  
     if (missing.length > 0) return;
-
+  
     setIsSubmitting(true);
-
+  
     try {
-      const formData = new FormData();
+      // Prepare product data for submission
+      const productFormData = new FormData();
       Object.entries(productData).forEach(([key, value]) => {
-        if (value !== null) formData.append(key, value);
+        if (value !== null) productFormData.append(key, value);
       });
-
-      const response = await adminApi.put(`/api/products/${productId}`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+  
+      console.log('Product FormData Entries:', [...productFormData.entries()]);
+  
+      // Prepare media data
+      const mediaFormData = new FormData();
+      const mediaToKeep = mediaPreviews.filter((media) => !media.file).map((media) => media.id);
+  
+      mediaPreviews.forEach((media, index) => {
+        if (media.file) {
+          mediaFormData.append('media', media.file);
+          mediaFormData.append(`mediaOrder_${index}`, index + 1);
+        }
       });
-      fetchProducts();
-      onCancel();
-      console.log('Product updated successfully:', response.data);
-
-      if (onUpdate) onUpdate(response.data); // Notify parent component of the update
+  
+      // Add `mediaToKeep` to mediaFormData
+      mediaFormData.append('mediaToKeep', JSON.stringify(mediaToKeep));
+  
+      // Log Media FormData Entries Before Adding Removed Media
+      console.log('Media FormData Entries before removedMedia:', [...mediaFormData.entries()]);
+  
+      // Add removedMedia if there are any
+      if (removedMedia.length > 0) {
+        removedMedia.forEach((id) => {
+          mediaFormData.append('removedMediaIds', id);
+        });
+      }
+  
+      console.log('Final Media FormData Entries:', [...mediaFormData.entries()]);
+  
+      // Send both product and media updates
+      await updateProductAndMedia(productId, productFormData, mediaFormData);
+  
+      if (onUpdate) onUpdate(); // Notify parent of successful update
+      console.log('Product and media updated successfully');
     } catch (error) {
-      console.error('Error updating product:', error);
+      console.error('Error updating product and media:', error);
     } finally {
       setIsSubmitting(false);
     }
   };
+  
+  
+  
 
-  // Show a loading state while product data is being fetched
+  
+
   if (!productData) {
     return <p>Loading product details...</p>;
   }
@@ -147,21 +206,30 @@ const EditProductForm = ({ productId, onUpdate, onCancel }) => {
         {imagePreview && <img src={imagePreview} alt="Thumbnail Preview" style={{ maxWidth: '100%', marginTop: '10px' }} />}
       </div>
 
+      <div className="form-section">
+        <label>Media</label>
+        <MediaUploader
+          mode="edit"
+          initialMedia={mediaPreviews}
+          onMediaChange={handleMediaChange}
+        />
+      </div>
+
       <div className="form-actions">
         <button onClick={handleSubmit} disabled={isSubmitting}>
           {isSubmitting ? 'Updating...' : 'Update Product'}
         </button>
-        <button onClick={onCancel}>Cancel</button>
+        <button onClick={onCancel}>Cancel</button> {/* Directly use onCancel */}
       </div>
     </div>
   );
 };
 
 EditProductForm.propTypes = {
-    productId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-    onClose: PropTypes.func.isRequired,
-    fetchProducts: PropTypes.func.isRequired,
-    onCancel: PropTypes.func.isRequired,
-  };
+  productId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+  fetchProducts: PropTypes.func.isRequired,
+  onCancel: PropTypes.func,
+  onUpdate: PropTypes.func,
+};
 
 export default EditProductForm;

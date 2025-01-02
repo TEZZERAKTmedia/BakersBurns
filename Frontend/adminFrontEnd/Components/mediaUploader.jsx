@@ -6,6 +6,7 @@ const MediaUploader = ({
   initialMedia = [],
   maxMedia = 10,
   onMediaChange,
+  onMediaDelete, // Function to delete media from the backend in edit mode
 }) => {
   const [mediaPreviews, setMediaPreviews] = useState(
     Array.isArray(initialMedia)
@@ -33,7 +34,7 @@ const MediaUploader = ({
       .map((file, index) => {
         if (file instanceof File) {
           try {
-            const preview = URL.createObjectURL(file); // Catch errors here
+            const preview = URL.createObjectURL(file);
             return {
               id: `${Date.now()}-${file.name}`,
               file,
@@ -55,6 +56,42 @@ const MediaUploader = ({
     if (onMediaChange) onMediaChange([...mediaPreviews, ...mediaFiles]);
   };
 
+  const handleDragStart = (index) => {
+    setDraggedIndex(index);
+  };
+
+  const handleDragOver = (index) => {
+    if (draggedIndex === null || draggedIndex === index) return;
+
+    const reorderedPreviews = [...mediaPreviews];
+    const [draggedItem] = reorderedPreviews.splice(draggedIndex, 1);
+    reorderedPreviews.splice(index, 0, draggedItem);
+
+    reorderedPreviews.forEach((item, i) => (item.order = i + 1));
+
+    setMediaPreviews(reorderedPreviews);
+    setDraggedIndex(index);
+    if (onMediaChange) onMediaChange(reorderedPreviews);
+  };
+
+  const handleDrop = () => {
+    setDraggedIndex(null);
+  };
+
+  const handleRemoveMedia = (index) => {
+    const mediaToRemove = mediaPreviews[index];
+    console.log('Removing media:', mediaToRemove)
+    // If in edit mode and the media has an `id`, call the delete function
+    if (mode === 'edit' && mediaToRemove.id && onMediaDelete) {
+      onMediaDelete(mediaToRemove.id);
+    }
+
+    const updatedPreviews = mediaPreviews.filter((_, i) => i !== index);
+    updatedPreviews.forEach((item, i) => (item.order = i + 1));
+    setMediaPreviews(updatedPreviews);
+    if (onMediaChange) onMediaChange(updatedPreviews);
+  };
+
   useEffect(() => {
     // Clean up object URLs when the component unmounts
     return () => {
@@ -66,34 +103,37 @@ const MediaUploader = ({
     };
   }, [mediaPreviews]);
 
-  const handleRemoveMedia = (index) => {
-    const updatedPreviews = mediaPreviews.filter((_, i) => i !== index);
-    updatedPreviews.forEach((item, i) => (item.order = i + 1));
-    setMediaPreviews(updatedPreviews);
-    if (onMediaChange) onMediaChange(updatedPreviews);
-  };
-
   const renderMediaGrid = () => {
     return (
       <div className="image-uploader-grid">
         {mediaPreviews.map((preview, index) => (
-          <div key={preview.id} className="image-uploader-grid-item">
+          <div
+            key={preview.id}
+            className="image-uploader-grid-item"
+            draggable={mode === 'edit'}
+            onDragStart={() => handleDragStart(index)}
+            onDragOver={(e) => {
+              e.preventDefault();
+              handleDragOver(index);
+            }}
+            onDrop={handleDrop}
+          >
             <div className="drag-handle">
               <span className="image-order-number">{preview.order}</span>
               {preview.src.endsWith('.mp4') || preview.src.endsWith('.avi') ? (
                 <video
-                  controls
+                  autoPlay
+                  loop
+                  muted
                   className="media-preview"
                   src={preview.src}
                   alt={`Video ${index + 1}`}
-                  draggable={false}
                 />
               ) : (
                 <img
                   className="media-preview"
                   src={preview.src}
-                  alt={`Preview ${index + 1}`}
-                  draggable={false}
+                  alt={`Image ${index + 1}`}
                 />
               )}
             </div>
@@ -113,7 +153,7 @@ const MediaUploader = ({
 
   const renderAddMediaSection = () => {
     return (
-      mode === 'add' && (
+      mode === 'add' || mode === 'edit' ? (
         <div className="image-grid-item-add-image">
           <label>
             +
@@ -126,7 +166,7 @@ const MediaUploader = ({
             />
           </label>
         </div>
-      )
+      ) : null
     );
   };
 

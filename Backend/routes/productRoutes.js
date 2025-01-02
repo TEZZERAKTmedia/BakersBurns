@@ -8,14 +8,17 @@ const {
   addProduct,
   addMedia,
   updateProduct,
+  updateMedia,
   deleteProduct,
   addDiscount,
   updateDiscount,
   removeDiscount,
   getDiscountedProducts,
   getProductTypes,
-  getProductMedia
+  getProductMedia,
+  
 } = require('../controllers/admin/productController');
+const adminAuthMiddleware = require('../middleware/adminAuthMiddleware');
 
 // Product routes
 router.get('/', getProducts);
@@ -30,7 +33,8 @@ router.post('/add-media', productUploadMiddleware, addMedia);
 router.post('/', productUploadMiddleware, addProduct);
 
 // Unified route for updating a product
-router.put('/:id', productUploadMiddleware, updateProduct);
+router.put('/update-media/:id', productUploadMiddleware, updateMedia);
+router.put('/update-product/:id', productUploadMiddleware, updateProduct);
 
 // Route for deleting a product
 router.delete('/:id', deleteProduct);
