@@ -120,7 +120,7 @@ const ProductCard = ({ product }) => {
                     <video
                       className="media-preview"
                       src={`${import.meta.env.VITE_BACKEND}/uploads/${item.url}`}
-                      autoPlay
+
                       loop
                       muted
                     >
