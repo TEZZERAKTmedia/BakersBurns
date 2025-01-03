@@ -11,8 +11,8 @@ const sequelize = new Sequelize(
     process.env.DB_PASSWORD,
     {
         host: process.env.DB_HOST,
-        port: process.env.DB_PORT || 3306, // Default to 3306 if not specified
-        dialect: process.env.DB_DIALECT || 'mysql', // Default to 'mysql'
+        port: process.env.DB_PORT || 3306,
+        dialect: process.env.DB_DIALECT || 'mysql',
     }
 );
 
@@ -32,7 +32,39 @@ const Media = sequelize.define('Media', {
     timestamps: false,
 });
 
-// Path to uploads directory (can also be set via environment variable)
+// Define Products model
+const Products = sequelize.define('Products', {
+    id: {
+        type: DataTypes.INTEGER,
+        autoIncrement: true,
+        primaryKey: true,
+    },
+    thumbnail: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+}, {
+    tableName: 'Products',
+    timestamps: false,
+});
+
+// Define Gallery model
+const Gallery = sequelize.define('Gallery', {
+    id: {
+        type: DataTypes.INTEGER,
+        autoIncrement: true,
+        primaryKey: true,
+    },
+    image: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
+}, {
+    tableName: 'Gallery',
+    timestamps: false,
+});
+
+// Path to uploads directory
 const uploadsDir = process.env.UPLOADS_DIR || path.join(__dirname, '../uploads');
 
 const cleanupMedia = async () => {
@@ -41,17 +73,29 @@ const cleanupMedia = async () => {
         await sequelize.authenticate();
         console.log('Database connected successfully.');
 
+        // Step 1: Fetch all media, thumbnails, and gallery images
         const mediaRecords = await Media.findAll();
-        const databaseFiles = mediaRecords.map((record) => record.url);
+        const mediaFiles = mediaRecords.map((record) => record.url);
 
+        const productRecords = await Products.findAll();
+        const productThumbnails = productRecords.map((record) => record.thumbnail).filter(Boolean);
+
+        const galleryRecords = await Gallery.findAll();
+        const galleryImages = galleryRecords.map((record) => record.image);
+
+        // Combine all files referenced in the database
+        const databaseFiles = [...mediaFiles, ...productThumbnails, ...galleryImages];
+
+        // Step 2: Get all files in the uploads folder
         if (!fs.existsSync(uploadsDir)) {
             console.error('Uploads directory does not exist:', uploadsDir);
             return;
         }
 
         const uploadFiles = fs.readdirSync(uploadsDir);
-        const filesToDelete = uploadFiles.filter((file) => !databaseFiles.includes(file));
 
+        // Step 3: Identify and delete files not in the database
+        const filesToDelete = uploadFiles.filter((file) => !databaseFiles.includes(file));
         filesToDelete.forEach((file) => {
             const filePath = path.join(uploadsDir, file);
             fs.unlinkSync(filePath);
