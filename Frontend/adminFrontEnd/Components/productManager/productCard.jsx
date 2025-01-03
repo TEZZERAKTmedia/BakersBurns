@@ -24,16 +24,17 @@ const ProductCard = ({ product }) => {
       setIsLoadingMedia(true);
       try {
         const mediaData = await fetchProductMedia(product.id);
+        console.log('Fetched Media:', mediaData);
         setMedia(mediaData || []);
       } catch (error) {
-        console.error("Error fetching media:", error);
+        console.error('Error fetching media:', error);
       } finally {
         setIsLoadingMedia(false);
       }
     };
-
     fetchMedia();
   }, [product.id, fetchProductMedia]);
+  
 
   useEffect(() => {
     const fetchDetails = async () => {

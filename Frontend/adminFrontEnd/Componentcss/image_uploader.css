@@ -97,20 +97,6 @@
     cursor: grab;
   }
 
-  
-  /* Prevent fullscreen */
-video {
-  max-height: 100%; /* Constrain video to container */
-  object-fit: cover; /* Adjust how the video fits */
-  pointer-events: auto; /* Ensure tap events work */
-  display: block;
-}
-
-video::-webkit-media-controls-fullscreen-button {
-  display: none; /* Hide fullscreen button */
-}
-
-  
   .image-uploader-grid-item button {
     position: absolute;
     top: 5px;
