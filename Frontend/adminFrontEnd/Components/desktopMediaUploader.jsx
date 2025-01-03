@@ -1,10 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
 import '../Componentcss/image_uploader.css'; // Use your existing CSS
+import LoadingPage from './loading'; 
 
-const MediaUploader = ({
+
+const DesktopMediaUploader = ({
   mode = 'view', // Modes: 'view', 'edit', 'add'
   initialMedia = [],
   maxMedia = 10,
+  isLoading = false, 
   onMediaChange,
   onMediaDelete, // Function to delete media from the backend in edit mode
 }) => {
@@ -18,7 +21,7 @@ const MediaUploader = ({
         }))
       : []
   );
-
+  const [loading, setLoading] = useState(false);
   const [draggedIndex, setDraggedIndex] = useState(null);
   const dragImageRef = useRef(null);
 
@@ -58,6 +61,7 @@ const MediaUploader = ({
 
   const handleDragStart = (index) => {
     setDraggedIndex(index);
+    
   };
 
   const handleDragOver = (index) => {
@@ -174,10 +178,16 @@ const MediaUploader = ({
 
   return (
     <div className="media-uploader">
-      {renderMediaGrid()}
-      {renderAddMediaSection()}
+      {isLoading ? (
+        <LoadingPage />
+      ) : (
+        <>
+          {renderMediaGrid()}
+          {renderAddMediaSection()}
+        </>
+      )}
     </div>
   );
 };
 
-export default MediaUploader;
+export default DesktopMediaUploader;

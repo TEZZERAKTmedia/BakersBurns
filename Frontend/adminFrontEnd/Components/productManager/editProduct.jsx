@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { adminApi } from '../../config/axios';
 import { useProductContext } from './ProductsContext';
-import MediaUploader from '../mediaUploader';
+import DesktopMediaUploader from '../desktopMediaUploader';
+import MobileMediaUploader from '../mobileMediaUploader';
 
 const EditProductForm = ({ productId, onUpdate, onCancel }) => {
   const { fetchProducts, fetchProductMedia, updateProductAndMedia } = useProductContext();
@@ -12,7 +13,20 @@ const EditProductForm = ({ productId, onUpdate, onCancel }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [missingFields, setMissingFields] = useState([]);
   const [removedMedia, setRemovedMedia] = useState([]);
+  const [mediaLoading, setMediaLoading] = useState(false); // New
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+      
+    };
+
+    window.addEventListener('resize', handleResize);
+    console.log("mobile device detected");
+    return () => window.removeEventListener('resize', handleResize);
+    
+  }, []);
   
 
   useEffect(() => {
@@ -29,6 +43,7 @@ const EditProductForm = ({ productId, onUpdate, onCancel }) => {
     };
 
     const fetchMedia = async () => {
+      setMediaLoading(true);
       try {
         const media = await fetchProductMedia(productId);
         const formattedMedia = media.map((item, index) => ({
@@ -41,6 +56,8 @@ const EditProductForm = ({ productId, onUpdate, onCancel }) => {
         setMediaPreviews(formattedMedia);
       } catch (error) {
         console.error('Error fetching media:', error);
+      } finally {
+        setMediaLoading(false);
       }
     };
 
@@ -212,13 +229,22 @@ const EditProductForm = ({ productId, onUpdate, onCancel }) => {
 
       <div className="form-section">
         <label>Media</label>
-        <MediaUploader
-          mode="edit"
-          initialMedia={mediaPreviews}
-          onMediaChange={handleMediaChange}
-        />
+        {isMobile ? (
+          <MobileMediaUploader
+            mode="edit"
+            initialMedia={mediaPreviews}
+            onMediaChange={handleMediaChange}
+            isLoading={mediaLoading}
+          />
+        ) : (
+          <DesktopMediaUploader
+            mode="edit"
+            initialMedia={mediaPreviews}
+            onMediaChange={handleMediaChange}
+            isLoading={mediaLoading}
+          />
+        )}
       </div>
-
       <div className="form-actions">
         <button onClick={handleSubmit} disabled={isSubmitting}>
           {isSubmitting ? 'Updating...' : 'Update Product'}
