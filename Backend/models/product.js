@@ -1,114 +1,119 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
-const xss = require('xss'); // Import xss library
+const { Sequelize, DataTypes } = require('sequelize');
+const fs = require('fs');
+const path = require('path');
+const cron = require('node-cron');
+require('dotenv').config();
 
-const Product = sequelize.define('Product', {
-  name: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  description: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  price: {
-    type: DataTypes.FLOAT,
-    allowNull: false,
-  },
-  thumbnail: {
-    type: DataTypes.STRING,
-    allowNull: true,
-  },
-  quantity: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    validate: {
-      min: 0 // Ensure quantity is never negative
+// Initialize Sequelize using environment variables
+const sequelize = new Sequelize(
+    process.env.DB_NAME,
+    process.env.DB_USER,
+    process.env.DB_PASSWORD,
+    {
+        host: process.env.DB_HOST,
+        port: process.env.DB_PORT || 3306,
+        dialect: process.env.DB_DIALECT || 'mysql',
     }
-  },
-  type: {
-    type: DataTypes.STRING,
-    allowNull: true,
-  },
-  isDiscounted: {
-    type: DataTypes.BOOLEAN,
-    defaultValue: false, // Discount is not active by default
-  },
-  discountType: {
-    type: DataTypes.STRING,
-    allowNull: true, // Make this nullable if not always used
-  },
-  discountAmount: {
-    type: DataTypes.DECIMAL(10, 2),
-    allowNull: true, // Make this nullable if not always used
-  },
-  discountPrice: {
-    type: DataTypes.DECIMAL(10, 2),
-    allowNull: true,
-  },
-  discountStartDate: {
-    type: DataTypes.DATE,
-    allowNull: true, // Make this nullable if not always used
-  },
-  discountEndDate: {
-    type: DataTypes.DATE,
-    allowNull: true, // Fixed typo and made it nullable if not always used
-  },
-  // New fields for dimensions and weight
-  length: {
-    type: DataTypes.FLOAT,
-    allowNull: true, // Nullable in case some products don't have dimensions
-    validate: {
-      min: 0, // Ensure non-negative values
-    }
-  },
-  width: {
-    type: DataTypes.FLOAT,
-    allowNull: true,
-    validate: {
-      min: 0, // Ensure non-negative values
-    }
-  },
-  height: {
-    type: DataTypes.FLOAT,
-    allowNull: true,
-    validate: {
-      min: 0, // Ensure non-negative values
-    }
-  },
-  weight: {
-    type: DataTypes.FLOAT,
-    allowNull: true, // Nullable in case weight is not provided
-    validate: {
-      min: 0, // Ensure non-negative values
+);
+
+// Define Media model
+const Media = sequelize.define('Media', {
+    id: {
+        type: DataTypes.INTEGER,
+        autoIncrement: true,
+        primaryKey: true,
     },
-    
-  },
-  unit: {
-    type: DataTypes.ENUM('metric', 'standard'),
-    allowNull: false,
-    defaultValue: 'standard', // Default to metric if not specified
-  }
+    url: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
 }, {
-  timestamps: false,
-  tableName: 'Products',
-  hooks: {
-    beforeValidate: (product) => {
-      // Sanitize only the string fields
-      product.name = xss(product.name);
-      product.description = xss(product.description);
-      product.image = product.image ? xss(product.image) : null;
-      product.type = product.type ? xss(product.type) : null;
-      product.discountType = product.discountType ? xss(product.discountType) : null;
-    }
-  }
+    tableName: 'Media',
+    timestamps: false,
 });
 
-Product.associate = (models) => {
-  Product.hasMany(models.Order, {
-    foreignKey: 'productId',
-    as: 'orders'
-  });
+// Define Products model
+const Products = sequelize.define('Products', {
+    id: {
+        type: DataTypes.INTEGER,
+        autoIncrement: true,
+        primaryKey: true,
+    },
+    thumbnail: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+}, {
+    tableName: 'Products',
+    timestamps: false,
+});
+
+// Define Gallery model
+const Gallery = sequelize.define('Gallery', {
+    id: {
+        type: DataTypes.INTEGER,
+        autoIncrement: true,
+        primaryKey: true,
+    },
+    image: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
+}, {
+    tableName: 'Gallery',
+    timestamps: false,
+});
+
+// Path to uploads directory
+const uploadsDir = process.env.UPLOADS_DIR || path.join(__dirname, '../uploads');
+
+const cleanupMedia = async () => {
+    try {
+        console.log('Testing database connection...');
+        await sequelize.authenticate();
+        console.log('Database connected successfully.');
+
+        // Step 1: Fetch all media, thumbnails, and gallery images
+        const mediaRecords = await Media.findAll();
+        const mediaFiles = mediaRecords.map((record) => record.url);
+
+        const productRecords = await Products.findAll();
+        const productThumbnails = productRecords.map((record) => record.thumbnail).filter(Boolean);
+
+        const galleryRecords = await Gallery.findAll();
+        const galleryImages = galleryRecords.map((record) => record.image);
+
+        // Combine all files referenced in the database
+        const databaseFiles = [...mediaFiles, ...productThumbnails, ...galleryImages];
+
+        // Step 2: Get all files in the uploads folder
+        if (!fs.existsSync(uploadsDir)) {
+            console.error('Uploads directory does not exist:', uploadsDir);
+            return;
+        }
+
+        const uploadFiles = fs.readdirSync(uploadsDir);
+
+        // Step 3: Identify and delete files not in the database
+        const filesToDelete = uploadFiles.filter((file) => !databaseFiles.includes(file));
+        filesToDelete.forEach((file) => {
+            const filePath = path.join(uploadsDir, file);
+            fs.unlinkSync(filePath);
+            console.log(`Deleted file: ${filePath}`);
+        });
+
+        console.log('Media cleanup completed successfully.');
+    } catch (error) {
+        console.error('Error during media cleanup:', error);
+    } finally {
+        await sequelize.close();
+    }
 };
 
-module.exports = Product;
+// Schedule the cron job to run every 14 hours
+cron.schedule('0 */24 * * *', async () => {
+    console.log('Running media cleanup cron job...');
+    await cleanupMedia();
+});
+
+console.log('Media cleanup cron job scheduled to run every 24 hours.');
