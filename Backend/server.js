@@ -129,6 +129,7 @@ app.use('/user-gallery', userAuthMiddleware('user'), rateLimiter('user-gallery')
 
 //STRIPE ROUTES
 app.use('/stripe', rateLimiter('stripe'),stripeRoutes); 
+app.use('/stripe-webhook-routes', stripeWebhookRoutes)
 app.use('/carriers', carrierRoutes);
 
 
