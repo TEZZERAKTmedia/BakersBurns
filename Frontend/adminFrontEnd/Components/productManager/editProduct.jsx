@@ -7,35 +7,42 @@ import MobileMediaUploader from '../mobileMediaUploader';
 
 const EditProductForm = ({ productId, onUpdate, onCancel }) => {
   const { fetchProducts, fetchProductMedia, updateProductAndMedia } = useProductContext();
-  const [productData, setProductData] = useState(null); 
+  const [productData, setProductData] = useState(null);
   const [mediaPreviews, setMediaPreviews] = useState([]);
   const [imagePreview, setImagePreview] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [missingFields, setMissingFields] = useState([]);
   const [removedMedia, setRemovedMedia] = useState([]);
-  const [mediaLoading, setMediaLoading] = useState(false); // New
+  const [mediaLoading, setMediaLoading] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
+  // Track device size changes
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth <= 768);
-      
     };
 
     window.addEventListener('resize', handleResize);
-    console.log("mobile device detected");
     return () => window.removeEventListener('resize', handleResize);
-    
   }, []);
-  
 
+  // Reset state on component mount
   useEffect(() => {
+    setMediaPreviews([]); // Clear previous state
+  }, [productId]);
+
+  // Fetch product details and media
+  useEffect(() => {
+    let isMounted = true;
+
     const fetchProductData = async () => {
       try {
         const response = await adminApi.get(`/products/${productId}/details`);
-        setProductData(response.data);
-        if (response.data.thumbnail) {
-          setImagePreview(`${import.meta.env.VITE_BACKEND}/uploads/${response.data.thumbnail}`);
+        if (isMounted) {
+          setProductData(response.data);
+          if (response.data.thumbnail) {
+            setImagePreview(`${import.meta.env.VITE_BACKEND}/uploads/${response.data.thumbnail}`);
+          }
         }
       } catch (error) {
         console.error('Error fetching product data:', error);
@@ -46,23 +53,29 @@ const EditProductForm = ({ productId, onUpdate, onCancel }) => {
       setMediaLoading(true);
       try {
         const media = await fetchProductMedia(productId);
-        const formattedMedia = media.map((item, index) => ({
-          id: item.id,
-          src: `${import.meta.env.VITE_BACKEND}/uploads/${item.url}`,
-          type: item.type,
-          file: null,
-          order: index + 1,
-        }));
-        setMediaPreviews(formattedMedia);
+        if (isMounted) {
+          const formattedMedia = media.map((item, index) => ({
+            id: item.id,
+            src: `${import.meta.env.VITE_BACKEND}/uploads/${item.url}`,
+            type: item.type,
+            file: null,
+            order: item.order || index + 1,
+          }));
+          setMediaPreviews(formattedMedia);
+        }
       } catch (error) {
         console.error('Error fetching media:', error);
       } finally {
-        setMediaLoading(false);
+        if (isMounted) setMediaLoading(false);
       }
     };
 
     fetchProductData();
     fetchMedia();
+
+    return () => {
+      isMounted = false; // Prevent updates if unmounted
+    };
   }, [productId, fetchProductMedia]);
 
   const handleInputChange = (e) => {
@@ -79,19 +92,14 @@ const EditProductForm = ({ productId, onUpdate, onCancel }) => {
   };
 
   const handleMediaChange = (updatedMedia) => {
-    console.log('Updated media received in EditProductForm', updatedMedia);
-
     const currentMediaIds = mediaPreviews.map((media) => media.id);
     const updatedMediaIds = updatedMedia.map((media) => media.id);
-  
-    // Track removed media
+
     const removed = currentMediaIds.filter((id) => !updatedMediaIds.includes(id));
     setRemovedMedia((prev) => [...prev, ...removed]);
-  
-    // Update the media previews
+
     setMediaPreviews(updatedMedia);
   };
-  
 
   const handleSubmit = async () => {
     if (!productData) return;
@@ -109,48 +117,39 @@ const EditProductForm = ({ productId, onUpdate, onCancel }) => {
     setIsSubmitting(true);
   
     try {
-      // Prepare product data for submission
       const productFormData = new FormData();
       Object.entries(productData).forEach(([key, value]) => {
         if (value !== null) productFormData.append(key, value);
       });
   
-      console.log('Product FormData Entries:', [...productFormData.entries()]);
-  
-      // Prepare media data
       const mediaFormData = new FormData();
-      const mediaToKeep = mediaPreviews
-        .filter((media) => !media.file)
-        .map((media) => ({ id: media.id, order: media.order }));
+      const mediaToKeep = mediaPreviews.map((media) => ({
+        id: media.id,
+        order: media.order, // Include the order in the payload
+      }));
+
+      console.log('Media to keep', mediaToKeep);
   
       mediaPreviews.forEach((media, index) => {
         if (media.file) {
           mediaFormData.append('media', media.file);
-          mediaFormData.append(`mediaOrder_${index}`, index + 1); // Send new order for new files
+          mediaFormData.append(`mediaOrder_${index}`, media.order); // Include order for new files
         }
       });
   
-      // Add `mediaToKeep` to mediaFormData for existing media
       mediaFormData.append('mediaToKeep', JSON.stringify(mediaToKeep));
   
-      console.log('Media FormData Entries before removedMedia:', [...mediaFormData.entries()]);
-  
-      // Add removedMedia if there are any
       if (removedMedia.length > 0) {
         removedMedia.forEach((id) => {
           mediaFormData.append('removedMediaIds', id);
         });
       }
   
-      console.log('Final Media FormData Entries:', [...mediaFormData.entries()]);
-  
-      // Send both product and media updates
       await updateProductAndMedia(productId, productFormData, mediaFormData);
   
-      if (onUpdate) onUpdate(); // Notify parent of successful update
-      console.log('Product and media updated successfully');
-      onCancel(); // Close the form
-      fetchProducts(); // Refresh product list
+      if (onUpdate) onUpdate();
+      onCancel();
+      fetchProducts();
     } catch (error) {
       console.error('Error updating product and media:', error);
     } finally {
@@ -158,13 +157,8 @@ const EditProductForm = ({ productId, onUpdate, onCancel }) => {
     }
   };
   
-  
-  
-  
 
-  
-
-  if (!productData) {
+  if (!productData || mediaLoading) {
     return <p>Loading product details...</p>;
   }
 
@@ -245,11 +239,12 @@ const EditProductForm = ({ productId, onUpdate, onCancel }) => {
           />
         )}
       </div>
+
       <div className="form-actions">
         <button onClick={handleSubmit} disabled={isSubmitting}>
           {isSubmitting ? 'Updating...' : 'Update Product'}
         </button>
-        <button onClick={onCancel}>Cancel</button> {/* Directly use onCancel */}
+        <button onClick={onCancel}>Cancel</button>
       </div>
     </div>
   );

@@ -87,28 +87,36 @@ export const ProductsProvider = ({ children }) => {
   
 
   // Update a product and media
-  const updateProductAndMedia = async (productId, productFormData, mediaFormData) => {
-    try {
-      const [productResponse, mediaResponse] = await Promise.all([
-        adminApi.put(`/products/update-product/${productId}`, productFormData, {
-          headers: { 'Content-Type': 'multipart/form-data' },
-        }),
-        adminApi.put(`/products/update-media/${productId}`, mediaFormData, {
-          headers: { 'Content-Type': 'multipart/form-data' },
-        }),
-      ]);
-  
-      console.log('Product Response:', productResponse.data);
-      console.log('Media Response:', mediaResponse.data);
-  
-      return { product: productResponse.data, media: mediaResponse.data };
-    } catch (error) {
-      console.error('Error in updateProductAndMedia:', error);
-      throw error;
+  // Update a product and media
+const updateProductAndMedia = async (productId, productFormData, mediaFormData) => {
+  try {
+    // Assuming mediaToKeep is passed as a FormData entry
+    if (mediaFormData) {
+      const mediaToKeep = mediaFormData.get('mediaToKeep');
+      console.log('Media to keep:', mediaToKeep);
     }
-  };
+
+    const [productResponse, mediaResponse] = await Promise.all([
+      adminApi.put(`/products/update-product/${productId}`, productFormData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      }),
+      adminApi.put(`/products/update-media/${productId}`, mediaFormData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      }),
+    ]);
+
+    console.log('Product Response:', productResponse.data);
+    console.log('Media Response:', mediaResponse.data);
+
+    return { product: productResponse.data, media: mediaResponse.data };
+  } catch (error) {
+    console.error('Error in updateProductAndMedia:', error);
+    throw error;
+  }
+};
+
   
-  
+   
   
   
 

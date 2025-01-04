@@ -141,43 +141,6 @@ const updateProduct = async (req, res) => {
 };
 
 
-// Helper function for media synchronization
-const updateMediaInternal = async (productId, mediaFiles) => {
-  try {
-    // Fetch and delete all existing media for the product
-    const existingMedia = await Media.findAll({ where: { productId } });
-    const uploadsPath = path.join(__dirname, '../../uploads');
-
-    // Delete media files from the file system
-    for (const media of existingMedia) {
-      const mediaPath = path.join(uploadsPath, media.url);
-      if (fs.existsSync(mediaPath)) {
-        fs.unlinkSync(mediaPath); // Delete the file
-      }
-    }
-
-    // Remove media records from the database
-    await Media.destroy({ where: { productId } });
-
-    // Process and save new media
-    if (mediaFiles) {
-      const newMediaEntries = mediaFiles.map((file) => ({
-        productId,
-        url: file.filename,
-        type: file.mimetype.startsWith('video/') ? 'video' : 'image',
-      }));
-
-      const newMedia = await Media.bulkCreate(newMediaEntries); // Add new media records
-      return newMedia;
-    }
-
-    return [];
-  } catch (error) {
-    console.error('Error in updateMediaInternal:', error);
-    throw error;
-  }
-};
-
 
 const updateThumbnail = async (req, res) => {
   const { id } = req.params;
@@ -213,25 +176,20 @@ const updateThumbnail = async (req, res) => {
 
 // Fetch media for a specific product by ID
 const getProductMedia = async (req, res) => {
-  const { id } = req.params; // Product ID from the request parameters
+  const { id } = req.params;
 
   if (!id) {
     return res.status(400).json({ message: 'Product ID is required' });
   }
 
   try {
-    // Fetch media associated with the product ID
     const mediaFiles = await Media.findAll({
-      where: { productId: id }, // Use productId to filter records
-      attributes: ['id', 'url', 'type', 'isDefault'], // Only fetch specific fields
+      where: { productId: id },
+      attributes: ['id', 'url', 'type', 'isDefault', 'order'],
+      order: [['order', 'ASC']], // Ensure media is returned in correct order
     });
 
-    if (!mediaFiles.length) {
-      // No media found, return an empty array
-      return res.status(200).json([]);
-    }
-
-    res.status(200).json(mediaFiles); // Return media files as JSON
+    res.status(200).json(mediaFiles);
   } catch (error) {
     console.error(`Error fetching media for product ${id}:`, error);
     res.status(500).json({ message: 'Error fetching media', error });
@@ -240,28 +198,25 @@ const getProductMedia = async (req, res) => {
 
 
 const addMedia = async (req, res) => {
-  console.log('addMedia endpoint hit');
-  console.log('Files:', req.files);
-  console.log('Body:', req.body);
-  console.log('Query:', req.query);
-
-  // Support both body and query parameter for productId
   const productId = req.body.productId || req.query.productId;
   if (!productId) {
     return res.status(400).json({ message: 'Product ID is required' });
   }
 
   try {
-    // Ensure `productId` is treated as a number
     const parsedProductId = parseInt(productId, 10);
     if (isNaN(parsedProductId)) {
       return res.status(400).json({ message: 'Invalid Product ID' });
     }
 
-    const mediaFiles = req.files.media.map((file) => ({
+    // Get the current max order for the product
+    const maxOrder = await Media.max('order', { where: { productId: parsedProductId } }) || 0;
+
+    const mediaFiles = req.files.media.map((file, index) => ({
       productId: parsedProductId,
       url: file.filename,
       type: file.mimetype.startsWith('video/') ? 'video' : 'image',
+      order: maxOrder + index + 1, // Increment order for each new file
     }));
 
     await Media.bulkCreate(mediaFiles);
@@ -278,12 +233,17 @@ const addMedia = async (req, res) => {
 
 
 
+
 // Update product media
 const updateMedia = async (req, res) => {
   const { id } = req.params; // Product ID
-  const { mediaToKeep = [] } = req.body; // Array of media IDs to keep
+  const mediaToKeepRaw = req.body.mediaToKeep; // `mediaToKeep` will be a JSON string
 
   try {
+    const mediaToKeep = mediaToKeepRaw ? JSON.parse(mediaToKeepRaw) : [];
+    
+    console.log('Parsed Media to Keep:', mediaToKeep); // Log to verify parsing
+
     const product = await Product.findByPk(id);
     if (!product) {
       return res.status(404).json({ message: 'Product not found' });
@@ -296,13 +256,21 @@ const updateMedia = async (req, res) => {
 
     // Delete media not included in `mediaToKeep`
     for (const media of existingMedia) {
-      if (!mediaToKeep.includes(media.id)) {
+      if (!mediaToKeep.some((m) => m.id === media.id)) {
         const mediaPath = path.join(uploadsPath, media.url);
         if (fs.existsSync(mediaPath)) {
           fs.unlinkSync(mediaPath); // Delete the file from the file system
         }
         await media.destroy(); // Delete the record from the database
       }
+    }
+
+    // Update media orders in the database
+    for (const media of mediaToKeep) {
+      await Media.update(
+        { order: media.order },
+        { where: { id: media.id } }
+      );
     }
 
     // Process and add new media files
@@ -322,6 +290,8 @@ const updateMedia = async (req, res) => {
     res.status(500).json({ message: 'Error updating media', error });
   }
 };
+
+
 
 
 

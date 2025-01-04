@@ -3,7 +3,7 @@ import '../Componentcss/image_uploader.css'; // Use your existing CSS
 import LoadingPage from './loading';
 
 const MobileMediaUploader = ({
-  mode = 'view', // Modes: 'view', 'edit', 'add'
+  mode = 'view',
   initialMedia = [],
   maxMedia = 10,
   isLoading = false,
@@ -20,7 +20,8 @@ const MobileMediaUploader = ({
         }))
       : []
   );
-  const [loading, setLoading] = useState(false);
+
+  
   const [activeOrderChange, setActiveOrderChange] = useState(null);
 
   const handleMediaChange = (event) => {
@@ -68,7 +69,7 @@ const MobileMediaUploader = ({
     setMediaPreviews(reorderedPreviews);
     if (onMediaChange) onMediaChange(reorderedPreviews);
 
-    setActiveOrderChange(null); // Close the modal
+    setActiveOrderChange(null); // Close the overlay
   };
 
   const handleRemoveMedia = (index) => {
@@ -134,27 +135,33 @@ const MobileMediaUploader = ({
     </div>
   );
 
-  const renderOrderModal = () => (
+  const renderOrderOverlay = () => (
     activeOrderChange !== null && (
-      <div className="order-modal">
-        <div className="modal-content">
-          <h3>Select New Position</h3>
-          <div className="order-grid">
-            {Array.from({ length: mediaPreviews.length }, (_, i) => i + 1).map((order) => (
-              <div
-                key={order}
-                className="order-option"
-                onClick={() => handleOrderChange(order)}
-              >
-                {order}
-              </div>
-            ))}
-          </div>
-          <button onClick={() => setActiveOrderChange(null)}>Cancel</button>
+      <div
+        className="mobile-order-overlay"
+        onMouseEnter={(e) => e.stopPropagation()} // Prevent hover bubbling
+      >
+        <div className="image-uploader-grid mobile-order-grid">
+          {Array.from({ length: mediaPreviews.length }, (_, i) => i + 1).map((order) => (
+            <div
+              key={order}
+              className="image-uploader-grid-item mobile-order-option"
+              onClick={() => handleOrderChange(order)}
+            >
+              <span className="image-order-number">{order}</span>
+            </div>
+          ))}
         </div>
+        <button
+          className="mobile-cancel-button"
+          onClick={() => setActiveOrderChange(null)}
+        >
+          Cancel
+        </button>
       </div>
     )
   );
+  
 
   const renderAddMediaSection = () => (
     mode === 'add' || mode === 'edit' ? (
@@ -174,13 +181,16 @@ const MobileMediaUploader = ({
   );
 
   return (
-    <div className="media-uploader">
+    <div
+      className="media-uploader"
+      onMouseLeave={() => setActiveOrderChange(null)} // Reset state on leave
+    >
       {isLoading ? (
         <LoadingPage />
       ) : (
         <>
           {renderMediaGrid()}
-          {renderOrderModal()}
+          {renderOrderOverlay()}
           {renderAddMediaSection()}
         </>
       )}
