@@ -1,5 +1,6 @@
 // controllers/storeController.js
 const Product = require('../../models/product'); // Importing the Product model // Sanitization for incoming data
+const Media  = require('../../models/media');
 const { Op } = require('sequelize');
 
 // Function to get all products
@@ -91,6 +92,31 @@ const createCheckoutSession = async (req, res) => {
     res.status(500).json({ message: 'Failed to create checkout session.' });
   }
 };
+const getProductMedia = async (req, res) => {
+  const { id } = req.params; // Product ID from the request parameters
+
+  if (!id) {
+    return res.status(400).json({ message: 'Product ID is required' });
+  }
+
+  try {
+    // Fetch media associated with the product ID
+    const mediaFiles = await Media.findAll({
+      where: { productId: id }, // Filter by product ID
+      attributes: ['id', 'url', 'type', 'order'], // Include media order
+      order: [['order', 'ASC']], // Sort by order
+    });
+
+    if (!mediaFiles.length) {
+      return res.status(200).json([]); // No media found, return empty array
+    }
+
+    res.status(200).json(mediaFiles); // Return media files as JSON
+  } catch (error) {
+    console.error(`Error fetching media for product ${id}:`, error);
+    res.status(500).json({ message: 'Error fetching media', error });
+  }
+};
 
 // Function to handle Stripe webhook events
 const handleStripeWebhook = async (req, res) => {
@@ -110,5 +136,6 @@ module.exports = {
   removeFromCart,
   createCheckoutSession,
   handleStripeWebhook,
+  getProductMedia
   
 };

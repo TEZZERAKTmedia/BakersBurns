@@ -13,6 +13,8 @@ const Store = () => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [loading, setLoading] = useState(false); // New loading state
   const { showNotification } = useNotification();
+  const [media, setMedia] = useState([]);
+  const [currentMediaIndex, setCurrentMediaIndex] = useState('0')
 
   useEffect(() => {
     fetchProducts();
@@ -36,8 +38,31 @@ const Store = () => {
   };
   
 
-  const openProductModal = (product) => {
+  const openProductModal = async (product) => {
     setSelectedProduct(product);
+    try {
+      const response = await userApi.get(`/store/${product.id}/media`);
+      const mediaData = response.data || [];
+      setMedia([
+        { id: "thumbnail", url: product.thumbnail, type: "image" }, // Start with the thumbnail
+        ...mediaData,
+      ]);
+      setCurrentMediaIndex(0); // Reset carousel to the first media item
+    } catch (error) {
+      console.error("Error fetching product media:", error);
+      setMedia([]); // Fallback to empty media
+    }
+  };
+  const handleNextSlide = () => {
+    if (currentMediaIndex < media.length - 1) {
+      setCurrentMediaIndex((prev) => prev + 1);
+    }
+  };
+
+  const handlePrevSlide = () => {
+    if (currentMediaIndex > 0) {
+      setCurrentMediaIndex((prev) => prev - 1);
+    }
   };
 
   const closeProductModal = () => {
@@ -77,6 +102,25 @@ const Store = () => {
       setLoading(false); // Reset loading state
     }
   };
+  const [startX, setStartX] = useState(0);
+
+const handleTouchStart = (e) => {
+  setStartX(e.touches[0].clientX); // Store the initial touch position
+};
+
+const handleTouchMove = (e) => {
+  const endX = e.touches[0].clientX; // Get the current touch position
+  const diffX = startX - endX;
+
+  if (diffX > 50) {
+    // Swipe left (next slide)
+    handleNextSlide();
+  } else if (diffX < -50) {
+    // Swipe right (previous slide)
+    handlePrevSlide();
+  }
+};
+
 
   return (
     <div className="store-container" >
@@ -121,11 +165,44 @@ const Store = () => {
                         <h3 style={{ color: 'black'}}>
                           {selectedProduct.name}
                         </h3>
-                        <img
-                          src={`${import.meta.env.VITE_IMAGE_BASE_URL}/${selectedProduct.thumbnail}`}
-                          alt={selectedProduct.name}
-                          
-                        />
+                        <div
+                          className="carousel"
+                          onTouchStart={handleTouchStart}
+                          onTouchMove={handleTouchMove}
+                        >
+                          <button
+                            className="prev"
+                            onClick={handlePrevSlide}
+                            disabled={currentMediaIndex === 0}
+                          >
+                            &lt;
+                          </button>
+
+                          {media.length > 0 && (
+                            <div className="carousel-slide">
+                              {media[currentMediaIndex].type === "image" ? (
+                                <img
+                                  src={`${import.meta.env.VITE_IMAGE_BASE_URL}/${media[currentMediaIndex].url}`}
+                                  alt={`Media ${currentMediaIndex + 1}`}
+                                />
+                              ) : (
+                                <video
+                                  src={`${import.meta.env.VITE_IMAGE_BASE_URL}/${media[currentMediaIndex].url}`}
+                                  controls
+                                />
+                              )}
+                            </div>
+                          )}
+
+                          <button
+                            className="next"
+                            onClick={handleNextSlide}
+                            disabled={currentMediaIndex === media.length - 1}
+                          >
+                            &gt;
+                          </button>
+                        </div>
+
                         <div className='modal-descriptor'>
                           <h4 >Description:</h4>
                           <p >

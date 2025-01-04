@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { createCheckoutSession, handleStripeWebhook, getProducts, addToCart, removeFromCart, getFeaturedProducts } = require('../../controllers/user/storeController');
+const { createCheckoutSession, handleStripeWebhook, getProducts, addToCart, removeFromCart, getFeaturedProducts, getProductMedia } = require('../../controllers/user/storeController');
 const { getCart } = require('../../controllers/user/cartController');
 const userAuthMiddleware = require('../../middleware/userAuthMiddleware');
 
@@ -9,6 +9,7 @@ const userAuthMiddleware = require('../../middleware/userAuthMiddleware');
 router.get('/',userAuthMiddleware(), getProducts);  // Get all products
 router.get('/get-cart',userAuthMiddleware(), getCart);  // Get user's cart
 router.get('/get-featured-products', userAuthMiddleware(), getFeaturedProducts);
+router.get('/:id/media', userAuthMiddleware('user'), getProductMedia)
 
 router.post('/add-to-cart',userAuthMiddleware(), addToCart);  // Add product to cart
 router.delete('/remove-from-cart', userAuthMiddleware(),removeFromCart);  // Remove product from cart

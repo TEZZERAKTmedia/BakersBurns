@@ -298,3 +298,62 @@ button:hover:not(:disabled) {
 .dimensions-container p:last-of-type {
   margin-bottom: 0; /* Removes extra margin for the last item */
 }
+
+
+.carousel {
+  position: relative; /* To allow button positioning relative to this container */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden; /* Prevent content overflow */
+}
+
+.carousel-slide {
+  width: 100%;
+  height: auto;
+  max-height: 60vh; /* Ensures the media fits within 60% of the viewport height */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden; /* Ensures no overflow outside the container */
+}
+.carousel-slide img,
+.carousel-slide video {
+  max-width: 100%; /* Ensure the media does not exceed the container width */
+  max-height: 100%; /* Ensure the media does not exceed the container height */
+  object-fit: contain; /* Maintain aspect ratio and ensure the entire media is visible */
+}
+
+
+.carousel-button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%); /* Center vertically */
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  cursor: pointer;
+  z-index: 1000; /* Ensure buttons are above the carousel */
+  font-size: 1.2rem;
+  border-radius: 50%;
+}
+
+.carousel button:hover {
+  background-color: rgba(0, 0, 0, 0.7); /* Slightly darker on hover */
+}
+
+.carousel button:disabled {
+  background-color: rgba(0, 0, 0, 0.2); /* Lighter when disabled */
+  cursor: not-allowed;
+}
+
+.carousel .prev {
+  left: 10px; /* Position the left button */
+
+}
+
+.carousel .next {
+  right: 10px; /* Position the right button */
+}
+
