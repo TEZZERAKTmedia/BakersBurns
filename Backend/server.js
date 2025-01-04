@@ -72,7 +72,7 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 
-app.use('/stripe-webhooks', express.raw({ type: 'application/json' }), stripeWebhookRoutes);
+app.use('/stripe-webhook-routes', express.raw({ type: 'application/json' }), stripeWebhookRoutes);
 
 
 app.use(bodyParser.json());
@@ -129,7 +129,7 @@ app.use('/user-gallery', userAuthMiddleware('user'), rateLimiter('user-gallery')
 
 //STRIPE ROUTES
 app.use('/stripe', rateLimiter('stripe'),stripeRoutes); 
-app.use('/stripe-webhook-routes', stripeWebhookRoutes)
+
 app.use('/carriers', carrierRoutes);
 
 
