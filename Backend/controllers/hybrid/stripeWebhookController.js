@@ -3,6 +3,7 @@ const Order = require('../../models/order');
 const Product = require('../../models/product');
 const Cart = require('../../models/cart');
 const OrderItem = require('../../models/orderItem'); // Assuming you have an OrderItem model
+const {encrypt} = require('../../utils/encrypt');
 
 
 const handleWebhook = async (req, res) => {
@@ -28,13 +29,12 @@ const handleWebhook = async (req, res) => {
         return res.status(400).send('Webhook Error: Missing userId or productIds.');
       }
 
-      // Extract shipping details
-      const shippingAddress = session.shipping_details?.address || {};
-      const billingAddress = session.customer_details?.address || {};
+      // Extract and encrypt shipping and billing details
+      const shippingAddress = encrypt(JSON.stringify(session.shipping_details?.address || {}));
+      const billingAddress = encrypt(JSON.stringify(session.customer_details?.address || {}));
 
-      console.log('Metadata:', session.metadata);
-      console.log('Shipping Address:', shippingAddress);
-      console.log('Billing Address:', billingAddress);
+      console.log('Encrypted Shipping Address:', shippingAddress);
+      console.log('Encrypted Billing Address:', billingAddress);
 
       // Process the products
       const productIdArray = productIds.split(',').map((id) => parseInt(id.trim(), 10)).filter(Number.isInteger);
@@ -44,20 +44,12 @@ const handleWebhook = async (req, res) => {
         return res.status(400).send('Webhook Error: Invalid productIds.');
       }
 
-      console.log('Product IDs:', productIdArray);
-
-      // Log the payload before saving to the database
-      console.log('Order Payload:', {
-        shippingAddress,
-        billingAddress,
-      });
-
       // Create an order in the database
       const order = await Order.create({
         userId,
         total,
-        shippingAddress: JSON.stringify(shippingAddress), // Ensure object is stored as a string
-        billingAddress: JSON.stringify(billingAddress), // Ensure object is stored as a string
+        shippingAddress,
+        billingAddress,
         status: 'processing',
       });
 
@@ -97,7 +89,6 @@ const handleWebhook = async (req, res) => {
     res.status(400).send(`Webhook Error: ${err.message}`);
   }
 };
-
 
 
 // Cancel checkout session (moved outside `handleWebhook`)

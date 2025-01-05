@@ -2,6 +2,7 @@ const Order = require('../../models/order');
 const OrderItem = require('../../models/orderItem');
 const User = require('../../models/user');
 const Product = require('../../models/product');
+const { decrypt } = require('../../utils/encrypt');
 
 
 
@@ -9,50 +10,61 @@ const Product = require('../../models/product');
 // Get all orders for the authenticated user
 const getOrdersForUser = async (req, res) => {
     try {
-        const { status } = req.query;
-        const filter = { userId: req.user.id };
-
-        if (status) filter.status = status;
-
-        const orders = await Order.findAll({
-            where: filter,
-            include: [
-                {
-                    model: OrderItem,
-                    as: 'items',
-                    include: [
-                        {
-                            model: Product,
-                            as: 'product',
-                            attributes: ['name', 'thumbnail', 'price'],
-                        },
-                    ],
-                },
-            ],
-            attributes: [
-                'id',
-                'total',
-                'shippingAddress',
-                'billingAddress',
-                'trackingNumber',
-                'carrier',
-                'status',
-                'createdAt',
-                'updatedAt',
-            ],
-        });
-
-        // Serialize the orders to ensure decrypted fields are returned
-        const serializedOrders = orders.map(order => order.toJSON());
-
-        res.status(200).json({ message: 'Orders fetched successfully', orders: serializedOrders });
-    } catch (error) {
-        console.error('Error fetching orders:', error);
-        res.status(500).json({ message: 'Error fetching orders', error });
-    }
-};
-
+      const { status } = req.query;
+      const filter = { userId: req.user.id };
   
+      if (status) filter.status = status;
+  
+      const orders = await Order.findAll({
+        where: filter,
+        include: [
+          {
+            model: OrderItem,
+            as: 'items',
+            include: [
+              {
+                model: Product,
+                as: 'product',
+                attributes: ['name', 'thumbnail', 'price'],
+              },
+            ],
+          },
+        ],
+        attributes: [
+          'id',
+          'total',
+          'shippingAddress',
+          'billingAddress',
+          'trackingNumber',
+          'carrier',
+          'status',
+          'createdAt',
+          'updatedAt',
+        ],
+      });
+  
+      // Decrypt sensitive fields and serialize the orders
+      const serializedOrders = orders.map(order => {
+        const decryptedShippingAddress = order.shippingAddress
+          ? JSON.parse(decrypt(order.shippingAddress))
+          : null;
+        const decryptedBillingAddress = order.billingAddress
+          ? JSON.parse(decrypt(order.billingAddress))
+          : null;
+  
+        return {
+          ...order.toJSON(),
+          shippingAddress: decryptedShippingAddress,
+          billingAddress: decryptedBillingAddress,
+        };
+      });
+  
+      res.status(200).json({ message: 'Orders fetched successfully', orders: serializedOrders });
+    } catch (error) {
+      console.error('Error fetching orders:', error);
+      res.status(500).json({ message: 'Error fetching orders', error });
+    }
+  };
 
 
 // Get a specific order by ID for the authenticated user
