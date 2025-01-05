@@ -21,8 +21,18 @@ const Orders = () => {
   const fetchOrderDetails = async (orderId) => {
     try {
       const response = await userApi.get(`/user-orders/get-order-details/${orderId}`);
-
-      setSelectedOrder(response.data.order);
+      
+      const order = response.data.order;
+  
+      // Ensure that shipping and billing addresses are objects
+      if (typeof order.shippingAddress === 'string') {
+        order.shippingAddress = JSON.parse(order.shippingAddress);
+      }
+      if (typeof order.billingAddress === 'string') {
+        order.billingAddress = JSON.parse(order.billingAddress);
+      }
+  
+      setSelectedOrder(order);
     } catch (error) {
       console.error('Failed to fetch order details:', error);
       setError('Failed to fetch order details. Please try again later.');
@@ -125,8 +135,11 @@ const Orders = () => {
     </div>
     <div className="detail-tile">
       <label><strong>Shipping Address:</strong></label>
-      <p>{JSON.parse(selectedOrder.shippingAddress).line1}, {JSON.parse(selectedOrder.shippingAddress).city}, {JSON.parse(selectedOrder.shippingAddress).state}</p>
+      <p>
+        {selectedOrder.shippingAddress.line1}, {selectedOrder.shippingAddress.city}, {selectedOrder.shippingAddress.state}
+      </p>
     </div>
+
 
 
     <div className="detail-tile">

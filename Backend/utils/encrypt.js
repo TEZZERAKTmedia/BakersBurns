@@ -1,5 +1,4 @@
 require('dotenv').config();
-
 const crypto = require('crypto');
 
 // Set the encryption key as a 32-byte buffer from the hex string
@@ -12,8 +11,6 @@ const ivLength = 16; // AES block size
 
 // Encrypt function
 function encrypt(text) {
-  console.log('Encrypting input:', text);
-
   if (!text || typeof text !== 'string') {
     throw new Error('Input to encrypt must be a non-empty string.');
   }
@@ -23,46 +20,30 @@ function encrypt(text) {
   let encrypted = cipher.update(text, 'utf8', 'hex');
   encrypted += cipher.final('hex');
 
-  const encryptedValue = `${iv.toString('hex')}:${encrypted}`;
-  console.log('Encrypted value:', encryptedValue);
-  return encryptedValue;
+  return `${iv.toString('hex')}:${encrypted}`;
 }
-
-
 
 // Decrypt function
 function decrypt(encryptedText) {
-  console.log('Decrypting input:', encryptedText); // Log the input
-
   // Check if input is valid
   if (!encryptedText || typeof encryptedText !== 'string') {
-    console.error('Decrypt received invalid input. Must be a non-empty string.');
     throw new Error('Input to decrypt must be a non-empty string.');
   }
 
   // Split the encrypted text into IV and encrypted content
   const parts = encryptedText.split(':');
   if (parts.length !== 2) {
-    console.error('Decrypt received invalid format. Expected "iv:encryptedText".');
     throw new Error('Invalid encrypted value format. Expected "iv:encryptedText".');
   }
 
   const [ivHex, encryptedHex] = parts;
-
-  // Ensure IV and encrypted text are valid hex strings
-  if (!ivHex || !encryptedHex) {
-    console.error('Invalid IV or encrypted text detected.');
-    throw new Error('Invalid IV or encrypted text. Ensure both parts are present.');
-  }
 
   let iv, encryptedTextBuffer;
 
   try {
     iv = Buffer.from(ivHex, 'hex');
     encryptedTextBuffer = Buffer.from(encryptedHex, 'hex');
-    console.log('Parsed IV:', ivHex, 'Parsed Encrypted Text:', encryptedHex);
   } catch (err) {
-    console.error('Failed to parse IV or encrypted text to buffer:', err.message);
     throw new Error('Failed to convert IV or encrypted text to buffer: ' + err.message);
   }
 
@@ -71,10 +52,8 @@ function decrypt(encryptedText) {
     const decipher = crypto.createDecipheriv('aes-256-cbc', encryptionKey, iv);
     let decrypted = decipher.update(encryptedTextBuffer, 'hex', 'utf8');
     decrypted += decipher.final('utf8');
-    console.log('Decryption successful:', encryptedText, '->', decrypted); // Log successful decryption
     return decrypted;
   } catch (err) {
-    console.error('Decryption failed:', err.message);
     throw new Error('Decryption failed: ' + err.message);
   }
 }
