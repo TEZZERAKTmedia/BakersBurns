@@ -12,18 +12,22 @@ const ivLength = 16; // AES block size
 
 // Encrypt function
 function encrypt(text) {
-  if (!text) {
-    console.log('Encrypt function received empty input. Returning null.');
-    return null; // Skip encryption for empty inputs
+  console.log('Encrypting input:', text);
+
+  if (!text || typeof text !== 'string') {
+    throw new Error('Input to encrypt must be a non-empty string.');
   }
+
   const iv = crypto.randomBytes(ivLength);
   const cipher = crypto.createCipheriv('aes-256-cbc', encryptionKey, iv);
   let encrypted = cipher.update(text, 'utf8', 'hex');
   encrypted += cipher.final('hex');
-  const result = `${iv.toString('hex')}:${encrypted}`;
-  console.log('Encrypting:', text, '->', result); // Log plaintext and encrypted result
-  return result;
+
+  const encryptedValue = `${iv.toString('hex')}:${encrypted}`;
+  console.log('Encrypted value:', encryptedValue);
+  return encryptedValue;
 }
+
 
 // Decrypt function
 function decrypt(encryptedText) {
