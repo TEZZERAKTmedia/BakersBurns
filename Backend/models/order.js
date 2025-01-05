@@ -29,20 +29,24 @@ Order.init({
     allowNull: true,
     
   },
-  billingAddress: {
-    type: DataTypes.STRING,
+
+  shippingAddress: {
+    type: DataTypes.TEXT, // Changed to TEXT to allow longer strings
     allowNull: true,
-    
   },
-  
-  trackingNumber: {
-    type: DataTypes.STRING,
+  billingAddress: {
+    type: DataTypes.TEXT, // Changed to TEXT to allow longer strings
     allowNull: true,
   },
   carrier: {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  trackingNumber: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  
 }, {
   sequelize,
   modelName: 'Order',

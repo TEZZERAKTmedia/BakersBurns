@@ -3,7 +3,7 @@ const User = require('../models/user'); // Assuming you need to check the user's
 
 const userAuthMiddleware = () => {
   return async (req, res, next) => {
-    console.log('Cookies received:', req.cookies); // Debugging the received cookies
+    console.log('Cookies received'); // Debugging the received cookies
 
     const token = req.cookies && req.cookies.authToken; // Check if the token is present
 
@@ -24,7 +24,7 @@ const userAuthMiddleware = () => {
 
       // Attach the user to the request object
       req.user = decoded;
-      console.log('Middleware passed, user attached:', req.user); // Debugging the user attached to req
+      console.log('Middleware passed, user attached:'); // Debugging the user attached to req
       next();
     } catch (error) {
       console.log('Invalid token:', error.message);
