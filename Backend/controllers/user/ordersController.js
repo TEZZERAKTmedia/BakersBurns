@@ -70,70 +70,87 @@ const getOrdersForUser = async (req, res) => {
 // Get a specific order by ID for the authenticated user
 const getOrderForUserById = async (req, res) => {
     try {
-        const { orderId } = req.params;
-
-        // Fetch the specific order
-        const order = await Order.findOne({
-            where: { id: orderId, userId: req.user.id }, // Ensure the order belongs to the user
+      const { orderId } = req.params;
+  
+      // Fetch the specific order
+      const order = await Order.findOne({
+        where: { id: orderId, userId: req.user.id }, // Ensure the order belongs to the user
+        include: [
+          {
+            model: User,
+            as: 'user',
+            attributes: ['username', 'email'], // Include User details
+          },
+          {
+            model: OrderItem,
+            as: 'items',
             include: [
-                {
-                    model: User,
-                    as: 'user',
-                    attributes: ['username', 'email'], // Include User details
-                },
-                {
-                    model: OrderItem,
-                    as: 'items',
-                    include: [
-                        {
-                            model: Product,
-                            as: 'product',
-                            attributes: ['id', 'name', 'thumbnail', 'price'], // Include Product details
-                        },
-                    ],
-                },
+              {
+                model: Product,
+                as: 'product',
+                attributes: ['id', 'name', 'thumbnail', 'price'], // Include Product details
+              },
             ],
-            attributes: ['id', 'shippingAddress', 'billingAddress', 'trackingNumber', 'carrier', 'total', 'status', 'createdAt', 'updatedAt'],
-        });
-
-        if (!order) {
-            return res.status(404).json({ message: 'Order not found' });
-        }
-
-        // Map and transform the order into the desired response format
-        const items = order.items.map(orderItem => ({
-            productId: orderItem.product?.id || null,
-            productName: orderItem.product?.name || 'Unknown',
-            productImage: orderItem.product?.thumbnail 
-                ? `${process.env.BASE_URL}/uploads/${orderItem.product.thumbnail}` // Generate full URL
-                : null, // Use null if no image
-            quantity: orderItem.quantity,
-            price: orderItem.product?.price || 0,
-        }));
-        
-        
-
-        const response = {
-            id: order.id,
-            username: order.user?.username || 'Unknown',
-            email: order.user?.email || 'Unknown',
-            shippingAddress: order.shippingAddress,
-            billingAddress: order.billingAddress,
-            trackingNumber: order.trackingNumber,
-            carrier: order.carrier,
-            total: order.total,
-            status: order.status,
-            createdAt: order.createdAt,
-            updatedAt: order.updatedAt,
-            items,
-        };
-
-        res.status(200).json({ message: 'Order fetched successfully', order: response });
+          },
+        ],
+        attributes: [
+          'id',
+          'shippingAddress',
+          'billingAddress',
+          'trackingNumber',
+          'carrier',
+          'total',
+          'status',
+          'createdAt',
+          'updatedAt',
+        ],
+      });
+  
+      if (!order) {
+        return res.status(404).json({ message: 'Order not found' });
+      }
+  
+      // Decrypt sensitive fields
+      const decryptedShippingAddress = order.shippingAddress
+        ? JSON.parse(decrypt(order.shippingAddress))
+        : null;
+      const decryptedBillingAddress = order.billingAddress
+        ? JSON.parse(decrypt(order.billingAddress))
+        : null;
+  
+      // Map and transform the order into the desired response format
+      const items = order.items.map((orderItem) => ({
+        productId: orderItem.product?.id || null,
+        productName: orderItem.product?.name || 'Unknown',
+        productImage: orderItem.product?.thumbnail
+          ? `${process.env.BASE_URL}/uploads/${orderItem.product.thumbnail}` // Generate full URL
+          : null, // Use null if no image
+        quantity: orderItem.quantity,
+        price: orderItem.product?.price || 0,
+      }));
+  
+      const response = {
+        id: order.id,
+        username: order.user?.username || 'Unknown',
+        email: order.user?.email || 'Unknown',
+        shippingAddress: decryptedShippingAddress,
+        billingAddress: decryptedBillingAddress,
+        trackingNumber: order.trackingNumber,
+        carrier: order.carrier,
+        total: order.total,
+        status: order.status,
+        createdAt: order.createdAt,
+        updatedAt: order.updatedAt,
+        items,
+      };
+  
+      res.status(200).json({ message: 'Order fetched successfully', order: response });
     } catch (error) {
-        console.error('Error fetching order:', error);
-        res.status(500).json({ message: 'Error fetching order', error });
+      console.error('Error fetching order:', error);
+      res.status(500).json({ message: 'Error fetching order', error });
     }
-};
+  };
+  
 
 // Utility function to generate tracking link
 const generateTrackingLink = (carrier, trackingNumber) => {
