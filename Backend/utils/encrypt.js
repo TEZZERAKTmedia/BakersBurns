@@ -29,6 +29,7 @@ function encrypt(text) {
 }
 
 
+
 // Decrypt function
 function decrypt(encryptedText) {
   console.log('Decrypting input:', encryptedText); // Log the input
