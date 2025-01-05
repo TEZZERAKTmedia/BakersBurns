@@ -28,22 +28,30 @@ Order.init({
     type: DataTypes.STRING,
     allowNull: true,
     set(value) {
+      console.log('Setting shippingAddress:', value);
       this.setDataValue('shippingAddress', encrypt(value));
     },
     get() {
       const value = this.getDataValue('shippingAddress');
-      return value ? decrypt(value) : null;
+      console.log('Getting shippingAddress (encrypted):', value);
+      const decryptedValue = value ? decrypt(value) : null;
+      console.log('Decrypted shippingAddress:', decryptedValue);
+      return decryptedValue;
     }
   },
   billingAddress: {
     type: DataTypes.STRING,
     allowNull: true,
     set(value) {
+      console.log('Setting billingAddress:', value);
       this.setDataValue('billingAddress', encrypt(value));
     },
     get() {
       const value = this.getDataValue('billingAddress');
-      return value ? decrypt(value) : null;
+      console.log('Getting billingAddress (encrypted):', value);
+      const decryptedValue = value ? decrypt(value) : null;
+      console.log('Decrypted billingAddress:', decryptedValue);
+      return decryptedValue;
     }
   },
   trackingNumber: {

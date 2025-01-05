@@ -11,71 +11,86 @@ const handleWebhook = async (req, res) => {
   try {
     const event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
 
-    console.log('Received Stripe event:', event);
+    console.log('Webhook received, event type:', event.type);
 
     if (event.type === 'checkout.session.completed') {
+      console.log('Processing checkout.session.completed event...');
+
       const session = event.data.object;
 
-      const userId = session.metadata.userId;
-      const total = session.amount_total ? session.amount_total / 100 : null; // Convert to dollars
+      // Extract metadata
+      const userId = session.metadata?.userId;
+      const productIds = session.metadata?.productIds;
+      const total = session.amount_total / 100; // Convert to dollars
 
-      if (!total) {
-        console.error('Total amount is missing in the session.');
-        return res.status(400).send('Webhook Error: Total amount missing in the session.');
+      if (!userId || !productIds) {
+        console.error('Missing userId or productIds in session metadata.');
+        return res.status(400).send('Webhook Error: Missing userId or productIds.');
       }
 
-      const cartItems = await Cart.findAll({
-        where: { userId },
-        include: [{ model: Product, as: 'product' }],
+      // Extract shipping details
+      const shippingAddress = session.shipping_details?.address || null;
+      const billingAddress = session.customer_details?.address || null;
+
+      console.log('Metadata:', session.metadata);
+      console.log('Shipping Address:', shippingAddress);
+      console.log('Billing Address:', billingAddress);
+
+      // Process the products
+      const productIdArray = productIds.split(',').map((id) => parseInt(id.trim(), 10));
+      console.log('Product IDs:', productIdArray);
+
+      console.log('Order Payload:', {
+        shippingAddress: req.body.shippingAddress,
+        billingAddress: req.body.billingAddress,
       });
 
-      if (cartItems.length === 0) {
-        console.error(`No cart items found for userId: ${userId}`);
-        return res.status(400).send('No cart items found for this user.');
-      }
-
-      const shippingAddress = session.shipping_details?.address
-        ? JSON.stringify(session.shipping_details.address)
-        : null;
-      const billingAddress = session.customer_details?.address
-        ? JSON.stringify(session.customer_details.address)
-        : null;
-
+      // Create an order in the database
       const order = await Order.create({
         userId,
         total,
-        billingAddress,
         shippingAddress,
+        billingAddress,
         status: 'processing',
       });
 
       console.log(`Order created with ID: ${order.id}`);
 
+      // Add order items based on productIds
       await Promise.all(
-        cartItems.map(async (cartItem) => {
+        productIdArray.map(async (productId) => {
+          const product = await Product.findByPk(productId);
+
+          if (!product) {
+            console.error(`Product not found with ID: ${productId}`);
+            return;
+          }
+
           await OrderItem.create({
             orderId: order.id,
-            productId: cartItem.productId,
-            quantity: cartItem.quantity,
-            price: cartItem.product.price,
+            productId: product.id,
+            quantity: 1, // Adjust quantity based on your logic
+            price: product.price,
           });
 
-          cartItem.product.stock -= cartItem.quantity;
-          await cartItem.product.save();
-
-          await cartItem.destroy();
+          // Update product stock
+          product.stock -= 1; // Adjust based on your logic
+          await product.save();
         })
       );
 
-      console.log(`Cart items moved to order for userId: ${userId}`);
+      console.log(`Order items created for order ID: ${order.id}`);
+    } else {
+      console.log(`Unhandled event type: ${event.type}`);
     }
 
     res.status(200).send('Webhook received successfully');
   } catch (err) {
-    console.error('Error in Stripe webhook:', err);
+    console.error('Error in Stripe webhook handler:', err.message, err.stack);
     res.status(400).send(`Webhook Error: ${err.message}`);
   }
 };
+
 
 
 // Cancel checkout session (moved outside `handleWebhook`)

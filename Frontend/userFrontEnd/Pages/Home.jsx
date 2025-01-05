@@ -58,14 +58,7 @@ const Home = () => {
   return (
     <div className="home-container" >
       <motion.h1 
-            style={{
-              fontFamily: '"Dancing Script", cursive',
-              fontSize: '13vw',
-              color: 'white',
-              marginTop: '40%'
-
-              
-            }}
+            className='hero-title'
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 1 }}

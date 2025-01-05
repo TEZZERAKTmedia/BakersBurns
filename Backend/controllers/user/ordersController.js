@@ -3,51 +3,55 @@ const OrderItem = require('../../models/orderItem');
 const User = require('../../models/user');
 const Product = require('../../models/product');
 
-const { decrypt } = require('../../utils/encrypt');
+
 
 
 // Get all orders for the authenticated user
 const getOrdersForUser = async (req, res) => {
     try {
-      const { status } = req.query;
-      const filter = { userId: req.user.id };
-  
-      if (status) filter.status = status;
-  
-      const orders = await Order.findAll({
-        where: filter,
-        include: [
-          {
-            model: OrderItem,
-            as: 'items',
+        const { status } = req.query;
+        const filter = { userId: req.user.id };
+
+        if (status) filter.status = status;
+
+        const orders = await Order.findAll({
+            where: filter,
             include: [
-              {
-                model: Product,
-                as: 'product',
-                attributes: ['name', 'thumbnail', 'price'],
-              },
+                {
+                    model: OrderItem,
+                    as: 'items',
+                    include: [
+                        {
+                            model: Product,
+                            as: 'product',
+                            attributes: ['name', 'thumbnail', 'price'],
+                        },
+                    ],
+                },
             ],
-          },
-        ],
-        attributes: [
-          'id',
-          'total',
-          'shippingAddress',
-          'billingAddress',
-          'trackingNumber',
-          'carrier',
-          'status',
-          'createdAt',
-          'updatedAt',
-        ],
-      });
-  
-      res.status(200).json({ message: 'Orders fetched successfully', orders });
+            attributes: [
+                'id',
+                'total',
+                'shippingAddress',
+                'billingAddress',
+                'trackingNumber',
+                'carrier',
+                'status',
+                'createdAt',
+                'updatedAt',
+            ],
+        });
+
+        // Serialize the orders to ensure decrypted fields are returned
+        const serializedOrders = orders.map(order => order.toJSON());
+
+        res.status(200).json({ message: 'Orders fetched successfully', orders: serializedOrders });
     } catch (error) {
-      console.error('Error fetching orders:', error);
-      res.status(500).json({ message: 'Error fetching orders', error });
+        console.error('Error fetching orders:', error);
+        res.status(500).json({ message: 'Error fetching orders', error });
     }
-  };
+};
+
   
 
 
