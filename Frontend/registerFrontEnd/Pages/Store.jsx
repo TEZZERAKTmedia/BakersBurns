@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { registerApi } from '../config/axios';
 import LoadingPage from '../Components/loading';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
+
 
 const Store = () => {
   const [products, setProducts] = useState([]);
@@ -45,6 +47,7 @@ const Store = () => {
     }
   };
 
+
   const openProductPreview = (product) => {
     window.scrollTo({
       top: 0,
@@ -56,6 +59,7 @@ const Store = () => {
   const closeProductPreview = () => {
     setSelectedProduct(null);
   };
+
 
   if (isLoading || error) {
     return (
@@ -178,7 +182,22 @@ const Store = () => {
   );
 };
 
+
+import QuantityModal from '../Components/quantityModal';
 const ProductModal = ({ product, onClose }) => {
+  const [showQuantityModal, setShowQuantityModal] = useState(false);
+  const navigate = useNavigate();
+
+  const openQuantityModal = () => {
+    setShowQuantityModal(true);
+  };
+
+  const closeQuantityModal = () => {
+    setShowQuantityModal(false);
+  };
+
+  
+
   return (
     <div
       onClick={onClose}
@@ -378,9 +397,9 @@ const ProductModal = ({ product, onClose }) => {
             marginTop: "20px",
           }}
         >
-          <Link to="/login">
+         
             <button
-              onClick={onClose}
+              
               style={{
                 display: "inline-block",
                 padding: "10px 20px",
@@ -393,10 +412,20 @@ const ProductModal = ({ product, onClose }) => {
                 boxShadow: "0 4px 10px rgba(0, 0, 0, 0.2)", // Button shadow
                 transition: "transform 0.3s ease, background 0.3s ease", // Smooth hover effect
               }}
+              onClick={openQuantityModal}
             >
               Purchase
             </button>
-          </Link>
+            {showQuantityModal && (
+        <QuantityModal
+          product={product}
+          maxQuantity={product.quantity} // Pass the available quantity
+          onClose={closeQuantityModal}
+          onAddToCart={() => console.log("Added to cart!")} // Optional callback for additional actions
+          onViewCart={() => navigate("/cart")}
+        />
+      )}
+        
         </div>
       </div>
     </div>

@@ -44,6 +44,7 @@ const adminEventRoutes = require('./routes/admin/adminEventRoutes');
 const userEventRoutes = require('./routes/user/eventRoutes');
 const userGalleryRoutes = require('./routes/user/galleryRoutes');
 const carrierRoutes = require('./routes/carrier/carrierRoutes');
+const registerCartRoutes = require('./routes/register/cartRoutes');
 const { handleDhlWebhook, handleFedexWebhook, handleUpsWebhook, handleUspsWebhook} = require('./webhooks/carrierWebhooks');
 const { rateLimiter } = require('./utils/rateLimiter');
 const googleRoutes = require('./routes/register/googleRoutes');
@@ -111,6 +112,7 @@ app.use('/login-passkey-routes', rateLimiter('passkey'), passkeyRoutes);
 
 //Register routes
 app.use('/register-store', rateLimiter('register-store'), registerStoreRoutes);
+app.use('/register-cart', rateLimiter('register-cart'), registerCartRoutes); 
 
 
 // User routes

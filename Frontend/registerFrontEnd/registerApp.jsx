@@ -12,7 +12,9 @@ import ForgotPassword from './Components/passwordForgot';
 import Events from '../userFrontEnd/Pages/Events';
 import PrivacyPolicy from './Components/Privacy&Terms/privacyPolicy';
 import TermsOfService from './Components/Privacy&Terms/termsOfService';
-
+import GuestCheckout from './Components/guestCheckout';
+import CheckoutOptions from './Components/checkoutOptions';
+import Cart from './Pages/Cart';
 
 
 
@@ -36,6 +38,9 @@ function App() {
                     <Route path ="/event-manager" element={<Events/>} />
                     <Route path ="/privacy-policy" element={<PrivacyPolicy />} />
                     <Route path ="/terms-of-service" element={<TermsOfService />} />
+                    <Route path="/checkout-options" element={<CheckoutOptions />} />
+                    <Route path="/guest-checkout" element={<GuestCheckout />} />
+                    <Route path="/cart" element={<Cart />} />
                 </Routes>
             </div>
         </Router>
