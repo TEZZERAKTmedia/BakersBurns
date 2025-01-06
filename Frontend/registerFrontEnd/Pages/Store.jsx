@@ -130,7 +130,7 @@ const Store = () => {
         paddingTop: '180px',
         padding: '20px',
         display: 'grid',
-        gridTemplateColumns: 'repeat(2, 1fr)',
+        gridTemplateColumns: 'repeat(1, 1fr)',
         gap: '1.5rem',
         marginTop: '50%'
       }}>

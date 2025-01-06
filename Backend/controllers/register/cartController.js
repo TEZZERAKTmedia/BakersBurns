@@ -134,10 +134,39 @@ const createCheckoutSession = async (req, res) => {
     }
   };
 
+const checkQuantity = async (req, res) => {
+    const { productId, quantity } = req.body;
+  
+    if (!productId || !quantity) {
+      return res.status(400).json({ message: 'Product ID and quantity are required' });
+    }
+  
+    try {
+      const product = await Product.findByPk(productId);
+  
+      if (!product) {
+        return res.status(404).json({ message: 'Product not found' });
+      }
+  
+      if (product.stock < quantity) {
+        return res.status(400).json({
+          message: `Insufficient stock for ${product.name}. Only ${product.stock} left.`,
+          availableStock: product.stock,
+        });
+      }
+  
+      res.status(200).json({ message: 'Stock is sufficient', availableStock: product.stock });
+    } catch (error) {
+      console.error('Error checking quantity:', error);
+      res.status(500).json({ message: 'Error checking product quantity' });
+    }
+  };
+
 
 module.exports = {
     getCartItems,
     lockInventory,
     createCheckoutSession,
-    unlockInventory
+    unlockInventory,
+    checkQuantity
 }
