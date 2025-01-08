@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { registerApi } from '../config/axios';
+import { registerApi } from '../../config/axios';
 
 const GuestCheckout = () => {
   const [cartItems, setCartItems] = useState([]); // Items with full details from the backend

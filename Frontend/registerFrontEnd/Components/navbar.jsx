@@ -33,7 +33,7 @@ const Navbar = () => {
 
         <li className="nav-item" onClick={closeMenu}><Link to="/">Home</Link></li>
         <li className="nav-item" onClick={closeMenu}><Link to="/store">Store</Link></li>
-       
+        <li className="nav-item" onClick={closeMenu}><Link to="/cart">Cart</Link></li>
         {/*<li className="nav-item" onClick={closeMenu}><Link to="/create">Create</Link></li>*/}
         <li className="nav-item" onClick={closeMenu}><Link to="/about">About</Link></li> 
         <li className="nav-item-privacy" onClick={closeMenu}><Link to="/privacy-policy" style={{textDecoration:'none', color:'white', padding:'10px'}}>Privacy Policy</Link></li>

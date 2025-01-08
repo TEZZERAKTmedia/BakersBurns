@@ -45,6 +45,7 @@ const userEventRoutes = require('./routes/user/eventRoutes');
 const userGalleryRoutes = require('./routes/user/galleryRoutes');
 const carrierRoutes = require('./routes/carrier/carrierRoutes');
 const registerCartRoutes = require('./routes/register/cartRoutes');
+const stripeWebhookGuestRoutes = require('./routes/register/stripeWebhookGuestRoute');
 const { handleDhlWebhook, handleFedexWebhook, handleUpsWebhook, handleUspsWebhook} = require('./webhooks/carrierWebhooks');
 const { rateLimiter } = require('./utils/rateLimiter');
 const googleRoutes = require('./routes/register/googleRoutes');
@@ -74,7 +75,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 
 app.use('/stripe-webhook-routes', express.raw({ type: 'application/json' }), stripeWebhookRoutes);
-
+app.use('/stripe-webhook-guest', express.raw({ type: 'application/json' }), stripeWebhookGuestRoutes);
 
 app.use(bodyParser.json());
 app.use(cookieParser());

@@ -1,172 +1,291 @@
-const Cart = require('../../models/cart');
+const GuestCart = require('../../models/guestCart');
 const Product = require('../../models/product');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
-// Get items in the cart
-const getCartItems = async (req, res) => {
-    const { items } = req.body; // Expecting an array of { productId, quantity }
-  
-    if (!items || !Array.isArray(items)) {
-      return res.status(400).json({ error: 'Invalid input. Must send an array of items.' });
-    }
-  
-    try {
-      // Fetch all products by product IDs
-      const productIds = items.map((item) => item.productId);
-      const products = await Product.findAll({
-        where: {
-          id: productIds,
-        },
-      });
-  
-      // Build the response by combining product details and quantities
-      const cartDetails = items.map((item) => {
-        const product = products.find((p) => p.id === item.productId);
-        if (!product) {
-          throw new Error(`Product with ID ${item.productId} not found.`);
-        }
-  
-        return {
-          id: product.id,
-          name: product.name,
-          price: product.price,
-          thumbnail: product.thumbnail,
-          stock: product.stock,
-          quantity: item.quantity,
-          total: product.price * item.quantity,
-        };
-      });
-  
-      res.status(200).json({ cartDetails });
-    } catch (error) {
-      console.error('Error fetching cart items:', error);
-      res.status(500).json({ error: error.message });
-    }
-  };
+// Add to Guest Cart
+const addToGuestCart = async (req, res) => {
+  const { sessionId, productId, quantity } = req.body;
 
-// Lock inventory for the cart items
+  if (!sessionId || !productId || !quantity) {
+    return res.status(400).json({ message: 'Session ID, product ID, and quantity are required.' });
+  }
+
+  try {
+    const product = await Product.findByPk(productId);
+
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found.' });
+    }
+
+    if (quantity <= 0) {
+      // Remove item if quantity is 0
+      await GuestCart.destroy({ where: { sessionId, productId } });
+      return res.status(200).json({ message: 'Item removed from cart.' });
+    }
+
+    // Check if the product already exists in the guest cart
+    const existingCartItem = await GuestCart.findOne({ where: { sessionId, productId } });
+
+    if (existingCartItem) {
+      existingCartItem.quantity = quantity;
+      await existingCartItem.save();
+    } else {
+      await GuestCart.create({ sessionId, productId, quantity });
+    }
+
+    res.status(200).json({ message: 'Item added/updated in cart successfully.' });
+  } catch (error) {
+    console.error('Error adding item to guest cart:', error.message, error.stack);
+    res.status(500).json({ message: 'Failed to add item to cart.' });
+  }
+};
+
+// Get Guest Cart Items
+// Get Guest Cart Items
+const getCartItems = async (req, res) => {
+  const { sessionId } = req.body;
+
+  console.log("Received session ID:", sessionId);
+
+  if (!sessionId) {
+    console.log("No session ID provided in the request.");
+    return res.status(400).json({ message: 'Session ID is required.' });
+  }
+
+  try {
+    // Fetch cart items associated with the session ID
+    const cartItems = await GuestCart.findAll({
+      where: { sessionId },
+      include: [
+        {
+          model: Product,
+          as: 'Product',
+        },
+      ],
+    });
+
+    console.log("Database query results:", cartItems);
+
+    if (cartItems.length === 0) {
+      console.log("No cart items found for session ID:", sessionId);
+      return res.status(200).json({ cartDetails: [] });
+    }
+
+    // Build cart details response
+    const cartDetails = cartItems.map((item) => ({
+      id: item.productId,
+      name: item.Product.name,
+      price: item.Product.price,
+      thumbnail: item.Product.thumbnail,
+      stock: item.Product.quantity,
+      quantity: item.quantity,
+      total: item.Product.price * item.quantity,
+    }));
+
+    console.log("Cart details to be sent in response:", cartDetails);
+
+    res.status(200).json({ cartDetails });
+  } catch (error) {
+    console.error('Error fetching cart items:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+};
+const deleteCartItem = async (req, res) => {
+  const { sessionId, productId } = req.body;
+
+  if (!sessionId || !productId) {
+    return res.status(400).json({ message: 'Session ID and product ID are required.' });
+  }
+
+  try {
+    const deletedRows = await GuestCart.destroy({
+      where: { sessionId, productId },
+    });
+
+    if (deletedRows === 0) {
+      return res.status(404).json({ message: 'Cart item not found.' });
+    }
+
+    res.status(200).json({ message: 'Cart item deleted successfully.' });
+  } catch (error) {
+    console.error('Error deleting cart item:', error);
+    res.status(500).json({ message: 'Failed to delete cart item.' });
+  }
+};
+
+
+// Lock Inventory
 const lockInventory = async (req, res, next) => {
-    try {
-      const { cartItems } = req.body;
-  
-      if (!cartItems || cartItems.length === 0) {
-        return res.status(400).json({ message: 'Cart is empty' });
+  const { sessionId } = req.body;
+
+  if (!sessionId) {
+    return res.status(400).json({ message: 'Session ID is required.' });
+  }
+
+  try {
+    const cartItems = await GuestCart.findAll({ where: { sessionId }, include: [Product] });
+
+    for (const cartItem of cartItems) {
+      const product = cartItem.Product;
+
+      if (!product) {
+        return res.status(404).json({ message: `Product with ID ${cartItem.productId} not found` });
       }
-  
-      for (const cartItem of cartItems) {
-        const product = await Product.findByPk(cartItem.id);
-  
-        if (!product) {
-          return res.status(404).json({ message: `Product with ID ${cartItem.id} not found` });
-        }
-  
-        if (product.stock < cartItem.quantity) {
-          return res.status(400).json({ message: `Not enough stock for ${product.name}` });
-        }
-  
-        product.stock -= cartItem.quantity; // Reduce stock
+
+      if (product.quantity < cartItem.quantity) {
+        return res.status(400).json({ message: `Not enough quantity for ${product.name}` });
+      }
+
+      product.quantity -= cartItem.quantity;
+      await product.save();
+    }
+
+    next();
+  } catch (error) {
+    console.error('Error locking inventory:', error.message, error.stack);
+    res.status(500).json({ message: 'Error locking inventory' });
+  }
+};
+
+// Unlock Inventory
+const unlockInventory = async (cartItems) => {
+  try {
+    for (const cartItem of cartItems) {
+      const product = await Product.findByPk(cartItem.productId);
+
+      if (product) {
+        product.quantity += cartItem.quantity;
         await product.save();
       }
-  
-      next();
-    } catch (error) {
-      console.error('Error locking inventory:', error);
-      res.status(500).json({ message: 'Error locking inventory' });
     }
-  };
-  const unlockInventory = async (cartItems) => {
-    try {
-      for (const cartItem of cartItems) {
-        const product = await Product.findByPk(cartItem.id);
-        if (product) {
-          product.stock += cartItem.quantity; // Add back stock
-          await product.save();
-        }
-      }
-    } catch (error) {
-      console.error('Error unlocking inventory:', error);
-    }
-  };
+  } catch (error) {
+    console.error('Error unlocking inventory:', error.message, error.stack);
+  }
+};
 
-// Create a Stripe checkout session
+// Create Stripe Checkout Session
 const createCheckoutSession = async (req, res) => {
-    try {
-      const { cartItems } = req.body;
-  
-      if (!cartItems || cartItems.length === 0) {
-        return res.status(400).json({ message: 'Cart is empty' });
-      }
-  
-      const lineItems = await Promise.all(
-        cartItems.map(async (cartItem) => {
-          const product = await Product.findByPk(cartItem.id);
-  
-          if (!product) {
-            throw new Error(`Product with ID ${cartItem.id} not found`);
-          }
-  
-          return {
-            price_data: {
-              currency: 'usd',
-              product_data: {
-                name: product.name,
-                images: [`${process.env.BASE_URL}/uploads/${product.thumbnail}`],
-              },
-              unit_amount: Math.round(product.price * 100),
-            },
-            quantity: cartItem.quantity,
-          };
-        })
-      );
-  
-      const session = await stripe.checkout.sessions.create({
-        payment_method_types: ['card'],
-        line_items: lineItems,
-        mode: 'payment',
-        success_url: `${process.env.REGISTER_FRONTEND}/success?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${process.env.REGISTER_FRONTEND}/cancel`,
-      });
-  
-      res.status(200).json({ url: session.url });
-    } catch (error) {
-      console.error('Error creating checkout session:', error);
-      res.status(500).json({ message: 'Error creating checkout session' });
-    }
-  };
+  try {
+    const { sessionId } = req.body;
 
-const checkQuantity = async (req, res) => {
-    const { productId, quantity } = req.body;
-  
-    if (!productId || !quantity) {
-      return res.status(400).json({ message: 'Product ID and quantity are required' });
+    if (!sessionId) {
+      return res.status(400).json({ message: 'Session ID is required.' });
     }
-  
-    try {
-      const product = await Product.findByPk(productId);
-  
+
+    // Fetch cart items with the correct alias
+    const cartItems = await GuestCart.findAll({
+      where: { sessionId },
+      include: [
+        {
+          model: Product,
+          as: 'Product',
+        },
+      ],
+    });
+
+    if (cartItems.length === 0) {
+      return res.status(400).json({ message: 'Cart is empty' });
+    }
+
+    // Lock inventory
+    for (const cartItem of cartItems) {
+      const product = cartItem.Product;
+
       if (!product) {
-        return res.status(404).json({ message: 'Product not found' });
+        return res.status(404).json({ message: `Product with ID ${cartItem.productId} not found` });
       }
-  
-      if (product.stock < quantity) {
-        return res.status(400).json({
-          message: `Insufficient stock for ${product.name}. Only ${product.stock} left.`,
-          availableStock: product.stock,
-        });
+
+      if (product.quantity < cartItem.quantity) {
+        return res.status(400).json({ message: `Not enough quantity for ${product.name}` });
       }
-  
-      res.status(200).json({ message: 'Stock is sufficient', availableStock: product.stock });
-    } catch (error) {
-      console.error('Error checking quantity:', error);
-      res.status(500).json({ message: 'Error checking product quantity' });
+
+      product.quantity -= cartItem.quantity;
+      await product.save();
     }
-  };
+
+    const lineItems = cartItems.map((item) => ({
+      price_data: {
+        currency: 'usd',
+        product_data: {
+          name: item.Product.name,
+          images: [`${process.env.BASE_URL}/uploads/${item.Product.thumbnail}`],
+        },
+        unit_amount: Math.round(item.Product.price * 100),
+      },
+      quantity: item.quantity,
+    }));
+
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: lineItems,
+      mode: 'payment',
+      success_url: `${process.env.REGISTER_FRONTEND}/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.REGISTER_FRONTEND}/cancel?session_id={CHECKOUT_SESSION_ID}`,
+      metadata: {
+        sessionId,
+      },
+    });
+
+    res.status(200).json({ url: session.url });
+  } catch (error) {
+    console.error('Error creating checkout session:', error);
+    res.status(500).json({ message: 'Error creating checkout session' });
+  }
+};
+
+
+
+// Cancel Checkout Session
+const cancelCheckoutSession = async (req, res) => {
+  try {
+    const { sessionId } = req.body;
+
+    if (!sessionId) {
+      console.error("No sessionId provided in request.");
+      return res.status(400).json({ message: 'Session ID is required.' });
+    }
+
+    console.log("Received sessionId:", sessionId);
+
+    const cartItems = await GuestCart.findAll({
+      where: { sessionId },
+      include: [{ model: Product, as: 'Product' }],
+    });
+
+    console.log("Cart Items Fetched:", cartItems);
+
+    if (cartItems.length === 0) {
+      console.error(`No cart items found for sessionId: ${sessionId}`);
+      return res.status(400).json({ message: 'No cart data found for session' });
+    }
+
+    // Unlock inventory
+    for (const cartItem of cartItems) {
+      const product = cartItem.Product;
+      if (product) {
+        product.quantity += cartItem.quantity;
+        await product.save();
+        console.log(
+          `Unlocked inventory for product: ${product.name}, quantity restored: ${cartItem.quantity}`
+        );
+      }
+    }
+
+    res.status(200).json({ message: 'Inventory unlocked successfully' });
+  } catch (error) {
+    console.error('Error unlocking inventory:', error);
+    res.status(500).json({ message: 'Failed to unlock inventory' });
+  }
+};
+
 
 
 module.exports = {
-    getCartItems,
-    lockInventory,
-    createCheckoutSession,
-    unlockInventory,
-    checkQuantity
-}
+  addToGuestCart,
+  getCartItems,
+  lockInventory,
+  unlockInventory,
+  createCheckoutSession,
+  cancelCheckoutSession,
+  deleteCartItem
+};

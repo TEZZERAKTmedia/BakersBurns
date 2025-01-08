@@ -183,7 +183,7 @@ const Store = () => {
 };
 
 
-import QuantityModal from '../Components/quantityModal';
+import QuantityModal from './Cart/quantityModal';
 const ProductModal = ({ product, onClose }) => {
   const [showQuantityModal, setShowQuantityModal] = useState(false);
   const navigate = useNavigate();
@@ -269,7 +269,11 @@ const ProductModal = ({ product, onClose }) => {
           <p
             style={{
               fontSize: "1.5rem",
-              color: "#444",
+              color: "#555",
+              backgroundColor:'white',
+              padding: '10px',
+              border:'solid 2px white',
+              borderRadius:'20px'
             }}
           >
             ${product.price}

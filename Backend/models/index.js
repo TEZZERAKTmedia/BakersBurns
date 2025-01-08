@@ -8,7 +8,9 @@ const Message = require('./messages');
 const Thread = require('./threads');
 const OrderItem = require('./orderItem');
 const Media = require('./media');
+const GuestCart = require('./guestCart')
 const RateLimiterLogs = require("./rateLimiterLogs");
+
 
 // Define the models within an object for easier association management
 const db = {
@@ -20,6 +22,9 @@ const db = {
   OrderItem,
   RateLimiterLogs,
   Media,
+  GuestCart,
+
+  
 };
 
 // Manually define associations within each model
@@ -103,6 +108,17 @@ Object.keys(db).forEach((modelName) => {
     db[modelName].associate(db);
   }
 });
+
+GuestCart.belongsTo(Product,
+   { foreignKey: 'productId',
+    as: 'Product'
+});
+
+Product.hasMany(GuestCart, 
+  { foreignKey: 'productId',
+   as: 'Product'
+   });
+
 
 
 // Export Sequelize instance and models
