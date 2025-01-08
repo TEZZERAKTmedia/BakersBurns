@@ -117,7 +117,7 @@ const CartPage = () => {
 
   if (cart.length === 0) {
     return (
-      <div className="cart-container empty" style={{backgroundColor:'#555555ce', color: 'white', borderRadius:'20px'}}>
+      <div className="cart-container empty" style={{backgroundColor:'#555555ce', borderRadius:'20px'}}>
         <h2 style={{ color: 'white'}}>Your cart is empty!</h2>
         <button
           onClick={() => navigate("/store")}
@@ -130,8 +130,8 @@ const CartPage = () => {
   }
 
   return (
-    <div className="cart-container" style={{backgroundColor:'#555555ce'}}>
-      <h2 className="cart-title">Your Cart</h2>
+    <div className="cart-container" style={{backgroundColor:'#555555ce', borderRadius:'20px'}}>
+      <h2 className="cart-title" style={{color:'white'}}>Your Cart</h2>
       {error && <p className="cart-error">{error}</p>}
       <div className="cart-items">
         {cart.map((item) => (
@@ -144,7 +144,7 @@ const CartPage = () => {
               />
               <div className="cart-item-details">
                 <h4 className="cart-item-name">{item.name}</h4>
-                <p className="cart-item-price">${item.price.toFixed(2)}</p>
+                <p className="cart-item-price" >${item.price.toFixed(2)}</p>
               </div>
             </div>
             <div className="cart-item-quantity-control">
@@ -184,7 +184,7 @@ const CartPage = () => {
       </div>
 
       <div className="cart-summary">
-        <h3>Total: ${totalPrice.toFixed(2)}</h3>
+        <h3 style={{color:'white', padding: '10px'}}>Total: ${totalPrice.toFixed(2)}</h3>
         <button
           onClick={handleCheckout}
           disabled={loading}
