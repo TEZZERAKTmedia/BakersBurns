@@ -20,10 +20,11 @@ const handleWebhook = async (req, res) => {
 
       const session = event.data.object;
 
-      // Extract metadata
+      // Extract metadata and session details
       const sessionId = session.metadata?.sessionId;
       const userId = session.metadata?.userId;
-      const email = session.metadata?.email;
+      const metadataEmail = session.metadata?.email;
+      const customerEmail = session.customer_details?.email; // Stripe-provided email
       const total = session.amount_total / 100; // Convert to dollars
 
       if (!sessionId && !userId) {
@@ -31,14 +32,19 @@ const handleWebhook = async (req, res) => {
         return res.status(400).send('Webhook Error: Missing sessionId or userId.');
       }
 
-      // Guest checkout: create user account
+      // Determine email: use metadata email if available, otherwise use Stripe email
+      const email = metadataEmail || customerEmail;
+
+      if (!email) {
+        console.error('Missing email from both metadata and Stripe session.');
+        return res.status(400).send('Webhook Error: Missing email.');
+      }
+
+      console.log(`Email for checkout: ${email}`);
+
+      // Handle guest checkout: create user account if userId is not provided
       let user;
       if (!userId) {
-        if (!email) {
-          console.error('Missing email for guest checkout.');
-          return res.status(400).send('Webhook Error: Missing email for guest checkout.');
-        }
-
         user = await User.findOne({ where: { email } });
         if (!user) {
           // Create a guest user account
@@ -136,6 +142,7 @@ const handleWebhook = async (req, res) => {
     res.status(400).send(`Webhook Error: ${err.message}`);
   }
 };
+
 
 
 // Cancel checkout session (moved outside `handleWebhook`)
