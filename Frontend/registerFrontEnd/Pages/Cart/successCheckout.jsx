@@ -1,41 +1,8 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { registerApi } from '../../config/axios';
+import { Link } from 'react-router-dom';
 
 const SuccessPage = () => {
-  const sessionId = localStorage.getItem('sessionId'); // Get session ID from local storage
-  const navigate = useNavigate();
-  const [isProcessing, setIsProcessing] = useState(false); // To handle the button loading state
-  const [error, setError] = useState(null); // To display error messages
-
-  const handleSuccessCheckout = async () => {
-    if (!sessionId) {
-      console.warn('SuccessPage: No session ID found in local storage.');
-      setError('No active session found. Please try again.');
-      return;
-    }
-
-    setIsProcessing(true); // Start processing
-    setError(null); // Clear any previous error
-
-    try {
-      const response = await registerApi.post('/register-cart/success-checkout', { sessionId });
-      console.log('SuccessPage: Checkout session successfully handled.', response.data);
-
-      // Redirect to the home page after successful API call
-      navigate('/');
-    } catch (error) {
-      console.error('SuccessPage: Error during API call to complete checkout session:', error);
-      if (error.response) {
-        console.error('SuccessPage: API error response:', error.response.data);
-        setError(error.response.data.message || 'An error occurred. Please try again.');
-      } else {
-        setError('Failed to process your request. Please try again.');
-      }
-    } finally {
-      setIsProcessing(false); // Stop processing
-    }
-  };
+  
 
   return (
     <div style={styles.backdrop}>
@@ -45,13 +12,9 @@ const SuccessPage = () => {
           Your order has been successfully placed. We hope to see you again soon!
         </p>
         {error && <p style={styles.error}>{error}</p>}
-        <button
-          style={styles.button}
-          onClick={handleSuccessCheckout}
-          disabled={isProcessing}
-        >
+        <Link to="/store"></Link>
           {isProcessing ? 'Processing...' : 'Continue Shopping'}
-        </button>
+        
       </div>
     </div>
   );
