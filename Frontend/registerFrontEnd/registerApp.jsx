@@ -16,6 +16,7 @@ import GuestCheckout from './Pages/Cart/guestCheckout';
 import CheckoutOptions from './Pages/Cart/checkoutOptions';
 import Cart from './Pages/Cart/Cart';
 import CancelPage from './Pages/Cart/cancelCheckout';
+import SuccessPage from './Pages/Cart/successCheckout';
 
 
 
@@ -43,6 +44,7 @@ function App() {
                     <Route path="/guest-checkout" element={<GuestCheckout />} />
                     <Route path="/cart" element={<Cart />} />
                     <Route path="/cancel" element={<CancelPage/>} />
+                    <Route path="/success" element={<SuccessPage/>} />
                 </Routes>
             </div>
         </Router>

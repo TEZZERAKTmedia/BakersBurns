@@ -20,12 +20,21 @@ const handleWebhook = async (req, res) => {
 
       const session = event.data.object;
 
+      // Log entire session metadata for debugging
+      console.log('Session metadata:', session.metadata);
+
       // Extract metadata and session details
       const sessionId = session.metadata?.sessionId;
       const userId = session.metadata?.userId;
       const metadataEmail = session.metadata?.email;
       const customerEmail = session.customer_details?.email; // Stripe-provided email
       const total = session.amount_total / 100; // Convert to dollars
+
+      console.log('Session Details:');
+      console.log(`sessionId: ${sessionId}`);
+      console.log(`userId: ${userId}`);
+      console.log(`metadataEmail: ${metadataEmail}`);
+      console.log(`customerEmail: ${customerEmail}`);
 
       if (!sessionId && !userId) {
         console.error('Missing sessionId or userId in session metadata.');
@@ -45,9 +54,11 @@ const handleWebhook = async (req, res) => {
       // Handle guest checkout: create user account if userId is not provided
       let user;
       if (!userId) {
+        console.log(`No userId provided, handling guest checkout for email: ${email}`);
         user = await User.findOne({ where: { email } });
         if (!user) {
           // Create a guest user account
+          console.log('Creating a new guest user...');
           user = await User.create({
             email,
             username: `guest_${Date.now()}`,
@@ -58,6 +69,7 @@ const handleWebhook = async (req, res) => {
           console.log(`User already exists for email: ${email}`);
         }
       } else {
+        console.log(`Using existing userId: ${userId}`);
         user = await User.findByPk(userId);
         if (!user) {
           console.error(`User not found with ID: ${userId}`);
@@ -68,11 +80,13 @@ const handleWebhook = async (req, res) => {
       // Handle cart items for guest users or registered users
       let cartItems;
       if (sessionId) {
+        console.log(`Fetching cart items for sessionId: ${sessionId}`);
         cartItems = await GuestCart.findAll({
           where: { sessionId },
           include: [{ model: Product, as: 'Product' }],
         });
       } else {
+        console.log(`Fetching cart items for userId: ${userId}`);
         cartItems = await Cart.findAll({
           where: { userId },
           include: [{ model: Product, as: 'product' }],
@@ -84,6 +98,9 @@ const handleWebhook = async (req, res) => {
         return res.status(400).send('Webhook Error: Cart is empty.');
       }
 
+      // Log fetched cart items
+      console.log('Cart items:', cartItems);
+
       // Extract and encrypt shipping and billing details
       const shippingAddress = encrypt(JSON.stringify(session.shipping_details?.address || {}));
       const billingAddress = encrypt(JSON.stringify(session.customer_details?.address || {}));
@@ -92,6 +109,7 @@ const handleWebhook = async (req, res) => {
       console.log('Encrypted Billing Address:', billingAddress);
 
       // Create an order in the database
+      console.log('Creating an order...');
       const order = await Order.create({
         userId: user.id,
         total,
@@ -103,6 +121,7 @@ const handleWebhook = async (req, res) => {
       console.log(`Order created with ID: ${order.id}`);
 
       // Add order items and update inventory
+      console.log('Processing order items...');
       await Promise.all(
         cartItems.map(async (cartItem) => {
           const product = cartItem.Product || cartItem.product;
@@ -112,6 +131,7 @@ const handleWebhook = async (req, res) => {
             return;
           }
 
+          console.log(`Adding order item for product: ${product.name}, quantity: ${cartItem.quantity}`);
           await OrderItem.create({
             orderId: order.id,
             productId: product.id,
@@ -122,6 +142,7 @@ const handleWebhook = async (req, res) => {
           // Update product stock
           product.quantity -= cartItem.quantity;
           await product.save();
+          console.log(`Stock updated for product: ${product.name}, remaining quantity: ${product.quantity}`);
         })
       );
 

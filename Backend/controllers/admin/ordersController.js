@@ -102,7 +102,7 @@ const getAllOrders = async (req, res) => {
               {
                 model: Product,
                 as: 'product',
-                attributes: ['name', 'image', 'price'],
+                attributes: ['name', 'thumbnail', 'price'],
               },
             ],
           },
