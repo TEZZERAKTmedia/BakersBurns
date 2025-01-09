@@ -11,9 +11,9 @@ const SuccessPage = () => {
         <p style={styles.message}>
           Your order has been successfully placed. We hope to see you again soon!
         </p>
-        {error && <p style={styles.error}>{error}</p>}
-        <Link to="/store"></Link>
-          {isProcessing ? 'Processing...' : 'Continue Shopping'}
+        
+        <Link to="/store">back to shop</Link>
+          
         
       </div>
     </div>
