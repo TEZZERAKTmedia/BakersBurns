@@ -2,7 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Navbar from './Components/navbar';
 import Home from './Pages/Home';
-import Store from './Pages/Store';
+import Store from './Pages/Store/Store';
 import About from './Pages/About';
 import VerifyEmail from './Components/verifyEmail';
 import Signup from './Pages/SignUp';
@@ -17,6 +17,7 @@ import CheckoutOptions from './Pages/Cart/checkoutOptions';
 import Cart from './Pages/Cart/Cart';
 import CancelPage from './Pages/Cart/cancelCheckout';
 import SuccessPage from './Pages/Cart/successCheckout';
+import PasswordSetupForm from './Pages/Signup/password';
 
 
 
@@ -45,6 +46,7 @@ function App() {
                     <Route path="/cart" element={<Cart />} />
                     <Route path="/cancel" element={<CancelPage/>} />
                     <Route path="/success" element={<SuccessPage/>} />
+                    <Route path="/password-form" element={< PasswordSetupForm/>} />
                 </Routes>
             </div>
         </Router>

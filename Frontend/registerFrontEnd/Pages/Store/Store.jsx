@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { registerApi } from '../config/axios';
-import LoadingPage from '../Components/loading';
+import { registerApi } from '../../config/axios';
+import LoadingPage from '../../Components/loading';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 
@@ -183,7 +183,7 @@ const Store = () => {
 };
 
 
-import QuantityModal from './Cart/quantityModal';
+import QuantityModal from '../Cart/quantityModal';
 const ProductModal = ({ product, onClose }) => {
   const [showQuantityModal, setShowQuantityModal] = useState(false);
   const navigate = useNavigate();

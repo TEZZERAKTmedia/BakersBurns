@@ -21,7 +21,7 @@ const handleWebhook = async (req, res) => {
       const session = event.data.object;
 
       // Extract metadata and session details
-      const sessionId = session.metadata?.sessionId; // For guest users
+      const sessionId = session.metadata?.sessionId;
       const customerEmail = session.customer_details?.email; // Stripe-provided email
       const total = session.amount_total / 100; // Convert to dollars
 
@@ -34,6 +34,7 @@ const handleWebhook = async (req, res) => {
 
       // Check if user exists by email
       let user = await User.findOne({ where: { email: customerEmail } });
+      let emailType;
 
       if (!user) {
         // Create a guest user account if no user exists
@@ -43,8 +44,10 @@ const handleWebhook = async (req, res) => {
           isGuest: true, // Mark as guest user
         });
         console.log(`Guest user created with email: ${customerEmail}`);
+        emailType = 'newGuest';
       } else {
         console.log(`User found for email: ${customerEmail}`);
+        emailType = 'existingUser';
       }
 
       // Handle cart items for guest users or registered users
@@ -114,6 +117,28 @@ const handleWebhook = async (req, res) => {
         await GuestCart.destroy({ where: { sessionId } });
         console.log(`Cleared guest cart for session ID: ${sessionId}`);
       }
+
+      // Send email to user
+      const emailData = {
+        orderItems: cartItems.map(cartItem => ({
+          name: cartItem.Product?.name || cartItem.product?.name,
+          quantity: cartItem.quantity,
+          price: cartItem.Product?.price || cartItem.product?.price,
+        })),
+        total,
+        setPasswordUrl: `${process.env.FRONTEND_URL}/set-password?token=GENERATED_TOKEN`, // Placeholder for the guest password setup link
+        orderUrl: `${process.env.FRONTEND_URL}/orders/${order.id}`, // Placeholder for the order details page
+      };
+
+      await sendOrderEmail(emailType, customerEmail, emailData);
+
+      // Notify admins of the transaction
+      const adminEmailData = {
+        orderItems: emailData.orderItems,
+        total,
+        status: 'processing',
+      };
+      await sendOrderEmail('adminNotification', process.env.ADMIN_EMAIL, adminEmailData);
     } else {
       console.log(`Unhandled event type: ${event.type}`);
     }
@@ -124,7 +149,6 @@ const handleWebhook = async (req, res) => {
     res.status(400).send(`Webhook Error: ${err.message}`);
   }
 };
-
 
 
 

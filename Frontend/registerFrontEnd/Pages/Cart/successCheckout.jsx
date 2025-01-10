@@ -1,26 +1,74 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const SuccessPage = () => {
-  
+  const [isAnimating, setIsAnimating] = useState(false);
+  const navigate = useNavigate();
+
+  const handleAnimationEnd = () => {
+    // Navigate to the store page after animation ends
+    navigate('/store');
+  };
+
+  const handleButtonClick = () => {
+    setIsAnimating(true); // Trigger the animation
+  };
+
+  const keyframes = `
+    @keyframes flipAndSlide {
+      0% {
+        transform: rotateY(0) translateX(0);
+        opacity: 1;
+      }
+      50% {
+        transform: rotateY(90deg) translateX(0); /* Midpoint of flip */
+        opacity: 0.5; /* Slight fade at midpoint */
+      }
+      100% {
+        transform: rotateY(180deg) translateX(100%);
+        opacity: 0;
+      }
+    }
+  `;
 
   return (
     <div style={styles.backdrop}>
-      <div style={styles.modal}>
+      <style>{keyframes}</style> {/* Inject the keyframes inline */}
+      <div
+        style={{
+          ...styles.modal,
+          animation: isAnimating ? 'flipAndSlide 1s forwards' : 'none',
+        }}
+        onAnimationEnd={handleAnimationEnd} // Trigger navigation after animation ends
+      >
         <h2 style={styles.heading}>Thank you for your purchase!</h2>
         <p style={styles.message}>
           Your order has been successfully placed. We hope to see you again soon!
         </p>
-        
-        <Link to="/store">back to shop</Link>
-          
-        
+
+        <button
+          onClick={handleButtonClick}
+          style={{
+            textDecoration: 'none',
+            color: 'white',
+            padding: '10px 20px',
+            borderRadius: '5px',
+            background: 'linear-gradient(to right, blue, lightgreen)',
+            display: 'inline-block',
+            textAlign: 'center',
+            fontWeight: 'bold',
+            border: 'none',
+            cursor: 'pointer',
+          }}
+        >
+          Back to Shop
+        </button>
       </div>
     </div>
   );
 };
 
-// Styling for the modal
+// Styling for the modal and animations
 const styles = {
   backdrop: {
     position: 'fixed',
@@ -42,6 +90,8 @@ const styles = {
     width: '90%',
     textAlign: 'center',
     boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
+    transformOrigin: 'center', // For the flip animation
+    backfaceVisibility: 'hidden', // Hides the backside of the modal
   },
   heading: {
     fontSize: '1.8rem',
@@ -52,24 +102,6 @@ const styles = {
     fontSize: '1rem',
     marginBottom: '20px',
     color: '#555',
-  },
-  error: {
-    color: 'red',
-    fontSize: '0.9rem',
-    marginBottom: '15px',
-  },
-  button: {
-    padding: '10px 20px',
-    fontSize: '1rem',
-    color: '#fff',
-    backgroundColor: '#28a745',
-    border: 'none',
-    borderRadius: '5px',
-    cursor: 'pointer',
-    transition: 'background-color 0.3s',
-  },
-  buttonDisabled: {
-    backgroundColor: '#ccc',
   },
 };
 
