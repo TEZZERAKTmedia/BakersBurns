@@ -6,6 +6,7 @@ const OrderItem = require('../../models/orderItem');
 const User = require('../../models/user'); // Import User model
 const GuestCart = require('../../models/guestCart'); // Import GuestCart model
 const { encrypt } = require('../../utils/encrypt');
+const { sendOrderEmail } = require('../../utils/orderEmail');
 
 const handleWebhook = async (req, res) => {
   const sig = req.headers['stripe-signature'];
