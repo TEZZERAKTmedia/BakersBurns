@@ -104,10 +104,7 @@ const handleWebhook = async (req, res) => {
             quantity: cartItem.quantity,
             price: product.price,
           });
-
-          // Update product stock
-          product.quantity -= cartItem.quantity;
-          await product.save();
+        
         })
       );
 
