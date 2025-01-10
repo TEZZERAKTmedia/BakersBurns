@@ -131,7 +131,12 @@ const handleWebhook = async (req, res) => {
         orderUrl: `${process.env.FRONTEND_URL}/orders/${order.id}`, // Placeholder for the order details page
       };
 
-      await sendOrderEmail(emailType, customerEmail, emailData);
+      try {
+        await sendOrderEmail(emailType, customerEmail, emailData);
+        console.log(`Order email sent to ${customerEmail}.`);
+      } catch (err) {
+        console.error(`Failed to send order email to ${customerEmail}:`, err.message);
+      }
 
       // Notify admins of the transaction
       const adminEmailData = {
@@ -139,7 +144,13 @@ const handleWebhook = async (req, res) => {
         total,
         status: 'processing',
       };
-      await sendOrderEmail('adminNotification', process.env.ADMIN_EMAIL, adminEmailData);
+
+      try {
+        await sendOrderEmail('adminNotification', process.env.ADMIN_EMAIL, adminEmailData);
+        console.log(`Admin notification sent.`);
+      } catch (err) {
+        console.error(`Failed to send admin notification:`, err.message);
+      }
     } else {
       console.log(`Unhandled event type: ${event.type}`);
     }
