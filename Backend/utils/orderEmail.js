@@ -80,4 +80,4 @@ const sendOrderEmail = async (type, email, data = {}) => {
   }
 };
 
-module.exports = sendOrderEmail;
+module.exports = {sendOrderEmail};
