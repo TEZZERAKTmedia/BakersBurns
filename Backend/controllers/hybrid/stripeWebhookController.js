@@ -22,7 +22,7 @@ const handleWebhook = async (req, res) => {
       const session = event.data.object;
 
       // Extract metadata and session details
-      const sessionId = session.metadata?.sessionId;
+      const sessionId = session.metadata?.sessionId; // For guest users
       const customerEmail = session.customer_details?.email; // Stripe-provided email
       const total = session.amount_total / 100; // Convert to dollars
 
@@ -35,9 +35,9 @@ const handleWebhook = async (req, res) => {
 
       // Check if user exists by email
       let user = await User.findOne({ where: { email: customerEmail } });
-      let emailType;
 
-      if (!user) {
+      const isNewGuest = !user;
+      if (isNewGuest) {
         // Create a guest user account if no user exists
         user = await User.create({
           email: customerEmail,
@@ -45,10 +45,6 @@ const handleWebhook = async (req, res) => {
           isGuest: true, // Mark as guest user
         });
         console.log(`Guest user created with email: ${customerEmail}`);
-        emailType = 'newGuest';
-      } else {
-        console.log(`User found for email: ${customerEmail}`);
-        emailType = 'existingUser';
       }
 
       // Handle cart items for guest users or registered users
@@ -104,7 +100,10 @@ const handleWebhook = async (req, res) => {
             quantity: cartItem.quantity,
             price: product.price,
           });
-        
+
+          // Update product stock
+          product.quantity -= cartItem.quantity;
+          await product.save();
         })
       );
 
@@ -116,37 +115,32 @@ const handleWebhook = async (req, res) => {
         console.log(`Cleared guest cart for session ID: ${sessionId}`);
       }
 
-      // Send email to user
-      const emailData = {
-        orderItems: cartItems.map(cartItem => ({
-          name: cartItem.Product?.name || cartItem.product?.name,
-          quantity: cartItem.quantity,
-          price: cartItem.Product?.price || cartItem.product?.price,
-        })),
+      // Send email notifications
+      const orderItems = cartItems.map(cartItem => ({
+        name: cartItem.Product?.name || cartItem.product?.name,
+        quantity: cartItem.quantity,
+        price: cartItem.Product?.price || cartItem.product?.price,
+      }));
+
+      // Send user email
+      await sendOrderEmail(isNewGuest ? 'newGuest' : 'existingUser', customerEmail, {
         total,
-        setPasswordUrl: `${process.env.FRONTEND_URL}/set-password?token=GENERATED_TOKEN`, // Placeholder for the guest password setup link
-        orderUrl: `${process.env.FRONTEND_URL}/orders/${order.id}`, // Placeholder for the order details page
-      };
+        orderItems,
+        orderUrl: `${process.env.ORDER_URL}/${order.id}`,
+      });
 
-      try {
-        await sendOrderEmail(emailType, customerEmail, emailData);
-        console.log(`Order email sent to ${customerEmail}.`);
-      } catch (err) {
-        console.error(`Failed to send order email to ${customerEmail}:`, err.message);
-      }
+      // Send admin notification email
+      const admins = await User.findAll({ where: { role: 'admin' } });
+      const adminEmails = admins.map(admin => admin.email).filter(email => email);
 
-      // Notify admins of the transaction
-      const adminEmailData = {
-        orderItems: emailData.orderItems,
-        total,
-        status: 'processing',
-      };
-
-      try {
-        await sendOrderEmail('adminNotification', process.env.ADMIN_EMAIL, adminEmailData);
-        console.log(`Admin notification sent.`);
-      } catch (err) {
-        console.error(`Failed to send admin notification:`, err.message);
+      if (adminEmails.length > 0) {
+        await sendOrderEmail('adminNotification', adminEmails.join(','), {
+          total,
+          orderItems,
+          status: 'processing',
+        });
+      } else {
+        console.warn('No admin emails found to send admin notification.');
       }
     } else {
       console.log(`Unhandled event type: ${event.type}`);
@@ -158,8 +152,6 @@ const handleWebhook = async (req, res) => {
     res.status(400).send(`Webhook Error: ${err.message}`);
   }
 };
-
-
 
 // Cancel checkout session (moved outside `handleWebhook`)
 const cancelCheckoutSession = async (req, res) => {
