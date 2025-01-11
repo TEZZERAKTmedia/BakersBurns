@@ -48,6 +48,7 @@ const handleWebhook = async (req, res) => {
           privacyPolicyAcceptedAt: new Date(),
           hasAcceptedTermsOfService: true,
           termsAcceptedAt: new Date(),
+          role: 'user',
         });
         console.log(`Guest user created with email: ${customerEmail}`);
       }

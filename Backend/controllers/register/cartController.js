@@ -234,6 +234,10 @@ const createCheckoutSession = async (req, res) => {
         hasAcceptedPrivacy: metadata.hasAcceptedPrivacy, // Log for audit
         hasAcceptedTermsOfService: metadata.hasAcceptedTermsOfService, // Log for audit
       },
+      shipping_address_collection: {
+        allowed_countries: ['US', 'CA'], // Add or remove countries as needed
+      },
+      billing_address_collection: 'required', // Require billing address
     });
 
     res.status(200).json({ url: session.url });
@@ -242,7 +246,6 @@ const createCheckoutSession = async (req, res) => {
     res.status(500).json({ message: 'Error creating checkout session' });
   }
 };
-
 
 
 
