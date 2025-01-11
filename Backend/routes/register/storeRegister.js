@@ -1,7 +1,7 @@
 // routes/registerStoreRouter.js
 
 const express = require('express');
-const { getProducts, addToCart } = require('../../controllers/register/registerStoreController');
+const { getProducts, addToCart, getProductMedia } = require('../../controllers/register/registerStoreController');
 const { getFeaturedProducts }= require('../../controllers/user/storeController');
 const router = express.Router();
 
@@ -12,5 +12,7 @@ router.get('/products', getProducts);
 router.post('/add-to-cart', addToCart);
 
 router.get('/get-featured-products', getFeaturedProducts);
+
+router.get('/products/:productId/media', getProductMedia);
 
 module.exports = router;

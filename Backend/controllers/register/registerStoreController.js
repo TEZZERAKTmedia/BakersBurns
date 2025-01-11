@@ -1,6 +1,6 @@
 // controllers/registerStoreController.js
 const { Op } = require('sequelize');
-
+const Media = require('../../models/media');
 const Product = require('../../models/product'); // Assuming a Product model exists
 const TempCart = require('../../models/tempCart'); // Temporary Cart model for unregistered users
 
@@ -46,8 +46,37 @@ const addToCart = async (req, res) => {
     res.status(500).json({ message: 'Error adding item to cart', error });
   }
 };
+const getProductMedia = async (req, res) => {
+  const { productId } = req.params;
+
+  try {
+    // Check if the product exists
+    const product = await Product.findByPk(productId);
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found.' });
+    }
+
+    // Fetch all media related to the product
+    const media = await Media.findAll({
+      where: { productId },
+      attributes: ['id', 'url', 'type', 'isDefault', 'order'], // Fetch relevant fields
+      order: [['order', 'ASC']], // Sort media by `order` field
+    });
+
+    if (media.length === 0) {
+      return res.status(404).json({ message: 'No media found for this product.' });
+    }
+
+    res.status(200).json(media);
+  } catch (error) {
+    console.error('Error fetching product media:', error);
+    res.status(500).json({ message: 'Failed to fetch product media.' });
+  }
+};
+
 
 module.exports = {
   getProducts,
   addToCart,
+  getProductMedia
 };
