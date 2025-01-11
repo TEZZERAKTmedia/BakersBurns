@@ -89,7 +89,7 @@ const handleWebhook = async (req, res) => {
 
       console.log(`Order created with ID: ${order.id}`);
 
-      // Add order items and update inventory
+      // Add order items (without updating inventory here)
       await Promise.all(
         cartItems.map(async (cartItem) => {
           const product = cartItem.Product || cartItem.product;
@@ -105,10 +105,6 @@ const handleWebhook = async (req, res) => {
             quantity: cartItem.quantity,
             price: product.price,
           });
-
-          // Update product stock
-          product.quantity -= cartItem.quantity;
-          await product.save();
         })
       );
 
@@ -183,6 +179,7 @@ const handleWebhook = async (req, res) => {
     res.status(400).send(`Webhook Error: ${err.message}`);
   }
 };
+
 
 // Cancel checkout session (moved outside `handleWebhook`)
 const cancelCheckoutSession = async (req, res) => {
