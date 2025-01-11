@@ -58,6 +58,7 @@ const sendOrderEmail = async (type, email, data = {}) => {
           </ul>
           <p>Total: $${data.total}</p>
           <p>Status: ${data.status}</p>
+          <p>Next steps: get tracking order and </p>
         `;
         break;
 

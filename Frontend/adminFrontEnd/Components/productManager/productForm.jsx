@@ -11,6 +11,8 @@ const ProductForm = ({ productTypes, product = {}, onClose }) => {
   const {fetchProducts,} = useProductContext();
   const {addProductWithMedia} =useProductContext();
   const [thumbnailPreview, setThumbnailPreview] = useState(null);
+  const [isAddingNewType, setIsAddingNewType] = useState(false);
+
 
   
   const [newProduct, setNewProduct] = useState({
@@ -262,36 +264,39 @@ const ProductForm = ({ productTypes, product = {}, onClose }) => {
       <label >
         Product Type:
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <select
-            value={newProduct.type}
-            onChange={(e) => {
-              const value = e.target.value;
-              if (value === 'new') {
-                setNewProduct({ ...newProduct, type: '' }); // Clear type for the new input
-              } else {
-                setNewProduct({ ...newProduct, type: value });
-              }
-            }}
-          >
-            <option value="">Select a Type</option>
-            {productTypes.map((type, index) => (
-              <option key={index} value={type.type}>
-                {type.type}
-              </option>
-            ))}
-            <option value="new">Add a New Type</option>
-          </select>
+  <select
+    value={newProduct.type === '' && isAddingNewType ? 'new' : newProduct.type}
+    onChange={(e) => {
+      const value = e.target.value;
+      if (value === 'new') {
+        setIsAddingNewType(true); // Enable adding a new type
+        setNewProduct({ ...newProduct, type: '' }); // Clear type for the new input
+      } else {
+        setIsAddingNewType(false); // Disable adding a new type
+        setNewProduct({ ...newProduct, type: value });
+      }
+    }}
+  >
+    <option value="">Select a Type</option>
+    {productTypes.map((type, index) => (
+      <option key={index} value={type.type}>
+        {type.type}
+      </option>
+    ))}
+    <option value="new">Add a New Type</option>
+  </select>
 
-          {newProduct.type === '' && (
-            <input
-              type="text"
-              placeholder="Enter new type"
-              value={newProduct.type}
-              onChange={(e) => setNewProduct({ ...newProduct, type: e.target.value })}
-              style={{ flex: '1' }} // Makes the input take the remaining space
-            />
-          )}
-        </div>
+  {isAddingNewType && (
+    <input
+      type="text"
+      placeholder="Enter new type"
+      value={newProduct.type}
+      onChange={(e) => setNewProduct({ ...newProduct, type: e.target.value })}
+      style={{ flex: '1' }} // Makes the input take the remaining space
+    />
+  )}
+</div>
+
       </label>
       </div>
       <div className='form-section'>
