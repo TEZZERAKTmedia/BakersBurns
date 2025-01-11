@@ -7,6 +7,7 @@ const User = require('../../models/user'); // Import User model
 const GuestCart = require('../../models/guestCart'); // Import GuestCart model
 const { encrypt } = require('../../utils/encrypt');
 const { sendOrderEmail } = require('../../utils/orderEmail');
+const {unlockInventory} = require('../register/cartController');
 
 const handleWebhook = async (req, res) => {
   const sig = req.headers['stripe-signature'];
@@ -43,6 +44,10 @@ const handleWebhook = async (req, res) => {
           email: customerEmail,
           username: `guest_${Date.now()}`,
           isGuest: true, // Mark as guest user
+          hasAcceptedPrivacyPolicy: true, // Assume they accepted during checkout
+          privacyPolicyAcceptedAt: new Date(),
+          hasAcceptedTermsOfService: true,
+          termsAcceptedAt: new Date(),
         });
         console.log(`Guest user created with email: ${customerEmail}`);
       }
@@ -142,9 +147,35 @@ const handleWebhook = async (req, res) => {
       } else {
         console.warn('No admin emails found to send admin notification.');
       }
-    } else {
-      console.log(`Unhandled event type: ${event.type}`);
+    } else if (event.type === 'checkout.session.expired') {
+      console.log('Processing checkout.session.expired event...');
+    
+      const session = event.data.object;
+      const sessionId = session.metadata?.sessionId;
+    
+      if (sessionId) {
+        // Fetch cart items for the expired session
+        const guestCartItems = await GuestCart.findAll({
+          where: { sessionId },
+          include: [{ model: Product, as: 'Product' }],
+        });
+    
+        if (guestCartItems && guestCartItems.length > 0) {
+          // Use the unlockInventory function to restore quantities
+          await unlockInventory(guestCartItems);
+          console.log(`Inventory unlocked for session ID: ${sessionId}`);
+        } else {
+          console.warn(`No cart items found for expired session ID: ${sessionId}`);
+        }
+    
+        // Clear guest cart for the expired session
+        await GuestCart.destroy({ where: { sessionId } });
+        console.log(`Cleared guest cart for expired session ID: ${sessionId}`);
+      }
+    
+      // Additional logic (if needed)
     }
+    
 
     res.status(200).send('Webhook received successfully');
   } catch (err) {

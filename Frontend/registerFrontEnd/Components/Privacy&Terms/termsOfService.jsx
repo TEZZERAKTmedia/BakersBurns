@@ -1,9 +1,39 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import './privacy.css';
 
-const TermsOfService = () => {
+const TermsOfService = ({ onReachBottom }) => {
+  const bottomRef = useRef(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        if (entry.isIntersecting) {
+          console.log("Privacy Policy bottom reached.");
+          onReachBottom(true); // Notify parent
+        }
+      },
+      { threshold: 1.0 } // Fully visible
+    );
+
+    if (bottomRef.current) {
+      observer.observe(bottomRef.current);
+    }
+
+    return () => {
+      if (bottomRef.current) {
+        observer.unobserve(bottomRef.current);
+      }
+    };
+  }, [onReachBottom]);
   return (
-    <div style={{ padding: '20px', lineHeight: '1.6', fontFamily: 'Arial, sans-serif' }} className="privacy-policy">
+    <div 
+    style={{ 
+      padding: '20px',
+      lineHeight: '1.6',
+      fontFamily: 'Arial, sans-serif'
+       }}
+      className="privacy-policy">
       <h1 style={{ textAlign: 'center', marginBottom: '20px' }}>Terms of Service</h1>
       <p>Published 12/9/2024</p>
 
@@ -216,80 +246,102 @@ const TermsOfService = () => {
         </p>
       </section>
 
-<section style={{ marginBottom: '20px' }} className='privacy-section'>
-  <h2>18. Force Majeure</h2>
-  <p>
-    Bakers Burns is not liable for any failure or delay in performance caused by circumstances beyond its reasonable control, including but not limited to natural disasters, acts of government, labor disputes, pandemics, power outages, or internet service interruptions.
-  </p>
-</section>
-<section style={{ marginBottom: '20px' }} className='privacy-section'>
-  <h2>19. Promotions and Discounts</h2>
-  <p>
-    Bakers Burns may offer promotions, discounts, or special offers from time to time. By participating in these offers, you agree to the following:
-  </p>
-  <ul>
-    <li>
-      <strong>Eligibility:</strong> Promotions are subject to eligibility criteria and may require specific actions, such as entering a promo code or meeting a minimum purchase requirement.
-    </li>
-    <li>
-      <strong>Non-Transferability:</strong> Promotions cannot be transferred, resold, or redeemed for cash unless explicitly stated.
-    </li>
-    <li>
-      <strong>Expiration:</strong> All promotions have an expiration date, which will be specified in the terms of the promotion.
-    </li>
-    <li>
-      <strong>Right to Modify:</strong> Bakers Burns reserves the right to cancel or modify promotions at any time without prior notice.
-    </li>
-  </ul>
-</section>
-<section style={{ marginBottom: '20px' }} className='privacy-section'>
-  <h2>20. Custom Orders</h2>
-  <p>
-    Bakers Burns may offer custom or personalized products. By placing a custom order, you agree to the following:
-  </p>
-  <ul>
-    <li>
-      <strong>Accuracy:</strong> You are responsible for providing accurate details (e.g., text, colors, sizes) for custom orders.
-    </li>
-    <li>
-      <strong>Approval Process:</strong> Custom orders may require user approval of proofs or designs before production. Delays in approval can affect delivery timelines.
-    </li>
-    <li>
-      <strong>Non-Refundable:</strong> Custom products are non-refundable unless defective or incorrect due to a mistake by Bakers Burns.
-    </li>
-  </ul>
-</section>
-<section style={{ marginBottom: '20px' }} className='privacy-section'>
-  <h2>21. Product Allergies Disclaimer</h2>
-  <p>
-    Bakers Burns strives to provide clear and accurate product information, including ingredient lists where applicable. By purchasing and using our products, you acknowledge and agree to the following:
-  </p>
-  <ul>
-    <li>
-      <strong>Allergy Risk:</strong> Some products may contain allergens, including but not limited to nuts, dairy, gluten, or other ingredients that may cause allergic reactions. It is the user's responsibility to review product descriptions and ingredient lists carefully before purchase or use.
-    </li>
-    <li>
-      <strong>No Liability:</strong> Bakers Burns is not liable for allergic reactions or other adverse effects caused by the use of our products. Users are advised to consult a medical professional if they are uncertain about potential allergens.
-    </li>
-    <li>
-      <strong>Cross-Contamination:</strong> While we take precautions to avoid cross-contamination, products may be manufactured in facilities that process common allergens. Users with severe allergies should exercise caution.
-    </li>
-    <li>
-      <strong>Testing Products:</strong> Users are encouraged to test products on a small area of skin before full use to determine suitability, particularly for products applied topically.
-    </li>
-  </ul>
-</section>
+        <section style={{ marginBottom: '20px' }} className='privacy-section'>
+          <h2>18. Force Majeure</h2>
+          <p>
+            Bakers Burns is not liable for any failure or delay in performance caused by circumstances beyond its reasonable control, including but not limited to natural disasters, acts of government, labor disputes, pandemics, power outages, or internet service interruptions.
+          </p>
+        </section>
+        <section style={{ marginBottom: '20px' }} className='privacy-section'>
+          <h2>19. Promotions and Discounts</h2>
+          <p>
+            Bakers Burns may offer promotions, discounts, or special offers from time to time. By participating in these offers, you agree to the following:
+          </p>
+          <ul>
+            <li>
+              <strong>Eligibility:</strong> Promotions are subject to eligibility criteria and may require specific actions, such as entering a promo code or meeting a minimum purchase requirement.
+            </li>
+            <li>
+              <strong>Non-Transferability:</strong> Promotions cannot be transferred, resold, or redeemed for cash unless explicitly stated.
+            </li>
+            <li>
+              <strong>Expiration:</strong> All promotions have an expiration date, which will be specified in the terms of the promotion.
+            </li>
+            <li>
+              <strong>Right to Modify:</strong> Bakers Burns reserves the right to cancel or modify promotions at any time without prior notice.
+            </li>
+          </ul>
+        </section>
+        <section style={{ marginBottom: '20px' }} className='privacy-section'>
+          <h2>20. Custom Orders</h2>
+          <p>
+            Bakers Burns may offer custom or personalized products. By placing a custom order, you agree to the following:
+          </p>
+          <ul>
+            <li>
+              <strong>Accuracy:</strong> You are responsible for providing accurate details (e.g., text, colors, sizes) for custom orders.
+            </li>
+            <li>
+              <strong>Approval Process:</strong> Custom orders may require user approval of proofs or designs before production. Delays in approval can affect delivery timelines.
+            </li>
+            <li>
+              <strong>Non-Refundable:</strong> Custom products are non-refundable unless defective or incorrect due to a mistake by Bakers Burns.
+            </li>
+          </ul>
+        </section>
+        <section style={{ marginBottom: '20px' }} className='privacy-section'>
+          <h2>21. Product Allergies Disclaimer</h2>
+          <p>
+            Bakers Burns strives to provide clear and accurate product information, including ingredient lists where applicable. By purchasing and using our products, you acknowledge and agree to the following:
+          </p>
+          <ul>
+            <li>
+              <strong>Allergy Risk:</strong> Some products may contain allergens, including but not limited to nuts, dairy, gluten, or other ingredients that may cause allergic reactions. It is the user's responsibility to review product descriptions and ingredient lists carefully before purchase or use.
+            </li>
+            <li>
+              <strong>No Liability:</strong> Bakers Burns is not liable for allergic reactions or other adverse effects caused by the use of our products. Users are advised to consult a medical professional if they are uncertain about potential allergens.
+            </li>
+            <li>
+              <strong>Cross-Contamination:</strong> While we take precautions to avoid cross-contamination, products may be manufactured in facilities that process common allergens. Users with severe allergies should exercise caution.
+            </li>
+            <li>
+              <strong>Testing Products:</strong> Users are encouraged to test products on a small area of skin before full use to determine suitability, particularly for products applied topically.
+            </li>
+          </ul>
+        </section>
 
 
-<section style={{ marginBottom: '20px' }} className='privacy-section'>
+      <section style={{ marginBottom: '20px' }} className='privacy-section'>
         <h2>22. Modifications</h2>
         <p>
-          Bakers Burns reserves the right to modify these Terms at any time. Users will be notified of any material changes via email or by a notice on the Platform. Continued use of the Platform constitutes acceptance of the revised Terms.
+        Bakers Burns reserves the right to modify these Terms at any time. Users will be notified of any material changes via email or by a notice on the Platform. Continued use of the Platform constitutes acceptance of the revised Terms.
         </p>
+       </section>
+      <section className="terms-section">
+        <h2>Guest Checkout</h2>
+        <p>
+          By proceeding with Guest Checkout, you agree to the following terms related to your order and account creation:
+        </p>
+        <ul>
+          <li>
+            <strong>Temporary Account Creation:</strong> A temporary account is automatically created for you during the checkout process to process and manage your order. The account will be associated with the email address provided at checkout.
+          </li>
+          <li>
+            <strong>Account Setup:</strong> You will receive an email with a link to complete your account setup. This link allows you to create a password and fully activate your account. Completing this setup grants access to order history, tracking, and other features.
+          </li>
+          <li>
+            <strong>Missing Email:</strong> If you do not receive an account setup email, you may already have an account associated with the provided email address. Please use the "Forgot Password" feature on the login page to reset your password and access your account.
+          </li>
+          <li>
+            <strong>Data Handling:</strong> All shipping and billing addresses provided during checkout are securely hashed in our database to ensure your data remains private and secure.
+          </li>
+        </ul>
       </section>
 
 
-      
+
+
+      <div ref={bottomRef} style={{ height: "1px" }}></div>
     </div>
     
   );

@@ -18,6 +18,8 @@ import Cart from './Pages/Cart/Cart';
 import CancelPage from './Pages/Cart/cancelCheckout';
 import SuccessPage from './Pages/Cart/successCheckout';
 import PasswordSetupForm from './Pages/Signup/password';
+import AcceptPrivacyTerms from './Pages/Cart/privacy&terms';
+
 
 
 
@@ -41,12 +43,16 @@ function App() {
                     <Route path ="/event-manager" element={<Events/>} />
                     <Route path ="/privacy-policy" element={<PrivacyPolicy />} />
                     <Route path ="/terms-of-service" element={<TermsOfService />} />
+                    {/*CART ROUTES */}
                     <Route path="/checkout-options" element={<CheckoutOptions />} />
                     <Route path="/guest-checkout" element={<GuestCheckout />} />
                     <Route path="/cart" element={<Cart />} />
                     <Route path="/cancel" element={<CancelPage/>} />
                     <Route path="/success" element={<SuccessPage/>} />
                     <Route path="/password-form" element={< PasswordSetupForm/>} />
+                    <Route path="/checkout-options" element={<CheckoutOptions/>} />
+                    <Route path="/accept-privacy-terms" element={<AcceptPrivacyTerms />} />
+
                 </Routes>
             </div>
         </Router>

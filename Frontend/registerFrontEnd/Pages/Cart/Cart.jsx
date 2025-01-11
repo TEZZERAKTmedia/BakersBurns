@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { registerApi } from "../../config/axios";
 import "./cart.css";
+
 
 const CartPage = () => {
   const [cart, setCart] = useState([]);
@@ -97,23 +98,7 @@ const CartPage = () => {
     }
   };
 
-  const handleCheckout = async () => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const response = await registerApi.post("/register-cart/create-checkout-session", {
-        sessionId,
-      });
-
-      window.location.href = response.data.url;
-    } catch (err) {
-      console.error("Checkout error:", err);
-      setError("Failed to initiate checkout. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  
 
   if (cart.length === 0) {
     return (
@@ -185,13 +170,14 @@ const CartPage = () => {
 
       <div className="cart-summary">
         <h3 style={{color:'white', padding: '10px'}}>Total: ${totalPrice.toFixed(2)}</h3>
-        <button
-          onClick={handleCheckout}
-          disabled={loading}
-          className="checkout-button"
+        <Link
+        to="/checkout-options"
+        className="proceed-checkout-checkout-options"
+        
+
         >
           {loading ? "Processing..." : "Proceed to Checkout"}
-        </button>
+        </Link>
       </div>
     </div>
   );

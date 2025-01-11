@@ -1,9 +1,37 @@
-import React from 'react';
+import React, {useRef, useEffect} from 'react';
 import './privacy.css'; // Optional: Add a CSS file for styling this component
 
-const PrivacyPolicy = () => {
+
+
+const PrivacyPolicy = ( {onReachBottom}) => {
+    const bottomRef = useRef(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        if (entry.isIntersecting) {
+          console.log("Privacy Policy bottom reached.");
+          onReachBottom(true); // Notify parent
+        }
+      },
+      { threshold: 1.0 } // Fully visible
+    );
+
+    if (bottomRef.current) {
+      observer.observe(bottomRef.current);
+    }
+
+    return () => {
+      if (bottomRef.current) {
+        observer.unobserve(bottomRef.current);
+      }
+    };
+  }, [onReachBottom]);
     return (
-        <div className="privacy-policy" style={{padding:'10px'}}>
+        <div
+       
+         className="privacy-policy" style={{padding:'10px'}}>
             <h1>Privacy Policy</h1>
             <p><strong>Effective Date:</strong> 12/8/2024</p>
 
@@ -260,10 +288,32 @@ const PrivacyPolicy = () => {
                 >
                     trentyn.nicholas@gmail.com
                 </a>
+                
                 </strong>
                 
             </section>
+            <section className="privacy-section">
+                <h2>Guest Checkout</h2>
+                <p>
+                    By using Guest Checkout, you agree to the creation of a temporary account to facilitate the processing of your order. The following applies:
+                </p>
+                <ul>
+                    <li>
+                    <strong>Temporary Account Creation:</strong> During the checkout process, we automatically create a temporary account using the information you provide (e.g., email, shipping, and billing addresses). 
+                    </li>
+                    <li>
+                    <strong>Account Completion:</strong> After placing your order, you will receive an email with a link to complete your account setup. This enables you to access additional features such as order tracking and account management. 
+                    </li>
+                    <li>
+                    <strong>Already Have an Account?</strong> If you do not receive the account setup email, it is possible that an account associated with your email address already exists. Please use the "Forgot Password" feature on the login page to access your account.
+                    </li>
+                    <li>
+                    <strong>Data Security:</strong> We hash all sensitive data, including shipping and billing addresses, to ensure your privacy and protect against unauthorized access.
+                    </li>
+                </ul>
+            </section>
 
+      <div ref={bottomRef} style={{ height: "1px" }}></div>
         </div>
     );
 };

@@ -19,7 +19,7 @@ const CheckoutOptions = () => {
             borderRadius: "5px",
             cursor: "pointer",
           }}
-          onClick={() => navigate("/guest-checkout")}
+          onClick={() => navigate("/accept-privacy-terms")} // Navigate to Privacy & Terms
         >
           Guest Checkout
         </button>

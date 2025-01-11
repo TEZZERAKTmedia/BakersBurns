@@ -166,10 +166,18 @@ const unlockInventory = async (cartItems) => {
 // Create Stripe Checkout Session
 const createCheckoutSession = async (req, res) => {
   try {
-    const { sessionId } = req.body;
+    const { sessionId, metadata } = req.body;
 
     if (!sessionId) {
       return res.status(400).json({ message: 'Session ID is required.' });
+    }
+
+    // Validate metadata for acceptance of terms
+    if (!metadata || !metadata.hasAcceptedPrivacy || !metadata.hasAcceptedTermsOfService) {
+      return res.status(400).json({
+        message: 'Must accept Terms and Conditions and Privacy Policy to proceed.',
+        redirect: '/accept-privacy-terms', // Optional: Provide a link to redirect
+      });
     }
 
     // Fetch cart items with the correct alias
@@ -223,6 +231,8 @@ const createCheckoutSession = async (req, res) => {
       cancel_url: `${process.env.REGISTER_FRONTEND}/cancel?session_id={CHECKOUT_SESSION_ID}`,
       metadata: {
         sessionId,
+        hasAcceptedPrivacy: metadata.hasAcceptedPrivacy, // Log for audit
+        hasAcceptedTermsOfService: metadata.hasAcceptedTermsOfService, // Log for audit
       },
     });
 
@@ -232,6 +242,7 @@ const createCheckoutSession = async (req, res) => {
     res.status(500).json({ message: 'Error creating checkout session' });
   }
 };
+
 
 
 
