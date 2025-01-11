@@ -1,5 +1,8 @@
 const GuestCart = require('../../models/guestCart');
 const Product = require('../../models/product');
+const User = require('../../models/user');
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 // Add to Guest Cart
@@ -291,7 +294,25 @@ const cancelCheckoutSession = async (req, res) => {
     res.status(500).json({ message: 'Failed to unlock inventory' });
   }
 };
+const setPassword = async (req, res) => {
+  try {
+    const { token, password } = req.body;
 
+    // Verify token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Update the user's password
+    await User.update({ password: hashedPassword }, { where: { email: decoded.email } });
+
+    res.status(200).json({ message: 'Password set successfully!' });
+  } catch (err) {
+    console.error('Error setting password:', err);
+    res.status(400).json({ message: 'Invalid or expired token.' });
+  }
+};
 
 
 module.exports = {
@@ -301,5 +322,6 @@ module.exports = {
   unlockInventory,
   createCheckoutSession,
   cancelCheckoutSession,
-  deleteCartItem
+  deleteCartItem,
+  setPassword
 };

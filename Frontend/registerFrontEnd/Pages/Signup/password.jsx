@@ -60,7 +60,7 @@ const PasswordSetupForm = () => {
       const sanitizedPassword = DOMPurify.sanitize(password);
 
       // Send password to the backend
-      const response = await registerApi.post('/set-password', { password: sanitizedPassword, token });
+      const response = await registerApi.post('/register-cart/guest-set-password', { password: sanitizedPassword, token });
 
       if (response.status === 200) {
         setSuccess('Password set successfully! Redirecting...');

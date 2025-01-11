@@ -1,4 +1,10 @@
 const nodemailer = require('nodemailer');
+const jwt = require('jsonwebtoken');
+
+const generateToken = (payload) => {
+  return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' }); // 1-hour expiration
+};
+
 
 const transporter = nodemailer.createTransport({
   host: process.env.EMAIL_HOST, // Hostinger's SMTP server (e.g., smtp.hostinger.com)
@@ -19,12 +25,18 @@ const sendOrderEmail = async (type, email, data = {}) => {
 
     switch (type) {
       case 'newGuest':
+        // Generate a token for the password setup
+        const token = generateToken({ email }); // Create a secure token with email (see implementation below)
+
+        // Save the token to the database for validation
+        await Token.create({ email, token, type: 'password_setup', expiresAt: new Date(Date.now() + 3600 * 1000) }); // 1-hour expiry
+
         subject = 'Welcome to Our Store!';
         html = `
           <h1>Thank You for Your Order!</h1>
           <p>Your order has been placed successfully.</p>
           <p>Complete your account setup by setting a password:</p>
-          <a href="${process.env.PASSWORD_SETUP_URL}" style="background: #4caf50; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px;">Set Password</a>
+          <a href="${process.env.PASSWORD_SETUP_URL}?token=${token}" style="background: #4caf50; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px;">Set Password</a>
           <p>Order Summary:</p>
           <ul>
             ${data.orderItems.map(item => `<li>${item.name} - ${item.quantity} x $${item.price}</li>`).join('')}
@@ -58,7 +70,6 @@ const sendOrderEmail = async (type, email, data = {}) => {
           </ul>
           <p>Total: $${data.total}</p>
           <p>Status: ${data.status}</p>
-          <p>Next steps: get tracking order and </p>
         `;
         break;
 
