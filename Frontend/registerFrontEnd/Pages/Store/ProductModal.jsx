@@ -90,10 +90,7 @@ const ProductModal = ({ product, onClose }) => {
         }}
       >
         {/* Modal Header */}
-        <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-          <h2 style={{ fontSize: '2rem', color: 'black' }}>{product.name}</h2>
-        </div>
-
+        
         {/* Media Carousel */}
         {loadingMedia ? (
           <p>Loading media...</p>
