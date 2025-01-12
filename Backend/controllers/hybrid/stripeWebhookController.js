@@ -42,7 +42,7 @@ const handleWebhook = async (req, res) => {
         // Create a guest user account if no user exists
         user = await User.create({
           email: customerEmail,
-          username: `guest_${Date.now()}`,
+          username: customerEmail,
           isGuest: true, // Mark as guest user
           hasAcceptedPrivacyPolicy: true, // Assume they accepted during checkout
           privacyPolicyAcceptedAt: new Date(),
