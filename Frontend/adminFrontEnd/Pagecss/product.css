@@ -1,0 +1,69 @@
+/* Sticky Header */
+.sticky-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: #ffffff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  /* Header Buttons */
+  .header-buttons {
+    display: flex;
+    gap: 15px;
+  }
+  
+  .header-buttons button {
+    padding: 10px 15px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
+  }
+  
+  .header-buttons button:hover {
+    background-color: #0056b3;
+  }
+  
+  /* Main Content */
+  .product-manager-container {
+    padding: 20px;
+    margin-top: 80px; /* To ensure the sticky header doesn't overlap content */
+  }
+  
+  /* Add Forms Section */
+  .add-forms {
+    margin-bottom: 20px;
+  }
+  
+  /* Add Buttons */
+  .add-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+  }
+  
+  .add-buttons button {
+    padding: 10px 15px;
+    background-color: #28a745;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
+  }
+  
+  .add-buttons button:hover {
+    background-color: #1c7a31;
+  }
+  

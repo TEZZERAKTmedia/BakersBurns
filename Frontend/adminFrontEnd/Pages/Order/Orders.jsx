@@ -135,7 +135,7 @@ const OrderManagement = () => {
   return (
     <div style={styles.fixedContainer}>
    
-      <h1 style={styles.title}>Order Management</h1>
+      
 
           <button onClick={() => setDialogOpen(true)} style={styles.addButton}>
             Add Order
