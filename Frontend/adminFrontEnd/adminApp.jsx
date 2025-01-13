@@ -7,7 +7,7 @@ import GalleryManagement from './Pages/GalleryManager';
 import Messaging from './Pages/inAppMessaging';
 import Email from './Pages/Email';
 import Layout from './Pages/Layout';
-import Orders from './Pages/Orders';
+import Orders from './Pages/Order/Orders';
 import Events from './Pages/newEvents';
 import ProductManagement from './Pages/Products';
 import { ScannerProvider } from './context/scannerContext';

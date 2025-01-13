@@ -1,19 +1,30 @@
 const express = require('express');
 const router = express.Router();
-const ordersController = require('../../controllers/admin/ordersController');
+const { 
+    getAllOrders,
+    getOrderById,
+    getUsers,
+    createOrder,
+    updateOrder,
+    quickAddProduct,
+    deleteOrder,
+    getOrderDetails
+} = require('../../controllers/admin/ordersController');
 const adminAuthMiddleware = require('../../middleware/adminAuthMiddleware');
+const {productUploadMiddleware} = require('../../config/multer')
 
 // GET
-router.get('/get', adminAuthMiddleware(), ordersController.getAllOrders);
-router.get('/get-by-id/:orderId', adminAuthMiddleware(), ordersController.getOrderById);
-
-router.get('/get-users', adminAuthMiddleware(), ordersController.getUsers);
+router.get('/get', adminAuthMiddleware('admin'), getAllOrders);
+router.get('/get-by-id/:orderId', adminAuthMiddleware('admin'), getOrderById);
+router.get('/:orderId/details', adminAuthMiddleware('admin'), getOrderDetails);
+router.get('/get-users', adminAuthMiddleware('admin'), getUsers);
 
 // POST
-router.post('/create', adminAuthMiddleware(), ordersController.createOrder);
-router.put('/update/:orderId', adminAuthMiddleware(), ordersController.updateOrder);
+router.post('/create', adminAuthMiddleware('admin'), createOrder);
+router.put('/update/:orderId', adminAuthMiddleware('admin'), updateOrder);
+router.post('/quick-add-product',adminAuthMiddleware('admin'), productUploadMiddleware, quickAddProduct);
 
 // DELETE
-router.delete('/delete/:orderId', adminAuthMiddleware(), ordersController.deleteOrder);
+router.delete('/delete/:orderId', adminAuthMiddleware('admin'), deleteOrder);
 
 module.exports = router;

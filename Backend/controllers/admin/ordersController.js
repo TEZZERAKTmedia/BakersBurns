@@ -3,6 +3,7 @@ const OrderItem = require('../../models/orderItem');
 const User = require('../../models/user');
 const Product = require('../../models/product');
 const {sendEmailNotification } = require('../../utils/statusEmail');
+const {decrypt} = require('../../utils/encrypt');
 
 const sendStatusNotification = async (order, status) => {
     const user = await User.findByPk(order.userId);
@@ -231,6 +232,109 @@ const getUsers = async (req, res) => {
 };
 
 
+const quickAddProduct = async (req, res) => {
+  try {
+    const { name, description, price, quantity } = req.body;
+
+    // Validate required fields
+    if (!name || !description || !price || quantity === undefined) {
+      return res.status(400).json({ message: 'Missing required fields' });
+    }
+
+    // Extract the thumbnail file
+    const thumbnailFile = req.files?.thumbnail?.[0]; // Access the thumbnail field from multer
+    if (!thumbnailFile) {
+      return res.status(400).json({ message: 'Thumbnail is required' });
+    }
+
+    // Parse and validate numeric values
+    const parsedPrice = parseFloat(price);
+    const parsedQuantity = parseInt(quantity, 10);
+    if (isNaN(parsedPrice) || isNaN(parsedQuantity)) {
+      return res.status(400).json({ message: 'Price and quantity must be valid numbers' });
+    }
+
+    // Create the product in the database
+    const newProduct = await Product.create({
+      name,
+      description,
+      price: parsedPrice,
+      quantity: parsedQuantity,
+      thumbnail: thumbnailFile.filename, // Save the filename of the uploaded thumbnail
+    });
+
+    // Respond with the created product
+    res.status(201).json({
+      message: 'Product added successfully',
+      product: newProduct,
+    });
+  } catch (error) {
+    console.error('Error in quickAddProduct:', error);
+    res.status(500).json({ message: 'Error adding product', error });
+  }
+};
+
+const getOrderDetails = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const order = await Order.findByPk(orderId, {
+      include: [
+        {
+          model: User,
+          as: 'user',
+          attributes: ['username', 'email'],
+        },
+        {
+          model: OrderItem,
+          as: 'items',
+          include: [
+            {
+              model: Product,
+              as: 'product',
+              attributes: ['name', 'price'],
+            },
+          ],
+        },
+      ],
+    });
+
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+
+    // Decrypt and parse the addresses
+    let shippingAddress = 'N/A';
+    let billingAddress = 'N/A';
+
+    if (order.shippingAddress) {
+      shippingAddress = JSON.parse(decrypt(order.shippingAddress));
+    }
+    if (order.billingAddress) {
+      billingAddress = JSON.parse(decrypt(order.billingAddress));
+    }
+
+    // Generate tracking link if applicable
+    let trackingLink = null;
+    if (order.trackingNumber && order.carrier) {
+      trackingLink = generateTrackingLink(order.carrier, order.trackingNumber);
+    }
+
+    res.status(200).json({
+      message: 'Order fetched successfully',
+      order: {
+        ...order.toJSON(),
+        shippingAddress,
+        billingAddress,
+        trackingLink: trackingLink || 'Tracking info not available',
+      },
+    });
+  } catch (error) {
+    console.error('Error fetching order:', error);
+    res.status(500).json({ message: 'Error fetching order', error });
+  }
+};
+
+
 
 
 module.exports = {
@@ -241,4 +345,6 @@ module.exports = {
     deleteOrder,
     getUsers,
     generateTrackingLink,
+    quickAddProduct,
+    getOrderDetails
 };

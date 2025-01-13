@@ -1,0 +1,28 @@
+.thumbnail-uploader-container {
+    display: flex;
+    flex-direction: column; /* Ensure vertical stacking */
+    align-items: center; /* Horizontally center the child elements */
+    justify-content: center; /* Vertically center the child elements */
+    text-align: center; /* Optional: Center align text inside the container */
+    height: 100%; /* Ensure full height of the container */
+  }
+  
+  
+  .thumbnail-uploader-label {
+    font-size: 1rem;
+    font-weight: bold;
+  }
+  
+  .thumbnail-uploader-input {
+    padding: 5px;
+  }
+  
+  .thumbnail-uploader-preview {
+    max-width: 100px;
+    width: '100%';
+    margin-top: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  

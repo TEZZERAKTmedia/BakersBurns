@@ -23,7 +23,7 @@ const rateLimit = require('express-rate-limit');
 // Import routes
 const cartRoutes = require('./routes/user/cartRoutes');
 const emailVerificationRoutes = require('./routes/verificationRoutes');
-const productRoutes = require('./routes/productRoutes');
+const productRoutes = require('./routes/admin/productRoutes');
 const userRoutes = require('./routes/user/userRoutes');
 const accountSettingsRoutes = require('./routes/accountSettingsRoutes');
 const galleryRoutes = require('./routes/admin/galleryRoutes');
