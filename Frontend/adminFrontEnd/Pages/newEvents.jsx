@@ -334,20 +334,24 @@ const Events = () => {
             className="form-input mb-2"
             placeholder="Description"
           />
-          <DatePicker
-            selected={newEvent.startDate}
-            onChange={(date) => setNewEvent({ ...newEvent, startDate: date })}
-            className="form-input mb-2"
-            dateFormat="yyyy-MM-dd"
-            placeholderText="Start Date"
-          />
-          <DatePicker
-            selected={newEvent.endDate}
-            onChange={(date) => setNewEvent({ ...newEvent, endDate: date })}
-            className="form-input mb-2"
-            dateFormat="yyyy-MM-dd"
-            placeholderText="End Date"
-          />
+         <div className="form-section">
+                <label>Start Date:</label>
+                <input
+                  type="date"
+                  value={newEvent.startDate}
+                  onChange={handleEventChange}
+                />
+              </div>
+
+              <div className="form-section">
+                <label>End Date:</label>
+                <input
+                  type="date"
+                  value={newEvent.endDate}
+                  onChange={handleEventChange}
+                />
+              </div>
+
           <input
             type="time"
             value={newEvent.startTime}
@@ -392,7 +396,7 @@ const Events = () => {
   return (
     <div className='events-body'>
       <div className="min-h-screen bg-gray-100 p-6">
-        <h1 className="event-header" style={{color:'black', marginTop:'20%', letterSpacing:'.1em'}}>Event Management</h1>
+        <h1 className="event-header" style={{color:'black', marginTop:'20%', letterSpacing:'.1em'}}></h1>
         {validationError && <p className="text-center text-red-500">{validationError}</p>}
         {loading && <p className="text-center">Loading...</p>}
         {error && <p className="text-center text-red-500">{error}</p>}
@@ -459,25 +463,27 @@ const Events = () => {
                 </select>
               </div>
 
-              <div className="mb-4">
-                <label className="form-label">Start Date</label>
-                <DatePicker
-                  selected={newEvent.startDate}
-                  onChange={(date) => setNewEvent({ ...newEvent, startDate: date })}
-                  className="form-input"
-                  dateFormat="yyyy-MM-dd"
+              <div className="form-section">
+                <label>Start Date:</label>
+                <input
+                  type="date"
+                  name="startDate"
+                  value={newEvent.startDate}
+                  onChange={(e) => setNewEvent({ ...newEvent, startDate: e.target.value })}
                 />
               </div>
 
-              <div className="mb-4">
-                <label className="form-label">End Date</label>
-                <DatePicker
-                  selected={newEvent.endDate}
-                  onChange={(date) => setNewEvent({ ...newEvent, endDate: date })}
-                  className="form-input"
-                  dateFormat="yyyy-MM-dd"
+              <div className="form-section">
+                <label>End Date:</label>
+                <input
+                  type="date"
+                  name="endDate"
+                  value={newEvent.endDate}
+                  onChange={(e) => setNewEvent({ ...newEvent, endDate: e.target.value })}
                 />
               </div>
+
+
               <label>
               Start Time:
               <input

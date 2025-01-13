@@ -19,6 +19,7 @@
   color: white;
   padding: 10px 20px;
   display: inline-block;
+  z-index: 9999;
 }
   /* Hamburger Menu (for mobile) */
   .hamburger-menu {
@@ -62,8 +63,9 @@
     justify-content: center;
     align-items: center;
     position: fixed;
-    top: 60px;
+    top: 0px;
     left: 0;
+    
     width: 100vw;
     height: 100vh;
     background-color: rgba(0, 0, 0, 0.9);
@@ -81,6 +83,7 @@
   /* Nav Item Styling */
   .nav-item {
     margin: 10px 0;
+    
   }
   
   .nav-item a {
