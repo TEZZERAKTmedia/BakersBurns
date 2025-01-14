@@ -151,7 +151,7 @@ useEffect(() => {
     <div style={{ display: 'flex', height: '100vh', width: '100vw', fontFamily: 'Arial, sans-serif', backgroundColor: 'white' }}>
       {/* Sidebar for Threads */}
       <div style={{ width: '300px', borderRight: '1px solid #ddd', padding: '10px' }}>
-        <h3 style={{ fontSize: '2rem', fontFamily: 'Dancing Script', marginTop: '30%'}}>Conversations</h3>
+        <h3 style={{ fontSize: '2rem', fontFamily: 'Dancing Script', marginTop: '30%'}}></h3>
         <div style={{ display: 'flex', gap: '5px', marginBottom: '10px' }}>
           <input
             type="text"
@@ -169,7 +169,7 @@ useEffect(() => {
             </li>
           ))}
         </ul>
-        <ul style={{ listStyle: 'none', padding: 0 }}>
+        <ul style={{ listStyle: 'none', padding: 0,  }}>
           {threads.map((thread) => (
             <li
               key={thread.threadId}
@@ -181,23 +181,23 @@ useEffect(() => {
               }}
             >
               <div style={{ color: 'black', fontFamily: 'Dancing Script', fontSize: '1.5rem' }}>
-  {thread.senderUsername === 'Admin'
-    ? thread.receiverUsername || 'Unknown User'
-    : thread.senderUsername || 'Unknown User'}
-</div>
+                {thread.senderUsername === 'Admin'
+                  ? thread.receiverUsername || 'Unknown User'
+                  : thread.senderUsername || 'Unknown User'}
+              </div>
 
               
               <div style={{ fontSize: '14px', color: '#555' }}>
-  {thread.lastMessage?.messageBody || 'No messages yet'}
-</div>
-      <div style={{ fontSize: '12px', color: '#999' }}>
-        {thread.lastMessageTime
-          ? new Date(thread.lastMessageTime).toLocaleString()
-          : 'No recent messages'}
-      </div>
-            </li>
-          ))}
-        </ul>
+                {thread.lastMessage?.messageBody || 'No messages yet'}
+              </div>
+              <div style={{ fontSize: '12px', color: '#999' }}>
+                {thread.lastMessageTime
+                  ? new Date(thread.lastMessageTime).toLocaleString()
+                  : 'No recent messages'}
+              </div>
+                    </li>
+                  ))}
+                </ul>
 
 
 
@@ -437,7 +437,7 @@ useEffect(() => {
   paddingTop: '20%', 
   textAlign: 'center',
 }}>
-  Conversations
+  
 </h3>
 
         <input
@@ -454,19 +454,16 @@ useEffect(() => {
             </li>
           ))}
         </ul>
-        <ul style={{ listStyle: 'none', padding: 0 }}>
+        <ul style={{ listStyle: 'none', padding: 0,backgroundColor:'white' }}>
           {threads.map((thread) => (
               <li
                 key={thread.threadId}
                 onClick={() => handleThreadSelect(thread)}
-                style={{
-                  padding: '10px',
-                  cursor: 'pointer',
-                  borderBottom: '1px solid #ddd',
-                }}
+                className='form-section'
+                
               >
                 {/* Username */}
-                <div style={{ fontFamily: 'Arial', fontSize: '1.2rem', color: '#333' }}>
+                <div  style={{ fontFamily: 'Arial', fontSize: '1.2rem', color: '#333' }}>
                   {thread.senderUsername || 'Unknown User'}
                 </div>
 

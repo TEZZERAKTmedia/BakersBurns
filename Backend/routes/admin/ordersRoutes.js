@@ -8,7 +8,8 @@ const {
     updateOrder,
     quickAddProduct,
     deleteOrder,
-    getOrderDetails
+    getOrderDetails,
+    updateTracking
 } = require('../../controllers/admin/ordersController');
 const adminAuthMiddleware = require('../../middleware/adminAuthMiddleware');
 const {productUploadMiddleware} = require('../../config/multer')
@@ -18,6 +19,7 @@ router.get('/get', adminAuthMiddleware('admin'), getAllOrders);
 router.get('/get-by-id/:orderId', adminAuthMiddleware('admin'), getOrderById);
 router.get('/:orderId/details', adminAuthMiddleware('admin'), getOrderDetails);
 router.get('/get-users', adminAuthMiddleware('admin'), getUsers);
+router.put('/update-tracking/:id', adminAuthMiddleware('admin'), updateTracking);
 
 // POST
 router.post('/create', adminAuthMiddleware('admin'), createOrder);

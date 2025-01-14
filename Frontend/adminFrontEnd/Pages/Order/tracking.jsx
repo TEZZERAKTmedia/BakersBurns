@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { adminApi } from '../../config/axios';
+import editIcon from '../../assets/Pencil_icon.png';
 
 const TrackingNumber = ({
   orderId,
@@ -25,7 +26,11 @@ const TrackingNumber = ({
         trackingNumber,
         carrier,
       });
-      onTrackingUpdated(trackingNumber, carrier); // Notify parent about the update
+
+      if (onTrackingUpdated) {
+        onTrackingUpdated(trackingNumber, carrier);
+      }
+
       setIsEditing(false);
     } catch (error) {
       console.error('Error updating tracking number:', error);
@@ -90,8 +95,19 @@ const TrackingNumber = ({
 
   return (
     <div>
-      <p>
+      <p style={{ padding: '10px' }}>
         <strong>Tracking Number:</strong> {trackingNumber}
+        <button
+          onClick={() => setIsEditing(true)}
+          style={styles.editButton}
+          title="Edit"
+        >
+          <img
+            src={editIcon} // Replace this with the correct path to your PNG
+            alt="Edit"
+            style={styles.icon}
+            />
+        </button>
       </p>
       <a
         href={getTrackingLink(carrier, trackingNumber)}
@@ -151,10 +167,25 @@ const styles = {
     color: 'red',
     fontSize: '0.9rem',
   },
+  icon: {
+    width: '20px',
+    height: '20px',
+  },
   link: {
-    color: '#007bff',
-    textDecoration: 'underline',
+    color: 'white',
+    textDecoration: 'none',
     cursor: 'pointer',
+    backgroundColor: 'black',
+    padding: '5px',
+    borderRadius: '10px',
+  },
+  editButton: {
+    background: 'none',
+    border: 'none',
+    color: '#007bff',
+    cursor: 'pointer',
+    fontSize: '1rem',
+    marginLeft: '10px',
   },
 };
 

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import '../Pagecss/Home.css'; // Import the CSS file for styling
+import NotificationBadge from '../Components/notification/notificationBadge';
 
 const Home = () => {
   return (
@@ -16,6 +17,13 @@ const Home = () => {
               <div className='tile-content'>
                 <h3>Orders</h3>
                 <p>Manage orders</p>
+                <NotificationBadge
+                  apiEndpoint="/admin-notifications/orders"
+                  customFilter={(data) => data.filter((order) => order.status.toLowerCase() === 'processing')}
+                  color="red"
+                  label="Processing Orders"
+                />
+
               </div>
             </Link>
           </li>

@@ -93,6 +93,7 @@ const AddOrderForm = ({ onClose, onOrderCreated }) => {
           productId: product.id,
           quantity: product.quantity,
         })),
+        total: calculateTotal(),
       };
       await adminApi.post('/orders/create', orderData);
       onOrderCreated();
@@ -101,6 +102,19 @@ const AddOrderForm = ({ onClose, onOrderCreated }) => {
       console.error('Error creating order:', error);
     }
   };
+
+  const calculateTotal = () => {
+    return selectedProducts.reduce(
+        (total, product ) => total + product.price * (product.quantity || 1),
+        0
+    )
+  }
+
+  const calculateGrandTotal = () => {
+    const productTotal = calculateTotal();
+    const additionalCosts = 0;
+    return productTotal + additionalCosts;
+  }
 
   const handleScroll = () => {
     if (productBoxRef.current) {
@@ -257,12 +271,19 @@ const AddOrderForm = ({ onClose, onOrderCreated }) => {
                       >
                         +
                       </button>
+                     
                     </div>
                   </div>
+                  <div className="add-order-total">
+                        <h3>Total: ${calculateTotal().toFixed(2)}</h3>
+                </div>
                 </div>
               ))}
             </div>
           </div>
+        </div>
+        <div className="add-order-total">
+            <h3>Grand Total: ${calculateGrandTotal().toFixed(2)}</h3>
         </div>
 
         <div className="add-order-button-container">

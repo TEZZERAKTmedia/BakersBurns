@@ -45,6 +45,7 @@ const userEventRoutes = require('./routes/user/eventRoutes');
 const userGalleryRoutes = require('./routes/user/galleryRoutes');
 const carrierRoutes = require('./routes/carrier/carrierRoutes');
 const registerCartRoutes = require('./routes/register/cartRoutes');
+const notificationRoutes = require('./routes/admin/notifcationRoutes');
 const stripeWebhookGuestRoutes = require('./routes/register/stripeWebhookGuestRoute');
 const { handleDhlWebhook, handleFedexWebhook, handleUpsWebhook, handleUspsWebhook} = require('./webhooks/carrierWebhooks');
 const { rateLimiter } = require('./utils/rateLimiter');
@@ -147,7 +148,7 @@ app.use('/admin-mail', adminAuthMiddleware('admin'), rateLimiter('admin-mail'), 
 app.use('/orders', adminAuthMiddleware('admin'), rateLimiter('orders'), ordersRoutes);
 app.use('/admin-message-routes', adminAuthMiddleware('admin'), rateLimiter('admin-messaging'), adminMessagingRoutes);
 app.use('/admin-event', adminAuthMiddleware('admin'), rateLimiter('admin-event'), adminEventRoutes);
-
+app.use('/admin-notifications', adminAuthMiddleware('admin'), notificationRoutes);
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/galleryuploads', express.static(path.join(__dirname, 'galleryuploads')));
 app.use('/admin', express.static(path.join(__dirname, 'public/admin')));

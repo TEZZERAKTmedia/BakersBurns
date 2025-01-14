@@ -58,7 +58,7 @@ const OrderDetails = ({ orderId, onClose }) => {
   return (
     <div className="order-details__modal-overlay">
       <div className="order-details__modal-container">
-        <div className="form-section">
+        <div className="fo">
           <h2>Order Details</h2>
           <button onClick={onClose} className="order-details__close-button">
             Close

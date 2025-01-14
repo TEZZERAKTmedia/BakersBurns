@@ -24,37 +24,43 @@ const createOrder = async (req, res) => {
   const { username, shippingAddress, orderItems, trackingNumber, carrier, total } = req.body;
 
   try {
-    // Step 1: Find the user by username
     const user = await User.findOne({ where: { username } });
     if (!user) {
       return res.status(400).json({ message: 'User not found. Please check the username and try again.' });
     }
 
-    // Step 2: Determine initial order status
     const initialStatus = trackingNumber ? 'Shipped' : 'Processing';
 
-    // Step 3: Create the main order
     const newOrder = await Order.create({
       userId: user.id,
       shippingAddress,
       trackingNumber,
       carrier,
       total,
-      status: initialStatus, // Set status based on tracking number presence
+      status: initialStatus,
     });
 
-    // Step 4: Create associated order items
     const items = orderItems.map((item) => ({
       orderId: newOrder.id,
       productId: item.productId,
       quantity: item.quantity,
-      total: item.total,
+      total: item.price * item.quantity, // Ensure item total is calculated
     }));
 
     await OrderItem.bulkCreate(items);
 
-    // Step 5: Send email notification
-    await sendStatusNotification(newOrder, initialStatus);
+    const orderDetails = {
+      shippingAddress,
+      carrier,
+      total,
+      orderItems: orderItems.map((item) => ({
+        name: item.name, // Ensure name is included in the frontend request
+        quantity: item.quantity,
+        price: item.price,
+      })),
+    };
+
+    await sendEmailNotification(user.email, trackingNumber, initialStatus, orderDetails);
 
     res.status(201).json({ message: 'Order created successfully.', order: newOrder });
   } catch (error) {
@@ -62,6 +68,7 @@ const createOrder = async (req, res) => {
     res.status(500).json({ message: 'Error creating order', error });
   }
 };
+
 
 
 const generateTrackingLink = (carrier, trackingNumber) => {
@@ -83,6 +90,61 @@ const generateTrackingLink = (carrier, trackingNumber) => {
             throw new Error('Unsupported carrier');
     }
     return baseUrl;
+};
+
+const updateTracking = async (req, res) => {
+  const { id } = req.params; // Order ID from the URL
+  const { trackingNumber, carrier } = req.body; // Tracking details from the request body
+
+  try {
+    // Find the order by ID
+    const order = await Order.findByPk(id, {
+      include: [
+        { model: User, as: 'user' }, // Include the user for email
+      ],
+    });
+
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found.' });
+    }
+
+    // Update the tracking information
+    order.trackingNumber = trackingNumber || order.trackingNumber;
+    order.carrier = carrier || order.carrier;
+
+    // Automatically set status to "Shipped" if tracking number is provided
+    if (trackingNumber && order.status !== 'Shipped') {
+      order.status = 'Shipped';
+    }
+
+    await order.save();
+
+    // Send "Shipped" email if tracking number is provided
+    if (trackingNumber) {
+      sendEmailNotification(
+        order.user.email,        // User email
+        trackingNumber,          // Tracking number
+        'Shipped',               // Status
+        {
+          shippingAddress: order.shippingAddress || 'N/A', // Assuming order has shippingAddress
+          carrier: carrier || 'N/A',
+          total: order.total || 0,
+          orderItems: [], // Adjust if you need to include order items in the email
+        }
+      );
+    }
+
+    res.status(200).json({
+      message: 'Tracking information updated successfully.',
+      order,
+    });
+  } catch (error) {
+    console.error('Error updating tracking information:', error);
+    res.status(500).json({
+      message: 'An error occurred while updating tracking information.',
+      error: error.message,
+    });
+  }
 };
 
 
@@ -346,5 +408,6 @@ module.exports = {
     getUsers,
     generateTrackingLink,
     quickAddProduct,
-    getOrderDetails
+    getOrderDetails,
+    updateTracking
 };
