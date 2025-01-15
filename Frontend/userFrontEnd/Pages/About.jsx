@@ -26,7 +26,7 @@ const About = () => {
                     data-aos="fade-up"
                 />
                 <p style={{ textAlign: 'justify', lineHeight: '1.6rem' }}>
-                    Welcome to the world of woodburning art by Kalea Baker. With a passion for
+                    Welcome to the world of woodburning art by Kalea. With a passion for
                     creating intricate and expressive pieces, Kalea Baker has been mastering the
                     craft of pyrography for over 3 years. Inspired by the natural beauty of wood and
                     the endless possibilities of this unique medium, each piece tells a story and
@@ -34,7 +34,7 @@ const About = () => {
                 </p>
                 <h2 style={{ marginTop: '1.5rem', fontSize: '1.5rem' }}>Our Work</h2>
                 <p style={{ textAlign: 'justify', lineHeight: '1.6rem' }}>
-                    Kalea Baker specializes in creating custom woodburned art, ranging from detailed
+                    Kalea specializes in creating custom woodburned art, ranging from detailed
                     portraits and landscapes to abstract designs and personalized gifts. Every piece
                     is meticulously crafted, ensuring that no two artworks are the same. The natural
                     grain and texture of the wood are embraced, adding depth and character to each
@@ -43,7 +43,7 @@ const About = () => {
                 <h2 style={{ marginTop: '1.5rem', fontSize: '1.5rem' }}>Our Process</h2>
                 <p style={{ textAlign: 'justify', lineHeight: '1.6rem' }}>
                     The process of woodburning, also known as pyrography, involves using a heated
-                    tool to burn designs onto wood surfaces. Kalea Baker begins with a careful
+                    tool to burn designs onto wood surfaces. Kalea begins with a careful
                     selection of high-quality wood, followed by sketching the initial design. Using
                     various tips and techniques, the design is then burned onto the wood, creating a
                     permanent and lasting piece of art. The final step includes sealing and
@@ -52,7 +52,7 @@ const About = () => {
                 <h2 style={{ marginTop: '1.5rem', fontSize: '1.5rem' }}>Get in Touch</h2>
                 <p style={{ textAlign: 'justify', lineHeight: '1.6rem' }}>
                     If you are interested in commissioning a custom piece or learning more about
-                    woodburning art, please don't hesitate to contact us. Follow Kalea Baker on
+                    woodburning art, please don't hesitate to contact us. Follow Kalea on
                     social media to stay updated on the latest creations and upcoming exhibitions.
                 </p>
                 <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1rem' }}>

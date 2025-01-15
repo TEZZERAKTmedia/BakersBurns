@@ -55,7 +55,6 @@ const User = sequelize.define('User', {
   termsAcceptedAt: {
       type: DataTypes.DATE, // Stores the timestamp of when terms were accepted
   },
-  
 }, {
   hooks: {
     beforeValidate: (user) => {

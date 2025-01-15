@@ -37,7 +37,7 @@ const sendEmailNotification = async (to, subject, htmlContent) => {
     console.error('Error sending email:', error.message);
   }
 };
-
+ 
 // Helper to generate order table in HTML with admin instructions
 const generateOrderTable = (orders) => {
   const rows = orders.map((order) => {
