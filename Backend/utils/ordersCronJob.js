@@ -8,7 +8,7 @@ const OrderItem = require('../models/orderItem'); // Assuming you have an OrderI
 const { Op } = require('sequelize');
 
 // Public URL for serving images
-const PUBLIC_URL = process.env.ADMIN_ORDER_DETAILS_URL || 'http://localhost:3450';
+const PUBLIC_URL = process.env.PUBLIC_URL || 'http://localhost:3450';
 
 // Nodemailer transporter
 const transporter = nodemailer.createTransport({
@@ -27,7 +27,7 @@ const transporter = nodemailer.createTransport({
 const sendEmailNotification = async (to, subject, htmlContent) => {
   try {
     const info = await transporter.sendMail({
-      from: `Your Company <${process.env.EMAIL_USER}>`,
+      from: `BakersBurns <${process.env.EMAIL_USER}>`,
       to,
       subject,
       html: htmlContent,
@@ -38,7 +38,7 @@ const sendEmailNotification = async (to, subject, htmlContent) => {
   }
 };
 
-// Helper to generate order table in HTML
+// Helper to generate order table in HTML with admin instructions
 const generateOrderTable = (orders) => {
   const rows = orders.map((order) => {
     const orderItems = order.items
@@ -66,13 +66,13 @@ const generateOrderTable = (orders) => {
       <tr>
         <td>${order.id}</td>
         <td>${order.status}</td>
-        <td>${order.updatedAt.toISOString()}</td>
+        <td>${new Date(order.updatedAt).toLocaleString()}</td>
         <td>
           <div style="display: flex; flex-wrap: wrap;">
             ${orderItems}
           </div>
         </td>
-        <td><a href="${process.env.ADMIN_ORDER_DETAILS_URL}" style="color: #1a73e8; text-decoration: none;">View Order</a></td>
+        <td><a href="${PUBLIC_URL}/admin/orders/${order.id}" style="color: #1a73e8; text-decoration: none;">View Order</a></td>
       </tr>
     `;
   });
@@ -92,6 +92,16 @@ const generateOrderTable = (orders) => {
         ${rows.join('')}
       </tbody>
     </table>
+    <div style="margin-top: 20px; padding: 15px; background-color: #fffbcc; border: 1px solid #ffe4a1; border-radius: 5px;">
+      <h3>Instructions:</h3>
+      <p>To resolve these orders:</p>
+      <ol>
+        <li>Click "View Order" for each pending shipment.</li>
+        <li>Add a tracking number for the shipment.</li>
+        <li>Update the order status to <strong>"Shipped"</strong>.</li>
+      </ol>
+      <p>Ensure timely processing to maintain customer satisfaction.</p>
+    </div>
   `;
 };
 
@@ -106,22 +116,21 @@ const runCronJobLogic = async () => {
       attributes: ['email'],
     });
 
-    // Set time for processing
-    const mountainTime = new Date();
-    mountainTime.setHours(9, 0, 0, 0);
+    const now = new Date();
+    now.setHours(9, 0, 0, 0); // Hardcoding 9:00 AM as processing time
 
     for (const admin of admins) {
       const { email } = admin;
 
-      // Find orders updated before 9:00 AM Mountain Time
+      // Find orders updated before 9:00 AM
       const stuckOrders = await Order.findAll({
         where: {
           status: 'processing',
           updatedAt: {
-            [Op.lte]: mountainTime,
+            [Op.lte]: now,
           },
         },
-        include: [{ model: OrderItem, as: 'items' }], // Include order items
+        include: [{ model: OrderItem, as: 'items' }],
       });
 
       if (stuckOrders.length > 0) {
@@ -145,7 +154,7 @@ const runCronJobLogic = async () => {
   }
 };
 
-// Schedule the cron job
+// Schedule the cron job to run at 9:00 AM Mountain Time daily
 cron.schedule('0 9 * * *', async () => {
   console.log('Running scheduled notification cron job...');
   await runCronJobLogic();
