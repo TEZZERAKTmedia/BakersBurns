@@ -43,7 +43,8 @@ const generateOrderTable = (orders) => {
   const rows = orders.map((order) => {
     const orderItems = order.items
       .map((item) => {
-        const thumbnailUrl = `${PUBLIC_URL}/uploads/${item.thumbnail || 'placeholder.png'}`;
+        const thumbnailUrl = `${process.env.IMAGE_URL}/${item.thumbnail || 'placeholder.png'}`;
+
         return `
           <div style="position: relative; display: inline-block; margin: 5px;">
             <img src="${thumbnailUrl}" alt="${item.name}" style="width: 50px; height: 50px; object-fit: cover; border: 1px solid #ddd; border-radius: 4px;">
@@ -72,7 +73,7 @@ const generateOrderTable = (orders) => {
             ${orderItems}
           </div>
         </td>
-        <td><a href="${PUBLIC_URL}/admin/orders/${order.id}" style="color: #1a73e8; text-decoration: none;">View Order</a></td>
+        <td><a href="${process.env.ADMIN_FRONTEND}/orders/${order.id}" style="color: #1a73e8; text-decoration: none;">View Order</a></td>
       </tr>
     `;
   });
