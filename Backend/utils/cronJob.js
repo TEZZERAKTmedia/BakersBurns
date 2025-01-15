@@ -1,5 +1,5 @@
 const cron = require('node-cron');
-const Product = require('./models/Product'); // Your Sequelize Product model
+const Product = require('../models/product'); // Your Sequelize Product model
 const { Op } = require('sequelize'); // Sequelize operator
 
 // Schedule a task to run at midnight every day

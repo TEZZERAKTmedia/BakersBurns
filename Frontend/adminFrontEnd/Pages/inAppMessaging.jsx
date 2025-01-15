@@ -148,7 +148,7 @@ useEffect(() => {
   };
 
   const renderDesktopView = () => (
-    <div style={{ display: 'flex', height: '100vh', width: '100vw', fontFamily: 'Arial, sans-serif', backgroundColor: 'white' }}>
+    <div style={{ display: 'flex', height: '100vh', width: '100vw', fontFamily: 'Arial, sans-serif' }}>
       {/* Sidebar for Threads */}
       <div style={{ width: '300px', borderRight: '1px solid #ddd', padding: '10px' }}>
         <h3 style={{ fontSize: '2rem', fontFamily: 'Dancing Script', marginTop: '30%'}}></h3>
@@ -454,7 +454,7 @@ useEffect(() => {
             </li>
           ))}
         </ul>
-        <ul style={{ listStyle: 'none', padding: 0,backgroundColor:'white' }}>
+        <ul style={{ listStyle: 'none', padding: 0, }}>
           {threads.map((thread) => (
               <li
                 key={thread.threadId}

@@ -1,10 +1,14 @@
-const { Sequelize, DataTypes } = require('sequelize');
+const cron = require('node-cron');
 const fs = require('fs');
 const path = require('path');
-const cron = require('node-cron');
+const { Sequelize, DataTypes } = require('sequelize');
 require('dotenv').config();
 
-// Initialize Sequelize using environment variables
+
+
+console.log("Media cleanup cron job script is running...");
+
+// Initialize Sequelize
 const sequelize = new Sequelize(
     process.env.DB_NAME,
     process.env.DB_USER,
@@ -16,86 +20,63 @@ const sequelize = new Sequelize(
     }
 );
 
-// Define Media model
+// Define models
 const Media = sequelize.define('Media', {
-    id: {
-        type: DataTypes.INTEGER,
-        autoIncrement: true,
-        primaryKey: true,
-    },
-    url: {
-        type: DataTypes.STRING,
-        allowNull: false,
-    },
-}, {
-    tableName: 'Media',
-    timestamps: false,
-});
+    id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
+    url: { type: DataTypes.STRING, allowNull: false },
+}, { tableName: 'Media', timestamps: false });
 
-// Define Products model
 const Products = sequelize.define('Products', {
-    id: {
-        type: DataTypes.INTEGER,
-        autoIncrement: true,
-        primaryKey: true,
-    },
-    thumbnail: {
-        type: DataTypes.STRING,
-        allowNull: true,
-    },
-}, {
-    tableName: 'Products',
-    timestamps: false,
-});
+    id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
+    thumbnail: { type: DataTypes.STRING, allowNull: true },
+}, { tableName: 'Products', timestamps: false });
 
-// Define Gallery model
 const Gallery = sequelize.define('Gallery', {
-    id: {
-        type: DataTypes.INTEGER,
-        autoIncrement: true,
-        primaryKey: true,
-    },
-    image: {
-        type: DataTypes.STRING,
-        allowNull: false,
-    },
-}, {
-    tableName: 'Gallery',
-    timestamps: false,
-});
+    id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
+    image: { type: DataTypes.STRING, allowNull: false },
+}, { tableName: 'Gallery', timestamps: false });
 
-// Path to uploads directory
+// Directory to clean up
 const uploadsDir = process.env.UPLOADS_DIR || path.join(__dirname, '../uploads');
 
-const cleanupMedia = async () => {
+/**
+ * Fetch all referenced files in the database
+ * @returns {Array<string>} List of file paths referenced in the database
+ */
+const fetchDatabaseFiles = async () => {
+    const mediaRecords = await Media.findAll();
+    const mediaFiles = mediaRecords.map((record) => record.url);
+
+    const productRecords = await Products.findAll();
+    const productThumbnails = productRecords.map((record) => record.thumbnail).filter(Boolean);
+
+    const galleryRecords = await Gallery.findAll();
+    const galleryImages = galleryRecords.map((record) => record.image);
+
+    return [...mediaFiles, ...productThumbnails, ...galleryImages];
+};
+
+/**
+ * Clean up unreferenced files in the uploads directory
+ */
+const cleanupMediaFiles = async () => {
     try {
-        console.log('Testing database connection...');
-        await sequelize.authenticate();
-        console.log('Database connected successfully.');
+        console.log('Starting media cleanup...');
 
-        // Step 1: Fetch all media, thumbnails, and gallery images
-        const mediaRecords = await Media.findAll();
-        const mediaFiles = mediaRecords.map((record) => record.url);
-
-        const productRecords = await Products.findAll();
-        const productThumbnails = productRecords.map((record) => record.thumbnail).filter(Boolean);
-
-        const galleryRecords = await Gallery.findAll();
-        const galleryImages = galleryRecords.map((record) => record.image);
-
-        // Combine all files referenced in the database
-        const databaseFiles = [...mediaFiles, ...productThumbnails, ...galleryImages];
-
-        // Step 2: Get all files in the uploads folder
+        // Ensure uploads directory exists
         if (!fs.existsSync(uploadsDir)) {
             console.error('Uploads directory does not exist:', uploadsDir);
             return;
         }
 
+        // Fetch database files and files in the uploads directory
+        const databaseFiles = await fetchDatabaseFiles();
         const uploadFiles = fs.readdirSync(uploadsDir);
 
-        // Step 3: Identify and delete files not in the database
+        // Identify unreferenced files
         const filesToDelete = uploadFiles.filter((file) => !databaseFiles.includes(file));
+
+        // Delete unreferenced files
         filesToDelete.forEach((file) => {
             const filePath = path.join(uploadsDir, file);
             fs.unlinkSync(filePath);
@@ -105,15 +86,16 @@ const cleanupMedia = async () => {
         console.log('Media cleanup completed successfully.');
     } catch (error) {
         console.error('Error during media cleanup:', error);
-    } finally {
-        await sequelize.close();
     }
 };
 
-// Schedule the cron job to run every 14 hours
-cron.schedule('0 */24 * * *', async () => {
-    console.log('Running media cleanup cron job...');
-    await cleanupMedia();
-});
+/**
+ * Schedule the cron job to run every 24 hours
+ */
+const scheduleCleanupMediaCron = () => {
+    cron.schedule('0 0 * * *', cleanupMediaFiles); // Runs at midnight UTC every day
+    console.log('Media cleanup cron job scheduled to run every 24 hours.');
+};
 
-console.log('Media cleanup cron job scheduled to run every 24 hours.');
+// Export the cron job scheduler
+module.exports = scheduleCleanupMediaCron;

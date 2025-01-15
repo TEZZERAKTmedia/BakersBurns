@@ -46,7 +46,7 @@ const ProductManagementContent = () => {
     <LoadingPage />
   ) : (
     <div className="product-manager-container">
-      <h1 className="page-header"></h1>
+      <h1 className="page-header" style={{marginTop:'100px'}}></h1>
 
       <div className="add-forms">
         {!showAddProductForm && !showAddDiscountForm && (

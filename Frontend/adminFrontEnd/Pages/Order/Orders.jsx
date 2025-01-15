@@ -54,7 +54,7 @@ const OrderManagement = () => {
 
   return (
     <div style={styles.container}>
-      <h1>Order Management</h1>
+      <h1 style={{marginTop:'100px'}}></h1>
       <button onClick={() => setDialogOpen(true)} style={styles.addButton}>
         Add Order
       </button>

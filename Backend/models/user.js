@@ -55,6 +55,11 @@ const User = sequelize.define('User', {
   termsAcceptedAt: {
       type: DataTypes.DATE, // Stores the timestamp of when terms were accepted
   },
+  timezone: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    defaultValue: 'UTC', // Default to UTC if not provided
+  },
 }, {
   hooks: {
     beforeValidate: (user) => {

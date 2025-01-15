@@ -12,14 +12,14 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 
+
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
 const jwt = require('jsonwebtoken'); // Assuming JWT is used for auth
 const db = require('./models/index');
+const sequelize = require('./config/database'); // Import the Sequelize instance
+
 const rateLimit = require('express-rate-limit'); 
-// Import middleware
-
-
 // Import routes
 const cartRoutes = require('./routes/user/cartRoutes');
 const emailVerificationRoutes = require('./routes/verificationRoutes');
@@ -172,6 +172,25 @@ app.use((err, req, res, next) => {
 app.use((req, res, next) => {
   res.status(404).json({ message: 'Not Found' });
 });
+
+
+
+//CRON
+const cleanupMediaCron = require('./utils/mediaCronJob');
+const scheduleCronJob = require('./utils/ordersCronJob');
+sequelize.authenticate()
+  .then(() => {
+    console.log('Database connected successfully.');
+
+    // Start the cron job
+    console.log('Initializing cron jobs...')
+    scheduleCronJob();
+    cleanupMediaCron();
+  })
+  .catch((err) => {
+    console.error('Database connection failed:', err.message);
+    process.exit(1); // Exit if database connection fails
+  });
 /*
 db.sequelize.sync({ alter: true })
   .then(() => {
