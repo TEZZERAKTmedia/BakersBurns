@@ -1,13 +1,14 @@
-const path = require('path');
 const cron = require('node-cron');
+const fs = require('fs');
+const path = require('path');
 const nodemailer = require('nodemailer');
+const { Sequelize, DataTypes } = require('sequelize');
+require('dotenv').config();
 
 const Order = require('../models/order');
 const User = require('../models/user');
-const OrderItem = require('../models/orderItem'); // Assuming you have an OrderItem model
+const OrderItem = require('../models/orderItem');
 const { Op } = require('sequelize');
-
-
 
 // Nodemailer transporter
 const transporter = nodemailer.createTransport({
@@ -22,7 +23,6 @@ const transporter = nodemailer.createTransport({
   debug: true,
 });
 
-// Helper to send email
 const sendEmailNotification = async (to, subject, htmlContent) => {
   try {
     const info = await transporter.sendMail({
@@ -36,14 +36,13 @@ const sendEmailNotification = async (to, subject, htmlContent) => {
     console.error('Error sending email:', error.message);
   }
 };
- 
-// Helper to generate order table in HTML with admin instructions
+
+// Generate order table HTML with instructions
 const generateOrderTable = (orders) => {
   const rows = orders.map((order) => {
     const orderItems = order.items
       .map((item) => {
         const thumbnailUrl = `${process.env.IMAGE_URL}/${item.thumbnail || 'placeholder.png'}`;
-
         return `
           <div style="position: relative; display: inline-block; margin: 5px;">
             <img src="${thumbnailUrl}" alt="${item.name}" style="width: 50px; height: 50px; object-fit: cover; border: 1px solid #ddd; border-radius: 4px;">
@@ -105,31 +104,18 @@ const generateOrderTable = (orders) => {
   `;
 };
 
-// Cron job logic
 const runCronJobLogic = async () => {
   try {
     console.log('Starting notification cron job...');
 
-    // Fetch all admin users
-    const admins = await User.findAll({
-      where: { role: 'admin' },
-      attributes: ['email'],
-    });
-
+    const admins = await User.findAll({ where: { role: 'admin' }, attributes: ['email'] });
     const now = new Date();
-    now.setHours(9, 0, 0, 0); // Hardcoding 9:00 AM as processing time
+    now.setHours(9, 0, 0, 0);
 
     for (const admin of admins) {
       const { email } = admin;
-
-      // Find orders updated before 9:00 AM
       const stuckOrders = await Order.findAll({
-        where: {
-          status: 'processing',
-          updatedAt: {
-            [Op.lte]: now,
-          },
-        },
+        where: { status: 'processing', updatedAt: { [Op.lte]: now } },
         include: [{ model: OrderItem, as: 'items' }],
       });
 
@@ -138,26 +124,18 @@ const runCronJobLogic = async () => {
         await sendEmailNotification(
           email,
           'Pending Shipments Alert',
-          `
-            <p>You have ${stuckOrders.length} orders still marked as "processing".</p>
-            <p>Please review them and take necessary action.</p>
-            ${orderTable}
-          `
+          `<p>You have ${stuckOrders.length} orders still marked as "processing".</p>
+          ${orderTable}`
         );
         console.log(`Notification email sent to ${email}`);
       }
     }
-
-    console.log('Notification cron job completed.');
   } catch (error) {
     console.error('Error in notification cron job:', error.message);
   }
 };
 
-// Schedule the cron job to run at 9:00 AM Mountain Time daily
-cron.schedule('0 9 * * *', async () => {
-  console.log('Running scheduled notification cron job...');
-  await runCronJobLogic();
-});
+// Schedule the cron job
+cron.schedule('0 9 * * *', runCronJobLogic);
 
 module.exports = runCronJobLogic;
