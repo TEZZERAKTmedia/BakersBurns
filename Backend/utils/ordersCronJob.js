@@ -7,8 +7,7 @@ const User = require('../models/user');
 const OrderItem = require('../models/orderItem'); // Assuming you have an OrderItem model
 const { Op } = require('sequelize');
 
-// Public URL for serving images
-const PUBLIC_URL = process.env.PUBLIC_URL || 'http://localhost:3450';
+
 
 // Nodemailer transporter
 const transporter = nodemailer.createTransport({
@@ -73,7 +72,7 @@ const generateOrderTable = (orders) => {
             ${orderItems}
           </div>
         </td>
-        <td><a href="${process.env.ADMIN_FRONTEND}/orders/${order.id}" style="color: #1a73e8; text-decoration: none;">View Order</a></td>
+        <td><a href="${process.env.ADMIN_FRONTEND}" style="color: #1a73e8; text-decoration: none;">View Order</a></td>
       </tr>
     `;
   });

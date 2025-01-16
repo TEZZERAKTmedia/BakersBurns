@@ -95,6 +95,12 @@ const cleanupMediaFiles = async () => {
 const scheduleCleanupMediaCron = () => {
     cron.schedule('0 0 * * *', cleanupMediaFiles); // Runs at midnight UTC every day
     console.log('Media cleanup cron job scheduled to run every 24 hours.');
+
+    // Test cleanup logic immediately on load
+    (async () => {
+        console.log('Running media cleanup immediately for testing...');
+        await cleanupMediaFiles();
+    })();
 };
 
 // Export the cron job scheduler
