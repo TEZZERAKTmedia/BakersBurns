@@ -41,6 +41,8 @@ const handleWebhook = async (req, res) => {
       let user = await User.findOne({ where: { email: customerEmail } });
 
       const isNewGuest = !user;
+      let thread; // Declare thread variable for later use
+
       if (isNewGuest) {
         // Create a guest user account if no user exists
         user = await User.create({
@@ -55,9 +57,9 @@ const handleWebhook = async (req, res) => {
         });
         console.log(`Guest user created with email: ${customerEmail}`);
 
-        // Create a thread and an initial message for the new user
+        // Create a new thread for the new user
         const threadId = uuidv4();
-        const thread = await Thread.create({
+        thread = await Thread.create({
           threadId,
           senderEmail: customerEmail,
           receiverEmail: null,
@@ -65,6 +67,7 @@ const handleWebhook = async (req, res) => {
         });
         console.log(`Thread created with ID: ${thread.threadId}`);
 
+        // Add the initial message to the thread
         await Message.create({
           threadId: thread.threadId,
           senderUsername: 'System',
@@ -73,6 +76,20 @@ const handleWebhook = async (req, res) => {
           createdAt: new Date(),
         });
         console.log(`Initial message created for thread: ${thread.threadId}`);
+      } else {
+        // If the user already exists, check for an existing thread
+        thread = await Thread.findOne({ where: { senderEmail: customerEmail } });
+        if (!thread) {
+          // Create a thread if none exists
+          const threadId = uuidv4();
+          thread = await Thread.create({
+            threadId,
+            senderEmail: customerEmail,
+            receiverEmail: null,
+            adminId: null,
+          });
+          console.log(`Thread created for existing user with ID: ${thread.threadId}`);
+        }
       }
 
       // Handle cart items for guest users or registered users
