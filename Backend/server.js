@@ -182,10 +182,17 @@ sequelize.authenticate()
   .then(async () => {
     console.log('Database connected successfully.');
 
-    // Start the cron jobs
+    // Start cron jobs
     console.log('Initializing cron jobs...');
-    cleanupMediaCron(); // Schedule the media cleanup cron
-    await runCronJobLogic(); // Run the orders notification cron logic immediately
+    cleanupMediaCron(); // Schedule media cleanup cron job
+
+    // Run the order notification cron job immediately for testing
+    console.log('Running order notification cron job immediately...');
+    try {
+      await runCronJobLogic(); // Direct invocation
+    } catch (error) {
+      console.error('Error running immediate order notification cron job:', error.message);
+    }
 
     console.log('Cron jobs initialized.');
   })

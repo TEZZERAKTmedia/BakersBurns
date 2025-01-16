@@ -1,10 +1,5 @@
 const cron = require('node-cron');
-const fs = require('fs');
-const path = require('path');
 const nodemailer = require('nodemailer');
-const { Sequelize, DataTypes } = require('sequelize');
-require('dotenv').config();
-
 const Order = require('../models/order');
 const User = require('../models/user');
 const OrderItem = require('../models/orderItem');
@@ -23,6 +18,7 @@ const transporter = nodemailer.createTransport({
   debug: true,
 });
 
+// Helper function to send email
 const sendEmailNotification = async (to, subject, htmlContent) => {
   try {
     const info = await transporter.sendMail({
@@ -37,7 +33,7 @@ const sendEmailNotification = async (to, subject, htmlContent) => {
   }
 };
 
-// Generate order table HTML with instructions
+// Helper function to generate HTML for email
 const generateOrderTable = (orders) => {
   const rows = orders.map((order) => {
     const orderItems = order.items
@@ -71,7 +67,7 @@ const generateOrderTable = (orders) => {
             ${orderItems}
           </div>
         </td>
-        <td><a href="${process.env.ADMIN_FRONTEND}" style="color: #1a73e8; text-decoration: none;">View Order</a></td>
+        <td><a href="${process.env.ADMIN_FRONTEND}/orders/${order.id}" style="color: #1a73e8; text-decoration: none;">View Order</a></td>
       </tr>
     `;
   });
@@ -91,26 +87,15 @@ const generateOrderTable = (orders) => {
         ${rows.join('')}
       </tbody>
     </table>
-    <div style="margin-top: 20px; padding: 15px; background-color: #fffbcc; border: 1px solid #ffe4a1; border-radius: 5px;">
-      <h3>Instructions:</h3>
-      <p>To resolve these orders:</p>
-      <ol>
-        <li>Click "View Order" for each pending shipment.</li>
-        <li>Add a tracking number for the shipment.</li>
-        <li>Update the order status to <strong>"Shipped"</strong>.</li>
-      </ol>
-      <p>Ensure timely processing to maintain customer satisfaction.</p>
-    </div>
   `;
 };
 
 const runCronJobLogic = async () => {
   try {
-    console.log('Starting notification cron job...');
-
+    console.log('Executing order notification cron job...');
     const admins = await User.findAll({ where: { role: 'admin' }, attributes: ['email'] });
     const now = new Date();
-    now.setHours(9, 0, 0, 0);
+    now.setHours(9, 0, 0, 0); // Set to 9:00 AM
 
     for (const admin of admins) {
       const { email } = admin;
@@ -125,13 +110,15 @@ const runCronJobLogic = async () => {
           email,
           'Pending Shipments Alert',
           `<p>You have ${stuckOrders.length} orders still marked as "processing".</p>
-          ${orderTable}`
+           <p>Please review them and take necessary action.</p>
+           ${orderTable}`
         );
         console.log(`Notification email sent to ${email}`);
       }
     }
+    console.log('Order notification cron job execution complete.');
   } catch (error) {
-    console.error('Error in notification cron job:', error.message);
+    console.error('Error in order notification cron job:', error.message);
   }
 };
 
