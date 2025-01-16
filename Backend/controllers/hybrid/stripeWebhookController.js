@@ -145,6 +145,7 @@ const handleWebhook = async (req, res) => {
         price: cartItem.Product?.price || cartItem.product?.price,
       }));
 
+      // Send user email based on guest or existing user
       await sendOrderEmail(
         isNewGuest ? 'newGuest' : 'existingUser',
         customerEmail,
@@ -181,6 +182,7 @@ const handleWebhook = async (req, res) => {
     res.status(400).send(`Webhook Error: ${err.message}`);
   }
 };
+
 
 // Cancel checkout session (moved outside `handleWebhook`)
 const cancelCheckoutSession = async (req, res) => {
