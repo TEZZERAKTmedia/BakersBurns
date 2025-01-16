@@ -295,25 +295,46 @@ const cancelCheckoutSession = async (req, res) => {
   }
 };
 const setPassword = async (req, res) => {
+  const { token, password } = req.body;
+
+  if (!token || !password) {
+    return res.status(400).json({ message: 'Token and password are required' });
+  }
+
   try {
-    const { token, password } = req.body;
-
-    // Verify token
+    // Step 1: Verify the token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const email = decoded.email;
 
-    // Hash the password
+    // Step 2: Validate the token in the database
+    const storedToken = await Token.findOne({ where: { token, type: 'password_setup' } });
+    if (!storedToken || new Date(storedToken.expiresAt) < new Date()) {
+      return res.status(400).json({ message: 'Invalid or expired token' });
+    }
+
+    // Step 3: Validate the user exists
+    const user = await User.findOne({ where: { email } });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Step 4: Hash the new password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Update the user's password
-    await User.update({ password: hashedPassword }, { where: { email: decoded.email } });
+    // Step 5: Update the user’s password
+    user.password = hashedPassword;
+    user.isGuest = false; // Convert guest to registered user
+    await user.save();
 
-    res.status(200).json({ message: 'Password set successfully!' });
-  } catch (err) {
-    console.error('Error setting password:', err);
-    res.status(400).json({ message: 'Invalid or expired token.' });
+    // Step 6: Remove the token from the database
+    await Token.destroy({ where: { token } });
+
+    return res.status(200).json({ message: 'Password has been set successfully. You can now log in.' });
+  } catch (error) {
+    console.error('Error in setPassword:', error.message);
+    return res.status(500).json({ message: 'An error occurred while setting the password.' });
   }
 };
-
 
 module.exports = {
   addToGuestCart,

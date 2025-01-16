@@ -36,43 +36,43 @@ const PasswordSetupForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Validate password
+  
     if (!requirements.length || !requirements.upperLowerCase || !requirements.specialChar || !requirements.digit) {
       setError('Password must meet all requirements.');
       return;
     }
-
+  
     if (password !== confirmPassword) {
       setError('Passwords do not match.');
       return;
     }
-
+  
     try {
       const urlParams = new URLSearchParams(window.location.search);
-      const token = urlParams.get('token'); // Token passed in the email link
-
+      const token = urlParams.get('token');
+  
       if (!token) {
         setError('Invalid or missing token.');
         return;
       }
-
+  
       const sanitizedPassword = DOMPurify.sanitize(password);
-
-      // Send password to the backend
-      const response = await registerApi.post('/register-cart/guest-set-password', { password: sanitizedPassword, token });
-
+  
+      // Call the backend to set the password
+      const response = await registerApi.post('/register-cart/set-password', { token, password: sanitizedPassword });
+  
       if (response.status === 200) {
-        setSuccess('Password set successfully! Redirecting...');
+        setSuccess(response.data.message);
         setTimeout(() => navigate('/login'), 2000);
       } else {
-        setError('Failed to set password. Please try again.');
+        setError(response.data.message);
       }
     } catch (err) {
       console.error('Error setting password:', err);
       setError('An error occurred. Please try again later.');
     }
   };
+  
 
   return (
     <div style={styles.container}>

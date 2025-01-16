@@ -25,25 +25,81 @@ const sendOrderEmail = async (type, email, data = {}) => {
 
     switch (type) {
       case 'newGuest':
-        // Generate a token for the password setup
-        const token = generateToken({ email }); // Create a secure token with email (see implementation below)
+  // Generate a token for the password setup
+      const token = generateToken({ email }); // Create a secure token with email
 
-        // Save the token to the database for validation
-        await Token.create({ email, token, type: 'password_setup', expiresAt: new Date(Date.now() + 3600 * 1000) }); // 1-hour expiry
+      // Save the token to the database for validation
+      await Token.create({
+        email,
+        token,
+        type: 'password_setup',
+        expiresAt: new Date(Date.now() + 3600 * 1000), // 1-hour expiry
+      });
 
-        subject = 'Welcome to Our Store!';
-        html = `
-          <h1>Thank You for Your Order!</h1>
-          <p>Your order has been placed successfully.</p>
-          <p>Complete your account setup by setting a password:</p>
-          <a href="${process.env.PASSWORD_SETUP_URL}?token=${token}" style="background: #4caf50; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px;">Set Password</a>
-          <p>Order Summary:</p>
-          <ul>
-            ${data.orderItems.map(item => `<li>${item.name} - ${item.quantity} x $${item.price}</li>`).join('')}
-          </ul>
-          <p>Total: $${data.total}</p>
-        `;
-        break;
+      subject = 'Welcome to BakerBurns! Complete Your Account Setup';
+
+      html = `
+        <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+          <h1 style="color: #4caf50;">Thank You for Your Order!</h1>
+          <p>Hi there,</p>
+          <p>
+            We're thrilled to welcome you to BakerBurns! Your order has been placed successfully.
+          </p>
+          <p>
+            To access your order history, save your favorite items, and receive personalized updates, 
+            please complete your account setup by setting a password:
+          </p>
+          <a href="${process.env.REGISTER_FRONTEND}/password-form?token=${token}" 
+            style="
+              background: #4caf50;
+              color: white;
+              padding: 12px 20px;
+              text-decoration: none;
+              border-radius: 5px;
+              font-size: 16px;
+              display: inline-block;
+              margin-top: 15px;">
+            Set Your Password
+          </a>
+          <p style="margin-top: 20px;">
+            Here's a summary of your order:
+          </p>
+          <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+            <thead>
+              <tr>
+                <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Item</th>
+                <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">Quantity</th>
+                <th style="border: 1px solid #ddd; padding: 8px; text-align: right;">Price</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${data.orderItems
+                .map(
+                  (item) => `
+                  <tr>
+                    <td style="border: 1px solid #ddd; padding: 8px;">${item.name}</td>
+                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${item.quantity}</td>
+                    <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">$${item.price}</td>
+                  </tr>`
+                )
+                .join('')}
+            </tbody>
+          </table>
+          <p style="font-size: 18px;">
+            <strong>Total: $${data.total.toFixed(2)}</strong>
+          </p>
+          <hr style="border: none; border-top: 1px solid #ddd; margin: 20px 0;" />
+          <p>
+            <strong>Need assistance?</strong><br />
+            Contact our support team anytime at <a href="mailto:support@bakerburns.com" style="color: #007bff;">support@bakerburns.com</a>.
+          </p>
+          <p style="font-size: 12px; color: #aaa;">
+            &copy; ${new Date().getFullYear()} BakerBurns. All rights reserved.
+          </p>
+        </div>
+      `;
+      break;
+
 
       case 'existingUser':
         subject = 'Order Confirmation';

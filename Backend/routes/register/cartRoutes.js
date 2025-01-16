@@ -11,6 +11,6 @@ router.post('/items', getCartItems);
 // Lock inventory and create a Stripe checkout session
 router.post('/create-checkout-session', createCheckoutSession);
 router.post('/cancel-checkout', cancelCheckoutSession);
-router.post('/guest-set-password', setPassword);
+router.post('/set-password', setPassword);
 
 module.exports = router;
