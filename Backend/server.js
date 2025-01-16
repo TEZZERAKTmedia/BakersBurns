@@ -177,34 +177,20 @@ app.use((req, res, next) => {
 
 //CRON
 const cleanupMediaCron = require('./utils/mediaCronJob');
-const scheduleCronJob = require('./utils/ordersCronJob'); // This contains `runCronJobLogic`
+const scheduleCronJob = require('./utils/ordersCronJob');
 sequelize.authenticate()
-  .then(async () => {
+  .then(() => {
     console.log('Database connected successfully.');
 
-    // Start the cron jobs
-    console.log('Initializing cron jobs...');
-    cleanupMediaCron();
+    // Start the cron job
+    console.log('Initializing cron jobs...')
     scheduleCronJob();
-
-    // Run order notification cron job immediately for testing
-    console.log('Running order notification cron job immediately...');
-    try {
-      const { runCronJobLogic } = require('./utils/ordersCronJob');
-      await runCronJobLogic(); // Direct invocation for testing
-      console.log('Order notification cron job executed successfully for testing.');
-    } catch (error) {
-      console.error('Error running immediate order notification cron job:', error.message);
-    }
-
-    console.log('Cron jobs initialized.');
+    cleanupMediaCron();
   })
   .catch((err) => {
     console.error('Database connection failed:', err.message);
     process.exit(1); // Exit if database connection fails
   });
-
-
 /*
 db.sequelize.sync({ alter: true })
   .then(() => {

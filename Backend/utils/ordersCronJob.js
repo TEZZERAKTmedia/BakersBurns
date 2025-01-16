@@ -3,6 +3,7 @@ const nodemailer = require('nodemailer');
 const Order = require('../models/order');
 const User = require('../models/user');
 const OrderItem = require('../models/orderItem');
+const Product = require('../models/product');
 const { Op } = require('sequelize');
 
 // Nodemailer transporter
@@ -38,10 +39,13 @@ const generateOrderTable = (orders) => {
   const rows = orders.map((order) => {
     const orderItems = order.items
       .map((item) => {
-        const thumbnailUrl = `${process.env.IMAGE_URL}/${item.thumbnail || 'placeholder.png'}`;
+        const thumbnailUrl = item.product?.thumbnail
+          ? `${process.env.IMAGE_URL}/${item.product.thumbnail}`
+          : `${process.env.IMAGE_URL}/placeholder.png`;
+
         return `
           <div style="position: relative; display: inline-block; margin: 5px;">
-            <img src="${thumbnailUrl}" alt="${item.name}" style="width: 50px; height: 50px; object-fit: cover; border: 1px solid #ddd; border-radius: 4px;">
+            <img src="${thumbnailUrl}" alt="${item.product?.name || 'Product'}" style="width: 50px; height: 50px; object-fit: cover; border: 1px solid #ddd; border-radius: 4px;">
             <span style="
               position: absolute;
               top: 0;
@@ -94,28 +98,73 @@ const runCronJobLogic = async () => {
   try {
     console.log('Executing order notification cron job...');
     const admins = await User.findAll({ where: { role: 'admin' }, attributes: ['email'] });
-    const now = new Date();
-    now.setHours(9, 0, 0, 0); // Set to 9:00 AM
+
+    if (admins.length === 0) {
+      console.warn('No admins found. Skipping email notifications.');
+      return;
+    }
+
+    const ordersWithItems = await Order.findAll({
+      where: { status: 'processing' },
+      include: [
+        {
+          model: OrderItem,
+          as: 'items',
+          attributes: ['id', 'productId', 'quantity'],
+        },
+      ],
+    });
+
+    if (ordersWithItems.length === 0) {
+      console.log('No stuck orders found.');
+      return;
+    }
+
+    // Extract productIds from OrderItems
+    const productIds = Array.from(
+      new Set(
+        ordersWithItems.flatMap((order) => order.items.map((item) => item.productId))
+      )
+    );
+
+    // Fetch Product data
+    const products = await Product.findAll({
+      where: { id: productIds },
+      attributes: ['id', 'thumbnail', 'name'],
+    });
+
+    // Create a product map for quick lookup
+    const productMap = products.reduce((acc, product) => {
+      acc[product.id] = product;
+      return acc;
+    }, {});
+
+    // Enrich orders with product data
+    const enrichedOrders = ordersWithItems.map((order) => ({
+      ...order.toJSON(),
+      items: order.items.map((item) => ({
+        ...item.toJSON(),
+        product: productMap[item.productId] || null,
+      })),
+    }));
+
+    console.log('Enriched orders:', JSON.stringify(enrichedOrders, null, 2));
 
     for (const admin of admins) {
       const { email } = admin;
-      const stuckOrders = await Order.findAll({
-        where: { status: 'processing', updatedAt: { [Op.lte]: now } },
-        include: [{ model: OrderItem, as: 'items' }],
-      });
+      const orderTable = generateOrderTable(enrichedOrders);
 
-      if (stuckOrders.length > 0) {
-        const orderTable = generateOrderTable(stuckOrders);
-        await sendEmailNotification(
-          email,
-          'Pending Shipments Alert',
-          `<p>You have ${stuckOrders.length} orders still marked as "processing".</p>
-           <p>Please review them and take necessary action.</p>
-           ${orderTable}`
-        );
-        console.log(`Notification email sent to ${email}`);
-      }
+      await sendEmailNotification(
+        email,
+        'Pending Shipments Alert',
+        `<p>You have ${enrichedOrders.length} orders still marked as "processing".</p>
+         <p>Please review them and take necessary action.</p>
+         ${orderTable}`
+      );
+
+      console.log(`Notification email sent to admin: ${email}`);
     }
+
     console.log('Order notification cron job execution complete.');
   } catch (error) {
     console.error('Error in order notification cron job:', error.message);
@@ -123,6 +172,6 @@ const runCronJobLogic = async () => {
 };
 
 // Schedule the cron job
-cron.schedule('0 9 * * *', runCronJobLogic);
+cron.schedule('0 9 * * *', runCronJobLogic); // Runs daily at 9:00 AM
 
 module.exports = runCronJobLogic;
