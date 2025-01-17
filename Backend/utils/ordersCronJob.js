@@ -44,18 +44,22 @@ const generateOrderTable = (orders) => {
           : `${process.env.IMAGE_URL}/placeholder.png`;
 
         return `
-          <div style="position: relative; display: inline-block; margin: 5px;">
-            <img src="${thumbnailUrl}" alt="${item.product?.name || 'Product'}" style="width: 50px; height: 50px; object-fit: cover; border: 1px solid #ddd; border-radius: 4px;">
+          <div style="position: relative; width: 60px; height: 60px; margin: 5px; display: inline-block;">
+            <img src="${thumbnailUrl}" alt="${item.product?.name || 'Product'}"
+              style="width: 100%; height: 100%; object-fit: cover; border: 1px solid #ddd; border-radius: 4px;">
             <span style="
               position: absolute;
               top: 0;
-              left: 0;
-              background-color: rgba(0, 0, 0, 0.7);
+              right: 0;
+              transform: translate(50%, -50%);
+              background-color: rgba(0, 0, 0, 0.8);
               color: white;
-              font-size: 10px;
-              padding: 2px 5px;
-              border-radius: 3px;
+              font-size: 12px;
+              padding: 5px 8px;
+              border-radius: 50%;
               font-weight: bold;
+              text-align: center;
+              line-height: 1;
             ">${item.quantity}</span>
           </div>
         `;
@@ -93,6 +97,7 @@ const generateOrderTable = (orders) => {
     </table>
   `;
 };
+
 
 const runCronJobLogic = async () => {
   try {
