@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-
+import SocialLinks from '../Components/socialLinks'
 import '../Componentcss/navbar.css'; // Import the CSS file for styling
 import { FaCog } from 'react-icons/fa'; // Import settings icon from Font Awesome
 
@@ -30,12 +30,13 @@ const Navbar = () => {
       </div>
       {/* Navbar links */}
       <ul className={`nav-list ${menuOpen ? 'show' : ''}`}>
-
+        
         <li className="nav-item" onClick={closeMenu}><Link to="/">Home</Link></li>
         <li className="nav-item" onClick={closeMenu}><Link to="/store">Store</Link></li>
         <li className="nav-item" onClick={closeMenu}><Link to="/cart">Cart</Link></li>
         {/*<li className="nav-item" onClick={closeMenu}><Link to="/create">Create</Link></li>*/}
         <li className="nav-item" onClick={closeMenu}><Link to="/about">About</Link></li> 
+        <SocialLinks />
         <li className="nav-item-privacy" onClick={closeMenu}><Link to="/privacy-policy" style={{textDecoration:'none', color:'white', padding:'10px'}}>Privacy Policy</Link></li>
         <li className="nav-item-terms" onClick={closeMenu}><Link to="/terms-of-service" style={{textDecoration:'none', color:'white', padding:'10px'}}>Terms of Service</Link></li>
 

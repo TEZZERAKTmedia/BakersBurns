@@ -5,10 +5,12 @@ import LoadingPage from '../../Components/loading';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import ProductModal from './ProductModal';
-
+import StoreNavbar from './storeMenu'; // Import the StoreMenu component
 
 const Store = () => {
   const [products, setProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]); // For filtered products
+  const [selectedType, setSelectedType] = useState('All'); // Selected type
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -19,7 +21,7 @@ const Store = () => {
 
     // Scroll event listener
     const handleScroll = () => {
-      if (window.scrollY > 100) { // Show after scrolling down 100px
+      if (window.scrollY > 100) {
         setShowTitle(true);
       } else {
         setShowTitle(false);
@@ -33,6 +35,7 @@ const Store = () => {
     };
   }, []);
 
+  // Fetch all products
   const fetchProducts = async () => {
     setIsLoading(true);
     setError(null);
@@ -40,6 +43,7 @@ const Store = () => {
     try {
       const response = await registerApi.get('/register-store/products');
       setProducts(response.data.products || []);
+      setFilteredProducts(response.data.products || []); // Initially show all products
     } catch (error) {
       console.error('Error fetching products:', error);
       setError('Failed to load products. Please try again later.');
@@ -48,11 +52,21 @@ const Store = () => {
     }
   };
 
+  // Update filtered products when the selected type changes
+  useEffect(() => {
+    if (selectedType === 'All') {
+      setFilteredProducts(products);
+    } else {
+      setFilteredProducts(
+        products.filter((product) => product.type === selectedType)
+      );
+    }
+  }, [selectedType, products]);
 
   const openProductPreview = (product) => {
     window.scrollTo({
       top: 0,
-      behavior: 'smooth'
+      behavior: 'smooth',
     });
     setSelectedProduct(product);
   };
@@ -61,22 +75,23 @@ const Store = () => {
     setSelectedProduct(null);
   };
 
-
   if (isLoading || error) {
     return (
       <div style={{ position: 'relative' }}>
         <LoadingPage />
         {error && (
-          <div style={{
-            position: 'fixed',
-            top: '20%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            color: 'red',
-            fontSize: '1.2rem',
-            textAlign: 'center',
-            zIndex: 1100
-          }}>
+          <div
+            style={{
+              position: 'fixed',
+              top: '20%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              color: 'red',
+              fontSize: '1.2rem',
+              textAlign: 'center',
+              zIndex: 1100,
+            }}
+          >
             {error}
           </div>
         )}
@@ -87,13 +102,10 @@ const Store = () => {
   return (
     <>
       {selectedProduct && (
-        <ProductModal 
-          product={selectedProduct} 
-          onClose={closeProductPreview} 
-        />
+        <ProductModal product={selectedProduct} onClose={closeProductPreview} />
       )}
 
-      {/* Store Title with Framer Motion for fade-in/out */}
+      {/* Store Title */}
       <AnimatePresence>
         {showTitle && (
           <motion.div
@@ -115,30 +127,38 @@ const Store = () => {
               zIndex: 10,
             }}
           >
-            <h2 style={{
-              fontFamily: 'Dancing Script',
-              fontSize: '3rem',
-              textAlign: 'center',
-              color: 'white',
-              marginTop:'20%'
-            }}>Store</h2>
+            <h2
+              style={{
+                fontFamily: 'Dancing Script',
+                fontSize: '3rem',
+                textAlign: 'center',
+                color: 'white',
+                marginTop: '20%',
+              }}
+            >
+              Store
+            </h2>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Scrollable Products Container */}
-      <div style={{
-        paddingTop: '180px',
-        padding: '20px',
-        display: 'grid',
-        gridTemplateColumns: 'repeat(1, 1fr)',
-        gap: '1.5rem',
-        marginTop: '50%'
-      }}>
-        {products.length > 0 ? (
-          products.map((product) => (
-            <div 
-              key={product.id} 
+      {/* Store Menu for Filtering */}
+      <StoreNavbar onTypeSelect={(type) => setSelectedType(type)} />
+
+      {/* Products Grid */}
+      <div
+        style={{
+          paddingTop: '20px',
+          padding: '20px',
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+          gap: '1.5rem',
+        }}
+      >
+        {filteredProducts.length > 0 ? (
+          filteredProducts.map((product) => (
+            <div
+              key={product.id}
               style={{
                 padding: '10px',
                 height: '300px',
@@ -166,26 +186,44 @@ const Store = () => {
                   }}
                 />
               </div>
-              <h3 style={{ fontSize: '1.25rem', margin: '10px 0', color:'black', backgroundColor:'white', padding: '10px', borderRadius:'10px'}}>{product.name}</h3>
-              <p style={{
-                fontSize: '1.5rem',
-                fontWeight: 'bold',
-                color: '#cecece',
-                marginBottom: '10px',
-              }}>${product.price}</p>
+              <h3
+                style={{
+                  fontSize: '1.25rem',
+                  margin: '10px 0',
+                  color: 'black',
+                  backgroundColor: 'white',
+                  padding: '10px',
+                  borderRadius: '10px',
+                }}
+              >
+                {product.name}
+              </h3>
+              <p
+                style={{
+                  fontSize: '1.5rem',
+                  fontWeight: 'bold',
+                  color: '#cecece',
+                  marginBottom: '10px',
+                }}
+              >
+                ${product.price}
+              </p>
             </div>
           ))
         ) : (
-          <p style={{ gridColumn: 'span 2', textAlign: 'center', color: '#ccc' }}>No products available or still loading...</p>
+          <p
+            style={{
+              gridColumn: 'span 2',
+              textAlign: 'center',
+              color: '#ccc',
+            }}
+          >
+            No products available or still loading...
+          </p>
         )}
       </div>
     </>
   );
 };
 
-
-
-
-
 export default Store;
-

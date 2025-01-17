@@ -353,7 +353,7 @@ const getOrderDetails = async (req, res) => {
             {
               model: Product,
               as: 'product',
-              attributes: ['name', 'price'],
+              attributes: ['name', 'price', 'thumbnail'],
             },
           ],
         },
@@ -363,6 +363,15 @@ const getOrderDetails = async (req, res) => {
     if (!order) {
       return res.status(404).json({ message: 'Order not found' });
     }
+
+    // Log thumbnails explicitly
+    order.items.forEach((item, index) => {
+      if (item.product) {
+        console.log(`Item ${index + 1} - Thumbnail:`, item.product.thumbnail);
+      } else {
+        console.log(`Item ${index + 1} - No product associated`);
+      }
+    });
 
     // Decrypt and parse the addresses
     let shippingAddress = 'N/A';
@@ -395,6 +404,7 @@ const getOrderDetails = async (req, res) => {
     res.status(500).json({ message: 'Error fetching order', error });
   }
 };
+
 
 
 

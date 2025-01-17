@@ -5,6 +5,7 @@ import EditOrderForm from './EditOrder';
 import StatusBanner from '../../Components/statusBanner';
 import TrackingNumber from './tracking';
 import OrderDetailsModal from './OrderDetailsModal';
+import OrderSummary from './orderSummary';
 
 const OrderManagement = () => {
   const [orders, setOrders] = useState([]);
@@ -86,6 +87,7 @@ const OrderManagement = () => {
               />
             ) : (
               <div>
+                 <OrderSummary orderId={order.id} />
                 <div style={styles.orderSection}>
                   <strong>Order ID:</strong> {order.id}
                 </div>

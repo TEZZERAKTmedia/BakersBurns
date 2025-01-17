@@ -73,6 +73,14 @@ const Home = () => {
               </div>
             </Link>
           </li>
+          <li className="home-tile">
+            <Link style={{textDecoration: 'none'}} to="/social-manager">
+              <div className='tile-content'>
+                <h3>Socials</h3>
+                <p className='home-tile-description'>Contact users using email. (Will only work with opted in users)</p>
+              </div>
+            </Link>
+          </li>
 
         </ul>
       </div>

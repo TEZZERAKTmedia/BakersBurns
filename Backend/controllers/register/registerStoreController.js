@@ -3,6 +3,7 @@ const { Op } = require('sequelize');
 const Media = require('../../models/media');
 const Product = require('../../models/product'); // Assuming a Product model exists
 const TempCart = require('../../models/tempCart'); // Temporary Cart model for unregistered users
+const Sequelize = require('../../config/database')
 
 // Get all available products
 const getProducts = async (req, res) => {
@@ -73,10 +74,33 @@ const getProductMedia = async (req, res) => {
     res.status(500).json({ message: 'Failed to fetch product media.' });
   }
 };
+const getProductTypes = async (req, res) => {
+  try {
+    // Fetch distinct product types from the database
+    const productTypes = await Product.findAll({
+      attributes: [[Sequelize.fn('DISTINCT', Sequelize.col('type')), 'type']], // Get unique 'type' values
+      where: {
+        type: {
+          [Op.not]: null, // Exclude null values
+        },
+      },
+    });
+
+    // Map the result to extract the 'type' field
+    const types = productTypes.map((product) => product.type);
+
+    res.status(200).json(types); // Send the product types as a simple array
+  } catch (error) {
+    console.error('Error fetching product types:', error);
+    res.status(500).json({ message: 'Error fetching product types', error });
+  }
+};
+
 
 
 module.exports = {
   getProducts,
   addToCart,
-  getProductMedia
+  getProductMedia,
+  getProductTypes
 };

@@ -9,6 +9,7 @@ import Email from './Pages/Email';
 import Layout from './Pages/Layout';
 import Orders from './Pages/Order/Orders';
 import Events from './Pages/newEvents';
+import SocialLinksManager from './Pages/socialManager';
 import ProductManagement from './Pages/Products';
 import { ScannerProvider } from './context/scannerContext';
 import AdminLoginForm from './Components/loginForm';
@@ -66,6 +67,8 @@ const AdminApp = () => {
           <Route path="/email" element={<Email />} />
           <Route path="/orders" element={<Orders />} />
           <Route path ="/event-manager" element={<Events/>} />
+          <Route path="/social-manager" element={<SocialLinksManager />} />
+
           <Route path="*" element={<Navigate to="/" />} />
 
         </Routes>

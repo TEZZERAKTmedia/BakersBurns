@@ -47,6 +47,8 @@ const carrierRoutes = require('./routes/carrier/carrierRoutes');
 const registerCartRoutes = require('./routes/register/cartRoutes');
 const notificationRoutes = require('./routes/admin/notifcationRoutes');
 const stripeWebhookGuestRoutes = require('./routes/register/stripeWebhookGuestRoute');
+const socialRoutes = require('./routes/register/socialRoutes');
+const adminSocialRoutes = require('./routes/admin/adminSocialRoutes');
 const { handleDhlWebhook, handleFedexWebhook, handleUpsWebhook, handleUspsWebhook} = require('./webhooks/carrierWebhooks');
 const { rateLimiter } = require('./utils/rateLimiter');
 const googleRoutes = require('./routes/register/googleRoutes');
@@ -129,6 +131,7 @@ app.use('/user-message-routes', userAuthMiddleware('user'), rateLimiter('user-me
 app.use('/user-orders', userAuthMiddleware('user'), rateLimiter('user-orders'), userOrderRoutes);
 app.use('/user-event', userAuthMiddleware('user'), rateLimiter('user-event'), userEventRoutes);
 app.use('/user-gallery', userAuthMiddleware('user'), rateLimiter('user-gallery'), userGalleryRoutes);
+app.use('/user-social', socialRoutes);
 
 
 //STRIPE ROUTES
@@ -149,11 +152,13 @@ app.use('/orders', adminAuthMiddleware('admin'), rateLimiter('orders'), ordersRo
 app.use('/admin-message-routes', adminAuthMiddleware('admin'), rateLimiter('admin-messaging'), adminMessagingRoutes);
 app.use('/admin-event', adminAuthMiddleware('admin'), rateLimiter('admin-event'), adminEventRoutes);
 app.use('/admin-notifications', adminAuthMiddleware('admin'), notificationRoutes);
+app.use('/admin-social', adminSocialRoutes);
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/galleryuploads', express.static(path.join(__dirname, 'galleryuploads')));
 app.use('/admin', express.static(path.join(__dirname, 'public/admin')));
 app.use('/terms-of-service', express.static(path.join(__dirname, 'public/static/terms-of-service.html')));
 app.use('/privacy-policy', express.static(path.join(__dirname, 'public/static/privacy-policy.html')));
+
 
 // Webhook routes for tracking updates from each carrier
 app.post('/webhook/ups', express.json(), handleUpsWebhook);

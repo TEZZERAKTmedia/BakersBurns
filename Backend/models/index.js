@@ -10,6 +10,7 @@ const OrderItem = require('./orderItem');
 const Media = require('./media');
 const GuestCart = require('./guestCart')
 const RateLimiterLogs = require("./rateLimiterLogs");
+const SocialLinks = require('./socialLinks');
 
 
 // Define the models within an object for easier association management
@@ -23,6 +24,7 @@ const db = {
   RateLimiterLogs,
   Media,
   GuestCart,
+  SocialLinks
 
   
 };
