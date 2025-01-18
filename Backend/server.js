@@ -153,9 +153,13 @@ app.use('/admin-message-routes', adminAuthMiddleware('admin'), rateLimiter('admi
 app.use('/admin-event', adminAuthMiddleware('admin'), rateLimiter('admin-event'), adminEventRoutes);
 app.use('/admin-notifications', adminAuthMiddleware('admin'), notificationRoutes);
 app.use('/admin-social', adminSocialRoutes);
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// Static file serving
+// Static file serving
+app.use('/uploads', express.static(path.resolve(__dirname, 'uploads')));
+app.use('/socialIcons', express.static(path.resolve(__dirname, 'socialIcons')));
+
+
 app.use('/galleryuploads', express.static(path.join(__dirname, 'galleryuploads')));
-app.use('/socialIcons', express.static(path.join(__dirname, 'socialIcons')));
 app.use('/admin', express.static(path.join(__dirname, 'public/admin')));
 app.use('/terms-of-service', express.static(path.join(__dirname, 'public/static/terms-of-service.html')));
 app.use('/privacy-policy', express.static(path.join(__dirname, 'public/static/privacy-policy.html')));

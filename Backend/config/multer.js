@@ -1,91 +1,69 @@
 const multer = require('multer');
 const path = require('path');
 
-// MIME type validation function for product media
+// MIME type validation function
 const productFileFilter = (req, file, cb) => {
   const allowedMimeTypes = [
-      'image/jpeg',
-      'image/png',
-      'image/jpg',
-      'video/mp4',
-      'video/quicktime', // MIME type for MOV files
-      'video/x-msvideo'  // MIME type for AVI files
+    'image/jpeg', 'image/png', 'image/jpg',
+    'video/mp4', 'video/quicktime', 'video/x-msvideo'
   ];
 
   if (allowedMimeTypes.includes(file.mimetype)) {
-      cb(null, true);
+    cb(null, true);
   } else {
-      cb(new Error('Only images (JPEG, JPG, PNG) and videos (MP4, MOV, AVI) are allowed!'), false);
+    cb(new Error('Only JPEG, PNG, JPG, MP4, MOV, and AVI files are allowed'), false);
   }
 };
 
-
-// Configure storage for product media
+// Configure storage with absolute path
 const productStorage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, 'uploads/'); // Destination folder for product media
+    const savePath = path.resolve(__dirname, 'uploads'); // Resolve absolute path
+    cb(null, savePath);
   },
   filename: function (req, file, cb) {
-    cb(null, `${Date.now()}_${file.originalname}`); // Append timestamp to prevent conflicts
+    const uniqueName = `${Date.now()}_${file.originalname}`;
+    cb(null, uniqueName);
   },
 });
 
-// Middleware for handling both thumbnail and media files dynamically
+// Middleware for handling product uploads
 const productUploadMiddleware = multer({
   storage: productStorage,
   fileFilter: productFileFilter,
-  limits: { fileSize: 50 * 1024 * 1024 }, // File size limit (50 MB)
+  limits: { fileSize: 50 * 1024 * 1024 }, // 50 MB limit
 }).fields([
-  { name: 'thumbnail', maxCount: 1 }, // Single thumbnail
-  { name: 'media', maxCount: 10 },   // Up to 10 media files
+  { name: 'thumbnail', maxCount: 1 },
+  { name: 'media', maxCount: 10 },
 ]);
 
-
+// Configure storage for social icons
 const socialIconStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, '../socialIcons')); // Save files to 'uploads/socialIcons'
+  destination: function (req, file, cb) {
+    const savePath = path.resolve(__dirname, '../socialIcons');
+    cb(null, savePath);
   },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-    cb(null, `${file.fieldname}-${uniqueSuffix}${path.extname(file.originalname)}`);
+  filename: function (req, file, cb) {
+    const uniqueName = `${Date.now()}-${Math.round(Math.random() * 1e9)}${path.extname(file.originalname)}`;
+    cb(null, uniqueName);
   },
 });
 
-// Define file filter for social icons
-const socialIconFileFilter = (req, file, cb) => {
-  const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
-  if (allowedTypes.includes(file.mimetype)) {
-    cb(null, true);
-  } else {
-    cb(new Error('Only JPEG, PNG, and GIF files are allowed.'));
-  }
-};
-
-// Create the socialIconUpload middleware
+// Middleware for handling social icon uploads
 const socialIconUploadMiddleware = multer({
   storage: socialIconStorage,
-  fileFilter: socialIconFileFilter,
-  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+    if (allowedTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only JPEG, PNG, and GIF files are allowed'), false);
+    }
+  },
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB limit
 }).fields([{ name: 'image', maxCount: 1 }]);
 
-const middlewareWrapper = (req, res, next) => {
-  socialIconUploadMiddleware(req, res, (err) => {
-    if (err) {
-      console.error('Error in Multer middleware:', err.message);
-      return res.status(400).json({ error: 'File upload failed', details: err.message });
-    }
-
-    console.log('Multer processed files:', req.files); // Should log the uploaded file
-    next();
-  });
-};
-
-module.exports = { socialIconUploadMiddleware: middlewareWrapper };
-
-
-
 module.exports = {
-  socialIconUploadMiddleware,// Use for single file uploads
-  productUploadMiddleware, // Use for multiple file uploads
-   // Use for gallery images
+  productUploadMiddleware,
+  socialIconUploadMiddleware,
 };
