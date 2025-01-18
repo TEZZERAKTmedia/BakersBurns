@@ -41,7 +41,10 @@ const SocialLinks = () => {
       try {
         const response = await registerApi.get('/user-social/social-links');
         console.log('Fetched social links:', response.data);
-        setSocialLinks(response.data || []); // Ensure it's an array
+
+        // Normalize response to always be an array
+        const data = Array.isArray(response.data) ? response.data : [response.data];
+        setSocialLinks(data);
       } catch (err) {
         console.error('Error fetching social links:', err);
         setError('Failed to fetch social links.');
@@ -51,14 +54,17 @@ const SocialLinks = () => {
     fetchSocialLinks();
   }, []);
 
+  // Check if the user is on a mobile device
+  const isMobile = () => /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
   const handleLinkClick = (platform, url) => {
     const deepLink = deepLinkMap[platform] ? deepLinkMap[platform](url) : null;
 
-    if (deepLink) {
-      // Try to open the deep link
+    if (isMobile() && deepLink) {
+      // Try to open the deep link on mobile
       window.location.href = deepLink;
     } else {
-      // Fallback to the URL
+      // Fallback to the web URL for desktop
       window.open(url, '_blank');
     }
   };
