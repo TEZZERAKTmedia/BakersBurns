@@ -217,6 +217,22 @@ const ProductForm = ({ productTypes, product = {}, onClose }) => {
           onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
         />
       </label>
+      <div className="form-section">
+      <label>
+        Quantity:
+        <input
+          type="number"
+          min="1"
+          step="1"
+          placeholder="Enter Quantity"
+          value={newProduct.quantity}
+          onChange={(e) =>
+            setNewProduct({ ...newProduct, quantity: parseInt(e.target.value, 10) || 1 })
+          }
+        />
+      </label>
+    </div>
+
       <div className='form-section'>
       <label>Dimensions (inches/cm):</label>
       <div className="dimensions-inputs">

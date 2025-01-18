@@ -197,7 +197,7 @@ sequelize.authenticate()
     console.error('Database connection failed:', err.message);
     process.exit(1); // Exit if database connection fails
   });
-
+/*
 db.sequelize.sync({ alter: true })
   .then(() => {
     console.log('Database synchronized successfully.');
@@ -205,7 +205,7 @@ db.sequelize.sync({ alter: true })
   .catch(err => {
     console.error('Error synchronizing database:', err);
   });
-  
+  */
 // Start the server
 
 const PORT = process.env.PORT || 3450;
