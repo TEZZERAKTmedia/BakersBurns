@@ -38,18 +38,24 @@ const SocialLinks = () => {
   // Fetch social links from the backend
   useEffect(() => {
     const fetchSocialLinks = async () => {
-      try {
-        const response = await userApi.get('/user-social/social-links');
-        console.log('Fetched social links:', response.data);
-
-        // Normalize response to always be an array
-        const data = Array.isArray(response.data) ? response.data : [response.data];
-        setSocialLinks(data);
-      } catch (err) {
-        console.error('Error fetching social links:', err);
-        setError('Failed to fetch social links.');
-      }
-    };
+        try {
+          const response = await userApi.get('/user-social/social-links');
+          console.log('Fetched social links:', response.data);
+      
+          // Ensure response is an array, log unexpected results
+          if (!Array.isArray(response.data)) {
+            console.warn('Unexpected response format:', response.data);
+            setError('Unexpected data format from the server.');
+            return;
+          }
+      
+          setSocialLinks(response.data);
+        } catch (err) {
+          console.error('Error fetching social links:', err);
+          setError('Failed to fetch social links.');
+        }
+      };
+      
 
     fetchSocialLinks();
   }, []);

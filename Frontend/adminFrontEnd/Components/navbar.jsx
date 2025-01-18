@@ -18,6 +18,7 @@ const AdminNavbar = () => {
     '/orders': 'Orders',
     '/messaging': 'Messages',
     '/email': 'Email',
+    '/social-manager': 'Social'
   };
 
   const currentPageTitle = pageTitles[location.pathname] || 'Admin Panel';
@@ -82,6 +83,7 @@ const AdminNavbar = () => {
         <li className="nav-item" onClick={closeMenu}><Link to="/email">Email</Link></li>
         <li className="nav-item" onClick={closeMenu}><Link to="/gallery">Gallery Manager</Link></li>
         <li className="nav-item" onClick={closeMenu}><Link to="/event-manager">Event Manager</Link></li>
+        <lk className="nav-item" onClick={closeMenu}><Link to="/social-manager"></Link></lk>
 
         <li className="nav-item" onClick={closeMenu}>
           <a href={import.meta.env.VITE_USER} target="_blank" rel="noopener noreferrer">
