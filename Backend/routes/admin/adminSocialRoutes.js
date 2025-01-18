@@ -1,25 +1,82 @@
-// routes/adminSocialLinksRoutes.js
 const express = require('express');
 const {
   addSocialLink,
   updateSocialLink,
   deleteSocialLink,
-  getSocialLinks
+  getSocialLinks,
 } = require('../../controllers/admin/adminSocialLinks');
+const { socialIconUploadMiddleware } = require('../../config/multer');
 const adminAuthMiddleware = require('../../middleware/adminAuthMiddleware');
 
 const router = express.Router();
-router.get('/social-links', getSocialLinks);
 
+// Middleware to log incoming requests
+const logRouteMiddleware = (req, res, next) => {
+  console.log(`Incoming request: ${req.method} ${req.originalUrl}`);
+  console.log('Headers:', req.headers);
+  console.log('Body:', req.body);
+  console.log('Files:', req.files || req.file);
+  next();
+};
 
+// Fetch all social links
+router.get(
+  '/social-links',
+  logRouteMiddleware,
+  adminAuthMiddleware('admin'),
+  (req, res, next) => {
+    console.log('Fetching social links...');
+    next();
+  },
+  getSocialLinks
+);
 
-// Route to add a social link
-router.post('/social-links', addSocialLink);
+// Add a new social link with image
+router.post(
+  '/social-links',
+  logRouteMiddleware,
+  adminAuthMiddleware('admin'),
+  (req, res, next) => {
+    console.log('Adding a new social link...');
+    next();
+  },
+  socialIconUploadMiddleware, // Process the image upload
+  (req, res, next) => {
+    console.log('After image upload middleware...');
+    console.log('File received:', req.file);
+    next();
+  },
+  addSocialLink
+);
 
-// Route to update a social link
-router.put('/social-links/:id', updateSocialLink);
+// Update an existing social link with image
+router.put(
+  '/social-links/:id',
+  logRouteMiddleware,
+  adminAuthMiddleware('admin'),
+  (req, res, next) => {
+    console.log(`Updating social link with ID: ${req.params.id}`);
+    next();
+  },
+  socialIconUploadMiddleware, // Process the image upload
+  (req, res, next) => {
+    console.log('After image upload middleware for update...');
+    console.log('File received:', req.file);
+    next();
+  },
+  updateSocialLink
+);
 
-// Route to delete a social link
-router.delete('/social-links/:id',  deleteSocialLink);
+// Delete a social link
+router.delete(
+  '/social-links/:id',
+  logRouteMiddleware,
+  adminAuthMiddleware('admin'),
+  (req, res, next) => {
+    console.log(`Deleting social link with ID: ${req.params.id}`);
+    next();
+  },
+  deleteSocialLink
+);
 
 module.exports = router;

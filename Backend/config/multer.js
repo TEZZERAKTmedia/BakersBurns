@@ -40,27 +40,52 @@ const productUploadMiddleware = multer({
   { name: 'media', maxCount: 10 },   // Up to 10 media files
 ]);
 
-// Middleware for handling both `thumbnail` and `media` fields
 
-
-// Middleware for gallery uploads
-const galleryStorage = multer.diskStorage({
+const socialIconStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'galleryuploads/'); // Destination folder for gallery images
+    cb(null, path.join(__dirname, '../socialIcons')); // Save files to 'uploads/socialIcons'
   },
   filename: (req, file, cb) => {
-    cb(null, `${Date.now()}_${file.originalname}`); // Append timestamp and file extension
+    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+    cb(null, `${file.fieldname}-${uniqueSuffix}${path.extname(file.originalname)}`);
   },
 });
 
-const galleryUpload = multer({
-  storage: galleryStorage,
-  fileFilter: productFileFilter,
-  limits: { fileSize: 50 * 1024 * 1024 }, // File size limit (50 MB)
-});
+// Define file filter for social icons
+const socialIconFileFilter = (req, file, cb) => {
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+  if (allowedTypes.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new Error('Only JPEG, PNG, and GIF files are allowed.'));
+  }
+};
+
+// Create the socialIconUpload middleware
+const socialIconUploadMiddleware = multer({
+  storage: socialIconStorage,
+  fileFilter: socialIconFileFilter,
+  limits: { fileSize: 5 * 1024 * 1024 },
+}).fields([{ name: 'image', maxCount: 1 }]);
+
+const middlewareWrapper = (req, res, next) => {
+  socialIconUploadMiddleware(req, res, (err) => {
+    if (err) {
+      console.error('Error in Multer middleware:', err.message);
+      return res.status(400).json({ error: 'File upload failed', details: err.message });
+    }
+
+    console.log('Multer processed files:', req.files); // Should log the uploaded file
+    next();
+  });
+};
+
+module.exports = { socialIconUploadMiddleware: middlewareWrapper };
+
+
 
 module.exports = {
-  // Use for single file uploads
+  socialIconUploadMiddleware,// Use for single file uploads
   productUploadMiddleware, // Use for multiple file uploads
-  galleryUpload, // Use for gallery images
+   // Use for gallery images
 };

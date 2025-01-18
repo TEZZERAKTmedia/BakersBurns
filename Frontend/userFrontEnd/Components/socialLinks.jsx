@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { registerApi } from '../config/axios';
+import { userApi } from '../config/axios';
 
 // Inline styles for simplicity
 const styles = {
@@ -29,7 +29,7 @@ const SocialLinks = () => {
   useEffect(() => {
     const fetchSocialLinks = async () => {
       try {
-        const response = await registerApi.get('/user-social/social-links'); // Adjust endpoint as necessary
+        const response = await userApi.get('/user-social/social-links'); // Adjust endpoint as necessary
         console.log('Fetched social links:', response.data);
 
         // Ensure the response is an array
@@ -61,7 +61,7 @@ const SocialLinks = () => {
             tabIndex={0}
           >
             <img
-              src={`${import.meta.env.VITE_BACKEND}/socialIcons/${link.image}`} // Ensure this matches your backend storage
+              src={`${import.meta.env.VITE_USER_API_URL}/socialIcons/${link.image}`} // Ensure this matches your backend storage
               alt={link.platform}
               style={styles.icon}
             />

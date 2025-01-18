@@ -15,6 +15,10 @@ const SocialLink = sequelize.define('SocialLink', {
     type: DataTypes.STRING,
     allowNull: false, // The URL of the platform
   },
+  image: {
+    type: DataTypes.STRING,
+    allowNull: true, // The image file name (optional)
+  },
 }, {
   tableName: 'SocialLinks', // Table name
   timestamps: false, // Disable timestamps
