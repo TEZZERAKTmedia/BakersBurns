@@ -6,6 +6,7 @@ const OrderItem = require('../../models/orderItem');
 const Thread = require('../../models/threads');
 const Message = require('../../models/messages');
 const User = require('../../models/user'); // Import User model
+
 const GuestCart = require('../../models/guestCart'); // Import GuestCart model
 const { encrypt } = require('../../utils/encrypt');
 const { sendOrderEmail } = require('../../utils/orderEmail');

@@ -1,5 +1,7 @@
 const nodemailer = require('nodemailer');
 const jwt = require('jsonwebtoken');
+const Token = require('../models/token');
+
 
 const generateToken = (payload) => {
   return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' }); // 1-hour expiration

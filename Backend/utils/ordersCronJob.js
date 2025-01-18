@@ -47,20 +47,21 @@ const generateOrderTable = (orders) => {
           <div style="position: relative; width: 60px; height: 60px; margin: 5px; display: inline-block;">
             <img src="${thumbnailUrl}" alt="${item.product?.name || 'Product'}"
               style="width: 100%; height: 100%; object-fit: cover; border: 1px solid #ddd; border-radius: 4px;">
-            <span style="
+              <span style="
               position: absolute;
-              top: 0;
-              right: 0;
-              transform: translate(50%, -50%);
+              top: 0%;
+              left: 0%;
               background-color: rgba(0, 0, 0, 0.8);
               color: white;
               font-size: 12px;
-              padding: 5px 8px;
-              border-radius: 50%;
+              padding: 3px 6px;
+              border-radius: 4px;
               font-weight: bold;
               text-align: center;
               line-height: 1;
-            ">${item.quantity}</span>
+            ">
+              ${item.quantity}
+            </span>
           </div>
         `;
       })

@@ -18,11 +18,21 @@ const OrderManagement = () => {
   const fetchOrders = async () => {
     try {
       const response = await adminApi.get('/orders/get');
-      setOrders(response.data.orders);
+      const fetchedOrders = response.data.orders;
+  
+      // Sort orders: 'processing' status comes first
+      const sortedOrders = fetchedOrders.sort((a, b) => {
+        if (a.status === 'processing' && b.status !== 'processing') return -1;
+        if (a.status !== 'processing' && b.status === 'processing') return 1;
+        return 0; // Preserve relative order for other statuses
+      });
+  
+      setOrders(sortedOrders);
     } catch (error) {
       console.error('Error fetching orders:', error);
     }
   };
+  
 
   useEffect(() => {
     fetchOrders();
