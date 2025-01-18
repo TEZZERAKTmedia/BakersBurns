@@ -25,16 +25,23 @@ const SocialLinks = () => {
   const [socialLinks, setSocialLinks] = useState([]);
   const [error, setError] = useState('');
 
+  // Map of deep links for supported platforms
+  const deepLinkMap = {
+    Facebook: (url) => `fb://profile/${url.split('/').pop()}`, // Example for Facebook
+    Instagram: (url) => `instagram://user?username=${url.split('/').pop()}`, // Example for Instagram
+    Twitter: (url) => `twitter://user?screen_name=${url.split('/').pop()}`, // Example for Twitter
+    YouTube: (url) => `vnd.youtube:${url.split('/').pop()}`, // Example for YouTube
+    Phone: (url) => `tel:${url}`, // Example for phone numbers
+    Email: (url) => `mailto:${url}`, // Example for email
+  };
+
   // Fetch social links from the backend
   useEffect(() => {
     const fetchSocialLinks = async () => {
       try {
-        const response = await registerApi.get('/user-social/social-links'); // Adjust endpoint as necessary
+        const response = await registerApi.get('/user-social/social-links');
         console.log('Fetched social links:', response.data);
-
-        // Ensure the response is an array
-        const data = Array.isArray(response.data) ? response.data : [response.data];
-        setSocialLinks(data);
+        setSocialLinks(response.data || []); // Ensure it's an array
       } catch (err) {
         console.error('Error fetching social links:', err);
         setError('Failed to fetch social links.');
@@ -44,6 +51,18 @@ const SocialLinks = () => {
     fetchSocialLinks();
   }, []);
 
+  const handleLinkClick = (platform, url) => {
+    const deepLink = deepLinkMap[platform] ? deepLinkMap[platform](url) : null;
+
+    if (deepLink) {
+      // Try to open the deep link
+      window.location.href = deepLink;
+    } else {
+      // Fallback to the URL
+      window.open(url, '_blank');
+    }
+  };
+
   return (
     <div style={styles.container}>
       {error && <p style={{ color: 'red' }}>{error}</p>}
@@ -51,17 +70,13 @@ const SocialLinks = () => {
         socialLinks.map((link) => (
           <div
             key={link.id}
-            onClick={() => {
-              if (link.url) {
-                window.open(link.url, '_blank');
-              }
-            }}
+            onClick={() => handleLinkClick(link.platform, link.url)}
             style={styles.link}
             role="button"
             tabIndex={0}
           >
             <img
-              src={`${import.meta.env.VITE_BACKEND}/socialIcons/${link.image}`} // Ensure this matches your backend storage
+              src={`${import.meta.env.VITE_BACKEND}/socialIcons/${link.image}`} // Adjust path to match backend
               alt={link.platform}
               style={styles.icon}
             />
