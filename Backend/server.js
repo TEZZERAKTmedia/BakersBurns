@@ -175,7 +175,7 @@ app.post('/webhook/dhl', express.json(), handleDhlWebhook);
 
 // Error handling
 app.use((err, req, res, next) => {
-  console.error('Error:', err);messages
+  console.error('Error:', err);
   res.status(500).json({ message: 'Internal Server Error', error: err.message });
 });
 
