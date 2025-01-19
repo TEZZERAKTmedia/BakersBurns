@@ -83,7 +83,7 @@ const AdminNavbar = () => {
         <li className="nav-item" onClick={closeMenu}><Link to="/email">Email</Link></li>
         <li className="nav-item" onClick={closeMenu}><Link to="/gallery">Gallery Manager</Link></li>
         <li className="nav-item" onClick={closeMenu}><Link to="/event-manager">Event Manager</Link></li>
-        <lk className="nav-item" onClick={closeMenu}><Link to="/social-manager"></Link></lk>
+        <lk className="nav-item" onClick={closeMenu}><Link to="/social-manager">Social</Link></lk>
 
         <li className="nav-item" onClick={closeMenu}>
           <a href={import.meta.env.VITE_USER} target="_blank" rel="noopener noreferrer">
