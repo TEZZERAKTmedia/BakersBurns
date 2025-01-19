@@ -18,7 +18,7 @@ const productFileFilter = (req, file, cb) => {
 // Configure storage with absolute path
 const productStorage = multer.diskStorage({
   destination: function (req, file, cb) {
-    const savePath = path.resolve(__dirname, 'uploads'); // Resolve absolute path
+    const savePath = path.resolve(__dirname, '../uploads'); // Resolve absolute path
     cb(null, savePath);
   },
   filename: function (req, file, cb) {
