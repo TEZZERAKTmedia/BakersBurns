@@ -106,41 +106,7 @@ const Store = () => {
       )}
 
       {/* Store Title */}
-      <AnimatePresence>
-        {showTitle && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5 }}
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '150px',
-              backgroundColor: 'rgba(0, 0, 0, 0.8)',
-              color: 'white',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              zIndex: 10,
-            }}
-          >
-            <h2
-              style={{
-                fontFamily: 'Dancing Script',
-                fontSize: '3rem',
-                textAlign: 'center',
-                color: 'white',
-                marginTop: '20%',
-              }}
-            >
-              Store
-            </h2>
-          </motion.div>
-        )}
-      </AnimatePresence>
+
 
       {/* Store Menu for Filtering */}
       <StoreNavbar onTypeSelect={(type) => setSelectedType(type)} />
@@ -161,6 +127,7 @@ const Store = () => {
               key={product.id}
               style={{
                 padding: '10px',
+                marginTop: '10%',
                 height: '300px',
                 overflow: 'hidden',
                 boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',

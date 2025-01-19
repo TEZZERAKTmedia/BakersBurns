@@ -4,7 +4,7 @@ import { registerApi } from '../../config/axios';
 
 const StoreNavbar = ({ onTypeSelect }) => {
   const [productTypes, setProductTypes] = useState([]);
-  const [isOpen, setIsOpen] = useState(true); // Initial state is open
+  const [isOpen, setIsOpen] = useState(false); // Default closed
 
   // Fetch product types from the backend
   useEffect(() => {
@@ -27,62 +27,38 @@ const StoreNavbar = ({ onTypeSelect }) => {
 
   return (
     <>
-      {/* Overlay */}
-      {isOpen && (
-        <div className="store-navbar">
+      {/* Store Navbar */}
+      <div className={`store-navbar ${isOpen ? 'open' : ''}`}>
+        <button
+          className="close-button"
+          onClick={() => setIsOpen(false)}
+        >
+          ✕
+        </button>
+        <div className="store-navbar-content">
           <button
-            className="close-button"
-            onClick={() => setIsOpen(false)}
-            style={{
-              position: 'absolute',
-              top: '20px',
-              right: '20px',
-              background: 'transparent',
-              border: 'none',
-              fontSize: '1.5rem',
-              cursor: 'pointer',
-              zIndex: 1100,
-            }}
+            className="store-navbar-item all-products"
+            onClick={() => handleTypeClick('All')}
           >
-            ✕
+            All Products
           </button>
-          <div className="store-navbar-content">
+          {productTypes.map((type) => (
             <button
-              className="store-navbar-item all-products"
-              onClick={() => handleTypeClick('All')}
+              key={type}
+              className="store-navbar-item"
+              onClick={() => handleTypeClick(type)}
             >
-              All Products
+              {type}
             </button>
-            {productTypes.map((type) => (
-              <button
-                key={type}
-                className="store-navbar-item"
-                onClick={() => handleTypeClick(type)}
-              >
-                {type}
-              </button>
-            ))}
-          </div>
+          ))}
         </div>
-      )}
+      </div>
 
-      {/* Button to reopen the overlay */}
+      {/* Button to reopen the Store Navbar */}
       {!isOpen && (
         <button
+          className="reopen-button"
           onClick={() => setIsOpen(true)}
-          style={{
-            position: 'absolute', // Use absolute positioning
-            top: '50%', // Center vertically
-            left: '50%', // Center horizontally
-            transform: 'translate(-50%, -900%)', // Adjust for element's dimensions
-            zIndex: 2000,
-            padding: '10px 20px',
-            background: '#007bff',
-            color: 'white',
-            border: 'none',
-            borderRadius: '5px',
-            cursor: 'pointer',
-          }}
         >
           Menu
         </button>

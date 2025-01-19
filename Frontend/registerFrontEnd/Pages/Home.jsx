@@ -4,6 +4,7 @@ import '../PagesCss/Home.css';
 import { Link } from 'react-router-dom'; 
 import { registerApi } from '../config/axios';
 import moment from 'moment';
+import SocialLinks from '../Components/svgComponent';
 
 const Home = () => {
   const [featuredProducts, setFeaturedProducts] = useState([]);                       
@@ -72,6 +73,7 @@ const Home = () => {
           <Link to="/store" className="hero-btn">Shop Now</Link>
         </div>
       </motion.section>
+      <SocialLinks />
 
       {/* Upcoming Event Section */}
       {upcomingEvent && (

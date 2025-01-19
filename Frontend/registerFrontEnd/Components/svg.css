@@ -1,0 +1,60 @@
+/* General styling */
+.social-links {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 20px;
+  }
+  
+  .social-links svg {
+    margin-bottom: 20px;
+  }
+  
+  /* SVG Animation */
+  .animated-svg {
+    width: 150px;
+    height: 150px;
+  }
+  
+  .animated-path {
+    stroke: red;
+    stroke-dasharray: 1000; /* Length of path */
+    stroke-dashoffset: 1000; /* Start hidden */
+    animation: draw 2s ease-in-out forwards;
+    transition: stroke 0.3s ease;
+  }
+  
+  .animated-path:hover {
+    stroke: blue;
+  }
+  
+  /* Social Links */
+  .social-list {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    gap: 15px;
+  }
+  
+  .social-item a {
+    text-decoration: none;
+    font-size: 1.2em;
+    color: #333;
+    padding: 10px 15px;
+    border-radius: 5px;
+    background-color: #f0f0f0;
+    transition: background-color 0.3s, color 0.3s;
+  }
+  
+  .social-item a:hover {
+    background-color: #444;
+    color: white;
+  }
+  
+  /* Keyframes for the stroke animation */
+  @keyframes draw {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+  
