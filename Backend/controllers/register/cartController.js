@@ -1,6 +1,8 @@
 const GuestCart = require('../../models/guestCart');
 const Product = require('../../models/product');
 const User = require('../../models/user');
+const Token = require('../../models/token'); // Adjust the path as needed
+
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);

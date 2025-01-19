@@ -76,17 +76,17 @@ const AdminNavbar = () => {
 
       {/* Admin Routes */}
       <ul className={`nav-list ${menuOpen ? 'show' : ''}`}>
-        <li className="nav-item" onClick={closeMenu}><Link to="/">Home</Link></li>
-        <li className="nav-item" onClick={closeMenu}><Link to="/orders">Orders</Link></li>
-        <li className="nav-item" onClick={closeMenu}><Link to="/product-manager">Product Manager</Link></li>
-        <li className="nav-item" onClick={closeMenu}><Link to="/messaging">Messages</Link></li>
-        <li className="nav-item" onClick={closeMenu}><Link to="/email">Email</Link></li>
-        <li className="nav-item" onClick={closeMenu}><Link to="/gallery">Gallery Manager</Link></li>
-        <li className="nav-item" onClick={closeMenu}><Link to="/event-manager">Event Manager</Link></li>
-        <lk className="nav-item" onClick={closeMenu}><Link to="/social-manager">Social</Link></lk>
+        <li className="nav-item" onClick={closeMenu}><Link to="/" style={{fontSize:'90%'}}>Home</Link></li>
+        <li className="nav-item" onClick={closeMenu}><Link to="/orders"style={{fontSize:'90%'}}>Orders</Link></li>
+        <li className="nav-item" onClick={closeMenu}><Link to="/product-manager"style={{fontSize:'90%'}}>Product Manager</Link></li>
+        <li className="nav-item" onClick={closeMenu}><Link to="/messaging"style={{fontSize:'90%'}}>Messages</Link></li>
+        <li className="nav-item" onClick={closeMenu}><Link to="/email"style={{fontSize:'90%'}}>Email</Link></li>
+        <li className="nav-item" onClick={closeMenu}><Link to="/gallery"style={{fontSize:'90%'}}>Gallery Manager</Link></li>
+        <li className="nav-item" onClick={closeMenu}><Link to="/event-manager"style={{fontSize:'90%'}}>Event Manager</Link></li>
+        <lk className="nav-item" onClick={closeMenu}><Link to="/social-manager"style={{fontSize:'90%'}}>Social</Link></lk>
 
         <li className="nav-item" onClick={closeMenu}>
-          <a href={import.meta.env.VITE_USER} target="_blank" rel="noopener noreferrer">
+          <a href={import.meta.env.VITE_USER} target="_blank" rel="noopener noreferrer" style={{fontSize:'90%'}}>
             User Preview
           </a>
         </li>

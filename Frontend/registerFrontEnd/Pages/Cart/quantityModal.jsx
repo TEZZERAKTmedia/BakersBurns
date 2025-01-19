@@ -156,6 +156,7 @@ const styles = {
     width: "40px",
     height: "40px",
     lineHeight: "1",
+   
   },
   input: {
     width: "60px",
@@ -164,6 +165,7 @@ const styles = {
     padding: "5px",
     border: "1px solid #ccc",
     borderRadius: "5px",
+    marginTop: '15px'
   },
   stockInfo: {
     fontSize: "0.9rem",
@@ -178,7 +180,8 @@ const styles = {
     border: "none",
     borderRadius: "5px",
     cursor: "pointer",
-    marginBottom: "10px",
+    
+    margin:'10px'
   },
   cancelButton: {
     padding: "10px 20px",
