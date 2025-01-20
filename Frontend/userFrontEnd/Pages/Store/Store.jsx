@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import '../Componentcss/store.css';
-import { userApi } from '../config/axios';
+import './store.css';
+import { userApi } from '../../config/axios';
 import { Link } from 'react-router-dom';
-import { useNotification } from '../Components/notification/notification';
+import { useNotification } from '../../Components/notification/notification';
 
 
 
@@ -124,7 +124,7 @@ const handleTouchMove = (e) => {
 
   return (
     <div className="store-container" >
-      <h2>Store</h2>
+      <h2></h2>
 
       {authError ? (
         <div className="auth-error">

@@ -1,28 +1,93 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ProductCard from './productCard';
-import EditProductForm from './editProduct';
-import DiscountByProductForm from './discountForm'; // Import the discount form
+import SortingControls from './sortingControls'; // Import SortingControls
 
-const ProductList = ({ products, onEditMedia, onDeleteProduct }) => {
-  const [editingProductId, setEditingProductId] = useState(null);
-  const [editingDiscountId, setEditingDiscountId] = useState(null); // Track which product is being discounted
+const ProductList = ({ products, onDeleteProduct }) => {
+  const [sortCriteria, setSortCriteria] = useState('name');
+  const [sortOrder, setSortOrder] = useState('asc');
+  const [sortedProducts, setSortedProducts] = useState(products);
+  const [filteredProducts, setFilteredProducts] = useState(products);
+  const [productTypes, setProductTypes] = useState([]);
+
+  useEffect(() => {
+    // Fetch product types when component mounts
+    const fetchProductTypes = async () => {
+      try {
+        const response = await adminApi.get('/products/types');
+        setProductTypes(response.data);
+      } catch (error) {
+        console.error('Error fetching product types:', error);
+      }
+    };
+
+    fetchProductTypes();
+  }, []);
+
+  useEffect(() => {
+    // Re-sort filtered products based on sortCriteria and sortOrder
+    const sortedList = [...filteredProducts];
+    sortedList.sort((a, b) => {
+      let valueA = a[sortCriteria];
+      let valueB = b[sortCriteria];
+
+      // Handle sorting for numeric values (e.g., price)
+      if (sortCriteria === 'price') {
+        valueA = parseFloat(valueA);
+        valueB = parseFloat(valueB);
+      }
+
+      // Handle sorting for dates (e.g., createdAt)
+      if (sortCriteria === 'createdAt') {
+        valueA = new Date(valueA);
+        valueB = new Date(valueB);
+      }
+
+      // Handle sorting for string values (e.g., name, type)
+      if (typeof valueA === 'string' && typeof valueB === 'string') {
+        return sortOrder === 'asc'
+          ? valueA.localeCompare(valueB)
+          : valueB.localeCompare(valueA);
+      }
+
+      // Handle comparison for other cases (e.g., numbers)
+      return sortOrder === 'asc' ? valueA - valueB : valueB - valueA;
+    });
+
+    setSortedProducts(sortedList);
+  }, [filteredProducts, sortCriteria, sortOrder]);
+
+  const handleSort = (criteria) => {
+    setSortCriteria(criteria);
+    setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+  };
+
+  const handleFilterByType = (type) => {
+    if (type) {
+      setFilteredProducts(products.filter((product) => product.type === type));
+    } else {
+      setFilteredProducts(products);
+    }
+  };
 
   return (
-    <div className="product-list">
-      {products.map((product) => (
-        <div key={product.id} className="product-item-container">
-          {/* Render Edit Form if editingProductId matches */}
-          
+    <div>
+      <SortingControls
+        onSort={handleSort}
+        sortCriteria={sortCriteria}
+        sortOrder={sortOrder}
+        productTypes={productTypes}
+        onFilterByType={handleFilterByType}
+      />
+      <div className="product-list">
+        {sortedProducts.map((product) => (
+          <div key={product.id} className="product-item-container">
             <ProductCard
               product={product}
-              onEditMedia={() => {}}
-              onEditProduct={() => setEditingProductId(product.id)}
-              onEditDiscount={() => setEditingDiscountId(product.id)}
               onDeleteProduct={onDeleteProduct}
             />
-         
-        </div>
-      ))}
+          </div>
+        ))}
+      </div>
     </div>
   );
 };

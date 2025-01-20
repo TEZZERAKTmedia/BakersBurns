@@ -12,6 +12,7 @@ const UserMessaging = () => {
   const [sending, setSending] = useState(false); // Add sending state for sending messages
   const receiverUsername = 'admin';
   const messagesEndRef = useRef(null);
+  const messagesContainerRef = useRef(null);
 
   const getThreadId = async () => {
     try {
@@ -136,7 +137,16 @@ const UserMessaging = () => {
       <div style={{ marginTop: '100px' }}>
         <h3 style={{ fontFamily: 'Arial, sans-serif' }}>Conversation with Admin</h3>
         {selectedThreadId && messages.length > 0 ? (
-          <ul style={{ listStyle: 'none', padding: 0 }}>
+          <ul
+            ref={messagesContainerRef}
+            style={{
+              listStyle: 'none',
+              padding: 0,
+              height: 'calc(100vh - 160px)', // Dynamically calculate height based on footer
+              overflowY: 'auto', // Make the message container scrollable
+              paddingBottom: '60px', // Ensure space for the footer
+            }}
+          >
             {renderMessages()}
             <div ref={messagesEndRef} />
           </ul>
@@ -153,27 +163,49 @@ const UserMessaging = () => {
           }}
           style={{ fontFamily: 'Arial, sans-serif' }}
         >
-          <div>
-          <input
-            type="text"
-            value={messageBody}
-            onChange={(e) => setMessageBody(e.target.value)}
-            placeholder="Type a message to Admin"
+          <div
             style={{
+              position: 'fixed',
+              bottom: '0',
+              left: '0',
               width: '100%',
+              backgroundColor: '#fff',
               padding: '10px',
-              marginBottom: '10px',
-              fontFamily: 'Arial, sans-serif',
+              boxShadow: '0 -2px 10px rgba(0, 0, 0, 0.1)',
+              zIndex: '0',
             }}
-            disabled={sending} // Disable input while sending
-          />
-          <button
-            type="submit"
-            style={{ fontFamily: 'Arial, sans-serif' }}
-            disabled={sending} // Disable button while sending
           >
-            {sending ? 'Sending...' : 'Send'}
-          </button>
+            <input
+              type="text"
+              value={messageBody}
+              onChange={(e) => setMessageBody(e.target.value)}
+              placeholder="Type a message to Admin"
+              style={{
+                width: '90%',
+                padding: '10px',
+                fontFamily: 'Arial, sans-serif',
+                borderRadius: '4px',
+                border: '1px solid #ccc',
+                marginBottom: '10px',
+              }}
+              disabled={sending} // Disable input while sending
+            />
+            <button
+              className="message-send-button"
+              type="submit"
+              style={{
+                padding: '10px 15px',
+                fontFamily: 'Arial, sans-serif',
+                backgroundColor: '#007bff',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+              }}
+              disabled={sending} // Disable button while sending
+            >
+              {sending ? 'Sending...' : 'Send'}
+            </button>
           </div>
         </form>
       </div>

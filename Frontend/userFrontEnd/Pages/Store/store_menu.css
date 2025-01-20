@@ -1,0 +1,96 @@
+/* Store Navbar */
+.store-navbar {
+    position: fixed;
+    top: 0px; /* Adjust to match the height of your main navbar */
+    left: 0;
+    width: 100vw;
+    height: calc(100vh - 60px); /* Subtract main navbar height */
+    background-color: rgba(255, 255, 255, 0.95); /* Semi-transparent background */
+    z-index: 1; /* Sits above most content but below other overlays */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow-y: auto; /* Scrollable if content overflows */
+    transition: transform 0.3s ease-in-out; /* Smooth open/close animation */
+    transform: translateY(-100%); /* Initially hidden off-screen */
+  }
+  
+  /* Open state for the store navbar */
+  .store-navbar.open {
+    transform: translateY(0); /* Slide into view */
+  }
+  
+  /* Store Navbar Content */
+  .store-navbar-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 15px;
+    padding: 20px;
+    text-align: center;
+    width: 80%;
+    max-width: 1200px;
+  }
+  
+  /* Individual Items */
+  .store-navbar-item {
+    padding: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    background-color: white;
+    color: #333;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    cursor: pointer;
+  }
+  
+  .store-navbar-item:hover {
+    background-color: #f0f0f0;
+    transform: scale(1.05);
+  }
+  
+  /* Special styling for "All Products" */
+  .store-navbar-item.all-products {
+    font-weight: bold;
+    background-color: #007bff;
+    color: white;
+  }
+  
+  /* Close Button */
+  .close-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 1.5rem;
+    background: transparent;
+    border: none;
+    color: #333;
+    cursor: pointer;
+    transition: color 0.2s ease;
+  }
+  
+  .close-button:hover {
+    color: #007bff;
+  }
+  
+  /* Menu Reopen Button */
+  .reopen-button {
+    position: fixed;
+    bottom: 20px; /* Adjust for footer spacing */
+    right: 20px;
+    z-index: 10;
+    padding: 10px 20px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  }
+  
+  .reopen-button:hover {
+    background: #0056b3;
+  }
+  

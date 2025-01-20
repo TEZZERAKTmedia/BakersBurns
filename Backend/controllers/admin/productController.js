@@ -493,16 +493,19 @@ const getDiscountedProducts = async (req, res) => {
 // In productController.js
 const getProductTypes = async (req, res) => {
   try {
-    const productTypes = await Product.findAll({
-      attributes: [[Sequelize.fn('DISTINCT', Sequelize.col('type')), 'type']],
+    const types = await Product.findAll({
+      attributes: ['type'], // Only fetch the 'type' attribute
+      group: ['type'], // Group by type to get unique values
     });
-    res.json(productTypes);
+    
+    // Extract the types from the result
+    const uniqueTypes = types.map(type => type.type);
+    res.status(200).json(uniqueTypes);
   } catch (error) {
     console.error('Error fetching product types:', error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ message: 'Failed to fetch product types.' });
   }
 };
-
 // Add this route to your routes file
 const getProductDetails = async (req, res) => {
   const { id } = req.params;

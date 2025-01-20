@@ -1,5 +1,4 @@
 /* General Navbar Styling */
-
 body {
   -webkit-text-size-adjust: 100%;
   -moz-text-size-adjust: 100%;
@@ -11,14 +10,63 @@ body {
   top: 0;
   left: 0;
   width: 100vw;
-  background-color: rgba(0, 0, 0, 0.8); /* Slight transparency for visibility */
+  
+  background-color: rgba(0, 0, 0, 0.8);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  z-index: 1000;
+  z-index: 1;
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 10px 20px;
 }
+
+/* Page Title Styling */
+/* Navbar title initial state */
+.navbar-title {
+  position: absolute;
+  top: 50%;
+  left: 45%;
+  transform: translate(-50%, -50%);
+  font-family: "Dancing Script", cursive;
+  color: white;
+  font-size: 2rem;
+  font-weight: bold;
+  white-space: nowrap;
+  z-index: 2;
+  opacity: 1; /* Start visible */
+  visibility: visible; /* Ensure it's visible */
+  transition: opacity 1s ease-in-out, visibility 1s ease-in-out; /* Timed fade transition */
+}
+
+/* Trigger the fade in and fade out loop animation */
+.navbar-title.fade-out-in {
+  animation: fadeOutIn 2s ease-in-out;
+}
+
+/* Keyframe animation for fading out and fading back in */
+@keyframes fadeOutIn {
+  0% {
+    opacity: 1;
+    visibility: visible;
+  }
+  25% {
+    opacity: 0;
+    visibility: hidden; /* Fade out */
+  }
+  50% {
+    opacity: 0;
+    visibility: hidden; /* Stay invisible */
+  }
+  75% {
+    opacity: 1;
+    visibility: visible; /* Start fading back in */
+  }
+  100% {
+    opacity: 1;
+    visibility: visible; /* Fully visible again */
+  }
+}
+
 
 /* Hamburger Menu */
 .hamburger-menu {
@@ -29,7 +77,6 @@ body {
   height: 35px;
   cursor: pointer;
   z-index: 1100;
-  margin-right: 20px;
 }
 
 .hamburger-menu .bar1,
@@ -53,36 +100,34 @@ body {
   transform: rotate(-45deg) translate(5px, -10px);
 }
 
-/* Navigation List (Mobile Dropdown) */
+/* Navigation List */
 .nav-list {
-  font-family: 'Dancing Script', cursive;
+  font-family: "Dancing Script", cursive;
   list-style: none;
   display: flex;
   flex-direction: column;
-  justify-content: center; /* Center items vertically */
-  align-items: center; /* Center items horizontally */
+  justify-content: center;
+  align-items: center;
   position: fixed;
-  top: -10px;
+  top: 0px;
   left: 0;
   width: 100vw;
   height: 100vh;
+  max-height: 0;
+  overflow: hidden;
   background-color: rgba(0, 0, 0, 0.9);
   padding: 0;
-  display: none;
-  z-index: -1;
-  transition: all 0.3s ease-in-out;
-  
+  z-index: 1;
+  transition: max-height 0.5s ease-in-out; /* Smooth slide effect */
 }
 
 .nav-list.show {
-  display: flex;
+  max-height: calc(100vh - 60px); /* Expand fully when open */
 }
 
 /* Nav Item Styling */
 .nav-item {
-  margin-top: 20px;
-  width: 90%;
-  
+  margin: 15px 0;
 }
 
 .nav-item a {
@@ -92,74 +137,59 @@ body {
   border-radius: 20px;
   padding: 8px 12px;
   background-color: #fff;
-  font-size: 2rem;
-  margin-top: -100px;
-  width: 90%;
+  font-size: 1.4rem;
   transition: background-color 0.3s;
-  opacity: 0; /* Initially hidden for animation */
-  transform: translateX(-20px); /* Slide in from the left */
-  border-bottom: 1px solid white;
-  
 }
 
 .nav-item a:hover {
   background-color: #555;
 }
 
-/* Slide-in animation */
-.nav-list.show .nav-item:nth-child(1) a {
-  animation: slideIn 0.5s forwards;
-  animation-delay: 0.1s;
+/* Action Buttons (Logout and Settings) */
+.action-buttons {
+  display: flex;
+  justify-content: space-between;
+  gap: 30px; /* Space between buttons */
+  margin-top: 20px;
 }
 
-.nav-list.show .nav-item:nth-child(2) a {
-  animation: slideIn 0.5s forwards;
-  animation-delay: 0.2s;
+.logout-button {
+  padding: 10px 20px;
+  background-color: #ff4d4d;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
 }
 
-.nav-list.show .nav-item:nth-child(3) a {
-  animation: slideIn 0.5s forwards;
-  animation-delay: 0.3s;
+.logout-button:hover {
+  background-color: #ff0000;
 }
 
-.nav-list.show .nav-item:nth-child(4) a {
-  animation: slideIn 0.5s forwards;
-  animation-delay: 0.4s;
-}
-.nav-list.show .nav-item:nth-child(5) a {
-  animation: slideIn 0.5s forwards;
-  animation-delay: 0.4s;
-}
-.nav-list.show .nav-item:nth-child(6) a {
-  animation: slideIn 0.5s forwards;
-  animation-delay: 0.4s;
-}
-.nav-list.show .nav-item:nth-child(7) a {
-  animation: slideIn 0.5s forwards;
-  animation-delay: 0.4s;
-}
-.nav-list.show .nav-item:nth-child(8) a {
-  animation: slideIn 0.5s forwards;
-  animation-delay: 0.4s;
+.settings-icon {
+  width: 60px;
+  height: 60px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #444;
+  color: white;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1.5rem;
+  transition: background-color 0.3s ease;
 }
 
-
-/* Keyframes for slide-in animation */
-@keyframes slideIn {
-  0% {
-    opacity: 0;
-    transform: translateX(-20px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateX(0);
-  }
+.settings-icon:hover {
+  background-color: #666;
 }
 
-/* Desktop View - Horizontal Navbar */
+/* Desktop View */
 @media (min-width: 768px) {
   .navbar {
-    justify-content: center; /* Center navbar items on larger screens */
+    justify-content: center;
   }
 
   .nav-list {
@@ -167,61 +197,8 @@ body {
     position: static;
     width: auto;
     height: auto;
+    max-height: none; /* Disable height restriction for desktop */
     background-color: transparent;
-    padding: 0;
-    
-  }
-
-  .nav-item {
-    margin: 0 15px;
-
-    
-    
-  }
-
-  .nav-item a {
-    background: transparent;
-    color: white;
-    padding: 10px 15px;
-    font-size: 1.2em;
-    
-  }
-
-  .nav-item a:hover {
-    color: #ffffff;
-    background-color: #000;
-  }
-}
-
-/* Additional styling for settings icon */
-/* Additional styling for settings icon */
-.settings-icon {
- padding: 10px;
- 
-}
-
-/* Show settings icon when navbar is open in mobile view */
-.settings-icon.show {
-  display: block;
-  
-}
-
-/* Desktop View - Adjust settings icon visibility and position */
-@media (min-width: 768px) {
-  .settings-icon {
-    display: inline-block; /* Make it visible in desktop view */
-    position: relative; /* Relative position aligns with desktop layout */
-    
-    
-  }
-
-  .nav-list {
-    flex-direction: row;
-    position: static;
-    width: auto;
-    height: auto;
-    background-color: transparent;
-    padding: 0;
   }
 
   .nav-item {
@@ -233,7 +210,6 @@ body {
     color: white;
     padding: 10px 15px;
     font-size: 1.2em;
-    
   }
 
   .nav-item a:hover {
@@ -241,4 +217,3 @@ body {
     background-color: #000;
   }
 }
-

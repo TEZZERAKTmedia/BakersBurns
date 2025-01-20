@@ -51,7 +51,7 @@ const ProductManagementContent = () => {
       <div className="add-forms">
         {!showAddProductForm && !showAddDiscountForm && (
           <div className="add-buttons">
-            <button onClick={() => setShowAddProductForm(true)}>Add Product</button>
+            <button style={{padding:'10px'}} onClick={() => setShowAddProductForm(true)}>Add Product</button>
             <button onClick={() => setShowAddDiscountForm(true)}>Add Discount</button>
           </div>
         )}
@@ -83,7 +83,7 @@ const ProductManagementContent = () => {
         />
       )}
 
-      <SortingControls onSort={handleSort} sortCriteria={sortCriteria} sortOrder={sortOrder} />
+
 
       <ProductList
   products={products}

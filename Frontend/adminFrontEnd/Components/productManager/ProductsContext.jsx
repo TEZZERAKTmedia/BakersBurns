@@ -200,6 +200,7 @@ const updateProductAndMedia = async (productId, productFormData, mediaFormData) 
       throw error;
     }
   };
+  
 
   return (
     <ProductsContext.Provider

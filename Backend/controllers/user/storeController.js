@@ -19,7 +19,27 @@ const getProducts = async (req, res) => {
     res.status(500).json({ message: 'Error fetching products', error });
   }
 };
+const getProductTypes = async (req, res) => {
+  try {
+    // Get unique product types where quantity > 0
+    const productTypes = await Product.findAll({
+      attributes: ['type'], // Only retrieve the 'type' attribute
+      where: {
+        quantity: {
+          [Op.gt]: 0, // Ensure quantity is greater than 0
+        },
+      },
+      group: ['type'], // Group by type to get unique types
+    });
 
+    // Extract the types from the result
+    const types = productTypes.map((product) => product.type);
+
+    res.status(200).json(types); // Return the product types
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching product types', error });
+  }
+};
 
 
 const getFeaturedProducts = async (req, res) => {
@@ -136,6 +156,7 @@ module.exports = {
   removeFromCart,
   createCheckoutSession,
   handleStripeWebhook,
-  getProductMedia
+  getProductMedia, 
+  getProductTypes
   
 };

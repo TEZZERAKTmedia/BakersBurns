@@ -65,7 +65,7 @@ const styles = {
     padding: '5px 10px',
     borderRadius: '20px',
     color: 'white',
-    fontSize: '0.9rem',
+    fontSize: '0.5rem',
     textAlign: 'center',
     minWidth: '50px',
   },

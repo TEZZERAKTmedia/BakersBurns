@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { adminApi } from '../../config/axios';
-import './social_manager.css';
+import './social_manager.css'; // Import the CSS file for styling
+import LoadingPage from '../../Components/loading'; // Import the loading page component
 
 const SocialLinksManager = () => {
   const [socialLinks, setSocialLinks] = useState([]);
@@ -9,17 +10,23 @@ const SocialLinksManager = () => {
   const [editingId, setEditingId] = useState(null);
   const [error, setError] = useState('');
   const [isCustomPlatform, setIsCustomPlatform] = useState(false);
+  const [isLoading, setIsLoading] = useState(false); // Loading state
+  const [isSaving, setIsSaving] = useState(false); // Saving state
 
   const commonPlatforms = ['Facebook', 'X', 'Instagram', 'LinkedIn', 'YouTube', 'Email', 'Phone'];
 
+  // Fetching social links from the API
   useEffect(() => {
     const fetchSocialLinks = async () => {
+      setIsLoading(true); // Set loading to true while fetching data
       try {
         const response = await adminApi.get('/admin-social/social-links');
         setSocialLinks(response.data);
       } catch (err) {
         console.error('Error fetching social links:', err);
         setError('Failed to fetch social links.');
+      } finally {
+        setIsLoading(false); // Set loading to false once data is fetched
       }
     };
 
@@ -33,7 +40,7 @@ const SocialLinksManager = () => {
 
   const handlePlatformChange = (e) => {
     const selectedPlatform = e.target.value;
-    setFormData({ platform: selectedPlatform, url: '' }); // Reset URL when platform changes
+    setFormData({ platform: selectedPlatform, url: '' });
     setIsCustomPlatform(selectedPlatform === 'Custom');
   };
 
@@ -54,28 +61,28 @@ const SocialLinksManager = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     if (!formData.platform || !formData.url) {
       setError('All fields are required.');
       return;
     }
-  
+
     const payload = new FormData();
     payload.append('platform', formData.platform);
     payload.append('url', formData.url);
-  
+
     if (image) {
-      // Only append the image if it's a new one
       payload.append('image', image);
     }
-  
+
+    setIsSaving(true); // Set saving to true while saving data
     try {
       if (editingId) {
         // Update existing link
         await adminApi.put(`/admin-social/social-links/${editingId}`, payload, {
           headers: { 'Content-Type': 'multipart/form-data' },
         });
-  
+
         setSocialLinks((prev) =>
           prev.map((link) =>
             link.id === editingId
@@ -88,16 +95,17 @@ const SocialLinksManager = () => {
         const response = await adminApi.post('/admin-social/social-links', payload, {
           headers: { 'Content-Type': 'multipart/form-data' },
         });
-  
+
         setSocialLinks([...socialLinks, response.data.link]);
       }
       resetForm();
     } catch (err) {
       console.error('Error saving social link:', err);
       setError('Failed to save social link. Please try again.');
+    } finally {
+      setIsSaving(false); // Set saving to false once data is saved
     }
   };
-  
 
   const handleEdit = (link) => {
     setEditingId(link.id);
@@ -137,9 +145,13 @@ const SocialLinksManager = () => {
     }
   };
 
+  if (isLoading) {
+    return <LoadingPage />; // Display Loading Page while data is being fetched
+  }
+
   return (
     <div className="social-links-manager">
-      <h2>Manage Social Links</h2>
+      <h2 style={{marginTop:'10%'}}></h2>
       {error && <p className="error">{error}</p>}
 
       {/* Add New Link Form */}
@@ -202,7 +214,7 @@ const SocialLinksManager = () => {
                 onChange={handleImageChange}
               />
             </label>
-            <button type="submit">Add Link</button>
+            <button type="submit" disabled={isSaving}>Add Link</button>
           </form>
         </div>
       )}
@@ -269,7 +281,7 @@ const SocialLinksManager = () => {
                     onChange={handleImageChange}
                   />
                 </label>
-                <button type="submit">Save</button>
+                <button type="submit" disabled={isSaving}>Save</button>
                 <button type="button" onClick={resetForm}>
                   Cancel
                 </button>
