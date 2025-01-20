@@ -1,5 +1,6 @@
 const Product = require('../../models/product');
 const Media = require('../../models/media');
+const OrderItem = require('../../models/orderItem')
 const path = require('path');
 const fs = require('fs'); // Correct way to import the file system module
 
@@ -300,9 +301,16 @@ const deleteProduct = async (req, res) => {
   const { id } = req.params;
 
   try {
+    // Check if product is referenced in any order items
+    const orderCount = await OrderItem.count({ where: { productId: id } });
+    if (orderCount > 0) {
+      return res.status(400).json({
+        message: "This product is associated with an order and cannot be deleted. We recommend marking it as unavailable."
+      });
+    }
+
     // Find the product by ID
     const product = await Product.findByPk(id);
-
     if (!product) {
       return res.status(404).json({ message: 'Product not found' });
     }
@@ -341,6 +349,7 @@ const deleteProduct = async (req, res) => {
     res.status(500).json({ message: 'An error occurred while deleting the product' });
   }
 };
+
 
 
 

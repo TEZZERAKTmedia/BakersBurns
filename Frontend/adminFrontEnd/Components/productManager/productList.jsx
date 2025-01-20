@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import ProductCard from './productCard';
 import SortingControls from './sortingControls'; // Import SortingControls
+import { toast } from 'react-toastify'; // Import Toastify for notifications
+import 'react-toastify/dist/ReactToastify.css'; // Import the CSS for Toastify
+import { adminApi } from '../../config/axios';
 
-const ProductList = ({ products, onDeleteProduct }) => {
+const ProductList = ({ products }) => {
   const [sortCriteria, setSortCriteria] = useState('name');
   const [sortOrder, setSortOrder] = useState('asc');
   const [sortedProducts, setSortedProducts] = useState(products);
@@ -17,6 +20,7 @@ const ProductList = ({ products, onDeleteProduct }) => {
         setProductTypes(response.data);
       } catch (error) {
         console.error('Error fetching product types:', error);
+        toast.error("Failed to fetch product types."); // Show Toastify error
       }
     };
 
@@ -69,6 +73,24 @@ const ProductList = ({ products, onDeleteProduct }) => {
     }
   };
 
+  const handleDeleteProduct = async (id) => {
+    try {
+      await adminApi.delete(`/products/${id}`); // Call the delete API
+  
+      // If successful, show success message
+      toast.success('Product deleted successfully!');
+    } catch (error) {
+      console.error('Error deleting product:', error);
+  
+      // Check if the error contains a response object and a message
+      const errorMessage = error.response?.data?.message || 'Failed to delete product. This product might have been purchased or is in use.';
+  
+      // Show error message with toast
+      toast.error(errorMessage);
+    }
+  };
+  
+
   return (
     <div>
       <SortingControls
@@ -83,7 +105,7 @@ const ProductList = ({ products, onDeleteProduct }) => {
           <div key={product.id} className="product-item-container">
             <ProductCard
               product={product}
-              onDeleteProduct={onDeleteProduct}
+              onDeleteProduct={handleDeleteProduct} // Use the modified handleDeleteProduct
             />
           </div>
         ))}

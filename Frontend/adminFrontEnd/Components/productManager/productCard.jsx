@@ -3,8 +3,9 @@ import EditProductForm from './editProduct';
 import DiscountByProductForm from './discountForm';
 import { useProductContext } from '../../Components/productManager/ProductsContext'; // Import context
 import './product_card.css';
+import { toast } from 'react-toastify';
 
-const ProductCard = ({ product }) => {
+const ProductCard = ({ product, onDeleteProduct }) => { // Added onDeleteProduct as a prop
   const [isEditingProduct, setIsEditingProduct] = useState(false);
   const [isEditingDiscount, setIsEditingDiscount] = useState(false);
   const [media, setMedia] = useState([]);
@@ -12,7 +13,7 @@ const ProductCard = ({ product }) => {
   const [productDetails, setProductDetails] = useState(null);
   const [isLoadingDetails, setIsLoadingDetails] = useState(false);
 
-  const { fetchProducts, fetchProductDetails, fetchProductMedia, deleteProduct } = useProductContext();
+  const { fetchProducts, fetchProductDetails, fetchProductMedia } = useProductContext();
 
   // Function to handle canceling edit mode
   const handleCancelEdit = () => {
@@ -34,7 +35,6 @@ const ProductCard = ({ product }) => {
     };
     fetchMedia();
   }, [product.id, fetchProductMedia]);
-  
 
   useEffect(() => {
     const fetchDetails = async () => {
@@ -54,16 +54,17 @@ const ProductCard = ({ product }) => {
 
   const handleDelete = async () => {
     try {
-      await deleteProduct(product.id);
-      console.log(`Product ${product.id} deleted successfully`);
+      // Call the delete function passed from parent
+      await onDeleteProduct(product.id); // Pass product id to delete
+      toast.success('Product deleted successfully!'); // Show success message
     } catch (error) {
-      console.error("Error deleting product:", error);
-      alert("Failed to delete product. Please try again.");
+      console.error('Error deleting product:', error);
+      toast.error('Failed to delete product. This product might have been purchased or is in use.');
     }
   };
 
   return (
-    <div className="product-tile">
+    <div className="form-section">
       {isEditingProduct ? (
         <EditProductForm
           productId={product.id}
@@ -84,20 +85,20 @@ const ProductCard = ({ product }) => {
               <p>No thumbnail available</p>
             )}
             <h3>{product.name}</h3>
-            <p>${product.price.toFixed(2)}</p>
+            <p style={{color:'black'}}>${product.price.toFixed(2)}</p>
           </div>
 
           {isLoadingDetails ? (
             <p>Loading product details...</p>
           ) : productDetails ? (
-            <div className="product-details">
-              <p>
+            <div className="form-section">
+              <p style={{color:'black'}}>
                 <strong>Description:</strong> {productDetails.description}
               </p>
-              <p>
+              <p style={{color:'black'}}>
                 <strong>Type:</strong> {productDetails.type}
               </p>
-              <p>
+              <p style={{color:'black'}}>
                 <strong>Quantity:</strong> {productDetails.quantity}
               </p>
             </div>
@@ -105,7 +106,7 @@ const ProductCard = ({ product }) => {
             <p>No additional details available</p>
           )}
 
-          <div className="image-uploader-grid">
+          <div >
             {isLoadingMedia ? (
               <p>Loading media...</p>
             ) : media.length > 0 ? (
@@ -121,7 +122,6 @@ const ProductCard = ({ product }) => {
                     <video
                       className="media-preview"
                       src={`${import.meta.env.VITE_BACKEND}/uploads/${item.url}`}
-
                       loop
                       muted
                     >
@@ -165,4 +165,3 @@ const ProductCard = ({ product }) => {
 };
 
 export default ProductCard;
-
