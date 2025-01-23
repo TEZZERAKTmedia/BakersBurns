@@ -49,6 +49,7 @@ const notificationRoutes = require('./routes/admin/notifcationRoutes');
 const stripeWebhookGuestRoutes = require('./routes/register/stripeWebhookGuestRoute');
 const socialRoutes = require('./routes/register/socialRoutes');
 const adminSocialRoutes = require('./routes/admin/adminSocialRoutes');
+const adminDiscountRoutes = require('./routes/admin/adminDiscountRoutes');
 const { handleDhlWebhook, handleFedexWebhook, handleUpsWebhook, handleUspsWebhook} = require('./webhooks/carrierWebhooks');
 const { rateLimiter } = require('./utils/rateLimiter');
 const googleRoutes = require('./routes/register/googleRoutes');
@@ -134,6 +135,7 @@ app.use('/user-gallery', userAuthMiddleware('user'), rateLimiter('user-gallery')
 app.use('/user-social', socialRoutes);
 
 
+
 //STRIPE ROUTES
 app.use('/stripe', rateLimiter('stripe'),stripeRoutes); 
 
@@ -153,6 +155,7 @@ app.use('/admin-message-routes', adminAuthMiddleware('admin'), rateLimiter('admi
 app.use('/admin-event', adminAuthMiddleware('admin'), rateLimiter('admin-event'), adminEventRoutes);
 app.use('/admin-notifications', adminAuthMiddleware('admin'), notificationRoutes);
 app.use('/admin-social', adminSocialRoutes);
+app.use('/discount', adminAuthMiddleware('admin'), adminDiscountRoutes);
 // Static file serving
 // Static file serving
 app.use('/uploads', express.static(path.resolve(__dirname, 'uploads')));

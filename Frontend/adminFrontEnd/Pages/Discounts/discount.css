@@ -1,0 +1,65 @@
+
+.discount-info {
+    position: relative;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+  }
+  
+  .edit-button {
+    position: relative;
+    top: 0;
+    right: 0;
+    background-color: #83afde;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 12px;
+    width: 30%;
+    z-index: 1000;
+  }
+  
+  .edit-button:hover {
+    background-color: #5b9fe6;
+  }
+  /* Animation for fade-in and fade-out */
+.modal-fade-in {
+  animation: fadeIn 0.3s ease-in-out forwards;
+}
+
+.modal-fade-out {
+  animation: fadeOut 0.3s ease-in-out forwards;
+}
+
+/* Define the fade-in effect */
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Define the fade-out effect */
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* You can also add other styles like modal background, etc. */
+.modal-content {
+  /* Example styling for modal content */
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  max-width: 600px;
+  margin: 0 auto;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}

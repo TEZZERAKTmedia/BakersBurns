@@ -18,6 +18,7 @@ const AdminNavbar = () => {
     '/messaging': 'Messages',
     '/email': 'Email',
     '/social-manager': 'Social',
+    '/discount' : 'Discount'
   };
 
   const currentPageTitle = pageTitles[location.pathname] || 'Admin Panel';

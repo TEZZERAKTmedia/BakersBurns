@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { adminApi } from '../../config/axios';
-import editIcon from '../../assets/Pencil_icon.png';
+import editIcon from '../../assets/Icons/edit.png';
 
 const TrackingNumber = ({
   orderId,

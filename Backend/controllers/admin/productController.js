@@ -21,15 +21,30 @@ const getProducts = async (req, res) => {
           attributes: ['id', 'type', 'url'], // Fetch specific fields from the Media table
         },
       ],
+      attributes: [
+        'id',
+        'name',
+        'description',
+        'price',
+        'thumbnail',
+        'quantity',
+        'type',
+        'discountType',
+        'isDiscounted', // Include the isDiscounted field
+        'discountPrice', // Include the discount price if available
+        'discountAmount', // Include discount amount
+        'discountStartDate', // Include discount start date
+        'discountEndDate', // Include discount end date
+      ],
     });
-    
-    console.log('Products with media fetched successfully');
-    res.json(products);
+
+    res.status(200).json(products);
   } catch (error) {
-    console.error('Error fetching products with media:', error);
-    res.status(500).json({ error: error.message });
+    console.error('Error fetching products:', error);
+    res.status(500).json({ message: 'Failed to fetch products' });
   }
 };
+
 // Add a new product (existing)
 const addProduct = async (req, res) => {
   try {
