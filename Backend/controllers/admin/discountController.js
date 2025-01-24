@@ -112,28 +112,45 @@ const deleteDiscount = async (req, res) => {
 const updateDiscountByType = async (req, res) => {
   const { productType, discountType, discountAmount, discountStartDate, discountEndDate } = req.body;
 
+  console.log("Received request to update discounts");
+  console.log("Request Body:", { productType, discountType, discountAmount, discountStartDate, discountEndDate });
+
   try {
     // Find all products that match the productType
     const products = await Product.findAll({
-      where: {
-        type: productType
-      }
+      where: { type: productType },
     });
 
     if (products.length === 0) {
+      console.log("No products found for the specified type:", productType);
       return res.status(404).json({ message: "No products found for this type." });
     }
 
+    console.log(`Found ${products.length} products for type: ${productType}`);
+
     // Loop through each product and calculate the discount price
     for (let product of products) {
+      const originalPrice = product.price; // Fetch the original price of the product
       let discountPrice;
+
+      // Log the product details before updating
+      console.log("Processing product:", {
+        id: product.id,
+        name: product.name,
+        originalPrice,
+      });
 
       // Calculate the discount price based on the discount type
       if (discountType === 'percentage') {
-        discountPrice = product.price * (1 - discountAmount / 100);
+        discountPrice = originalPrice - (originalPrice * discountAmount) / 100;
+        console.log("Calculated percentage discount price:", discountPrice);
       } else if (discountType === 'fixed') {
-        discountPrice = product.price - discountAmount;
+        discountPrice = originalPrice - discountAmount;
+        console.log("Calculated fixed discount price:", discountPrice);
       }
+
+      discountPrice = discountPrice > 0 ? discountPrice : 0; // Ensure no negative prices
+      console.log("Final discount price (after ensuring non-negative):", discountPrice);
 
       // Update the product's discount information
       await product.update({
@@ -142,16 +159,30 @@ const updateDiscountByType = async (req, res) => {
         discountPrice,
         discountStartDate,
         discountEndDate,
-        isDiscounted: true // Mark the product as discounted
+        isDiscounted: true, // Mark the product as discounted
+      });
+
+      console.log("Product updated successfully:", {
+        id: product.id,
+        discountType,
+        discountAmount,
+        discountPrice,
+        discountStartDate,
+        discountEndDate,
       });
     }
 
+    console.log("All products updated successfully for type:", productType);
+
     return res.status(200).json({ message: "Discounts updated for all products of this type." });
   } catch (error) {
-    console.error(error);
+    console.error("Error updating discounts:", error);
     return res.status(500).json({ message: "Error updating discounts." });
   }
 };
+
+
+
 const getAllProductTypes = async (req, res) => {
   try {
     // Fetch all products

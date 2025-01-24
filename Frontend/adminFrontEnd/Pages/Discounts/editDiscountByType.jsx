@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
-import { adminApi } from '../../config/axios'; // Assuming you're using axios for API calls
-import { motion } from 'framer-motion'; // Import framer-motion
+import { adminApi } from '../../config/axios';
+import { motion } from 'framer-motion';
 
 const DiscountEditForm = ({ discount, productType, onClose, onSuccess }) => {
   const [formValues, setFormValues] = useState({
     productType: discount.productType,
-    discountType: discount.discountType,
+    discountType: discount.discountType || 'percentage', // Default to 'percentage'
     discountAmount: discount.discountAmount,
     discountStartDate: discount.discountStartDate,
     discountEndDate: discount.discountEndDate,
@@ -22,15 +22,36 @@ const DiscountEditForm = ({ discount, productType, onClose, onSuccess }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
+    // Validate that all fields are filled
+    if (!formValues.discountType) {
+      toast.error('Discount type is required. Defaulting to "Percentage".');
+      setFormValues((prevValues) => ({
+        ...prevValues,
+        discountType: 'percentage',
+      }));
+      return;
+    }
+
+    if (!formValues.discountAmount || formValues.discountAmount <= 0) {
+      toast.error('Discount amount must be greater than 0.');
+      return;
+    }
+
+    if (!formValues.discountStartDate || !formValues.discountEndDate) {
+      toast.error('Start and end dates are required.');
+      return;
+    }
+
     try {
       const response = await adminApi.put(`/discount/`, {
         productType, // Send the product type to update all products with this type
         discountType: formValues.discountType,
-        discountAmount: formValues.discountAmount,
+        discountAmount: parseFloat(formValues.discountAmount), // Ensure discountAmount is a number
         discountStartDate: formValues.discountStartDate,
         discountEndDate: formValues.discountEndDate,
       });
+
       toast.success('Discount updated for all products of this type!');
       onSuccess(); // Close the modal on success
     } catch (error) {
@@ -38,7 +59,6 @@ const DiscountEditForm = ({ discount, productType, onClose, onSuccess }) => {
       toast.error('Failed to update discount');
     }
   };
-  
 
   // Animation for modal
   const modalAnimation = {
@@ -64,6 +84,7 @@ const DiscountEditForm = ({ discount, productType, onClose, onSuccess }) => {
             name="discountType"
             value={formValues.discountType}
             onChange={handleInputChange}
+            required
           >
             <option value="percentage">Percentage</option>
             <option value="fixed">Fixed Amount</option>

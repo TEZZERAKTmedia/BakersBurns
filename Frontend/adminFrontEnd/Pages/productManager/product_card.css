@@ -176,3 +176,30 @@
 .product-card-buttons {
   margin: 10px;
 }
+.add-discount-by-product {
+  background-color: #df9500; /* Golden background */
+  color: white; /* White text */
+  padding: 10px 20px; /* Add padding */
+  border-radius: 8px; /* Rounded corners */
+  font-size: 1rem; /* Adjust font size */
+  font-weight: bold; /* Make text bold */
+  display: flex; /* Align content */
+  align-items: center; /* Center vertically */
+  justify-content: center; /* Center horizontally */
+  cursor: pointer; /* Pointer cursor */
+  border: none; /* Remove border */
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.add-discount-by-product img {
+  margin-right: 10px; /* Space between icon and text */
+}
+
+.add-discount-by-product:hover {
+  background-color: #bf7a00; /* Darker gold on hover */
+  transform: scale(1.05); /* Slightly enlarge button */
+}
+
+.add-discount-by-product:active {
+  transform: scale(0.95); /* Shrink slightly on click */
+}

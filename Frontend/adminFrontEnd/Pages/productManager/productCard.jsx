@@ -79,6 +79,16 @@ const ProductCard = ({ product, onDeleteProduct }) => {
           onClose={() => setIsEditingProduct(false)}
           onCancel={handleCancelEdit}
         />
+      ) :
+      isEditingDiscount ? (
+        <DiscountByProductForm
+          product={product} // Pass the product to the form
+          onClose={() => setIsEditingDiscount(false)}
+          onSuccess={() => {
+            setIsEditingDiscount(false);
+            fetchProducts(); // Refresh the products list after discount is added
+          }}
+        />
       ) : (
         <>
           <div className="product-info">
@@ -93,6 +103,21 @@ const ProductCard = ({ product, onDeleteProduct }) => {
             )}
             <h3>{product.name}</h3>
             <p style={{ color: 'black' }}>${product.price}</p>
+         
+            {!product.isDiscounted && (
+              <div style={{width: '50%', marginLeft:' 25%', }}> 
+            <button
+              className='add-discount-by-product'
+              onClick={() => setIsEditingDiscount(true)}
+             
+            >
+              <img src={DiscountIcon}  style={{height:'50px', width:'50px'}}/>
+              Add Discount
+            </button>
+            </div>
+          )}
+          
+
 
             {/* Check if product is discounted and show discount details */}
             {product.isDiscounted && (
@@ -139,6 +164,7 @@ const ProductCard = ({ product, onDeleteProduct }) => {
                   </p>
                 </div>
                 </div>
+                
 
                 {/* Discounted price */}
                 <div className="form-section">
@@ -214,6 +240,7 @@ const ProductCard = ({ product, onDeleteProduct }) => {
               <p>No media available</p>
             )}
           </div>
+          
 
           <button
             className="product-card-buttons"

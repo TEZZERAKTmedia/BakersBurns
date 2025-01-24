@@ -58,27 +58,82 @@
 }
 
 /* Navigation Grid */
+/* Navigation Grid */
 .nav-grid {
-  display: none;
+  display: grid;
   list-style: none;
   padding: 1rem;
   margin: 0;
   gap: 1rem;
   justify-content: center;
   align-content: start;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  grid-auto-rows: 1fr; /* All rows will take the same height */
   width: 100%;
+  
   position: fixed;
   top: 60px; /* Space below the navbar-top */
   left: 0;
   height: calc(100vh - 60px); /* Full height minus navbar-top */
   background-color: rgba(0, 0, 0, 0.9);
   z-index: 9999;
-  overflow-y: auto;
+
+  overflow-y: auto; /* Enable vertical scrolling */
+  overflow-x: hidden; /* Prevent horizontal scrolling */
+  scrollbar-width: thin; /* For modern browsers */
+  scrollbar-color: #888 #444; /* Custom scrollbar styling */
 }
+
+/* Grid items */
+.nav-item {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #333;
+  border-radius: 8px;
+  padding: 1rem;
+  text-align: center;
+  cursor: pointer;
+
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+/* Scrollbar for Webkit browsers */
+.nav-grid::-webkit-scrollbar {
+  width: 8px;
+}
+
+.nav-grid::-webkit-scrollbar-track {
+  background: #444; /* Track background */
+}
+
+.nav-grid::-webkit-scrollbar-thumb {
+  background-color: #888; /* Scrollbar thumb */
+  border-radius: 4px; /* Round edges */
+}
+
+/* Larger screens adjustments */
+@media (min-width: 768px) {
+  .nav-grid {
+    height: auto; /* Remove fixed height for desktop */
+    background-color: transparent;
+    gap: 1.5rem;
+    overflow: visible; /* No scrolling needed for larger screens */
+  }
+
+  .nav-item {
+    background-color: transparent;
+  }
+
+  .nav-item:hover {
+    background-color: #333;
+  }
+}
+
 
 .nav-grid.show {
   display: grid;
+  
 }
 
 /* Grid items */
@@ -92,6 +147,7 @@
   text-align: center;
   cursor: pointer;
   padding: rem rem;
+  
   transition: background-color 0.3s ease, transform 0.2s ease;
 }
 

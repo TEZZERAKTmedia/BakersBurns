@@ -17,25 +17,22 @@ const ProductManagementContent = () => {
     applyDiscount,
   } = useProductContext();
 
-
   const [showAddProductForm, setShowAddProductForm] = useState(false);
-  const [showAddDiscountForm, setShowAddDiscountForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
-  const [editingDiscount, setEditingDiscount] = useState(null);
-
-
+  const [editingDiscount, setEditingDiscount] = useState(null); // Specific product discount editing
 
   return isLoading ? (
     <LoadingPage />
   ) : (
     <div className="product-manager-container">
-      <h1 className="page-header" style={{marginTop:'100px'}}></h1>
+      <h1 className="page-header" style={{ marginTop: '100px' }}></h1>
 
       <div className="add-forms">
-        {!showAddProductForm && !showAddDiscountForm && (
+        {!showAddProductForm && (
           <div className="add-buttons">
-            <button style={{padding:'10px'}} onClick={() => setShowAddProductForm(true)}>Add Product</button>
-            <button onClick={() => setShowAddDiscountForm(true)}>Add Discount</button>
+            <button style={{ padding: '10px' }} onClick={() => setShowAddProductForm(true)}>
+              Add Product
+            </button>
           </div>
         )}
       </div>
@@ -44,43 +41,30 @@ const ProductManagementContent = () => {
         <ProductForm
           productTypes={productTypes}
           onClose={() => setShowAddProductForm(false)}
-          
         />
       )}
 
-      {showAddDiscountForm && (
+      {editingDiscount && (
         <DiscountForm
-          productTypes={productTypes}
-          discount={editingDiscount ? editingDiscount : {}}
+          discount={editingDiscount} // Pass the selected product's discount
           onSave={(discountData) => {
-            if (editingDiscount) {
-              // Update existing discount logic can go here
-            } else {
-              applyDiscount(discountData); // Add new discount
-            }
+            applyDiscount(discountData); // Add or update discount for a specific product
           }}
-          onClose={() => {
-            setEditingDiscount(null);
-            setShowAddDiscountForm(false);
-          }}
+          onClose={() => setEditingDiscount(null)}
         />
       )}
-
-
 
       <ProductList
-  products={products}
-  onDeleteProduct={handleDeleteProduct}
-  onEditProduct={(product) => {
-    setEditingProduct(product);
-    setShowAddProductForm(true);
-  }}
-  onEditDiscount={(discount) => {
-    setEditingDiscount(discount);
-    setShowAddDiscountForm(true);
-  }}
-  setEditingProduct={setEditingProduct} // Pass it as a prop
-/>
+        products={products}
+        onDeleteProduct={handleDeleteProduct}
+        onEditProduct={(product) => {
+          setEditingProduct(product);
+          setShowAddProductForm(true);
+        }}
+        onAddDiscount={(product) => {
+          setEditingDiscount({ productId: product.id, ...product.discount });
+        }}
+      />
     </div>
   );
 };
