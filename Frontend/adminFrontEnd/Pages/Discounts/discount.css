@@ -63,3 +63,46 @@
   margin: 0 auto;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
+
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(50px, 1fr)); /* Smaller min size for more columns */
+  gap: 0; /* Remove gaps between grid items */
+  padding: 0; /* Remove padding around the grid */
+  margin: 0; /* Remove margins around the grid */
+  width: 100%; /* Ensure the grid spans the full width of the container */
+}
+
+.product-card {
+  display: block; /* Ensure the card fills the grid cell */
+  padding: 0; /* Remove padding inside the card */
+  margin: 0; /* Remove margin around the card */
+  border: none; /* Remove borders */
+  background-color: transparent; /* Make the background transparent */
+  width: 100%; /* Ensure the card spans the full width of the grid cell */
+}
+
+.product-thumbnail {
+  width: 100%; /* Ensure the image fits the grid cell width */
+  height: 50px; /* Adjust the height of the thumbnail */
+  object-fit: cover; /* Ensure the image covers the grid cell without distortion */
+  display: block; /* Eliminate inline gaps caused by images */
+}
+
+
+
+
+.product-info {
+  margin-top: 10px;
+  text-align: center;
+}
+
+.product-info h4 {
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.product-info p {
+  font-size: 0.9rem;
+  color: #555;
+}

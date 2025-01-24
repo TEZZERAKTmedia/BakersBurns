@@ -6,7 +6,7 @@ const discountController = require('../../controllers/admin/discountController')
 router.get('/', discountController.getDiscountedProductsByType); // Get all discounts for a product
 router.post('/create-by-type', discountController.addDiscountByType); // Create a new discount for a product
 router.put('/', discountController.updateDiscountByType); // Update an existing discount
-router.delete('/', discountController.deleteDiscount); // Delete a discount
+router.delete('/', discountController.deleteDiscountByType); // Delete a discount
 router.get('/type', discountController.getAllProductTypes); // Fetch all types
 
 module.exports = router;

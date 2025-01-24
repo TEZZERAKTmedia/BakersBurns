@@ -80,31 +80,35 @@ const addDiscountByType = async (req, res) => {
 
 
 // Delete a discount by productId
-const deleteDiscount = async (req, res) => {
+const deleteDiscountByType = async (req, res) => {
+  const { productType } = req.body;
+
+  if (!productType) {
+    return res.status(400).json({ error: "Product type is required." });
+  }
+
   try {
-    const { productId } = req.params;
+    const products = await Product.findAll({ where: { type: productType } });
 
-    // Find the product by productId
-    const product = await Product.findByPk(productId);
-
-    if (!product) {
-      return res.status(404).json({ message: 'Product not found' });
+    if (!products.length) {
+      return res.status(404).json({ error: "No products found for the specified type." });
     }
 
-    // Remove the discount
-    product.isDiscounted = false;
-    product.discountType = null;
-    product.discountAmount = null;
-    product.discountStartDate = null;
-    product.discountEndDate = null;
+    for (const product of products) {
+      await product.update({
+        isDiscounted: false,
+        discountType: null,
+        discountAmount: null,
+        discountStartDate: null,
+        discountEndDate: null,
+        discountPrice: null,
+      });
+    }
 
-    // Save the updated product
-    await product.save();
-
-    return res.status(200).json({ message: 'Discount deleted successfully' });
+    return res.status(200).json({ message: `Discounts removed for type: ${productType}` });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: 'Error deleting discount' });
+    console.error("Error deleting discounts by type:", error);
+    return res.status(500).json({ error: "Failed to remove discounts." });
   }
 };
 
@@ -202,7 +206,7 @@ const getAllProductTypes = async (req, res) => {
 module.exports = {
   getDiscountedProductsByType,
   getAllProductTypes,
-  deleteDiscount,
+  deleteDiscountByType,
   updateDiscountByType,
   addDiscountByType,
 };

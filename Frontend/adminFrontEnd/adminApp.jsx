@@ -15,6 +15,7 @@ import ProductManagement from './Pages/productManager/Products';
 import { ScannerProvider } from './context/scannerContext';
 import AdminLoginForm from './Components/loginForm';
 import { DiscountProvider } from './Pages/Discounts/discounts-context';
+import {ProductsProvider} from './Pages/productManager/ProductsContext';
 
 const AdminApp = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -63,12 +64,20 @@ const AdminApp = () => {
           <Route path="/" element={<Home />} />
           <Route path="/gallery" element={<GalleryManagement />} />
           <Route path="/layout" element={<Layout />} />
-          <Route path="/product-manager" element={<ProductManagement />} />
+          
           <Route path="/messaging" element={<Messaging />} />
           <Route path="/email" element={<Email />} />
           <Route path="/orders" element={<Orders />} />
           <Route path="/event-manager" element={<Events />} />
           <Route path="/social-manager" element={<SocialLinksManager />} />
+          <Route
+            path="/product-manager"
+            element={
+              <ProductsProvider>
+                <ProductManagement />
+              </ProductsProvider>
+            }
+          />
           <Route
             path="/discount"
             element={

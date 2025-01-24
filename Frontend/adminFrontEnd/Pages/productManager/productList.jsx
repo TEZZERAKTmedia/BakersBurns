@@ -3,63 +3,48 @@ import ProductCard from './productCard';
 import SortingControls from './sortingControls'; // Import SortingControls
 import { toast } from 'react-toastify'; // Import Toastify for notifications
 import 'react-toastify/dist/ReactToastify.css'; // Import the CSS for Toastify
-import { adminApi } from '../../config/axios';
+import { useProductContext } from './ProductsContext';
 
-const ProductList = ({ products }) => {
+const ProductList = () => {
+  const { products } = useProductContext(); // Get the latest products from context
   const [sortCriteria, setSortCriteria] = useState('name');
   const [sortOrder, setSortOrder] = useState('asc');
-  const [sortedProducts, setSortedProducts] = useState(products);
   const [filteredProducts, setFilteredProducts] = useState(products);
-  const [productTypes, setProductTypes] = useState([]);
 
   useEffect(() => {
-    // Fetch product types when component mounts
-    const fetchProductTypes = async () => {
-      try {
-        const response = await adminApi.get('/products/types');
-        setProductTypes(response.data);
-      } catch (error) {
-        console.error('Error fetching product types:', error);
-        toast.error("Failed to fetch product types."); // Show Toastify error
-      }
-    };
-
-    fetchProductTypes();
-  }, []);
-  
+    // Update filteredProducts whenever products change
+    setFilteredProducts(products);
+  }, [products]);
 
   useEffect(() => {
-    // Re-sort filtered products based on sortCriteria and sortOrder
-    const sortedList = [...filteredProducts];
-    sortedList.sort((a, b) => {
-      let valueA = a[sortCriteria];
-      let valueB = b[sortCriteria];
+    // Automatically sort filteredProducts whenever sortCriteria or sortOrder changes
+    setFilteredProducts((prevFilteredProducts) => {
+      const sortedList = [...prevFilteredProducts];
+      sortedList.sort((a, b) => {
+        let valueA = a[sortCriteria];
+        let valueB = b[sortCriteria];
 
-      // Handle sorting for numeric values (e.g., price)
-      if (sortCriteria === 'price') {
-        valueA = parseFloat(valueA);
-        valueB = parseFloat(valueB);
-      }
+        if (sortCriteria === 'price') {
+          valueA = parseFloat(valueA);
+          valueB = parseFloat(valueB);
+        }
 
-      // Handle sorting for dates (e.g., createdAt)
-      if (sortCriteria === 'createdAt') {
-        valueA = new Date(valueA);
-        valueB = new Date(valueB);
-      }
+        if (sortCriteria === 'createdAt') {
+          valueA = new Date(valueA);
+          valueB = new Date(valueB);
+        }
 
-      // Handle sorting for string values (e.g., name, type)
-      if (typeof valueA === 'string' && typeof valueB === 'string') {
-        return sortOrder === 'asc'
-          ? valueA.localeCompare(valueB)
-          : valueB.localeCompare(valueA);
-      }
+        if (typeof valueA === 'string' && typeof valueB === 'string') {
+          return sortOrder === 'asc'
+            ? valueA.localeCompare(valueB)
+            : valueB.localeCompare(valueA);
+        }
 
-      // Handle comparison for other cases (e.g., numbers)
-      return sortOrder === 'asc' ? valueA - valueB : valueB - valueA;
+        return sortOrder === 'asc' ? valueA - valueB : valueB - valueA;
+      });
+      return sortedList;
     });
-
-    setSortedProducts(sortedList);
-  }, [filteredProducts, sortCriteria, sortOrder]);
+  }, [sortCriteria, sortOrder]);
 
   const handleSort = (criteria) => {
     setSortCriteria(criteria);
@@ -90,11 +75,11 @@ const ProductList = ({ products }) => {
         onSort={handleSort}
         sortCriteria={sortCriteria}
         sortOrder={sortOrder}
-        productTypes={productTypes}
+        productTypes={[...new Set(products.map((p) => p.type))]} // Dynamically extract product types
         onFilterByType={handleFilterByType}
       />
       <div className="product-list">
-        {sortedProducts.map((product) => (
+        {filteredProducts.map((product) => (
           <div key={product.id} className="product-item-container">
             <ProductCard
               product={product}

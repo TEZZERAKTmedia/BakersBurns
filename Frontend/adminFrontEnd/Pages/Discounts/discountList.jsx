@@ -1,15 +1,15 @@
 import React, { useEffect } from 'react';
-
+import { useDiscountContext } from './DiscountContext';
 
 const DiscountList = () => {
-  const { fetchProductDiscounts, deleteDiscount, discounts } = useProductContext();
+  const { fetchDiscounts, deleteDiscountByType, discounts } = useDiscountContext();
 
   useEffect(() => {
-    fetchProductDiscounts(1);  // Assuming 1 is the product ID for demonstration
-  }, [fetchProductDiscounts]);
+    fetchDiscounts(); // Fetch discounts when the component mounts
+  }, [fetchDiscounts]);
 
-  const handleDeleteDiscount = (discountId) => {
-    deleteDiscount(discountId);
+  const handleDeleteDiscount = (productType) => {
+    deleteDiscountByType(productType); // Trigger the context function
   };
 
   return (
@@ -19,10 +19,27 @@ const DiscountList = () => {
         <p>No discounts available</p>
       ) : (
         <ul>
-          {discounts.map((discount) => (
-            <li key={discount.id}>
-              <span>{discount.discountType}: {discount.discountAmount}</span>
-              <button onClick={() => handleDeleteDiscount(discount.id)}>Delete</button>
+          {Object.entries(discounts).map(([productType, products]) => (
+            <li key={productType}>
+              {/* Render only the product type */}
+              <h3>{productType}</h3>
+
+              {/* Render the discount details for each product */}
+              <ul>
+                {products.map(({ id, discountType, discountAmount }) => (
+                  <li key={id}>
+                    {/* Render only the discount information */}
+                    {discountType === 'percentage'
+                      ? `${discountAmount}%`
+                      : `$${discountAmount}`}
+                  </li>
+                ))}
+              </ul>
+
+              {/* Delete button for the product type */}
+              <button onClick={() => handleDeleteDiscount(productType)}>
+                Delete All Discounts for {productType}
+              </button>
             </li>
           ))}
         </ul>

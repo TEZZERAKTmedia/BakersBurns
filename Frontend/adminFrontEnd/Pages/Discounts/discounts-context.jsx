@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import { adminApi } from '../../config/axios'; // Assuming you have axios configured
-
+import { toast } from 'react-toastify';
 const DiscountContext = createContext();
 
 export const useDiscountContext = () => {
@@ -44,22 +44,23 @@ export const DiscountProvider = ({ children }) => {
   }, [fetchDiscounts]);
 
   // Delete a specific discount by ID
-  const deleteDiscount = useCallback(async (discountId) => {
+  const deleteDiscountByType = useCallback(async (productType) => {
     try {
-      await adminApi.delete(`/discount/${discountId}`);
-      setDiscounts((prevDiscounts) =>
-        prevDiscounts.filter((discount) => discount.id !== discountId)
-      );
+      await adminApi.delete(`/discount/`, { data: { productType } });
+      fetchDiscounts(); // Refresh product data (optional)
+      toast.success("Discount removed successfully!");
     } catch (error) {
-      console.error('Error deleting discount:', error);
+      console.error("Error deleting discount by type:", error);
+      toast.error("Failed to remove discount.");
     }
   }, []);
+  
 
   return (
     <DiscountContext.Provider
       value={{
         fetchDiscounts,
-        deleteDiscount,
+        deleteDiscountByType,
         applyDiscount,
         fetchTypes,
         discounts,

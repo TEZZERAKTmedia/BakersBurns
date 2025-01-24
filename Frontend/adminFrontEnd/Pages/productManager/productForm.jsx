@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import MediaUploader from '../../Components/desktopMediaUploader';
 import { adminApi } from '../../config/axios';
-
+import { useProductContext } from './ProductsContext';
 
 const ProductForm = ({ product = {}, onClose }) => {
   
+  const [products, setProducts] = useState([]);
+  const {fetchProducts, addProductWithMedia} = useProductContext();
   const [fetchedProductTypes, setFetchedProductTypes] = useState([]); // Renamed to avoid conflict
   const [isAddingNewType, setIsAddingNewType] = useState(false);
   const [thumbnailPreview, setThumbnailPreview] = useState(null);
@@ -61,15 +63,8 @@ const ProductForm = ({ product = {}, onClose }) => {
     setMediaPreviews([]);
     setMissingFields([]);
   };
-  const fetchProducts = async () => {
-    try {
-      const response = await adminApi.get('/products/');
-      setProducts(response.data);
-    } catch (error) {
-      console.error('Error fetching products:', error);
-    }
-  };
 
+  
   const validateFields = () => {
     const missing = [];
     if (!newProduct.name) missing.push('name');
@@ -103,69 +98,35 @@ const ProductForm = ({ product = {}, onClose }) => {
       setMissingFields(missing);
       return;
     }
-
+  
     setIsLoading(true);
     try {
-      let productId;
-
-      // Step 1: Add the product
-      if (!product.id) {
-        const productFormData = new FormData();
-
-        // Add product data
-        productFormData.append('name', newProduct.name);
-        productFormData.append('description', newProduct.description);
-        productFormData.append('price', newProduct.price);
-        productFormData.append('type', newProduct.type);
-        productFormData.append('quantity', newProduct.quantity);
-        productFormData.append('length', newProduct.length || 0);
-        productFormData.append('width', newProduct.width || 0);
-        productFormData.append('height', newProduct.height || 0);
-        productFormData.append('weight', newProduct.weight || 0);
-        productFormData.append('unit', newProduct.unit || 'unit');
-        if (newProduct.thumbnail) {
-          productFormData.append('thumbnail', newProduct.thumbnail);
-        }
-
-        // Send product creation request
-        const productResponse = await adminApi.post('/products', productFormData, {
-          headers: { 'Content-Type': 'multipart/form-data' },
-        });
-
-        productId = productResponse.data.id;
-
-        if (!productId) {
-          throw new Error('Failed to retrieve product ID after creating product.');
-        }
-      } else {
-        productId = product.id;
-      }
-
-      // Step 2: Add media if any
-      if (mediaPreviews && mediaPreviews.length > 0) {
-        const mediaFormData = new FormData();
-        mediaPreviews.forEach((media, index) => {
-          mediaFormData.append('media', media.file);
-          mediaFormData.append(`mediaOrder_${index}`, index + 1);
-        });
-
-        // Attach the product ID to the media upload request
-        await adminApi.post(`/products/add-media?productId=${productId}`, mediaFormData, {
-          headers: { 'Content-Type': 'multipart/form-data' },
-        });
-      }
-
-      // Step 3: Refresh products list
+      const productData = {
+        name: newProduct.name,
+        description: newProduct.description,
+        price: newProduct.price,
+        type: newProduct.type,
+        quantity: newProduct.quantity,
+        length: newProduct.length || 0,
+        width: newProduct.width || 0,
+        height: newProduct.height || 0,
+        weight: newProduct.weight || 0,
+        unit: newProduct.unit || 'unit',
+        thumbnail: newProduct.thumbnail,
+      };
+  
+      await addProductWithMedia(productData, mediaPreviews);
       fetchProducts();
       resetForm();
-      onClose();
+      onClose(); // Close the form after saving
     } catch (error) {
-      console.error('Error saving product or media:', error);
-      alert('Failed to save product or media. Please try again.');
+      console.error('Error saving product:', error);
+      alert('Failed to save product. Please try again.');
     } finally {
       setIsLoading(false);
     }
   };
+  
 
   return (
     <div className="product-form-section">

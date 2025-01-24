@@ -52,16 +52,27 @@ export const ProductsProvider = ({ children }) => {
   // Fetch discounted products
   const addProductWithMedia = async (productData, mediaFiles) => {
     try {
-      // Step 1: Add the product and wait for the product ID
-      const productResponse = await adminApi.post('/products', productData);
+      const productFormData = new FormData();
   
-      const productId = productResponse.data.id; // Assuming the backend returns the product ID
+      // Append all product data to FormData
+      Object.entries(productData).forEach(([key, value]) => {
+        if (value !== null && value !== undefined) {
+          productFormData.append(key, value);
+        }
+      });
+  
+      // Step 1: Add the product
+      const productResponse = await adminApi.post('/products', productFormData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+  
+      const productId = productResponse.data.id;
   
       if (!productId) {
-        throw new Error('Failed to retrieve product ID after creating product.');
+        throw new Error('Failed to retrieve product ID after creating the product.');
       }
   
-      // Step 2: Add media using the productId
+      // Step 2: Add media files if any
       if (mediaFiles && mediaFiles.length > 0) {
         const mediaFormData = new FormData();
         mediaFiles.forEach((media, index) => {
@@ -69,14 +80,14 @@ export const ProductsProvider = ({ children }) => {
           mediaFormData.append(`mediaOrder_${index}`, index + 1);
         });
   
-        // Pass the productId as a query parameter or part of the body (based on backend logic)
+        // Pass the productId as a query parameter
         await adminApi.post(`/products/add-media?productId=${productId}`, mediaFormData, {
           headers: { 'Content-Type': 'multipart/form-data' },
         });
       }
   
       // Step 3: Refresh the products list
-      fetchProducts();
+      await fetchProducts();
   
       return { product: productResponse.data };
     } catch (error) {
