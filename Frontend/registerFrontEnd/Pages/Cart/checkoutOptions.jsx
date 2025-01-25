@@ -5,7 +5,7 @@ const CheckoutOptions = () => {
   const navigate = useNavigate();
 
   return (
-    <div style={{ textAlign: "center", marginTop: "50px" }}>
+    <div className="form-section">
       <h2>Checkout Options</h2>
       <p>How would you like to proceed?</p>
       <div style={{ marginTop: "20px" }}>

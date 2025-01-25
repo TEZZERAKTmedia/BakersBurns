@@ -19,7 +19,7 @@ const Navbar = () => {
     '/terms-of-service': 'Terms of Service',
   };
 
-  const currentPageTitle = pageTitles[location.pathname] || 'Page Not Found';
+  const currentPageTitle = pageTitles[location.pathname] || '';
 
   const toggleMenu = () => {
     setMenuOpen(!menuOpen);
@@ -89,7 +89,7 @@ const Navbar = () => {
 
       {/* Social Media Links */}
       {menuOpen && (
-        <div className="social-links-container">
+        <div >
           <SocialLinks />
         </div>
       )}

@@ -73,7 +73,7 @@ const Home = () => {
           <Link to="/store" className="hero-btn">Shop Now</Link>
         </div>
       </motion.section>
-      <SocialLinks />
+      
 
       {/* Upcoming Event Section */}
       {upcomingEvent && (

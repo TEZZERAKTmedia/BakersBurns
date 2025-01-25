@@ -68,7 +68,7 @@ const handleWebhook = async (req, res) => {
 
         await Message.create({
           threadId: thread.threadId,
-          senderUsername: '',
+          senderUsername: null,
           receiverUsername: user.username,
           messageBody: 'Welcome to BakersBurns! If you have any questions, feel free to ask.',
           createdAt: new Date(),

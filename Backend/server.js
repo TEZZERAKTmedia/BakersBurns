@@ -46,7 +46,6 @@ const userGalleryRoutes = require('./routes/user/galleryRoutes');
 const carrierRoutes = require('./routes/carrier/carrierRoutes');
 const registerCartRoutes = require('./routes/register/cartRoutes');
 const notificationRoutes = require('./routes/admin/notifcationRoutes');
-const stripeWebhookGuestRoutes = require('./routes/register/stripeWebhookGuestRoute');
 const socialRoutes = require('./routes/register/socialRoutes');
 const adminSocialRoutes = require('./routes/admin/adminSocialRoutes');
 const adminDiscountRoutes = require('./routes/admin/adminDiscountRoutes');
@@ -79,7 +78,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 
 app.use('/stripe-webhook-routes', express.raw({ type: 'application/json' }), stripeWebhookRoutes);
-app.use('/stripe-webhook-guest', express.raw({ type: 'application/json' }), stripeWebhookGuestRoutes);
+
 
 app.use(bodyParser.json());
 app.use(cookieParser());

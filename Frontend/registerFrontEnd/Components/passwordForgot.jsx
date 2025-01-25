@@ -8,7 +8,7 @@ const ForgotPassword = () => {
   const [message, setMessage] = useState(''); // Message state for success/error
   const [success, setSuccess] = useState(false); // Track if email was sent successfully
   const [notFound, setNotFound] = useState(false); // Track if email was not found
-
+  
   // Submit form handler
   const handleSubmit = async (e) => {
     e.preventDefault(); // Prevent form reload
