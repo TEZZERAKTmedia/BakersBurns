@@ -134,6 +134,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Contact
 If you have any questions or suggestions, feel free to reach out:
-- **Email**: [YourEmail@example.com](mailto:YourEmail@example.com)
-- **GitHub**: [YourGitHubUsername](https://github.com/YourGitHubUsername)
+- **Email**: trentyn.nicholas@gmail.com
+- **GitHub**: [Tezzeraktmedia](https://github.com/Tezzeraktmedia)
 
