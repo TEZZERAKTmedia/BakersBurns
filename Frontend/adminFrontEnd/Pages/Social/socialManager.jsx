@@ -295,7 +295,7 @@ const SocialLinksManager = () => {
                   ) : link.platform === 'Email' ? (
                     <a href={`mailto:${link.url}`}>{link.url}</a>
                   ) : (
-                    <a href={link.url} target="_blank" rel="noopener noreferrer">
+                    <a  href={link.url} target="_blank" rel="noopener noreferrer">
                       {link.url}
                     </a>
                   )}
