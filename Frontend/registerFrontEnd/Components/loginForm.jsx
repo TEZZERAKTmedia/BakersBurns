@@ -95,7 +95,7 @@ const LoginForm = () => {
             </Link>
           </form>
 
-          <div style={{ marginTop: '1rem' }}>
+          <div style={{ marginTop: '1rem', width: '100%' }} >
             <GoogleSignInButton
               
               onFailure={handleGoogleFailure}

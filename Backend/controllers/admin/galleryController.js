@@ -17,18 +17,34 @@ const getGalleryItems = async (req, res) => {
 // Add a new gallery item
 const addGalleryItem = async (req, res) => {
   const { title, description } = req.body;
-  const image = req.file ? req.file.filename : null; // Get filename from multer
+
+  // Use the updated `req.files` from `.any()`
+  const files = req.files || []; // Ensure `files` is always an array
+
+  if (files.length === 0) {
+    return res.status(400).json({ error: 'At least one media file is required' });
+  }
 
   try {
-    console.log('Adding new gallery item');
-    const newGalleryItem = await Gallery.create({ title, description, image });
-    console.log('Gallery item added');
+    // Extract file names to store in the database
+    const imageFilenames = files.map((file) => file.filename);
+
+    // Save the data in the database
+    const newGalleryItem = await Gallery.create({
+      title,
+      description,
+      image: JSON.stringify(imageFilenames), // Store image filenames as JSON array string
+    });
+
+    console.log('Gallery item added:', newGalleryItem);
     res.status(201).json(newGalleryItem);
   } catch (error) {
     console.error('Error adding gallery item:', error);
     res.status(500).json({ error: error.message });
   }
 };
+
+
 
 
 // Update a gallery item

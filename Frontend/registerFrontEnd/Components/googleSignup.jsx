@@ -141,7 +141,7 @@ const GoogleSignInButton = ({ onSuccess, onFailure }) => {
           onClose={() => setNeedsAcceptance(false)}
         />
       ) : (
-        <div id="googleSignInDiv" />
+        <div id="googleSignInDiv" style={{width: '100%'}} />
       )}
     </div>
   );

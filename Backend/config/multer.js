@@ -63,7 +63,42 @@ const socialIconUploadMiddleware = multer({
   limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB limit
 }).fields([{ name: 'image', maxCount: 1 }]);
 
+const galleryFileFilter = (req, file, cb) => {
+  const allowedMimeTypes = [
+    'image/jpeg', 'image/png', 'image/jpg',
+    'video/mp4', 'video/quicktime', 'video/x-msvideo'
+  ];
+
+  if (allowedMimeTypes.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new Error('Only JPEG, PNG, JPG, MP4, MOV, and AVI files are allowed'), false);
+  }
+};
+
+// Configure storage with absolute path
+const galleryStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const savePath = path.resolve(__dirname, '../galleryuploads'); // Resolve absolute path
+    cb(null, savePath);
+  },
+  filename: function (req, file, cb) {
+    const uniqueName = `${Date.now()}_${file.originalname}`;
+    cb(null, uniqueName);
+  },
+});
+
+// Middleware for handling product uploads
+const galleryUploadMiddleware = multer({
+  storage: galleryStorage,
+  fileFilter: galleryFileFilter,
+  limits: { fileSize: 50 * 1024 * 1024 }, // 50 MB limit
+}).any();
+
+// Configure storage for social icons
+
 module.exports = {
   productUploadMiddleware,
+  galleryUploadMiddleware,
   socialIconUploadMiddleware,
 };
