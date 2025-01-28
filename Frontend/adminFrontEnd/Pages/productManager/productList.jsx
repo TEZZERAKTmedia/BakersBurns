@@ -4,6 +4,7 @@ import SortingControls from './sortingControls'; // Import SortingControls
 import { toast } from 'react-toastify'; // Import Toastify for notifications
 import 'react-toastify/dist/ReactToastify.css'; // Import the CSS for Toastify
 import { useProductContext } from './ProductsContext';
+import { adminApi } from '../../config/axios';
 
 const ProductList = () => {
   const { products } = useProductContext(); // Get the latest products from context
