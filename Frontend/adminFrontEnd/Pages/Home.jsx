@@ -2,7 +2,8 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import '../Pagecss/Home.css'; // Import the CSS file for styling
 import NotificationBadge from '../Components/notification/notificationBadge';
-
+import ProductManagerGif from '../assets/ProductManager.gif'; // Import the ProductManager GIF
+import OrdersGif from '../assets/orders.gif';
 const Home = () => {
   return (
     <div className="home-container">
@@ -16,13 +17,18 @@ const Home = () => {
             <Link  style={{textDecoration: 'none'}} to="/orders">
               <div className='tile-content'>
                 <h3>Orders</h3>
+                <img 
+                style={{width: '50%', height: 'auto'}}
+                src={OrdersGif}/>
                 <p>Manage orders</p>
+                
                 <NotificationBadge
                   apiEndpoint="/admin-notifications/orders"
                   customFilter={(data) => data.filter((order) => order.status.toLowerCase() === 'processing')}
                   color="red"
                   label="Processing Orders"
                 />
+                
 
               </div>
             </Link>
@@ -32,6 +38,9 @@ const Home = () => {
             <Link style={{textDecoration: 'none'}} to="/product-manager">
               <div className="tile-content">
                 <h3>Product Manager</h3>
+                <img 
+                style={{width: '50%', height: 'auto'}}
+                src={ProductManagerGif}/>
                 <p className='home-tile-description'>Manage products and inventory</p>
               </div>
             </Link>

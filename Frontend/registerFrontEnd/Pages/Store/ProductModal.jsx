@@ -10,6 +10,18 @@ const ProductModal = ({ product, onClose }) => {
   const [loadingMedia, setLoadingMedia] = useState(true);
   const [startX, setStartX] = useState(0);
   const navigate = useNavigate();
+  const isDiscounted = product.isDiscounted;
+  const discountPrice = isDiscounted
+    ? parseFloat(product.discountPrice).toFixed(2)
+    : null;
+  const saleEndDate = isDiscounted
+    ? new Date(product.discountEndDate).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      })
+    : null;
+
 
   useEffect(() => {
     const fetchMedia = async () => {
@@ -204,18 +216,47 @@ const ProductModal = ({ product, onClose }) => {
             marginBottom: "20px",
           }}
         >
-          <p
-            style={{
-              fontSize: "1.5rem",
-              color: "#555",
-              backgroundColor: "white",
-              padding: "10px",
-              border: "solid 2px white",
-              borderRadius: "20px",
-            }}
-          >
-            ${product.price}
-          </p>
+          {isDiscounted ? (
+            <div>
+              <p
+                style={{
+                  fontSize: "1rem",
+                  textDecoration: "line-through",
+                  color: "#ccc",
+                }}
+              >
+                ${parseFloat(product.price).toFixed(2)}
+              </p>
+              <p
+                style={{
+                  fontSize: "1.5rem",
+                  fontWeight: "bold",
+                  color: "#ff4d4d",
+                }}
+              >
+                ${discountPrice}
+              </p>
+              <p
+                style={{
+                  fontSize: "0.9rem",
+                  color: "#ff4d4d",
+                  marginTop: "5px",
+                }}
+              >
+                Sale Ends: {saleEndDate}
+              </p>
+            </div>
+          ) : (
+            <p
+              style={{
+                fontSize: "1.5rem",
+                fontWeight: "bold",
+                color: "#cecece",
+              }}
+            >
+              ${parseFloat(product.price).toFixed(2)}
+            </p>
+          )}
         </div>
 
         {/* Product Details */}
