@@ -1,24 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import ProductCard from './productCard';
-import SortingControls from './sortingControls'; // Import SortingControls
-import { toast } from 'react-toastify'; // Import Toastify for notifications
-import 'react-toastify/dist/ReactToastify.css'; // Import the CSS for Toastify
+import SortingControls from './sortingControls';
 import { useProductContext } from './ProductsContext';
 import { adminApi } from '../../config/axios';
 
 const ProductList = () => {
-  const { products } = useProductContext(); // Get the latest products from context
+  const { products, fetchProducts } = useProductContext(); // 🔹 Use fetchProducts from context
   const [sortCriteria, setSortCriteria] = useState('name');
   const [sortOrder, setSortOrder] = useState('asc');
   const [filteredProducts, setFilteredProducts] = useState(products);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
   useEffect(() => {
-    // Update filteredProducts whenever products change
     setFilteredProducts(products);
   }, [products]);
 
   useEffect(() => {
-    // Automatically sort filteredProducts whenever sortCriteria or sortOrder changes
     setFilteredProducts((prevFilteredProducts) => {
       const sortedList = [...prevFilteredProducts];
       sortedList.sort((a, b) => {
@@ -60,31 +58,114 @@ const ProductList = () => {
     }
   };
 
+  // 🔹 Delete Product and Refresh List using `fetchProducts`
   const handleDeleteProduct = async (id) => {
     try {
-      await adminApi.delete(`/products/${id}`); // Assuming this calls the API to delete the product
-      toast.success('Product deleted successfully!'); // Show success message
+      await adminApi.delete(`/products/${id}`);
+      setSuccessMessage('Product deleted successfully!'); // Show success message
+      setErrorMessage('');
+      fetchProducts(); // 🔄 Use context function to refresh product list
     } catch (error) {
       console.error('Error deleting product:', error);
-      toast.error('Failed to delete product. This product might have been purchased or is in use.');
+      
+      if (error.response && error.response.status === 400) {
+        setErrorMessage(error.response.data.message || 'This product cannot be deleted because it is associated with an order.');
+      } else {
+        setErrorMessage('Failed to delete product. Please try again later.');
+      }
     }
   };
 
   return (
     <div>
+      {/* 🔹 SUCCESS MESSAGE */}
+      {successMessage && (
+        <div style={{
+          position: 'fixed',
+          top: '20px',
+          right: '20px',
+          backgroundColor: '#28a745',
+          color: 'white',
+          padding: '10px 20px',
+          borderRadius: '8px',
+          fontSize: '0.9rem',
+          fontWeight: 'bold',
+          zIndex: 9999,
+          boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
+          maxWidth: '300px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between'
+        }}>
+          <span>{successMessage}</span>
+          <button
+            onClick={() => setSuccessMessage('')}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              color: 'white',
+              fontSize: '16px',
+              marginLeft: '10px',
+              cursor: 'pointer',
+              fontWeight: 'bold'
+            }}
+          >
+            ✖
+          </button>
+        </div>
+      )}
+
+      {/* 🔹 ERROR MESSAGE FLOATING AT TOP-RIGHT */}
+      {errorMessage && (
+        <div style={{
+          position: 'fixed',
+          top: '70px', // Slightly below success message
+          right: '20px',
+          backgroundColor: '#ff4d4d',
+          color: 'white',
+          padding: '10px 20px',
+          borderRadius: '8px',
+          fontSize: '0.9rem',
+          fontWeight: 'bold',
+          zIndex: 9999,
+          boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
+          maxWidth: '300px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between'
+        }}>
+          <span>{errorMessage}</span>
+          <button
+            onClick={() => setErrorMessage('')}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              color: 'white',
+              fontSize: '16px',
+              marginLeft: '10px',
+              cursor: 'pointer',
+              fontWeight: 'bold'
+            }}
+          >
+            ✖
+          </button>
+        </div>
+      )}
+
       <SortingControls
         onSort={handleSort}
         sortCriteria={sortCriteria}
         sortOrder={sortOrder}
-        productTypes={[...new Set(products.map((p) => p.type))]} // Dynamically extract product types
+        productTypes={[...new Set(products.map((p) => p.type))]}
         onFilterByType={handleFilterByType}
       />
+
       <div className="product-list">
         {filteredProducts.map((product) => (
           <div key={product.id} className="product-item-container">
             <ProductCard
               product={product}
-              onDeleteProduct={handleDeleteProduct} // Use the modified handleDeleteProduct
+              onDeleteProduct={handleDeleteProduct}
             />
           </div>
         ))}

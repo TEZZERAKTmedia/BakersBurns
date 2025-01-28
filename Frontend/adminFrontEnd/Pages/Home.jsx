@@ -9,7 +9,7 @@ const Home = () => {
     <div className="home-container">
       <div className="background-image"></div>
       <div className="content">
-        <h1 className="home-page-header">Admin Dashboard</h1>
+        <h1 className="home-page-header"></h1>
 
         <ul className="home-app-tiles">
         
@@ -18,7 +18,7 @@ const Home = () => {
               <div className='tile-content'>
                 <h3>Orders</h3>
                 <img 
-                style={{width: '50%', height: 'auto'}}
+                style={{width: '100%', height: 'auto'}}
                 src={OrdersGif}/>
                 <p>Manage orders</p>
                 
@@ -39,7 +39,7 @@ const Home = () => {
               <div className="tile-content">
                 <h3>Product Manager</h3>
                 <img 
-                style={{width: '50%', height: 'auto'}}
+                style={{width: '100%', height: 'auto'}}
                 src={ProductManagerGif}/>
                 <p className='home-tile-description'>Manage products and inventory</p>
               </div>

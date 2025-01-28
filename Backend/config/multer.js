@@ -4,7 +4,7 @@ const path = require('path');
 // MIME type validation function
 const productFileFilter = (req, file, cb) => {
   const allowedMimeTypes = [
-    'image/jpeg', 'image/png', 'image/jpg',
+    'image/jpeg', 'image/png', 'image/jpg', 'image/gif',
     'video/mp4', 'video/quicktime', 'video/x-msvideo'
   ];
 

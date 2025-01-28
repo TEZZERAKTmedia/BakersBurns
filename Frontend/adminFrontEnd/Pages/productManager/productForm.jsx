@@ -4,6 +4,7 @@ import MediaUploader from '../../Components/desktopMediaUploader';
 import { adminApi } from '../../config/axios';
 import { useProductContext } from './ProductsContext';
 
+
 const ProductForm = ({ product = {}, onClose }) => {
   
   const [products, setProducts] = useState([]);
@@ -11,6 +12,7 @@ const ProductForm = ({ product = {}, onClose }) => {
   const [fetchedProductTypes, setFetchedProductTypes] = useState([]); // Renamed to avoid conflict
   const [isAddingNewType, setIsAddingNewType] = useState(false);
   const [thumbnailPreview, setThumbnailPreview] = useState(null);
+  const [successMessage, setSuccessMessage] = useState('');
   const [newProduct, setNewProduct] = useState({
     name: product.name || '',
     description: product.description || '',
@@ -117,6 +119,7 @@ const ProductForm = ({ product = {}, onClose }) => {
   
       await addProductWithMedia(productData, mediaPreviews);
       fetchProducts();
+      setSuccessMessage('Product saved successfully!');
       resetForm();
       onClose(); // Close the form after saving
     } catch (error) {
@@ -130,6 +133,41 @@ const ProductForm = ({ product = {}, onClose }) => {
 
   return (
     <div className="product-form-section">
+      {successMessage && (
+        <div style={{
+          position: 'fixed',
+          top: '20px',
+          right: '20px',
+          backgroundColor: '#28a745',
+          color: 'white',
+          padding: '10px 20px',
+          borderRadius: '8px',
+          fontSize: '0.9rem',
+          fontWeight: 'bold',
+          zIndex: 9999,
+          boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
+          maxWidth: '300px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between'
+        }}>
+          <span>{successMessage}</span>
+          <button
+            onClick={() => setSuccessMessage('')}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              color: 'white',
+              fontSize: '16px',
+              marginLeft: '10px',
+              cursor: 'pointer',
+              fontWeight: 'bold'
+            }}
+          >
+            ✖
+          </button>
+        </div>
+      )}
       <h2>{product.id ? 'Edit Product' : 'Add Product'}</h2>
       {missingFields.length > 0 && (
         <p style={{ color: 'red' }}>Missing fields: {missingFields.join(', ')}</p>
@@ -156,6 +194,14 @@ const ProductForm = ({ product = {}, onClose }) => {
           type="number"
           value={newProduct.price}
           onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
+        />
+      </label>
+      <label>
+        Quantity:
+        <input
+          type="number"
+          value={newProduct.quantity}
+          onChange={(e) => setNewProduct({ ...newProduct, quantity: e.target.value })}
         />
       </label>
 
@@ -259,6 +305,7 @@ const ProductForm = ({ product = {}, onClose }) => {
       </div>
 
       <div className='form-section'>
+        <h1>Media Uploader</h1>
         <MediaUploader
           mode="add"
           maxMedia={10}
