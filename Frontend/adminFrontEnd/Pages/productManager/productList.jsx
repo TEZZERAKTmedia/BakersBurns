@@ -4,6 +4,7 @@ import SortingControls from './sortingControls';
 import { useProductContext } from './ProductsContext';
 import { adminApi } from '../../config/axios';
 
+
 const ProductList = () => {
   const { products, fetchProducts } = useProductContext(); // 🔹 Use fetchProducts from context
   const [sortCriteria, setSortCriteria] = useState('name');

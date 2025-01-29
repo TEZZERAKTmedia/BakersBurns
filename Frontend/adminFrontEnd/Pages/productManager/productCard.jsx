@@ -5,6 +5,8 @@ import { useProductContext } from './ProductsContext'; // Import context
 import './product_card.css';
 import { toast } from 'react-toastify';
 import DiscountIcon from '../../assets/Icons/discount.png';
+import TrashIcon from '../../assets/Icons/trash.png';
+import { Link } from 'react-router-dom';
 
 const ProductCard = ({ product, onDeleteProduct }) => { 
   const [isEditingProduct, setIsEditingProduct] = useState(false);
@@ -13,6 +15,7 @@ const ProductCard = ({ product, onDeleteProduct }) => {
   const [isLoadingMedia, setIsLoadingMedia] = useState(false);
   const [productDetails, setProductDetails] = useState(null);
   const [isLoadingDetails, setIsLoadingDetails] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);  
 
   const { fetchProducts, fetchProductDetails, fetchProductMedia } = useProductContext();
 
@@ -55,6 +58,16 @@ const ProductCard = ({ product, onDeleteProduct }) => {
     try {
       await onDeleteProduct(product.id); // Pass product id to delete
       toast.success('Product deleted successfully!');
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      toast.error('Failed to delete product. This product might have been purchased or is in use.');
+    }
+  };
+  const handleDeleteConfirm = async () => {
+    try {
+      await onDeleteProduct(product.id);
+      toast.success('Product deleted successfully!');
+      setShowConfirmModal(false); // Close modal after deleting
     } catch (error) {
       console.error('Error deleting product:', error);
       toast.error('Failed to delete product. This product might have been purchased or is in use.');
@@ -106,14 +119,16 @@ const ProductCard = ({ product, onDeleteProduct }) => {
          
             {!product.isDiscounted && (
               <div style={{width: '50%', marginLeft:' 25%', }}> 
+              <Link to='/discount'>
             <button
               className='add-discount-by-product'
-              onClick={() => setIsEditingDiscount(true)}
+              
              
             >
               <img src={DiscountIcon}  style={{height:'50px', width:'50px'}}/>
               Add Discount
             </button>
+            </Link>
             </div>
           )}
           
@@ -251,7 +266,30 @@ const ProductCard = ({ product, onDeleteProduct }) => {
         </>
       )}
 
-      <button onClick={handleDelete}>Delete</button>
+        <div>
+        <img
+        onClick={setShowConfirmModal}
+        src={TrashIcon}
+        style={{width: '50px', height: '50px'}}
+
+        
+         />
+        </div>
+     
+       
+          {showConfirmModal && (
+        <div className="modal-overlay">
+          <div className="form-section">
+            <h3>Are you sure?</h3>
+            <p>Deleting this product cannot be undone.</p>
+            <div className="modal-buttons">
+              <button onClick={handleDeleteConfirm} className="confirm-button">Yes, Delete</button>
+              <button onClick={() => setShowConfirmModal(false)} className="cancel-button">Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+        
     </div>
   );
 };
