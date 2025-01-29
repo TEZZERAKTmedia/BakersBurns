@@ -3,11 +3,14 @@ import PropTypes from 'prop-types';
 import MediaUploader from '../../Components/desktopMediaUploader';
 import { adminApi } from '../../config/axios';
 import { useProductContext } from './ProductsContext';
+import { motion, AnimatePresence } from 'framer-motion';
+
 
 
 const ProductForm = ({ product = {}, onClose }) => {
-  
+  const [showMessage, setShowMessage] = useState(false);
   const [products, setProducts] = useState([]);
+  
   const {fetchProducts, addProductWithMedia} = useProductContext();
   const [fetchedProductTypes, setFetchedProductTypes] = useState([]); // Renamed to avoid conflict
   const [isAddingNewType, setIsAddingNewType] = useState(false);
@@ -29,6 +32,16 @@ const ProductForm = ({ product = {}, onClose }) => {
   const [mediaPreviews, setMediaPreviews] = useState([]);
   const [missingFields, setMissingFields] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  useEffect(() => {
+    if (missingFields.length > 0) {
+      setShowMessage(true);
+  
+      // ⏳ Hide message after a delay (matches exit animation duration)
+      setTimeout(() => {
+        setShowMessage(false);
+      }, 3000); // 0.5s matches `exit={{ opacity: 0, y: -20 }}` transition
+    }
+  }, [missingFields]);
 
   useEffect(() => {
     // Fetch product types
@@ -119,9 +132,15 @@ const ProductForm = ({ product = {}, onClose }) => {
   
       await addProductWithMedia(productData, mediaPreviews);
       fetchProducts();
+  
       setSuccessMessage('Product saved successfully!');
-      resetForm();
-      onClose(); // Close the form after saving
+  
+      // Delay resetting form and closing modal so the success message is visible
+      setTimeout(() => {
+        setSuccessMessage('');
+        resetForm();
+        onClose(); // 🔹 Now we close it AFTER 3 seconds
+      }, 3000);
     } catch (error) {
       console.error('Error saving product:', error);
       alert('Failed to save product. Please try again.');
@@ -130,13 +149,21 @@ const ProductForm = ({ product = {}, onClose }) => {
     }
   };
   
+  
 
   return (
     <div className="product-form-section">
+      <AnimatePresence>
       {successMessage && (
-        <div style={{
+        
+        <motion.div 
+        initial={{ opacity: 0, y: -20 }}  // Start invisible and slightly above
+        animate={{ opacity: 1, y: 0 }}  // Fade in and move to position
+        exit={{ opacity: 0, y: -20 }}   // Fade out and move up
+        transition={{ duration: 0.5 }}  // Smooth fade in/out
+          style={{
           position: 'fixed',
-          top: '20px',
+          top: '40px',
           right: '20px',
           backgroundColor: '#28a745',
           color: 'white',
@@ -166,12 +193,41 @@ const ProductForm = ({ product = {}, onClose }) => {
           >
             ✖
           </button>
-        </div>
+        </motion.div>
       )}
+      </AnimatePresence>
+      
       <h2>{product.id ? 'Edit Product' : 'Add Product'}</h2>
-      {missingFields.length > 0 && (
-        <p style={{ color: 'red' }}>Missing fields: {missingFields.join(', ')}</p>
+      <AnimatePresence>
+      {showMessage && (
+        <motion.p
+          initial={{ opacity: 0, y: -20 }}  // Start invisible and slightly above
+          animate={{ opacity: 1, y: 0 }}  // Fade in and move to position
+          exit={{ opacity: 0, y: -20 }}   // Fade out and move up
+          transition={{ duration: 0.5 }}  // Smooth fade in/out
+          style={{
+            position: 'fixed',
+            top: '40px',
+            right: '20px',
+            backgroundColor: 'red',
+            color: 'white',
+            padding: '10px 20px',
+            borderRadius: '8px',
+            fontSize: '0.9rem',
+            fontWeight: 'bold',
+            zIndex: 9999,
+            boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
+            maxWidth: '300px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
+          Missing fields: {missingFields.join(', ')}
+        </motion.p>
       )}
+    </AnimatePresence>
+     
       <label>
         Product Name:
         <input
