@@ -4,6 +4,7 @@ import '../Pagecss/Home.css'; // Import the CSS file for styling
 import NotificationBadge from '../Components/notification/notificationBadge';
 import ProductManagerGif from '../assets/ProductManager.gif'; // Import the ProductManager GIF
 import OrdersGif from '../assets/orders.gif';
+import GalleryGif from '../assets/gallery.gif';
 const Home = () => {
   return (
     <div className="home-container">
@@ -50,6 +51,9 @@ const Home = () => {
             <Link  style={{textDecoration: 'none'}} to="/gallery">
               <div className="tile-content">
                 <h3>Gallery</h3>
+                <img 
+                style={{width: '100%', height: 'auto'}}
+                src={GalleryGif}/>
                 <p className='home-tile-description'>Manage your gallery here</p>
               </div>
             </Link>

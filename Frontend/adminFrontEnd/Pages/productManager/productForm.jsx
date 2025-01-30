@@ -1,378 +1,264 @@
-import React, { useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
-import MediaUploader from '../../Components/desktopMediaUploader';
-import { adminApi } from '../../config/axios';
-import { useProductContext } from './ProductsContext';
-import { motion, AnimatePresence } from 'framer-motion';
-
-
+import React, { useState, useEffect, useRef } from "react";
+import PropTypes from "prop-types";
+import MediaUploader from "../../Components/desktopMediaUploader";
+import { useProductContext } from "./ProductsContext";
+import { motion, AnimatePresence } from "framer-motion";
 
 const ProductForm = ({ product = {}, onClose }) => {
-  const [showMessage, setShowMessage] = useState(false);
-  const [products, setProducts] = useState([]);
-  
-  const {fetchProducts, addProductWithMedia} = useProductContext();
-  const [fetchedProductTypes, setFetchedProductTypes] = useState([]); // Renamed to avoid conflict
+  const { fetchProducts, addProductWithMedia, fetchProductTypes, productTypes } = useProductContext();
   const [isAddingNewType, setIsAddingNewType] = useState(false);
   const [thumbnailPreview, setThumbnailPreview] = useState(null);
-  const [successMessage, setSuccessMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState("");
+  const [missingFields, setMissingFields] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const inputRefs = {
+    name: useRef(null),
+    description: useRef(null),
+    price: useRef(null),
+    quantity: useRef(null),
+    type: useRef(null),
+    newType: useRef(null),
+    thumbnail: useRef(null),
+  };
+
   const [newProduct, setNewProduct] = useState({
-    name: product.name || '',
-    description: product.description || '',
+    name: product.name || "",
+    description: product.description || "",
     price: product.price || 0,
-    type: product.type || '',
+    type: product.type || "",
+    newType: "", // Separate field for new type
     quantity: product.quantity || 1,
     length: product.length || 0,
     width: product.width || 0,
     height: product.height || 0,
     weight: product.weight || 0,
-    unit: product.unit || '',
+    unit: product.unit || "standard", // Default to "Standard"
     thumbnail: null,
   });
+
   const [mediaPreviews, setMediaPreviews] = useState([]);
-  const [missingFields, setMissingFields] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
+
+  // ✅ Fetch product types on mount
   useEffect(() => {
-    if (missingFields.length > 0) {
-      setShowMessage(true);
-  
-      // ⏳ Hide message after a delay (matches exit animation duration)
-      setTimeout(() => {
-        setShowMessage(false);
-      }, 3000); // 0.5s matches `exit={{ opacity: 0, y: -20 }}` transition
-    }
-  }, [missingFields]);
-
-  useEffect(() => {
-    // Fetch product types
-    const fetchProductTypes = async () => {
-      try {
-        const response = await adminApi.get('/products/types');
-        console.log('Fetched product types:', response.data); // Log the fetched data
-        setFetchedProductTypes(response.data);
-      } catch (error) {
-        console.error('Error fetching product types:', error);
-      }
-    };
-
-    // Fetch products for the list
-    
-
+    fetchProducts();
     fetchProductTypes();
-    fetchProducts(); // Fetch products when the component mounts
   }, []);
-  const resetForm = () => {
-    setNewProduct({
-      name: '',
-      description: '',
-      price: 0,
-      type: '',
-      quantity: 1,
-      length: 0,
-      width: 0,
-      height: 0,
-      weight: 0,
-      unit: '',
-      thumbnail: null,
-    });
-    setMediaPreviews([]);
-    setMissingFields([]);
-  };
 
-  
   const validateFields = () => {
     const missing = [];
-    if (!newProduct.name) missing.push('name');
-    if (!newProduct.description) missing.push('description');
-    if (!newProduct.price || newProduct.price <= 0) missing.push('price');
-    if (!newProduct.type) missing.push('type');
-    if (newProduct.quantity <= 0) missing.push('quantity');
+
+    if (!newProduct.name.trim()) missing.push("name");
+    if (!newProduct.description.trim()) missing.push("description");
+    if (!newProduct.price || newProduct.price <= 0) missing.push("price");
+    if (!newProduct.quantity || newProduct.quantity <= 0) missing.push("quantity");
+    if (!newProduct.thumbnail) missing.push("thumbnail");
+
+    if (isAddingNewType) {
+      if (!newProduct.newType.trim()) {
+        missing.push("newType");
+      } else {
+        setNewProduct((prev) => ({ ...prev, type: prev.newType.trim() })); // Ensure new type is set
+      }
+    } else if (!newProduct.type.trim()) {
+      missing.push("type");
+    }
+
     return missing;
-  };
-
-  const handleThumbnailChange = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      const previewUrl = URL.createObjectURL(file); // Generate a preview URL
-      setThumbnailPreview(previewUrl); // Store the preview URL
-      setNewProduct({ ...newProduct, thumbnail: file });
-    }
-  };
-
-  const handleMediaChange = (updatedMedia) => {
-    if (!Array.isArray(updatedMedia)) {
-      console.warn('Invalid media passed to handleMediaChange');
-      return;
-    }
-    setMediaPreviews(updatedMedia);
   };
 
   const handleSave = async () => {
     const missing = validateFields();
+
     if (missing.length > 0) {
       setMissingFields(missing);
+      const firstMissingField = missing[0];
+      if (inputRefs[firstMissingField]?.current) {
+        inputRefs[firstMissingField].current.scrollIntoView({ behavior: "smooth", block: "center" });
+        inputRefs[firstMissingField].current.focus();
+      }
       return;
     }
-  
+
     setIsLoading(true);
     try {
       const productData = {
-        name: newProduct.name,
-        description: newProduct.description,
-        price: newProduct.price,
-        type: newProduct.type,
-        quantity: newProduct.quantity,
-        length: newProduct.length || 0,
-        width: newProduct.width || 0,
-        height: newProduct.height || 0,
-        weight: newProduct.weight || 0,
-        unit: newProduct.unit || 'unit',
-        thumbnail: newProduct.thumbnail,
+        ...newProduct,
+        type: isAddingNewType ? newProduct.newType.trim() : newProduct.type.trim(),
+        unit: newProduct.unit || "unit",
       };
-  
+
       await addProductWithMedia(productData, mediaPreviews);
       fetchProducts();
-  
-      setSuccessMessage('Product saved successfully!');
-  
-      // Delay resetting form and closing modal so the success message is visible
+
+      setSuccessMessage("Product saved successfully!");
       setTimeout(() => {
-        setSuccessMessage('');
-        resetForm();
-        onClose(); // 🔹 Now we close it AFTER 3 seconds
+        setSuccessMessage("");
+        onClose();
       }, 3000);
     } catch (error) {
-      console.error('Error saving product:', error);
-      alert('Failed to save product. Please try again.');
+      console.error("Error saving product:", error);
+      alert("Failed to save product. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
-  
-  
 
   return (
     <div className="product-form-section">
       <AnimatePresence>
-      {successMessage && (
-        
-        <motion.div 
-        initial={{ opacity: 0, y: -20 }}  // Start invisible and slightly above
-        animate={{ opacity: 1, y: 0 }}  // Fade in and move to position
-        exit={{ opacity: 0, y: -20 }}   // Fade out and move up
-        transition={{ duration: 0.5 }}  // Smooth fade in/out
-          style={{
-          position: 'fixed',
-          top: '40px',
-          right: '20px',
-          backgroundColor: '#28a745',
-          color: 'white',
-          padding: '10px 20px',
-          borderRadius: '8px',
-          fontSize: '0.9rem',
-          fontWeight: 'bold',
-          zIndex: 9999,
-          boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
-          maxWidth: '300px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between'
-        }}>
-          <span>{successMessage}</span>
-          <button
-            onClick={() => setSuccessMessage('')}
+        {successMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.5 }}
             style={{
-              background: 'transparent',
-              border: 'none',
-              color: 'white',
-              fontSize: '16px',
-              marginLeft: '10px',
-              cursor: 'pointer',
-              fontWeight: 'bold'
+              position: "fixed",
+              top: "40px",
+              right: "20px",
+              backgroundColor: "#28a745",
+              color: "white",
+              padding: "10px 20px",
+              borderRadius: "8px",
+              zIndex: 9999,
             }}
           >
-            ✖
-          </button>
-        </motion.div>
-      )}
+            {successMessage}
+          </motion.div>
+        )}
       </AnimatePresence>
-      
-      <h2>{product.id ? 'Edit Product' : 'Add Product'}</h2>
-      <AnimatePresence>
-      {showMessage && (
-        <motion.p
-          initial={{ opacity: 0, y: -20 }}  // Start invisible and slightly above
-          animate={{ opacity: 1, y: 0 }}  // Fade in and move to position
-          exit={{ opacity: 0, y: -20 }}   // Fade out and move up
-          transition={{ duration: 0.5 }}  // Smooth fade in/out
-          style={{
-            position: 'fixed',
-            top: '40px',
-            right: '20px',
-            backgroundColor: 'red',
-            color: 'white',
-            padding: '10px 20px',
-            borderRadius: '8px',
-            fontSize: '0.9rem',
-            fontWeight: 'bold',
-            zIndex: 9999,
-            boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
-            maxWidth: '300px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-          }}
-        >
-          Missing fields: {missingFields.join(', ')}
-        </motion.p>
-      )}
-    </AnimatePresence>
-     
+
+      <h2>{product.id ? "Edit Product" : "Add Product"}</h2>
+
       <label>
         Product Name:
         <input
+          ref={inputRefs.name}
           type="text"
           value={newProduct.name}
           onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
+          style={{ border: missingFields.includes("name") ? "2px solid red" : "" }}
         />
       </label>
       <label>
         Description:
         <input
+          ref={inputRefs.description}
           type="text"
           value={newProduct.description}
           onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })}
+          style={{ border: missingFields.includes("description") ? "2px solid red" : "" }}
         />
       </label>
+
       <label>
         Price:
         <input
+          ref={inputRefs.price}
           type="number"
           value={newProduct.price}
           onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
+          style={{ border: missingFields.includes("price") ? "2px solid red" : "" }}
         />
       </label>
+
       <label>
         Quantity:
         <input
+          ref={inputRefs.quantity}
           type="number"
           value={newProduct.quantity}
           onChange={(e) => setNewProduct({ ...newProduct, quantity: e.target.value })}
+          style={{ border: missingFields.includes("quantity") ? "2px solid red" : "" }}
         />
       </label>
-
-      <div className='form-section'>
+      {/* ✅ Dimensions & Weight */}
+      <div className="form-section">
         <label>Dimensions (inches/cm):</label>
         <div className="dimensions-inputs">
-          <input
-            type="number"
-            step="0.01"
-            placeholder="Length"
-            value={newProduct.length}
-            onChange={(e) => setNewProduct({ ...newProduct, length: e.target.value })}
-          />
-          <input
-            type="number"
-            step="0.01"
-            placeholder="Width"
-            value={newProduct.width}
-            onChange={(e) => setNewProduct({ ...newProduct, width: e.target.value })}
-          />
-          <input
-            type="number"
-            step="0.01"
-            placeholder="Height"
-            value={newProduct.height}
-            onChange={(e) => setNewProduct({ ...newProduct, height: e.target.value })}
-          />
+          <input type="number" placeholder="Length" ref={inputRefs.length} />
+          <input type="number" placeholder="Width" ref={inputRefs.width} />
+          <input type="number" placeholder="Height" ref={inputRefs.height} />
         </div>
+
         <label>Weight (lbs/kg):</label>
-        <input
-          type="number"
-          step="0.01"
-          placeholder="Weight"
-          value={newProduct.weight}
-          onChange={(e) => setNewProduct({ ...newProduct, weight: e.target.value })}
-        />
+        <input type="number" placeholder="Weight" ref={inputRefs.weight} />
+
         <label>Measurement Unit:</label>
         <select
           value={newProduct.unit}
-          onChange={(e) => setNewProduct({ ...newProduct, unit: e.target.value })}
+          onChange={(e) =>
+            setNewProduct({ ...newProduct, unit: e.target.value })
+          }
         >
-          <option value="">Select Unit</option>
-          <option value="metric">Metric</option>
           <option value="standard">Standard</option>
+          <option value="metric">Metric</option>
         </select>
       </div>
 
-      <div className='form-section'>
-        <label >
-          Product Type:
-          <select
-            value={newProduct.type === '' && isAddingNewType ? 'new' : newProduct.type}
-            onChange={(e) => {
-              const value = e.target.value;
-              if (value === 'new') {
-                setIsAddingNewType(true); // Enable adding a new type
-                setNewProduct({ ...newProduct, type: '' }); // Clear type for the new input
-              } else {
-                setIsAddingNewType(false); // Disable adding a new type
-                setNewProduct({ ...newProduct, type: value });
-              }
-            }}
-          >
-            <option value="">Select a Type</option>
-            {fetchedProductTypes.map((type, index) => (
-              <option key={index} value={type}>
-                {type}
-              </option>
-            ))}
-            <option value="new">Add a New Type</option>
-          </select>
+      <label>
+        Product Type:
+        <select
+          ref={inputRefs.type}
+          value={isAddingNewType ? "new" : newProduct.type}
+          onChange={(e) => {
+            if (e.target.value === "new") {
+              setIsAddingNewType(true);
+              setNewProduct({ ...newProduct, type: "", newType: "" });
+            } else {
+              setIsAddingNewType(false);
+              setNewProduct({ ...newProduct, type: e.target.value, newType: "" });
+            }
+          }}
+          style={{ border: missingFields.includes("type") ? "2px solid red" : "" }}
+        >
+          <option value="">Select a Type</option>
+          {productTypes.map((type, index) => (
+            <option key={index} value={type}>
+              {type}
+            </option>
+          ))}
+          <option value="new">Enter New Type</option>
+        </select>
+      </label>
 
-          {isAddingNewType && (
-            <input
-              type="text"
-              placeholder="Enter new type"
-              value={newProduct.type}
-              onChange={(e) => setNewProduct({ ...newProduct, type: e.target.value })}
-              style={{ flex: '1' }} // Makes the input take the remaining space
-            />
-          )}
-        </label>
-      </div>
-
-      <div className='form-section'>
+      {isAddingNewType && (
         <label>
-          Thumbnail:
-          <input type="file" accept="image/*" onChange={handleThumbnailChange} />
+          New Type:
+          <input
+            ref={inputRefs.newType}
+            type="text"
+            value={newProduct.newType}
+            onChange={(e) => setNewProduct({ ...newProduct, newType: e.target.value })}
+            style={{ border: missingFields.includes("newType") ? "2px solid red" : "" }}
+          />
         </label>
-        <div className="form-section">
-          {thumbnailPreview && (
-            <div style={{ marginTop: '10px' }}>
-              <img
-                src={thumbnailPreview}
-                alt="Thumbnail Preview"
-                style={{ width: '100px', height: 'auto', border: '1px solid #ccc' }}
-              />
-            </div>
-          )}
-        </div>
-      </div>
+      )}
 
-      <div className='form-section'>
+    
+      <div className="form-section" style={{ border: missingFields.includes("thumbnail") ? "2px solid red" : "" }}>
+      <label>
+        Thumbnail:
+        <p style={{color:'black'}}>JPEG, PNG, and GIF</p>
+        <input
+          
+        ref={inputRefs.thumbnail}
+        type="file" 
+        accept="image/*" 
+        onChange={(e) => setNewProduct({ ...newProduct, thumbnail: e.target.files[0] })} />
+      </label>
+      </div>
+      {/* Media Uploader */}
+      <div className="form-section">
         <h1>Media Uploader</h1>
-        <MediaUploader
-          mode="add"
-          maxMedia={10}
-          initialMedia={Array.isArray(mediaPreviews) ? mediaPreviews : []}
-          onMediaChange={handleMediaChange}
-        />
+        <p style={{color:'black'}}>Accepted formats: JPEG, PNG, JPG, MP4, MOV, and AVI</p>
+      <MediaUploader mode="add" maxMedia={10} initialMedia={mediaPreviews} onMediaChange={setMediaPreviews} />
       </div>
 
-      <div style={{ marginTop: '20px' }}>
+      <div style={{ marginTop: "20px" }}>
         <button onClick={handleSave} disabled={isLoading}>
-          {isLoading ? 'Saving...' : 'Save'}
+          {isLoading ? "Saving..." : "Save"}
         </button>
         <button onClick={onClose}>Cancel</button>
       </div>
