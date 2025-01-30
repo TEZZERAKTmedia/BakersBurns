@@ -1,6 +1,7 @@
 const RateLimiterLogs = require('../models/rateLimiterLogs'); // Import the model
 const moment = require('moment');
 const { Op } = require('sequelize');
+const nodemailer = require('nodemailer'); 
 
 /**
  * Handles failed login attempts with exponential backoff blocking.
@@ -9,6 +10,41 @@ const { Op } = require('sequelize');
  * @param {number} maxAttempts - Maximum attempts before blocking.
  * @param {Array<number>} blockDurations - Array of block durations in minutes.
  */
+const ROOT_EMAIL = process.env.RootEmail; // Ensure this is set in your environment variables
+
+// 🛠️ Configure Nodemailer with Hostinger-style SMTP settings
+const transporter = nodemailer.createTransport({
+  host: process.env.EMAIL_HOST, // SMTP Host (e.g., smtp.hostinger.com)
+  port: parseInt(process.env.EMAIL_PORT, 10), // Port (e.g., 465 for SSL, 587 for TLS)
+  secure: process.env.EMAIL_SECURE === 'true', // true for SSL, false for TLS
+  auth: {
+    user: process.env.EMAIL_USER, // Your SMTP user (email)
+    pass: process.env.EMAIL_PASS, // Your SMTP password
+  },
+  logger: true, // Enable logging of SMTP communication
+  debug: true, // Enable debugging
+});
+
+/**
+ * Sends an email notification when the rate limiter is triggered.
+ * @param {string} ip - The blocked IP address.
+ * @param {string} routeName - The affected route.
+ */
+const sendRateLimiterAlert = async (ip, routeName) => {
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to: ROOT_EMAIL,
+    subject: '🚨 Rate Limiter Triggered on Bakers Burns 🚨',
+    text: `Hi,\n\nThe rate limiter on Bakers Burns was triggered.\n\n🔹 IP Address: ${ip}\n🔹 Route: ${routeName}\n\nThis might be a sign of a brute-force attempt or excessive API requests.\n\nBest regards,\nYour Server`,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log(`📧 Rate limiter alert sent to ${ROOT_EMAIL}`);
+  } catch (error) {
+    console.error('❌ Error sending rate limiter alert:', error);
+  }
+};
 const handleFailedLogin = async (ip, routeName, maxAttempts = 5, blockDurations = [3, 5, 10, 15, 30, 60, 1440]) => {
   try {
     const now = moment();
@@ -28,7 +64,11 @@ const handleFailedLogin = async (ip, routeName, maxAttempts = 5, blockDurations 
 
         log.blocked_until = now.add(nextDuration, 'minutes').toDate();
         log.request_count = 0; // Reset count after block
-        console.log(`IP ${ip} blocked on ${routeName} for ${nextDuration} minutes.`);
+
+        console.log(`🚫 IP ${ip} blocked on ${routeName} for ${nextDuration} minutes.`);
+
+        // 📧 Send an email alert
+        await sendRateLimiterAlert(ip, routeName);
       }
 
       await log.save();
@@ -42,9 +82,10 @@ const handleFailedLogin = async (ip, routeName, maxAttempts = 5, blockDurations 
       });
     }
   } catch (err) {
-    console.error('Error handling failed login:', err);
+    console.error('❌ Error handling failed login:', err);
   }
 };
+
 
 /**
  * Clears failed login attempts for an IP and route.
