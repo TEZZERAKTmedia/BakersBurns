@@ -84,7 +84,7 @@ const ProductCard = ({ product, onDeleteProduct }) => {
   };
 
   return (
-    <div className="form-section">
+    <div className="form-section" style={{marginBottom:'20%'}}>
       {isEditingProduct ? (
         <EditProductForm
           productId={product.id}

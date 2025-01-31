@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import MediaUploader from "../../Components/desktopMediaUploader";
 import { useProductContext } from "./ProductsContext";
 import { motion, AnimatePresence } from "framer-motion";
+import LoadingPage from "../../Components/loading";
 
 const ProductForm = ({ product = {}, onClose }) => {
   const { fetchProducts, addProductWithMedia, fetchProductTypes, productTypes } = useProductContext();
@@ -11,6 +12,7 @@ const ProductForm = ({ product = {}, onClose }) => {
   const [successMessage, setSuccessMessage] = useState("");
   const [missingFields, setMissingFields] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  
 
   const inputRefs = {
     name: useRef(null),
@@ -105,7 +107,11 @@ const ProductForm = ({ product = {}, onClose }) => {
   };
 
   return (
-    <div className="product-form-section">
+    <div >
+      {isLoading ? (
+        <LoadingPage /> // Render loading page
+      ) : (
+        <>
       <AnimatePresence>
         {successMessage && (
           <motion.div
@@ -262,6 +268,8 @@ const ProductForm = ({ product = {}, onClose }) => {
         </button>
         <button onClick={onClose}>Cancel</button>
       </div>
+      </>
+      )}
     </div>
   );
 };

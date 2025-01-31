@@ -24,7 +24,7 @@ const ProductManagementContent = () => {
   return isLoading ? (
     <LoadingPage />
   ) : (
-    <div className="product-manager-container">
+    <div className="product-manager-container" style={{width:'1000px'}}>
       <h1 className="page-header" style={{ marginTop: '100px' }}></h1>
 
       <div className="add-forms">
