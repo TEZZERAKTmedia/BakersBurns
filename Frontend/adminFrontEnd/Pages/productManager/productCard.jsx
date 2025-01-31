@@ -104,7 +104,7 @@ const ProductCard = ({ product, onDeleteProduct }) => {
         />
       ) : (
         <>
-          <div className="product-info">
+          <div className="product-info" style={{paddingBottom: '10%'}}>
             {product.thumbnail ? (
               <img
                 src={`${import.meta.env.VITE_BACKEND}/uploads/${product.thumbnail}`}
