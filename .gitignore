@@ -24,4 +24,5 @@ node_modules
 *.sw?
 .env
 uploads/
-gallery/
+socialIcons/
+galleryuploads/
