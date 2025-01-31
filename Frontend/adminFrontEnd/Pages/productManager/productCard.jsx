@@ -118,7 +118,7 @@ const ProductCard = ({ product, onDeleteProduct }) => {
             <p style={{ color: 'black' }}>${product.price}</p>
          
             {!product.isDiscounted && (
-              <div style={{width: '50%', marginLeft:' 25%', }}> 
+              <div style={{width: '100%', marginLeft:' 0%', marginTop:'10px'}}> 
               <Link to='/discount'>
             <button
               className='add-discount-by-product'

@@ -13,12 +13,15 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 
 
+
+
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
 const jwt = require('jsonwebtoken'); // Assuming JWT is used for auth
 const db = require('./models/index');
 const sequelize = require('./config/database'); // Import the Sequelize instance
-
+const helmet = require('helmet');
+ // Applies all default security headers
 const rateLimit = require('express-rate-limit'); 
 // Import routes
 const cartRoutes = require('./routes/user/cartRoutes');
@@ -60,7 +63,7 @@ const googleRoutes = require('./routes/register/googleRoutes');
 
 // Initialize Express app
 const app = express();
-
+app.use(helmet());
 // Set allowed origins based on environment
 const allowedOrigins = process.env.NODE_ENV === 'production' 
   ? [] // Leave empty since CORS is handled at NGINX level

@@ -161,7 +161,7 @@ const ProductList = () => {
         onFilterByType={handleFilterByType}
       />
 
-      <div className="product-list">
+      <div className="product-list" style={{paddingBottom: '10%'}}>
         {filteredProducts.map((product) => (
           <div key={product.id} className="product-item-container">
             <ProductCard
