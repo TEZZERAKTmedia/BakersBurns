@@ -107,7 +107,7 @@ const ProductForm = ({ product = {}, onClose }) => {
   };
 
   return (
-    <div >
+    <div className="product-form-section">
       {isLoading ? (
         <LoadingPage /> // Render loading page
       ) : (
