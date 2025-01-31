@@ -45,7 +45,6 @@ jobs:
           source: "Backend/*"
           target: "/home/bakersburns-api/htdocs/api.bakersburns.com/backend/"
           strip_components: 1
-          rm: true
           rsync_opts: "--exclude=uploads/ --exclude=socialIcons/ --exclude=galleryuploads/"
 
       - name: Ensure upload folders exist on VPS
