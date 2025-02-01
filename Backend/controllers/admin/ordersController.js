@@ -5,6 +5,7 @@ const Product = require('../../models/product');
 const {sendEmailNotification } = require('../../utils/statusEmail');
 const {decrypt} = require('../../utils/encrypt');
 
+
 const sendStatusNotification = async (order, status) => {
     const user = await User.findByPk(order.userId);
     if (!user) {
@@ -93,45 +94,49 @@ const generateTrackingLink = (carrier, trackingNumber) => {
 };
 
 const updateTracking = async (req, res) => {
-  const { id } = req.params; // Order ID from the URL
-  const { trackingNumber, carrier } = req.body; // Tracking details from the request body
+  const { id } = req.params; // Order ID
+  const { trackingNumber, carrier } = req.body;
 
   try {
-    // Find the order by ID
     const order = await Order.findByPk(id, {
-      include: [
-        { model: User, as: 'user' }, // Include the user for email
-      ],
+      include: [{ model: User, as: 'user' }],
     });
 
     if (!order) {
       return res.status(404).json({ message: 'Order not found.' });
     }
 
-    // Update the tracking information
+    const previousTrackingNumber = order.trackingNumber;
+    const previousCarrier = order.carrier;
+    const isNewTracking = trackingNumber && (trackingNumber !== previousTrackingNumber || carrier !== previousCarrier);
+
+    // Update tracking details
     order.trackingNumber = trackingNumber || order.trackingNumber;
     order.carrier = carrier || order.carrier;
-
-    // Automatically set status to "Shipped" if tracking number is provided
     if (trackingNumber && order.status !== 'Shipped') {
       order.status = 'Shipped';
     }
 
     await order.save();
 
-    // Send "Shipped" email if tracking number is provided
+    // Send tracking email
     if (trackingNumber) {
-      sendEmailNotification(
-        order.user.email,        // User email
-        trackingNumber,          // Tracking number
-        'Shipped',               // Status
-        {
-          shippingAddress: order.shippingAddress || 'N/A', // Assuming order has shippingAddress
-          carrier: carrier || 'N/A',
-          total: order.total || 0,
-          orderItems: [], // Adjust if you need to include order items in the email
-        }
-      );
+      sendEmailNotification(order.user.email, trackingNumber, 'Shipped', {
+        shippingAddress: order.shippingAddress || 'N/A',
+        carrier: carrier || 'N/A',
+        total: order.total || 0,
+        orderItems: [],
+      });
+    }
+
+    // Register webhook for UPS tracking if a new tracking number is added
+    if (isNewTracking && carrier.toLowerCase() === "ups") {
+      try {
+        await subscribeToUpsWebhook(trackingNumber);
+        console.log(`Successfully subscribed to UPS webhook for ${trackingNumber}`);
+      } catch (error) {
+        console.error(`Failed to subscribe UPS webhook:`, error.message);
+      }
     }
 
     res.status(200).json({
@@ -140,10 +145,7 @@ const updateTracking = async (req, res) => {
     });
   } catch (error) {
     console.error('Error updating tracking information:', error);
-    res.status(500).json({
-      message: 'An error occurred while updating tracking information.',
-      error: error.message,
-    });
+    res.status(500).json({ message: 'Error updating tracking information', error: error.message });
   }
 };
 

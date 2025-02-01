@@ -5,6 +5,11 @@ import NotificationBadge from '../Components/notification/notificationBadge';
 import ProductManagerGif from '../assets/ProductManager.gif'; // Import the ProductManager GIF
 import OrdersGif from '../assets/orders.gif';
 import GalleryGif from '../assets/gallery.gif';
+import MessageGif from '../assets/messages.gif';
+import SocialsGif from '../assets/socials.gif';
+import EmailGif from '../assets/email.gif';
+import UsersGif from '../assets/users.gif';
+
 const Home = () => {
   return (
     <div className="home-container">
@@ -58,22 +63,16 @@ const Home = () => {
               </div>
             </Link>
           </li>
-          <li className="home-tile">
-            <div  style={{textDecoration: 'none'}}>
-            <a style={{textDecoration: 'none'}} href={import.meta.env.VITE_USER} target="_blank" rel="noopener noreferrer">
-              <div className="tile-content">
-                <h3>User App Preview</h3>
-                <p className='home-tile-description'>Check out the user app here</p>
-              </div>
-              </a>
-            </div>
-          </li>
+          
 
 
           <li className="home-tile">
             <Link style={{textDecoration: 'none'}} to="/messaging">
               <div className="tile-content">
                 <h3>Messaging</h3>
+                <img 
+                style={{width: '100%', height: 'auto'}}
+                src={MessageGif}/>
                 <p className='home-tile-description'>Contact users using in app messaging</p>
               </div>
             </Link>
@@ -82,6 +81,9 @@ const Home = () => {
             <Link style={{textDecoration: 'none'}} to="/email">
               <div className='tile-content'>
                 <h3>Email</h3>
+                <img 
+                style={{width: '100%', height: 'auto'}}
+                src={EmailGif}/>
                 <p className='home-tile-description'>Contact users using email. (Will only work with opted in users)</p>
               </div>
             </Link>
@@ -90,6 +92,9 @@ const Home = () => {
             <Link style={{textDecoration: 'none'}} to="/social-manager">
               <div className='tile-content'>
                 <h3>Socials</h3>
+                <img 
+                style={{width: '100%', height: 'auto'}}
+                src={SocialsGif}/>
                 <p className='home-tile-description'>Contact users using email. (Will only work with opted in users)</p>
               </div>
             </Link>

@@ -46,13 +46,12 @@ const registerStoreRoutes = require('./routes/register/storeRegister');
 const adminEventRoutes = require('./routes/admin/adminEventRoutes');
 const userEventRoutes = require('./routes/user/eventRoutes');
 const userGalleryRoutes = require('./routes/user/galleryRoutes');
-const carrierRoutes = require('./routes/carrier/carrierRoutes');
+
 const registerCartRoutes = require('./routes/register/cartRoutes');
 const notificationRoutes = require('./routes/admin/notifcationRoutes');
 const socialRoutes = require('./routes/register/socialRoutes');
 const adminSocialRoutes = require('./routes/admin/adminSocialRoutes');
 const adminDiscountRoutes = require('./routes/admin/adminDiscountRoutes');
-const { handleDhlWebhook, handleFedexWebhook, handleUpsWebhook, handleUspsWebhook} = require('./webhooks/carrierWebhooks');
 const { rateLimiter } = require('./utils/rateLimiter');
 const googleRoutes = require('./routes/register/googleRoutes');
 
@@ -141,9 +140,7 @@ app.use('/user-social', socialRoutes);
 //STRIPE ROUTES
 app.use('/stripe', rateLimiter('stripe'),stripeRoutes); 
 
-app.use('/carriers', carrierRoutes);
-
-
+// Google Routes
 app.use('/google', googleRoutes);
 
 
@@ -170,11 +167,8 @@ app.use('/terms-of-service', express.static(path.join(__dirname, 'public/static/
 app.use('/privacy-policy', express.static(path.join(__dirname, 'public/static/privacy-policy.html')));
 
 
-// Webhook routes for tracking updates from each carrier
-app.post('/webhook/ups', express.json(), handleUpsWebhook);
-app.post('/webhook/fedex', express.json(), handleFedexWebhook);
-app.post('/webhook/usps', express.json(), handleUspsWebhook);
-app.post('/webhook/dhl', express.json(), handleDhlWebhook);
+
+
 
 
 
@@ -191,8 +185,17 @@ app.use((req, res, next) => {
 
 
 //CRON
+const { checkShippedOrders } = require("./controllers/carrier/cronjobs/trackingCronJob.js");
+const { checkShippedOrdersUsps } = require("./controllers/carrier/cronjobs/uspsCronJob.js");
+console.log("Initializing UPS tracking cron job...");
+checkShippedOrders();
+checkShippedOrdersUsps();
+
+
+
 const cleanupMediaCron = require('./utils/mediaCronJob');
 const scheduleCronJob = require('./utils/ordersCronJob');
+
 sequelize.authenticate()
   .then(() => {
     console.log('Database connected successfully.');
