@@ -185,7 +185,7 @@ app.use((req, res, next) => {
 
 
 //CRON
-const { checkShippedOrders } = require("./controllers/carrier/cronjobs/trackingCronJob.js");
+const { checkShippedOrders } = require("./controllers/carrier/cronjobs/upsCronJob.js");
 const { checkShippedOrdersUsps } = require("./controllers/carrier/cronjobs/uspsCronJob.js");
 console.log("Initializing UPS tracking cron job...");
 checkShippedOrders();
