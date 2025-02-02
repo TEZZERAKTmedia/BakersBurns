@@ -1,76 +1,45 @@
-require("dotenv").config();
-const nodemailer = require("nodemailer");
 const { fetchUspsTracking, getUspsAuthToken } = require("../uspsApi");
 const Order = require("../../../models/order");
 
-// Configure Nodemailer
-const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST,
-  port: process.env.EMAIL_PORT,
-  secure: process.env.EMAIL_SECURE === "true",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
-
-// Function to send email notification
-const sendEmailNotification = async (subject, message) => {
-  try {
-    await transporter.sendMail({
-      from: `"USPS Tracking Cron" <${process.env.EMAIL_USER}>`,
-      to: process.env.ROOT_EMAIL, // Your email
-      subject: subject,
-      text: message,
-    });
-
-    console.log(`📧 USPS Email Sent: ${subject}`);
-  } catch (error) {
-    console.error("❌ Error sending USPS email:", error);
-  }
-};
-
 /**
- * ✅ USPS Tracking Job
+ * ✅ Periodically check USPS tracking updates for shipped orders.
  */
 async function checkShippedOrdersUsps() {
-  console.log("🚀 Running USPS bulk tracking job...");
+  console.log("🚀 Checking USPS bulk tracking updates...");
 
-  const shippedOrders = await Order.findAll({ where: { status: "Shipped", carrier: "USPS" } });
+  const shippedOrders = await Order.findAll({
+    where: { status: "Shipped", carrier: "USPS" },
+  });
 
   if (shippedOrders.length === 0) {
     console.log("✅ No USPS orders to track.");
-    await sendEmailNotification("USPS Tracking Job - No Orders", "No shipped USPS orders found.");
     return;
   }
 
-  const trackingNumbers = shippedOrders.map(order => order.trackingNumber);
+  const trackingNumbers = shippedOrders.map((order) => order.trackingNumber);
 
   try {
     const accessToken = await getUspsAuthToken();
     const trackingData = await fetchUspsTracking(trackingNumbers, accessToken);
 
-    let updatedOrders = [];
     for (const shipment of trackingData.trackResponse.shipment) {
       const trackingNumber = shipment.inquiryNumber;
       const latestStatus = shipment.package?.[0]?.activity?.[0]?.status?.description || "Unknown";
 
-      const order = shippedOrders.find(o => o.trackingNumber === trackingNumber);
+      const order = shippedOrders.find((o) => o.trackingNumber === trackingNumber);
       if (order) {
         order.status = latestStatus;
         await order.save();
-        updatedOrders.push(`✅ Order ${order.id} - Updated to: ${latestStatus}`);
+
+        console.log(`✅ Order ${order.id} - Status Updated: ${latestStatus}`);
       }
     }
-
-    await sendEmailNotification("✅ USPS Tracking Job Executed", updatedOrders.join("\n") || "No updates.");
   } catch (error) {
-    console.error("🔴 USPS Tracking Job Error:", error.message);
-    await sendEmailNotification("❌ USPS Tracking Job Failed", error.message);
+    console.error("🔴 Error updating USPS bulk tracking:", error.message);
   }
 }
 
-// Run USPS cron job every hour
-setInterval(checkShippedOrdersUsps, 60 * 60 * 1000); // 1 hour
+// Schedule cron job (runs every hour)
+setInterval(checkShippedOrdersUsps, 60 * 60 * 1000); // Runs every 1 hour
 
 module.exports = { checkShippedOrdersUsps };

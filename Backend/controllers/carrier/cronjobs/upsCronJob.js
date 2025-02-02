@@ -1,76 +1,48 @@
-require("dotenv").config();
-const nodemailer = require("nodemailer");
 const { fetchUpsTracking, getUpsAuthToken } = require("../upsApi");
 const Order = require("../../../models/order");
 
-// Configure Nodemailer
-const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST,
-  port: process.env.EMAIL_PORT,
-  secure: process.env.EMAIL_SECURE === "true",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
-
-// Function to send email notification
-const sendEmailNotification = async (subject, message) => {
-  try {
-    await transporter.sendMail({
-      from: `"UPS Tracking Cron" <${process.env.EMAIL_USER}>`,
-      to: process.env.ROOT_EMAIL, // Your email
-      subject: subject,
-      text: message,
-    });
-
-    console.log(`📧 UPS Email Sent: ${subject}`);
-  } catch (error) {
-    console.error("❌ Error sending UPS email:", error);
-  }
-};
-
-/**
- * ✅ UPS Tracking Job
- */
 async function checkShippedOrders() {
-  console.log("🚀 Running UPS bulk tracking job...");
+  console.log("🚀 Checking UPS bulk tracking updates...");
 
-  const shippedOrders = await Order.findAll({ where: { status: "Shipped", carrier: "UPS" } });
+  // ✅ Step 1: Fetch orders with status "Shipped" and carrier "UPS"
+  const shippedOrders = await Order.findAll({
+    where: { status: "Shipped", carrier: "UPS" },
+  });
 
   if (shippedOrders.length === 0) {
     console.log("✅ No UPS orders to track.");
-    await sendEmailNotification("UPS Tracking Job - No Orders", "No shipped UPS orders found.");
     return;
   }
 
+  // ✅ Step 2: Extract tracking numbers from orders
   const trackingNumbers = shippedOrders.map(order => order.trackingNumber);
 
   try {
+    // ✅ Step 3: Get UPS OAuth Token
     const accessToken = await getUpsAuthToken();
+
+    // ✅ Step 4: Pass trackingNumbers to fetchUpsTracking() in upsApi.js
     const trackingData = await fetchUpsTracking(trackingNumbers, accessToken);
 
-    let updatedOrders = [];
+    // ✅ Step 5: Update Order Statuses in Database
     for (const shipment of trackingData.trackResponse.shipment) {
       const trackingNumber = shipment.trackingNumber;
-      const latestStatus = shipment.package?.[0]?.activity?.[0]?.status?.description || "Unknown";
+      const latestStatus = shipment.package[0].activity[0].status.description || "Unknown";
 
+      // ✅ Find the matching order in the database
       const order = shippedOrders.find(o => o.trackingNumber === trackingNumber);
       if (order) {
-        order.status = latestStatus;
-        await order.save();
-        updatedOrders.push(`✅ Order ${order.id} - Updated to: ${latestStatus}`);
+        order.status = latestStatus; // Update status
+        await order.save(); // Save updated order to database
+        console.log(`✅ Order ${order.id} - Status Updated: ${latestStatus}`);
       }
     }
-
-    await sendEmailNotification("✅ UPS Tracking Job Executed", updatedOrders.join("\n") || "No updates.");
   } catch (error) {
-    console.error("🔴 UPS Tracking Job Error:", error.message);
-    await sendEmailNotification("❌ UPS Tracking Job Failed", error.message);
+    console.error("🔴 Error updating UPS bulk tracking:", error.message);
   }
 }
 
-// Run UPS cron job every hour
+// Schedule cron job (runs every hour)
 setInterval(checkShippedOrders, 60 * 60 * 1000); // 1 hour
 
 module.exports = { checkShippedOrders };
