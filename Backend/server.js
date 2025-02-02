@@ -62,7 +62,7 @@ const googleRoutes = require('./routes/register/googleRoutes');
 
 // Initialize Express app
 const app = express();
-app.use(helmet());
+
 // Set allowed origins based on environment
 const allowedOrigins = process.env.NODE_ENV === 'production' 
   ? [] // Leave empty since CORS is handled at NGINX level
@@ -77,6 +77,39 @@ if (process.env.NODE_ENV !== 'production') {
   }));
   console.log('CORS middleware enabled for development');
 }
+app.use(
+  helmet({
+    crossOriginResourcePolicy: false, // ✅ Allows cross-origin images
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        imgSrc: [
+          "'self'",
+          "data:", // ✅ Allow inline base64 images
+          process.env.NODE_ENV === "production"
+            ? process.env.USER_FRONTEND
+            : process.env.DEV_USER_URL, // ✅ Choose based on environment
+          process.env.NODE_ENV === "production"
+            ? process.env.ADMIN_FRONTEND
+            : process.env.DEV_ADMIN_URL, // ✅ Admin domain (prod/dev)
+          process.env.NODE_ENV === "production"
+            ? process.env.REGISTER_FRONTEND
+            : process.env.DEV_REGISTER_URL, // ✅ Register domain (prod/dev)
+          process.env.BACKEND_URL, // ✅ Allow API itself if needed
+          process.env.NODE_ENV === "production"
+            ? "https://admin.bakersburns.com"
+            : "http://localhost:5010", // ✅ Explicitly allow local dev frontend
+          process.env.NODE_ENV === "production"
+            ? "https://api.bakersburns.com"
+            : "http://localhost:3450", // ✅ Local backend access for development
+        ].filter(Boolean), // ✅ Removes undefined values if a variable is missing
+        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"], // ✅ Adjust for necessary script security
+        styleSrc: ["'self'", "'unsafe-inline'"], // ✅ Allow inline styles
+      },
+    },
+  })
+);
+
 
 
 app.use('/stripe-webhook-routes', express.raw({ type: 'application/json' }), stripeWebhookRoutes);
