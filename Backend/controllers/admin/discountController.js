@@ -1,19 +1,52 @@
+const { Op } = require('sequelize'); // Needed for query operators
 const Product = require('../../models/product'); // Import Product model
 
+/**
+ * Helper function to update the isDiscounted property based on the current date.
+ * Sets isDiscounted to true if current date is between discountStartDate and discountEndDate.
+ *
+ * @param {Product} product - The product instance to update.
+ */
+function updateDiscountStatus(product) {
+  const now = new Date();
+  const start = new Date(product.discountStartDate);
+  const end = new Date(product.discountEndDate);
+  product.isDiscounted = now >= start && now <= end;
+}
+
+// -------------------------------------------------------------------------
 // Fetch all discounted products, grouped by their type
+// Instead of relying solely on isDiscounted flag, we recalc based on dates.
 const getDiscountedProductsByType = async (req, res) => {
   try {
-    // Fetch products that have discounts (isDiscounted = true)
+    const now = new Date();
+    // Fetch products where discountStartDate is in the past and discountEndDate is in the future.
     const products = await Product.findAll({
       where: {
-        isDiscounted: true, // Only get products that have a discount
+        discountStartDate: { [Op.lte]: now },
+        discountEndDate: { [Op.gte]: now }
       },
-      attributes: ['id', 'name', 'thumbnail', 'price', 'type', 'discountAmount', 'discountType', 'discountStartDate', 'discountEndDate'], // Include relevant fields
+      attributes: [
+        'id',
+        'name',
+        'thumbnail',
+        'price',
+        'type',
+        'discountAmount',
+        'discountType',
+        'discountStartDate',
+        'discountEndDate'
+      ],
     });
 
-    // Group products by their type
+    // Ensure each product's isDiscounted value is correctly set
+    products.forEach(product => {
+      updateDiscountStatus(product);
+    });
+
+    // Optionally group products by type
     const groupedByProductType = products.reduce((acc, product) => {
-      const productType = product.type; // Grouping by product type
+      const productType = product.type;
       if (!acc[productType]) {
         acc[productType] = [];
       }
@@ -21,15 +54,15 @@ const getDiscountedProductsByType = async (req, res) => {
       return acc;
     }, {});
 
-    return res.json(groupedByProductType); // Return the grouped products
+    return res.json(groupedByProductType);
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: 'Error fetching products with discounts' });
   }
 };
 
-// Create or apply a new discount to a product
-
+// -------------------------------------------------------------------------
+// Create or apply a new discount to products of a given type.
 const addDiscountByType = async (req, res) => {
   const { type, discountType, discountAmount, discountStartDate, discountEndDate } = req.body;
 
@@ -38,7 +71,7 @@ const addDiscountByType = async (req, res) => {
   }
 
   try {
-    const products = await Product.findAll({ where: { type } }); // Find all products of the specified type
+    const products = await Product.findAll({ where: { type } });
 
     if (!products.length) {
       return res.status(404).json({ error: 'No products found for the specified type.' });
@@ -65,10 +98,12 @@ const addDiscountByType = async (req, res) => {
       product.discountEndDate = discountEndDate;
       product.discountPrice = discountPrice > 0 ? discountPrice : 0;
       product.priceDifference = priceDifference;
-      product.isDiscounted = 1;
+      
+      // Set isDiscounted based on current date and discount dates
+      updateDiscountStatus(product);
 
-      await product.save(); // Save the updated product
-      updatedProducts.push(product); // Add to the updated products array
+      await product.save();
+      updatedProducts.push(product);
     }
 
     res.json({ message: 'Discount applied to all products of the specified type.', updatedProducts });
@@ -78,8 +113,8 @@ const addDiscountByType = async (req, res) => {
   }
 };
 
-
-// Delete a discount by productId
+// -------------------------------------------------------------------------
+// Delete a discount by product type (clear discount details)
 const deleteDiscountByType = async (req, res) => {
   const { productType } = req.body;
 
@@ -112,7 +147,8 @@ const deleteDiscountByType = async (req, res) => {
   }
 };
 
-// Update the discount for a product
+// -------------------------------------------------------------------------
+// Update the discount for products of a given type.
 const updateDiscountByType = async (req, res) => {
   const { productType, discountType, discountAmount, discountStartDate, discountEndDate } = req.body;
 
@@ -134,17 +170,15 @@ const updateDiscountByType = async (req, res) => {
 
     // Loop through each product and calculate the discount price
     for (let product of products) {
-      const originalPrice = product.price; // Fetch the original price of the product
+      const originalPrice = product.price;
       let discountPrice;
 
-      // Log the product details before updating
       console.log("Processing product:", {
         id: product.id,
         name: product.name,
         originalPrice,
       });
 
-      // Calculate the discount price based on the discount type
       if (discountType === 'percentage') {
         discountPrice = originalPrice - (originalPrice * discountAmount) / 100;
         console.log("Calculated percentage discount price:", discountPrice);
@@ -153,18 +187,20 @@ const updateDiscountByType = async (req, res) => {
         console.log("Calculated fixed discount price:", discountPrice);
       }
 
-      discountPrice = discountPrice > 0 ? discountPrice : 0; // Ensure no negative prices
+      discountPrice = discountPrice > 0 ? discountPrice : 0;
       console.log("Final discount price (after ensuring non-negative):", discountPrice);
 
       // Update the product's discount information
-      await product.update({
-        discountType,
-        discountAmount,
-        discountPrice,
-        discountStartDate,
-        discountEndDate,
-        isDiscounted: true, // Mark the product as discounted
-      });
+      product.discountType = discountType;
+      product.discountAmount = discountAmount;
+      product.discountPrice = discountPrice;
+      product.discountStartDate = discountStartDate;
+      product.discountEndDate = discountEndDate;
+      
+      // Set isDiscounted based on current date and discount dates
+      updateDiscountStatus(product);
+
+      await product.save();
 
       console.log("Product updated successfully:", {
         id: product.id,
@@ -177,7 +213,6 @@ const updateDiscountByType = async (req, res) => {
     }
 
     console.log("All products updated successfully for type:", productType);
-
     return res.status(200).json({ message: "Discounts updated for all products of this type." });
   } catch (error) {
     console.error("Error updating discounts:", error);
@@ -185,23 +220,18 @@ const updateDiscountByType = async (req, res) => {
   }
 };
 
-
-
+// -------------------------------------------------------------------------
+// Fetch unique product types (unchanged)
 const getAllProductTypes = async (req, res) => {
   try {
-    // Fetch all products
-    const products = await Product.findAll({ attributes: ['type'], raw: true }); // Fetch only 'type'
-
-    // Extract unique types
+    const products = await Product.findAll({ attributes: ['type'], raw: true });
     const uniqueTypes = [...new Set(products.map((product) => product.type))];
-
-    res.json(uniqueTypes); // Send unique types as a response
+    res.json(uniqueTypes);
   } catch (error) {
     console.error('Error fetching product types:', error);
     res.status(500).json({ error: 'Error fetching product types' });
   }
 };
-
 
 module.exports = {
   getDiscountedProductsByType,

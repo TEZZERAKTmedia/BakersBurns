@@ -220,12 +220,7 @@ app.use((req, res, next) => {
 //CRON
 const { checkShippedOrders } = require("./controllers/carrier/cronjobs/upsCronJob.js");
 const { checkShippedOrdersUsps } = require("./controllers/carrier/cronjobs/uspsCronJob.js");
-console.log("Initializing UPS tracking cron job...");
-checkShippedOrders();
-checkShippedOrdersUsps();
-
-
-
+const {startDiscountCron} = require('./controllers/admin/cron/discountCronJob.js');
 const cleanupMediaCron = require('./utils/mediaCronJob');
 const scheduleCronJob = require('./utils/ordersCronJob');
 
@@ -235,8 +230,16 @@ sequelize.authenticate()
 
     // Start the cron job
     console.log('Initializing cron jobs...')
+    
     scheduleCronJob();
     cleanupMediaCron();
+
+    console.log("Initializing discount cron job...");
+    startDiscountCron();
+    
+    console.log("Initializing UPS tracking cron job...");
+    checkShippedOrders();
+    checkShippedOrdersUsps();
   })
   .catch((err) => {
     console.error('Database connection failed:', err.message);
