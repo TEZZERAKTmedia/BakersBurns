@@ -229,8 +229,7 @@ sequelize.authenticate()
     console.log('Database connected successfully.');
 
     // Start the cron job
-    console.log('Initializing cron jobs...')
-    
+    console.log("Initializing order cron job...");
     scheduleCronJob();
     cleanupMediaCron();
 
