@@ -1,163 +1,167 @@
-/* General Layout */
-.messaging-interface {
-  margin-top: 5%;
-  
-  height: 90vh;
-  width: 90vw;
-  background-color: #f4f4f9;
-  color: #333;
-  font-family: 'Arial', sans-serif;
-  transition: all 0.3s ease-in-out;
-  overflow: hidden;
+/* inappmessaging.css */
+
+/* Common container for the messaging app */
+.messagingApp-container {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  font-family: Arial, sans-serif;
 }
 
-/* Thread Preview */
-.thread-preview {
-  font-family: 'Dancing Script', cursive;
-    /* Use percentage to make it responsive */
-  max-width: 800px; /* Set a max width to keep it consistent on large screens */
-  min-width: 250px; /* Ensure minimum size for usability */
-  background-color: #fff;
+/* Sidebar styles (Desktop) */
+.messagingApp-sidebar {
+  width: 300px;
   border-right: 1px solid #ddd;
   padding: 10px;
-  overflow-y: auto;
-  transition: flex-basis 0.3s ease-in-out;
+}
+.messagingApp-sidebar-header {
+  font-size: 2rem;
+  font-family: 'Dancing Script', cursive;
+  margin-top: 30%;
 }
 
-.thread-preview h3 {
-  margin-bottom: 15px;
-  font-size: 1.5rem;
-  color: #4a4a4a;
-}
-
-.thread-preview ul li {
-  padding: 10px;
+/* Search container in sidebar */
+.messagingApp-searchContainer {
+  display: flex;
+  gap: 5px;
   margin-bottom: 10px;
-  border-radius: 8px;
-  background-color: #f0f0f0;
-  transition: background-color 0.2s;
-  cursor: pointer;
 }
-
-.thread-preview ul li:hover {
-  background-color: #e0e0e0;
-}
-
-/* Messaging Window */
-.messaging-window {
+.messagingApp-searchInput {
   flex: 1;
+  padding: 5px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+.messagingApp-searchButton {
+  padding: 5px 10px;
+  border-radius: 4px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+}
+
+/* Thread list styles */
+.messagingApp-threadList {
+  list-style: none;
+  padding: 0;
+  margin-bottom: 10px;
+}
+.messagingApp-threadItem {
+  padding: 10px;
+  cursor: pointer;
+  border-bottom: 1px solid #ddd;
+  color: #007bff;
+}
+.messagingApp-threadUsername {
+  color: black;
+  font-family: 'Dancing Script', cursive;
+  font-size: 1.5rem;
+}
+.messagingApp-threadPreview {
+  font-size: 14px;
+  color: #555;
+}
+.messagingApp-threadTimestamp {
+  font-size: 12px;
+  color: #999;
+}
+
+/* Main message window styles (Desktop) */
+.messagingApp-main {
+  flex: 1;
+  padding: 10px;
   display: flex;
   flex-direction: column;
-  padding: 20px;
-  background-color: #fff;
-  overflow-y: auto;
+  justify-content: space-between;
 }
-
-.messaging-window h3 {
-  font-size: 1.8rem;
-  margin-bottom: 15px;
-  color: #333;
-}
-
-.messaging-window ul {
+.messagingApp-messageList {
   list-style: none;
   padding: 0;
   flex: 1;
-  overflow-y: auto;
-  margin-bottom: 20px;
+  overflow-y: scroll;
 }
-
-.messaging-window form {
-  display: flex;
-  padding-top: 15px;
-}
-
-.messaging-window form input {
-  flex: 1;
-  padding: 12px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  outline: none;
-  transition: border-color 0.2s ease;
-}
-
-.messaging-window form button {
-  padding: 12px 20px;
-  margin-left: 10px;
-  background-color: #5a67d8;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-/* Back Button */
-.back-button {
-  display: none;
-  padding: 10px;
-  font-size: 1rem;
-  background-color: #5a67d8;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-/* Mobile and Tablet View */
-@media (max-width: 768px) {
-  .messaging-interface {
-    flex-direction: column;
-  }
-
-  .thread-preview {
-    width: 100%;
-    border-bottom: 1px solid #ddd;
-    height: auto;
-  }
-
-  .messaging-body.mobile-view .thread-preview {
-    display: none;
-  }
-
-  .back-button {
-    display: block;
-  }
-
-  .messaging-window {
-    padding: 10px;
-  }
-}
-
-/* Message List */
-.message-list {
+.messagingApp-messageItem {
   display: flex;
   flex-direction: column;
-}
-
-
-/* Individual Messages */
-.message {
-  display: flex;
-  flex-direction: column;
-  padding: 10px;
-  border-radius: 10px;
   margin-bottom: 10px;
   max-width: 70%;
 }
-
-.admin-message {
-  background-color: #f1f1f1;
-  color: #333;
-  align-self: flex-start;
+.messagingApp-messageItem--admin {
+  align-items: flex-end;
 }
-
-.user-message {
-  background-color: #007bff;
+.messagingApp-messageItem--user {
+  align-items: flex-start;
+}
+.messagingApp-messageBubble {
+  padding: 10px;
+  border-radius: 15px;
+  word-wrap: break-word;
+}
+.messagingApp-messageBubble--admin {
+  background-color: white;
+  color: black;
+  text-align: right;
+  border: 1px solid #ccc;
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+}
+.messagingApp-messageBubble--user {
+  background-color: orange;
   color: white;
-  align-self: flex-end;
+  text-align: left;
+}
+.messagingApp-messageTimestamp {
+  font-size: 10px;
+  color: #999;
+  margin-top: 5px;
+}
+.messagingApp-messageForm {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+}
+.messagingApp-messageInput {
+  padding: 10px;
+  border-radius: 20px;
+  border: 1px solid #ddd;
+  flex: 1;
+}
+.messagingApp-sendButton {
+  padding: 10px 20px;
+  border-radius: 20px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  margin-left: 10px;
 }
 
-.message-content {
-  padding: 8px;
-  border-radius: 8px;
+/* Mobile-specific styles */
+.messagingApp-mobileSidebar {
+  width: 100%;
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+}
+.messagingApp-mobileMain {
+  flex: 1;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow-y: auto;
+}
+.messagingApp-mobileBackButton {
+  padding: 5px 10px;
+  border-radius: 4px;
+  background-color: black;
+  color: white;
+  border: none;
+  font-size: 2rem;
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 1000;
+}
+.messagingApp-mobileNoThread {
+  padding: 20px;
+  text-align: center;
+  font-size: 1.2rem;
 }

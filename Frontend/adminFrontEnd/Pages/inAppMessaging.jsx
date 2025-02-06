@@ -204,10 +204,10 @@ useEffect(() => {
       </div>
   
       {/* Main Message Window */}
-      <div style={{ flex: 1, padding: '10px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+      <div style={{ flex: 1, padding: '10px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between',}}>
         {selectedThreadId && (
           <>
-            <ul style={{ listStyle: 'none', padding: 0, flex: 1, overflowY: 'auto' }}>
+            <ul style={{ listStyle: 'none', padding: 0, flex: 1, overflowY: 'scroll' }}>
             {messages.map((message, index) => {
               const isAdminMessage = message.senderUsername === 'Admin'; // Admin sent the message
               const isUserMessage = message.receiverUsername === 'Admin'; // User sent the message
@@ -335,7 +335,7 @@ useEffect(() => {
           {selectedThreadId.threadPreviewUsername}
         </div>
 
-        <ul style={{ listStyle: 'none', padding: 0, flex: 1, overflowY: 'auto' , paddingTop:'50px', paddingBottom:'30px'}}>
+        <ul style={{ listStyle: 'none', padding: 0, flex: 1, overflowY: 'auto' , paddingTop:'200px', paddingBottom:'100px'}}>
             {messages.map((message, index) => {
               const isAdminMessage = message.senderUsername === 'Admin'; // Admin sent the message
               const isUserMessage = message.receiverUsername === 'Admin'; // User sent the message
@@ -347,9 +347,10 @@ useEffect(() => {
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: isAdminMessage ? 'flex-end' : 'flex-start',
-                    marginBottom: '30px',
+                    
                     maxWidth: '100%',
                     padding:'30px',
+                    
                    
                   }}
                 >
@@ -454,36 +455,45 @@ useEffect(() => {
             </li>
           ))}
         </ul>
-        <ul style={{ listStyle: 'none', padding: 0, }}>
+       
+        <ul
+          style={{
+            listStyle: 'none',
+            paddingBottom: '200px',
+            height: '90vh',       // Increase the container height as needed
+            overflowY: 'auto'      // Enable vertical scrolling
+          }}
+        >
           {threads.map((thread) => (
-              <li
-                key={thread.threadId}
-                onClick={() => handleThreadSelect(thread)}
-                className='form-section'
-                
-              >
-                {/* Username */}
-                <div  style={{ fontFamily: 'Arial', fontSize: '1.2rem', color: '#333' }}>
-                  {thread.senderUsername || 'Unknown User'}
-                </div>
+            <li
+              key={thread.threadId}
+              onClick={() => handleThreadSelect(thread)}
+              className="form-section"
+              // Remove overflow here unless you need each item to scroll on its own
+            >
+              {/* Username */}
+              <div style={{ fontFamily: 'Arial', fontSize: '1.2rem', color: '#333' }}>
+                {thread.senderUsername || 'Unknown User'}
+              </div>
 
-                {/* Most Recent Message */}
-                <div style={{ fontSize: '14px', color: '#555' }}>
-                  {thread.lastMessage?.messageBody || 'No recent messages'}
-                </div>
+              {/* Most Recent Message */}
+              <div style={{ fontSize: '14px', color: '#555' }}>
+                {thread.lastMessage?.messageBody || 'No messages yet'}
+              </div>
 
-                {/* Timestamp */}
-                <div style={{ fontSize: '12px', color: '#999' }}>
-                  {thread.lastMessage?.createdAt
-                    ? new Date(thread.lastMessage.createdAt).toLocaleString()
-                    : ''}
-                </div>
-              </li>
-            ))}
-         </ul>
+              {/* Timestamp */}
+              <div style={{ fontSize: '12px', color: '#999' }}>
+                {thread.lastMessage?.createdAt
+                  ? new Date(thread.lastMessage.createdAt).toLocaleString()
+                  : ''}
+              </div>
+            </li>
+          ))}
+        </ul>
 
 
 
+        
 
 
       </div>
