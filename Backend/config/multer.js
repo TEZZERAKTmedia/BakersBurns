@@ -50,6 +50,7 @@ const socialIconStorage = multer.diskStorage({
 });
 
 // Middleware for handling social icon uploads
+
 const socialIconUploadMiddleware = multer({
   storage: socialIconStorage,
   fileFilter: (req, file, cb) => {
@@ -61,7 +62,8 @@ const socialIconUploadMiddleware = multer({
     }
   },
   limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB limit
-}).fields([{ name: 'image', maxCount: 1 }]);
+}).single("image"); // ✅ Change `.fields([{ name: 'image', maxCount: 1 }])` to `.single("image")`
+
 
 const galleryFileFilter = (req, file, cb) => {
   const allowedMimeTypes = [

@@ -51,21 +51,22 @@ router.post(
 
 // Update an existing social link with image
 router.put(
-  '/social-links/:id',
+  "/social-links/:id",
   logRouteMiddleware,
-  adminAuthMiddleware('admin'),
+  adminAuthMiddleware("admin"),
   (req, res, next) => {
     console.log(`Updating social link with ID: ${req.params.id}`);
     next();
   },
-  socialIconUploadMiddleware, // Process the image upload
+  socialIconUploadMiddleware, // ✅ Now using `.single("image")` correctly
   (req, res, next) => {
-    console.log('After image upload middleware for update...');
-    console.log('File received:', req.file);
+    console.log("After image upload middleware for update...");
+    console.log("File received:", req.file); // ✅ Should now log a file, if present
     next();
   },
   updateSocialLink
 );
+
 
 // Delete a social link
 router.delete(

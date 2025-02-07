@@ -13,49 +13,99 @@
   align-items: center;
   gap: 20px;
 }
-
-.social-links-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Responsive grid */
-  gap: 15px;
-  width: 100%;
-  max-width: 1200px; /* Optional: Limit max width */
-  margin-top: 20px;
-}
-
+/* Ensure cards stack on smaller screens */
 .social-link-card {
   padding: 15px;
   border: 1px solid #ddd;
   border-radius: 8px;
   background-color: #f9f9f9;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 10px;
+  transition: transform 0.3s ease-in-out;
 }
 
+/* Grid layout that adjusts on different screen sizes */
+.social-links-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 15px;
+  width: 100%;
+  max-width: 1200px;
+  margin-top: 20px;
+}
+
+/* Hide text when editing */
+.edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  background: #fff;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.edit-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+/* Smooth transition effect */
+.social-link-card:has(.edit-form) {
+  transform: scale(1.05);
+  background: #e8f0fe;
+}
+
+.button-group {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+
+/* Adjust text elements inside the cards */
 .social-link-card p {
-  margin: 5px 0;
-  font-size: 2vw;
-  background-color:rgb(197, 197, 197);
+  font-size: 16px;
+  background-color: rgb(197, 197, 197);
   padding: 10px;
-  color:white;
+  color: white;
   text-decoration: none;
   border-radius: 20px;
+  width: 100%;
+  word-break: break-word; /* Prevent text overflow */
 }
-.social-link-card p a{
-  color:black;
+
+.social-link-card p a {
+  color: black;
   text-decoration: none;
 }
 
-.social-link-actions {
-  display: flex;
-  justify-content: space-between;
+/* Make images responsive */
+.social-link-image {
+  width: 80px;
+  height: 80px;
+  object-fit: cover; /* Ensure proper scaling */
+  border-radius: 10px;
 }
 
+/* Buttons arranged in a column for small screens */
+
+/* Improve buttons with responsive behavior */
 .edit-btn,
 .delete-btn {
-  padding: 5px 10px;
+  width: 100%;
+  max-width: 150px;
+  padding: 10px;
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  text-align: center;
 }
 
 .edit-btn {
@@ -68,105 +118,73 @@
   color: white;
 }
 
-.social-link-form {
+/* Responsive Modal Styling */
+.delete-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
   width: 100%;
-  max-width: 400px;
-  background-color: #fff;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.delete-modal {
+  background: white;
   padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  width: 90%;
+  max-width: 350px;
+  animation: fadeIn 0.3s ease-in-out;
 }
 
-.social-link-form form {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
 }
 
-.social-link-form label {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  font-weight: bold;
-}
-
-.social-link-form input,
-.social-link-form select {
-  padding: 10px;
-  width: 100%;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-}
-
-.form-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-}
-
-.form-actions button {
-  padding: 10px 15px;
+/* Style delete confirmation buttons */
+.confirm-delete {
+  background: red;
+  color: white;
+  padding: 12px;
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  margin: 10px;
+  width: 100%;
 }
 
-.form-actions button:first-of-type {
-  background-color: #007bff;
+.cancel-delete {
+  background: grey;
   color: white;
+  padding: 12px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  width: 100%;
 }
 
-.form-actions button:last-of-type {
-  background-color: #6c757d;
-  color: white;
-}
-
-
-  /*IMAGE UPLOADER */
-
-  
-
-
-  .image-uploader {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
+/* Mobile-Friendly Adjustments */
+@media (max-width: 600px) {
+  .social-links-grid {
+    grid-template-columns: 1fr; /* Stack all cards in a single column */
   }
-  
-  .crop-container {
-    position: relative;
+
+  .social-link-card {
     width: 100%;
-    height: 300px;
-    background-color: #333;
-    overflow: hidden;
   }
-  
-  .cropped-preview-container {
-    margin-top: 20px;
-    text-align: center;
+
+  .social-link-actions {
+    flex-direction: column;
   }
-  
-  .cropped-preview {
-    max-width: 100%;
-    height: auto;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+  .edit-btn, .delete-btn {
+    width: 100%;
   }
-  
-  .crop-button {
-    position: relative;
-    margin-top: 10px;
-    padding: 10px 20px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-  
-  .crop-button:hover {
-    background-color: #0056b3;
-  }
-  
+}

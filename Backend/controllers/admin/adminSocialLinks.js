@@ -47,35 +47,36 @@ const updateSocialLink = async (req, res) => {
     const { id } = req.params;
     const { platform, url } = req.body;
 
-    console.log('Received data for update:', { id, platform, url });
-    console.log('File received for update:', req.file);
+    console.log("Received data for update:", { id, platform, url });
+    console.log("File received for update:", req.file); // ✅ Debugging: Check if file is received
 
     // Find the social link
     const socialLink = await SocialLink.findByPk(id);
     if (!socialLink) {
-      return res.status(404).json({ message: 'Social link not found.' });
+      return res.status(404).json({ message: "Social link not found." });
     }
 
-    console.log('Existing social link found:', socialLink);
+    console.log("Existing social link found:", socialLink);
 
-    // Update fields if provided
+    // ✅ Update fields if provided
     if (platform) socialLink.platform = platform;
     if (url) socialLink.url = url;
 
-    // Handle uploaded file (if any)
+    // ✅ Use new file if uploaded, otherwise keep existing image
     if (req.file) {
-      socialLink.image = req.file.filename; // Update the image filename
+      socialLink.image = req.file.filename;
     }
 
     await socialLink.save();
-    console.log('Social link updated successfully:', socialLink);
+    console.log("✅ Social link updated successfully:", socialLink);
 
-    res.status(200).json({ message: 'Social link updated successfully.', link: socialLink });
+    res.status(200).json({ message: "Social link updated successfully.", link: socialLink });
   } catch (error) {
-    console.error('Error updating social link:', error);
-    res.status(500).json({ message: 'Failed to update social link.', error });
+    console.error("❌ Error updating social link:", error);
+    res.status(500).json({ message: "Failed to update social link.", error });
   }
 };
+
 
 
 // Delete a social link
