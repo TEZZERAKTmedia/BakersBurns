@@ -112,20 +112,4 @@
 }
 
 /* Adjust grid for larger screens */
-@media (min-width: 768px) {
-  .nav-grid {
-    display: grid !important;
-    position: static;
-    height: auto;
-    background-color: transparent;
-    gap: 1.5rem;
-  }
 
-  .nav-item {
-    background-color: transparent;
-  }
-
-  .nav-item:hover {
-    background-color: #333;
-  }
-}

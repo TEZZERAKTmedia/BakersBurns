@@ -150,6 +150,7 @@ const EditDiscountForm = ({ discountId, onClose, onSuccess }) => {
           ))}
         </select>
       </div>
+      
 
       <div className="form-actions">
         <button onClick={handleSave} disabled={isSubmitting}>

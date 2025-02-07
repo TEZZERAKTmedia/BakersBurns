@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { registerApi } from "../../config/axios";
+import ShippingCalculator from "./shippingCalculator";
 import "./cart.css";
 
 
@@ -9,6 +10,9 @@ const CartPage = () => {
   const [totalPrice, setTotalPrice] = useState(0);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [receiverZip, setReceiverZip] = useState("");
+  const [shippingCost, setShippingCost] = useState(null);
+  const [zipSubmitted, setZipSubmitted] = useState(false);
   const navigate = useNavigate();
 
   // Function to get or generate the session ID
@@ -26,29 +30,29 @@ const CartPage = () => {
   // Fetch cart items from the backend
   useEffect(() => {
     const fetchCartItems = async () => {
-      // Ensure sessionId is available
-      const sessionId = localStorage.getItem('sessionId');
-      if (!sessionId) {
-        console.error("Session ID is missing. Please initialize it.");
-        setError("Session ID is missing. Please refresh the page.");
-        return;
-      }
-  
-      console.log('Session ID in localStorage:', sessionId);
-  
       try {
         const response = await registerApi.post("/register-cart/items", { sessionId });
-        console.log("Fetched cart items:", response.data.cartDetails); // Debugging log
-        setCart(response.data.cartDetails || []);
-        calculateTotal(response.data.cartDetails || []);
+        const fetchedCart = response.data.cartDetails || [];
+  
+        // ✅ Ensure all cart items have required fields
+        fetchedCart.forEach(item => {
+          if (!item.weight || !item.length || !item.width || !item.height) {
+            console.error(`❌ Missing Data in Item ${item.id}:`, item);
+            throw new Error(`Item ${item.name} is missing weight or dimensions.`);
+          }
+        });
+  
+        console.log("🛒 Cart Items (Verified):", fetchedCart);
+        setCart(fetchedCart);
+        calculateTotal(fetchedCart);
       } catch (err) {
-        console.error("Error fetching cart items:", err);
-        setError("Failed to fetch cart items. Please try again later.");
+        console.error("❌ Error fetching cart items:", err);
+        setError("Error: Some items in your cart are missing required data.");
       }
     };
   
     fetchCartItems();
-  }, []); // Dependency array includes sessionId only if it's derived from state/props
+  }, []);
   
 
   const calculateTotal = (cartItems) => {
@@ -97,6 +101,24 @@ const CartPage = () => {
       setError("Failed to remove item. Please try again.");
     }
   };
+  const handleZipSubmit = () => {
+    if (receiverZip.length === 5 && /^\d+$/.test(receiverZip)) {
+      setZipSubmitted(true);
+    } else {
+      alert("Please enter a valid 5-digit ZIP code.");
+    }
+  };
+
+  if (cart.length === 0) {
+    return (
+      <div className="cart-container empty" style={{ backgroundColor: "#555555ce", borderRadius: "20px" }}>
+        <h2 style={{ color: "white" }}>Your cart is empty!</h2>
+        <button onClick={() => navigate("/store")} className="cart-back-button">
+          Back to Store
+        </button>
+      </div>
+    );
+  }
 
   
 
@@ -167,18 +189,44 @@ const CartPage = () => {
           </div>
         ))}
       </div>
+       {/* ZIP Code Entry */}
+       <div className="shipping-section">
+        <label htmlFor="zip">Enter ZIP Code:</label>
+        <input
+          type="text"
+          id="zip"
+          value={receiverZip}
+          onChange={(e) => setReceiverZip(e.target.value)}
+          placeholder="Enter your ZIP code"
+          disabled={zipSubmitted}
+        />
+        <button onClick={handleZipSubmit} disabled={zipSubmitted}>
+          {zipSubmitted ? "ZIP Code Submitted" : "Submit ZIP Code"}
+        </button>
+      </div>
 
+      {/* Shipping Calculator */}
+      {zipSubmitted && (
+        <ShippingCalculator cart={cart} receiverZip={receiverZip} setShippingCost={setShippingCost} />
+      )}
+
+      {/* Checkout Button (Disabled until ZIP is entered & shipping cost is retrieved) */}
       <div className="cart-summary">
-        <h3 style={{color:'white', padding: '10px'}}>Total: ${totalPrice.toFixed(2)}</h3>
+        <h3 style={{ color: "white", padding: "10px" }}>Total: ${totalPrice.toFixed(2)}</h3>
         <Link
-        to="/checkout-options"
-        className="proceed-checkout-checkout-options"
-        
-
+          to="/checkout-options"
+          className={`proceed-checkout ${!zipSubmitted || !shippingCost ? "disabled" : ""}`}
+          onClick={(e) => {
+            if (!zipSubmitted || !shippingCost) {
+              e.preventDefault();
+              alert("Please enter ZIP code and calculate shipping before proceeding.");
+            }
+          }}
         >
           {loading ? "Processing..." : "Proceed to Checkout"}
         </Link>
       </div>
+    
     </div>
   );
 };

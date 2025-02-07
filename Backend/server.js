@@ -46,7 +46,7 @@ const registerStoreRoutes = require('./routes/register/storeRegister');
 const adminEventRoutes = require('./routes/admin/adminEventRoutes');
 const userEventRoutes = require('./routes/user/eventRoutes');
 const userGalleryRoutes = require('./routes/user/galleryRoutes');
-
+const registerRates = require('./routes/register/rates.js');
 const registerCartRoutes = require('./routes/register/cartRoutes');
 const notificationRoutes = require('./routes/admin/notifcationRoutes');
 const socialRoutes = require('./routes/register/socialRoutes');
@@ -152,6 +152,7 @@ app.use('/login-passkey-routes', rateLimiter('passkey'), passkeyRoutes);
 //Register routes
 app.use('/register-store', rateLimiter('register-store'), registerStoreRoutes);
 app.use('/register-cart', rateLimiter('register-cart'), registerCartRoutes); 
+app.use('/register-rates', rateLimiter('register-rates'), registerRates);
 
 
 // User routes

@@ -4,7 +4,7 @@ import { adminApi } from '../../config/axios';
 import { useProductContext } from './ProductsContext';
 import DesktopMediaUploader from '../../Components/desktopMediaUploader';
 import MobileMediaUploader from '../../Components/mobileMediaUploader';
-import ThumbnailUploader from './components/thumbnailUploader'; // Import ThumbnailUploader
+import ThumbnailUploader from './components/thumbnailUploader';
 
 const EditProductForm = ({ productId, onUpdate, onCancel }) => {
   const { fetchProducts, fetchProductMedia, updateProductAndMedia } = useProductContext();
@@ -16,14 +16,12 @@ const EditProductForm = ({ productId, onUpdate, onCancel }) => {
   const [mediaLoading, setMediaLoading] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
-  // Track device size changes
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 768);
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Fetch product data and media on mount
   useEffect(() => {
     const fetchProductData = async () => {
       try {
@@ -71,7 +69,6 @@ const EditProductForm = ({ productId, onUpdate, onCancel }) => {
   const handleMediaChange = (updatedMedia) => {
     const currentMediaIds = mediaPreviews.map((media) => media.id);
     const updatedMediaIds = updatedMedia.map((media) => media.id);
-
     const removed = currentMediaIds.filter((id) => !updatedMediaIds.includes(id));
     setRemovedMedia((prev) => [...prev, ...removed]);
 
@@ -86,6 +83,11 @@ const EditProductForm = ({ productId, onUpdate, onCancel }) => {
     if (!productData.description) missing.push('description');
     if (!productData.price || productData.price <= 0) missing.push('price');
     if (!productData.type) missing.push('type');
+    if (!productData.length || productData.length <= 0) missing.push('length');
+    if (!productData.width || productData.width <= 0) missing.push('width');
+    if (!productData.height || productData.height <= 0) missing.push('height');
+    if (!productData.weight || productData.weight <= 0) missing.push('weight');
+    if (!productData.unit) missing.push('unit');
     setMissingFields(missing);
 
     if (missing.length > 0) return;
@@ -93,23 +95,21 @@ const EditProductForm = ({ productId, onUpdate, onCancel }) => {
     setIsSubmitting(true);
 
     try {
-      // Prepare product form data
       const productFormData = new FormData();
       Object.entries(productData).forEach(([key, value]) => {
         if (value !== null) productFormData.append(key, value);
       });
 
-      // Prepare media form data
       const mediaFormData = new FormData();
       const mediaToKeep = mediaPreviews.map((media) => ({
         id: media.id,
-        order: media.order, // Include order in the payload
+        order: media.order,
       }));
 
       mediaPreviews.forEach((media, index) => {
         if (media.file) {
           mediaFormData.append('media', media.file);
-          mediaFormData.append(`mediaOrder_${index}`, media.order); // Include order for new files
+          mediaFormData.append(`mediaOrder_${index}`, media.order);
         }
       });
 
@@ -140,85 +140,68 @@ const EditProductForm = ({ productId, onUpdate, onCancel }) => {
       <h2>Edit Product</h2>
 
       <div className="form-section">
-        <label>Product Name {missingFields.includes('name') && <span className="error-dot">*</span>}</label>
-        <input
-          type="text"
-          name="name"
-          value={productData.name}
-          onChange={handleInputChange}
-        />
+        <label>Product Name</label>
+        <input type="text" name="name" value={productData.name} onChange={handleInputChange} />
       </div>
 
       <div className="form-section">
-        <label>Product Description {missingFields.includes('description') && <span className="error-dot">*</span>}</label>
-        <textarea
-          name="description"
-          value={productData.description}
-          onChange={handleInputChange}
-        />
+        <label>Product Description</label>
+        <textarea name="description" value={productData.description} onChange={handleInputChange} />
       </div>
 
       <div className="form-section">
-        <label>Price (USD) {missingFields.includes('price') && <span className="error-dot">*</span>}</label>
-        <input
-          type="number"
-          name="price"
-          value={productData.price}
-          onChange={handleInputChange}
-        />
+        <label>Price (USD)</label>
+        <input type="number" name="price" value={productData.price} onChange={handleInputChange} />
       </div>
 
       <div className="form-section">
         <label>Quantity</label>
-        <input
-          type="number"
-          name="quantity"
-          value={productData.quantity}
-          onChange={handleInputChange}
-        />
+        <input type="number" name="quantity" value={productData.quantity} onChange={handleInputChange} />
       </div>
 
       <div className="form-section">
-        <label>Type {missingFields.includes('type') && <span className="error-dot">*</span>}</label>
-        <input
-          type="text"
-          name="type"
-          value={productData.type}
-          onChange={handleInputChange}
-        />
+        <label>Type</label>
+        <input type="text" name="type" value={productData.type} onChange={handleInputChange} />
       </div>
 
-      {/* Use the ThumbnailUploader component */}
+      {/* 🔹 Weight & Unit Selection */}
+      <div className="form-section">
+        <label>Weight</label>
+        <input type="number" name="weight" value={productData.weight} onChange={handleInputChange} />
+      
+
+      <div>
+        <label>Unit</label>
+        <select name="unit" value={productData.unit} onChange={handleInputChange}>
+          <option value="lb">Pounds (lb)</option>
+          <option value="kg">Kilograms (kg)</option>
+        </select>
+      </div>
+
+      {/* 🔹 Dimensions */}
+      <div >
+        <label>Length</label>
+        <input type="number" name="length" value={productData.length} onChange={handleInputChange} />
+      </div>
+
+      <div >
+        <label>Width</label>
+        <input type="number" name="width" value={productData.width} onChange={handleInputChange} />
+      </div>
+
+      <div >
+        <label>Height</label>
+        <input type="number" name="height" value={productData.height} onChange={handleInputChange} />
+      </div>
+      </div>
+
       <div className="form-section">
         <ThumbnailUploader
-          imagePreview={
-            productData.thumbnail &&
-            typeof productData.thumbnail === 'string'
-              ? `${import.meta.env.VITE_BACKEND}/uploads/${productData.thumbnail}`
-              : null
-          }
+          imagePreview={productData.thumbnail && typeof productData.thumbnail === 'string'
+            ? `${import.meta.env.VITE_BACKEND}/uploads/${productData.thumbnail}`
+            : null}
           onImageUpload={handleThumbnailChange}
         />
-      </div>
-
-
-      <div className="form-section">
-        <label>Media</label>
-        {isMobile ? (
-          <MobileMediaUploader
-            mode="edit"
-            initialMedia={mediaPreviews}
-            onMediaChange={handleMediaChange}
-            isLoading={mediaLoading}
-          />
-        ) : (
-          <DesktopMediaUploader
-            mode="edit"
-            initialMedia={mediaPreviews}
-            onMediaChange={handleMediaChange}
-            isLoading={mediaLoading}
-          />
-        )}
       </div>
 
       <div className="form-actions">
@@ -229,13 +212,6 @@ const EditProductForm = ({ productId, onUpdate, onCancel }) => {
       </div>
     </div>
   );
-};
-
-EditProductForm.propTypes = {
-  productId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-  fetchProducts: PropTypes.func.isRequired,
-  onCancel: PropTypes.func,
-  onUpdate: PropTypes.func,
 };
 
 export default EditProductForm;
