@@ -9,6 +9,7 @@ import MessageGif from '../assets/messages.gif';
 import SocialsGif from '../assets/socials.gif';
 import EmailGif from '../assets/email.gif';
 import UsersGif from '../assets/users.gif';
+import InvoicesGif from '../assets/invoice.gif';
 
 const Home = () => {
   return (
@@ -95,6 +96,17 @@ const Home = () => {
                 <img 
                 style={{width: '100%', height: 'auto'}}
                 src={SocialsGif}/>
+                <p className='home-tile-description'>Contact users using email. (Will only work with opted in users)</p>
+              </div>
+            </Link>
+          </li>
+          <li className="home-tile">
+            <Link style={{textDecoration: 'none'}} to="/invoices">
+              <div className='tile-content'>
+                <h3>Invoices</h3>
+                <img 
+                style={{width: '100%', height: 'auto'}}
+                src={InvoicesGif}/>
                 <p className='home-tile-description'>Contact users using email. (Will only work with opted in users)</p>
               </div>
             </Link>

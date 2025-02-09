@@ -11,6 +11,8 @@ const Media = require('./media');
 const GuestCart = require('./guestCart')
 const RateLimiterLogs = require("./rateLimiterLogs");
 const SocialLinks = require('./socialLinks');
+const Invoice = require('./invoice');
+
 
 
 // Define the models within an object for easier association management
@@ -24,9 +26,8 @@ const db = {
   RateLimiterLogs,
   Media,
   GuestCart,
-  SocialLinks
-
-  
+  SocialLinks,
+  Invoice,
 };
 
 // Manually define associations within each model

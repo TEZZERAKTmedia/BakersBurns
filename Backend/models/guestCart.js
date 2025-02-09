@@ -1,6 +1,6 @@
 const { DataTypes } = require('sequelize');
-const sequelize = require('../config/database'); // Your Sequelize instance
-const Product = require('./product'); // Import the Product model
+const sequelize = require('../config/database');
+const Product = require('./product');
 
 const GuestCart = sequelize.define('GuestCart', {
   id: {
@@ -28,11 +28,39 @@ const GuestCart = sequelize.define('GuestCart', {
       min: 1,
     },
   },
+  // Add missing product details
+  price: {
+    type: DataTypes.FLOAT,
+    allowNull: false,
+  },
+  thumbnail: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  weight: {
+    type: DataTypes.FLOAT,
+    allowNull: true,
+  },
+  length: {
+    type: DataTypes.FLOAT,
+    allowNull: true,
+  },
+  width: {
+    type: DataTypes.FLOAT,
+    allowNull: true,
+  },
+  height: {
+    type: DataTypes.FLOAT,
+    allowNull: true,
+  },
+  unit: {
+    type: DataTypes.ENUM('metric', 'standard'),
+    allowNull: false,
+    defaultValue: 'standard',
+  },
 }, {
-  timestamps: true, // Adds createdAt and updatedAt fields
-  tableName: 'GuestCarts', // Custom table name
+  timestamps: true,
+  tableName: 'GuestCarts',
 });
-
-
 
 module.exports = GuestCart;

@@ -54,6 +54,7 @@ const adminSocialRoutes = require('./routes/admin/adminSocialRoutes');
 const adminDiscountRoutes = require('./routes/admin/adminDiscountRoutes');
 const { rateLimiter } = require('./utils/rateLimiter');
 const googleRoutes = require('./routes/register/googleRoutes');
+const invoiceRoutes = require('./routes/admin/invoiceRoutes');
 
  // Assuming passport.js is in the same directory
 
@@ -180,6 +181,7 @@ app.use('/google', googleRoutes);
 
 
 // Admin routes (protected by adminAuthMiddleware)
+app.use('/invoice-routes', adminAuthMiddleware('admin'), rateLimiter('invoice-routes'), invoiceRoutes);
 app.use('/products', adminAuthMiddleware('admin'), rateLimiter('admin-products'), productRoutes);
 app.use('/gallery-manager', adminAuthMiddleware('admin'), rateLimiter('gallery-manager'), galleryRoutes);
 app.use('/admin-mail', adminAuthMiddleware('admin'), rateLimiter('admin-mail'), adminEmailRoutes);

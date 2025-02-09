@@ -16,6 +16,7 @@ import { ScannerProvider } from './context/scannerContext';
 import AdminLoginForm from './Components/loginForm';
 import { DiscountProvider } from './Pages/Discounts/discounts-context';
 import {ProductsProvider} from './Pages/productManager/ProductsContext';
+import Invoices from './Pages/Invoice/Invoice';
 
 const AdminApp = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -70,6 +71,7 @@ const AdminApp = () => {
           <Route path="/orders" element={<Orders />} />
           <Route path="/event-manager" element={<Events />} />
           <Route path="/social-manager" element={<SocialLinksManager />} />
+          <Route path="/invoices" element={<Invoices />} />
           <Route
             path="/product-manager"
             element={

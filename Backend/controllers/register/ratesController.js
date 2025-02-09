@@ -6,7 +6,6 @@ dotenv.config();
 // Load environment variables
 const UPS_CLIENT_ID = process.env.UPS_CLIENT_ID;
 const UPS_CLIENT_SECRET = process.env.UPS_CLIENT_SECRET;
-const USPS_USER_ID = process.env.USPS_USER_ID;
 const FEDEX_CLIENT_ID = process.env.FEDEX_CLIENT_ID;
 const FEDEX_CLIENT_SECRET = process.env.FEDEX_CLIENT_SECRET;
 
@@ -31,7 +30,7 @@ const getShippingRates = async (req, res) => {
   
       // Fetch rates from different carriers
       const upsRate = await getUPSRates(shipperZip, receiverZip, weight, dimensions);
-      const uspsRate = await getUSPSRates(shipperZip, receiverZip, weight);
+      const uspsRate = await getUSPSRates(shipperZip, receiverZip, weight, dimensions);
       const fedexRate = await getFedExRates(shipperZip, receiverZip, weight, dimensions);
   
       // ✅ Log the API responses
@@ -82,65 +81,182 @@ const getUPSToken = async () => {
   }
 };
 
+
+
+
+
 // 🔹 Function to Get UPS Rates
 const getUPSRates = async (shipperZip, receiverZip, weight, dimensions) => {
-  try {
-    const accessToken = await getUPSToken();
-    if (!accessToken) return null;
-
-    const response = await axios.post(
-      "https://onlinetools.ups.com/api/rating/v1/Shop",
-      {
+    try {
+      const accessToken = await getUPSToken();
+      if (!accessToken) {
+        console.error("❌ UPS Token Error: Unable to get UPS OAuth token");
+        return null;
+      }
+  
+      const upsRequestPayload = {
         RateRequest: {
+          Request: {
+            RequestOption: "Rate",  // Use "Shop" for all services
+          },
           Shipment: {
-            Shipper: { Address: { PostalCode: shipperZip } },
-            ShipTo: { Address: { PostalCode: receiverZip } },
-            Package: {
-              Dimensions: { Length: dimensions.length, Width: dimensions.width, Height: dimensions.height },
-              PackageWeight: { Weight: weight },
+            Shipper: {
+              Address: { PostalCode: shipperZip, CountryCode: "US" },
             },
+            ShipTo: {
+              Address: { PostalCode: receiverZip, CountryCode: "US" },
+            },
+            ShipFrom: {
+              Address: { PostalCode: shipperZip, CountryCode: "US" },
+            },
+            Service: { Code: "03" }, // 03 = UPS Ground
+            Package: [
+              {
+                PackagingType: { Code: "02" }, // 02 = Customer Supplied Package
+                Dimensions: {
+                  UnitOfMeasurement: { Code: "IN" },
+                  Length: String(dimensions.length),
+                  Width: String(dimensions.width),
+                  Height: String(dimensions.height),
+                },
+                PackageWeight: {
+                  UnitOfMeasurement: { Code: "LBS" },
+                  Weight: String(weight),
+                },
+              },
+            ],
           },
         },
-      },
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
+      };
+  
+      const response = await axios.post(
+        "https://onlinetools.ups.com/api/rating/v2409/Rate",
+        upsRequestPayload,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+  
+      return response.data?.RateResponse?.RatedShipment?.[0]?.TotalCharges?.MonetaryValue || null;
+    } catch (error) {
+      if (error.response) {
+        console.error("❌ UPS API Error:", JSON.stringify(error.response.data, null, 2));
+      } else {
+        console.error("❌ UPS API Unexpected Error:", error.message);
       }
-    );
+      return null;
+    }
+  };
+  
+//USPS
+// 🔹 Function to Get USPS OAuth Token (Your Working Version)
+const getUSPSToken = async () => {
+    try {
+        const response = await axios.post(
+            "https://apis.usps.com/oauth2/v3/token",
+            new URLSearchParams({
+                grant_type: "client_credentials",
+                client_id: process.env.USPS_CLIENT_ID,
+                client_secret: process.env.USPS_CLIENT_SECRET
+            }).toString(),
+            {
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                }
+            }
+        );
 
-    return response.data?.RateResponse?.RatedShipment?.TotalCharges?.MonetaryValue || null;
-  } catch (error) {
-    console.error("UPS API Error:", error.response?.data || error.message);
-    return null;
-  }
+        console.log("✅ USPS OAuth Response:", response.data);
+        return response.data.access_token;
+    } catch (error) {
+        console.error("❌ USPS OAuth Error:", error.response?.data || error.message);
+        return null;
+    }
 };
 
-// 🔹 Function to Get USPS Rates
-const getUSPSRates = async (shipperZip, receiverZip, weight) => {
-  try {
-    const response = await axios.get(
-      `https://secure.shippingapis.com/ShippingAPI.dll?API=RateV4&XML=
-      <RateV4Request USERID="${USPS_USER_ID}">
-        <Package ID="1ST">
-          <Service>PRIORITY</Service>
-          <ZipOrigination>${shipperZip}</ZipOrigination>
-          <ZipDestination>${receiverZip}</ZipDestination>
-          <Pounds>${Math.floor(weight)}</Pounds>
-          <Ounces>${(weight % 1) * 16}</Ounces>
-          <Container></Container>
-          <Size>REGULAR</Size>
-        </Package>
-      </RateV4Request>`
-    );
 
-    return parseUSPSRate(response.data);
-  } catch (error) {
-    console.error("USPS API Error:", error.response?.data || error.message);
-    return null;
-  }
+
+// 🔹 Function to Get USPS Rates (Using Shipping Options API)
+const getUSPSRates = async (shipperZip, receiverZip, weight, dimensions) => {
+    try {
+        const accessToken = await getUSPSToken();
+        if (!accessToken) {
+            console.error("❌ USPS Token Error: Unable to get USPS OAuth token");
+            return null;
+        }
+
+        console.log("🔎 Dimensions Inside USPS Function:", dimensions);
+
+        const uspsRequestPayload = {
+            originZIPCode: shipperZip,
+            destinationZIPCode: receiverZip,
+            destinationEntryFacilityType: "NONE",
+            packageDescription: {
+                weight: weight,
+                length: dimensions.length,
+                width: dimensions.width,
+                height: dimensions.height,
+                mailClass: "PRIORITY_MAIL"
+            },
+            pricingOptions: [
+                {
+                    priceType: "RETAIL",
+                    shippingFilter: "PRICE"
+                }
+            ]
+        };
+
+        console.log("📡 USPS Shipping Options Request Payload:", uspsRequestPayload);
+
+        const response = await axios.post(
+            "https://apis.usps.com/shipments/v3/options/search",
+            uspsRequestPayload,
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${accessToken}`
+                }
+            }
+        );
+
+        console.log("🔍 USPS Shipping Options API Response:", response.data);
+
+        // ✅ Extract the lowest rate
+        let lowestRate = null;
+        if (response.data?.pricingOptions?.length) {
+            const shippingOptions = response.data.pricingOptions[0].shippingOptions;
+            if (shippingOptions?.length) {
+                const rateOptions = shippingOptions[0].rateOptions;
+                if (rateOptions?.length) {
+                    lowestRate = rateOptions[0].totalBasePrice;
+                }
+            }
+        }
+
+        console.log("✅ Extracted USPS Rate:", lowestRate);
+        return lowestRate || null; // Ensure the frontend receives only a number
+    } catch (error) {
+        console.error("❌ USPS Shipping Options API Error:", error.response?.data || error.message);
+        return null;
+    }
 };
+
+
+
+// 🔹 Example Usage
+(async () => {
+    const shipperZip = "10001";
+    const receiverZip = "80030";
+    const weight = 3;
+    const dimensions = { length: 10, width: 10, height: 30 };
+
+    const uspsRate = await getUSPSRates(shipperZip, receiverZip, weight, dimensions);
+    console.log("Final USPS Shipping Rate:", uspsRate);
+})();
+
 
 // 🔹 Function to Get FedEx OAuth Token
 const getFedExToken = async () => {

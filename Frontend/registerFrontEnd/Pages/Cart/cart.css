@@ -173,3 +173,11 @@
      
    
   }
+  .carrier-disabled {
+    background: gray;
+    color: white;
+    padding: 5px 10px;
+    border: none;
+    cursor: not-allowed;
+    margin: 5px;
+}

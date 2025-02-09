@@ -1,6 +1,7 @@
 const { fetchUspsTracking, getUspsAuthToken } = require("../uspsApi");
 const Order = require("../../../models/order");
 const nodemailer = require("nodemailer");
+const { archiveCompletedOrder } = require("../util/invoiceArchiver");
 
 /**
  * ✅ Periodically check USPS tracking updates for shipped orders.
@@ -34,23 +35,27 @@ async function checkShippedOrdersUsps() {
         order.status = latestStatus;
         await order.save();
         console.log(`✅ Order ${order.id} - Status Updated: ${latestStatus}`);
+
+        // Archive the order if delivered.
+        if (latestStatus.toLowerCase() === "delivered") {
+          console.log(`Archiving Order ${order.id}...`);
+          await archiveCompletedOrder(order.id);
+        }
       }
     }
 
-    // Prepare to send the API response details via email for detailed logging.
+    // (Optional) Send detailed tracking data via email for logging.
     const transporter = nodemailer.createTransport({
       host: process.env.EMAIL_HOST,
       port: process.env.EMAIL_PORT,
-      secure: process.env.EMAIL_SECURE === "true", // true for 465, false for other ports
+      secure: process.env.EMAIL_SECURE === "true",
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
       },
     });
 
-    // Convert the tracking API response to a nicely formatted JSON string.
     const trackingDataJson = JSON.stringify(trackingData, null, 2);
-
     const mailOptions = {
       from: `"USPS Tracker" <${process.env.EMAIL_USER}>`,
       to: process.env.ROOT_EMAIL,
@@ -72,6 +77,6 @@ async function checkShippedOrdersUsps() {
 }
 
 // Schedule the job to run every hour.
-setInterval(checkShippedOrdersUsps, 60 * 60 * 1000); // Runs every 1 hour
+setInterval(checkShippedOrdersUsps, 60 * 60 * 1000); // 1 hour
 
 module.exports = { checkShippedOrdersUsps };

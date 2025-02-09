@@ -12,38 +12,52 @@ const addToGuestCart = async (req, res) => {
   const { sessionId, productId, quantity } = req.body;
 
   if (!sessionId || !productId || !quantity) {
-    return res.status(400).json({ message: 'Session ID, product ID, and quantity are required.' });
+    return res.status(400).json({ message: "Session ID, product ID, and quantity are required." });
   }
 
   try {
+    // 🔹 Fetch product details from the database
     const product = await Product.findByPk(productId);
 
     if (!product) {
-      return res.status(404).json({ message: 'Product not found.' });
+      return res.status(404).json({ message: "Product not found." });
     }
 
     if (quantity <= 0) {
-      // Remove item if quantity is 0
       await GuestCart.destroy({ where: { sessionId, productId } });
-      return res.status(200).json({ message: 'Item removed from cart.' });
+      return res.status(200).json({ message: "Item removed from cart." });
     }
 
-    // Check if the product already exists in the guest cart
+    // 🔹 Check if the product already exists in the guest cart
     const existingCartItem = await GuestCart.findOne({ where: { sessionId, productId } });
 
     if (existingCartItem) {
       existingCartItem.quantity = quantity;
       await existingCartItem.save();
     } else {
-      await GuestCart.create({ sessionId, productId, quantity });
+      await GuestCart.create({
+        sessionId,
+        productId,
+        quantity,
+        price: product.price,        // Fetch price from Product table
+        thumbnail: product.thumbnail,
+        weight: product.weight,      // Fetch weight from Product table
+        length: product.length,      // Fetch length from Product table
+        width: product.width,        // Fetch width from Product table
+        height: product.height,      // Fetch height from Product table
+        unit: product.unit,          // Fetch unit from Product table
+      });
     }
 
-    res.status(200).json({ message: 'Item added/updated in cart successfully.' });
+    res.status(200).json({ message: "Item added/updated in cart successfully." });
   } catch (error) {
-    console.error('Error adding item to guest cart:', error.message, error.stack);
-    res.status(500).json({ message: 'Failed to add item to cart.' });
+    console.error("Error adding item to guest cart:", error.message, error.stack);
+    res.status(500).json({ message: "Failed to add item to cart." });
   }
 };
+
+
+
 
 // Get Guest Cart Items
 // Get Guest Cart Items
@@ -53,48 +67,56 @@ const getCartItems = async (req, res) => {
   console.log("Received session ID:", sessionId);
 
   if (!sessionId) {
-    console.log("No session ID provided in the request.");
-    return res.status(400).json({ message: 'Session ID is required.' });
+    return res.status(400).json({ message: "Session ID is required." });
   }
 
   try {
-    // Fetch cart items associated with the session ID
     const cartItems = await GuestCart.findAll({
       where: { sessionId },
-      include: [
-        {
-          model: Product,
-          as: 'Product',
-        },
-      ],
+      attributes: [
+        "productId",
+        "quantity",
+        "price",
+        "thumbnail",
+        "weight",
+        "length",
+        "width",
+        "height",
+        "unit",
+      ], // ✅ Explicitly select fields
     });
 
-    console.log("Database query results:", cartItems);
+    console.log("Cart items fetched from DB:", cartItems);
 
     if (cartItems.length === 0) {
-      console.log("No cart items found for session ID:", sessionId);
       return res.status(200).json({ cartDetails: [] });
     }
 
-    // Build cart details response
+    // Build cart response with all necessary details
     const cartDetails = cartItems.map((item) => ({
       id: item.productId,
-      name: item.Product.name,
-      price: item.Product.price,
-      thumbnail: item.Product.thumbnail,
-      stock: item.Product.quantity,
+      name: `Test`, // Replace this with the actual product name if necessary
+      price: item.price,
+      thumbnail: item.thumbnail,
       quantity: item.quantity,
-      total: item.Product.price * item.quantity,
+      total: item.price * item.quantity,
+      weight: item.weight,
+      length: item.length,
+      width: item.width,
+      height: item.height,
+      unit: item.unit,
     }));
 
-    console.log("Cart details to be sent in response:", cartDetails);
+    console.log("Cart details sent to frontend:", cartDetails); // ✅ Confirm correct data
 
     res.status(200).json({ cartDetails });
   } catch (error) {
-    console.error('Error fetching cart items:', error.message);
+    console.error("Error fetching cart items:", error);
     res.status(500).json({ error: error.message });
   }
 };
+
+
 const deleteCartItem = async (req, res) => {
   const { sessionId, productId } = req.body;
 

@@ -1,5 +1,5 @@
 const express = require("express");
-const { getShippingRates, getUPSRates, getFedExRates, getUSPSRates } = require("../../controllers/register/ratesController");
+const { getShippingRates, getUPSRatesHandler, getFedExRatesHandler, getUSPSRatesHandler } = require("../../controllers/register/ratesController");
 
 const router = express.Router();
 
@@ -7,9 +7,9 @@ const router = express.Router();
 router.post('/all-rates', getShippingRates);
 
 // Route to fetch live shipping rates
-router.post('/ups-rates', getUPSRates);
-router.post('/fedex-rates', getFedExRates);
-router.post('/usps-rates', getUSPSRates);
+router.post('/ups-rates', getUPSRatesHandler);
+router.post('/fedex-rates', getFedExRatesHandler);
+router.post('/usps-rates', getUSPSRatesHandler);
 
 
 module.exports = router;
