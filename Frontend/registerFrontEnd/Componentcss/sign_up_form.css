@@ -148,7 +148,7 @@ input:focus {
     outline: none;
 }
 
-button {
+.blue-button {
     padding: 0.75rem;
     background-color: #007bff;
     color: #fff;

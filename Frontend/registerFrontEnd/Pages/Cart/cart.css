@@ -181,3 +181,213 @@
     cursor: not-allowed;
     margin: 5px;
 }
+
+.carrier-buttons {
+  width: 100%;
+  
+}
+
+
+
+/*UPS */
+
+/* General styles for the component */
+.rate-dropdown {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 400px;
+  margin-top: 10px;
+}
+
+/* UPS Rates button */
+.ups-button {
+  background-color: #ffb324; /* Tailwind blue-600 */
+  color: white;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.ups-button:hover {
+  background-color: #ffb324; /* Darker blue */
+  transform: scale(1.05);
+}
+
+.ups-button:active {
+  transform: scale(0.95);
+}
+
+/* Rate selection buttons */
+.rate-option {
+  position: relative;
+  width: 100%;
+  text-align: left;
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 2px solid transparent;
+  background-color: #f3f4f6; /* Light gray */
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.rate-option:hover {
+  border-color: #f6c13b; /* Blue-500 */
+}
+
+.rate-option.selected {
+  color: white;
+  background-color: #ffc421; /* Blue-600 */
+  border-color: #af751e; /* Darker blue */
+}
+
+/* Left-to-right fill effect when selected */
+.rate-option::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 0%;
+  background-color: rgba(235, 176, 37, 0.3); /* Semi-transparent blue */
+  transition: width 0.4s ease-in-out;
+}
+
+.rate-option.selected::before {
+  width: 100%;
+}
+
+/* Shipping rate details */
+.rate-text {
+  position: relative;
+  z-index: 2; /* Keep text above background animation */
+}
+
+/* No rates available message */
+.no-rates {
+  font-size: 14px;
+  color: #6b7280; /* Tailwind gray-500 */
+}
+
+/*USPS */
+
+/* General styles for the component */
+.usps-rate-dropdown {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 400px;
+  margin-top: 10px;
+}
+
+/* UPS Rates button */
+.usps-button {
+  background-color: #242876; /* Tailwind blue-600 */
+  color: white;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-weight: bold;
+  border: none;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.usps-button:hover {
+  background-color: #1e40af; /* Darker blue */
+  transform: scale(1.05);
+}
+
+.usps-button:active {
+  transform: scale(0.95);
+}
+
+/* Rate selection buttons */
+.usps-rate-option {
+  position: relative;
+  width: 100%;
+  text-align: left;
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 2px solid transparent;
+  background-color: #f3f4f6; /* Light gray */
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.usps-rate-option:hover {
+  border-color: #3b82f6; /* Blue-500 */
+}
+
+.usps-rate-option.selected {
+  color: white;
+  background-color: #2d2a7f; /* Blue-600 */
+  border-color: #1e40af; /* Darker blue */
+}
+
+/* Left-to-right fill effect when selected */
+.usps-rate-option::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 0%;
+  background-color: rgba(37, 99, 235, 0.3); /* Semi-transparent blue */
+  transition: width 0.4s ease-in-out;
+}
+
+.usps-rate-option.selected::before {
+  width: 100%;
+}
+
+/* Shipping rate details */
+.usps-rate-text {
+  position: relative;
+  z-index: 2; /* Keep text above background animation */
+}
+
+/* No rates available message */
+.usps-no-rates {
+  font-size: 14px;
+  color: #6b7280; /* Tailwind gray-500 */
+}
+
+
+
+
+
+/* Base styles for the checkout button */
+.proceed-checkout {
+  display: inline-block;
+  padding: 12px 24px;
+  background-color: #007BFF; /* Primary blue color */
+  color: #fff;
+  font-size: 1rem;
+  font-weight: bold;
+  text-align: center;
+  text-decoration: none;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, opacity 0.3s ease;
+}
+
+/* Hover effect for active button */
+.proceed-checkout:hover {
+  background-color: #0056b3;
+}
+
+/* Styles for disabled state */
+.proceed-checkout.disabled {
+  background-color: #ccc; /* Gray background for disabled state */
+  color: #666; /* Darker text color */
+  cursor: not-allowed;
+  opacity: 0.6;
+  pointer-events: none; /* Prevent clicks */
+}
