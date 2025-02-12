@@ -17,16 +17,14 @@ const handleWebhook = async (req, res) => {
   const sig = req.headers['stripe-signature'];
 
   try {
+    // Construct the event using Stripe's library and your webhook secret
     const event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
-
     console.log('Webhook received, event type:', event.type);
 
+    // Handle checkout session completed (successful payment)
     if (event.type === 'checkout.session.completed') {
       console.log('Processing checkout.session.completed event...');
-
       const session = event.data.object;
-
-      // Extract metadata and session details
       const sessionId = session.metadata?.sessionId;
       const customerEmail = session.customer_details?.email;
       const total = session.amount_total / 100;
@@ -38,12 +36,10 @@ const handleWebhook = async (req, res) => {
 
       console.log(`Email for checkout: ${customerEmail}`);
 
-      // Check if the user exists by email
+      // Find or create a guest user account
       let user = await User.findOne({ where: { email: customerEmail } });
-
       const isNewGuest = !user;
       if (isNewGuest) {
-        // Create a guest user account if no user exists
         user = await User.create({
           email: customerEmail,
           username: customerEmail,
@@ -76,7 +72,7 @@ const handleWebhook = async (req, res) => {
         console.log(`Initial message created for thread: ${thread.threadId}`);
       }
 
-      // Handle cart items for guest users or registered users
+      // Retrieve cart items (guest cart for session or user cart)
       let cartItems;
       if (sessionId) {
         cartItems = await GuestCart.findAll({
@@ -97,7 +93,6 @@ const handleWebhook = async (req, res) => {
 
       const shippingAddress = encrypt(JSON.stringify(session.shipping_details?.address || {}));
       const billingAddress = encrypt(JSON.stringify(session.customer_details?.address || {}));
-
       console.log('Encrypted Shipping Address:', shippingAddress);
       console.log('Encrypted Billing Address:', billingAddress);
 
@@ -109,19 +104,16 @@ const handleWebhook = async (req, res) => {
         billingAddress,
         status: 'processing',
       });
-
       console.log(`Order created with ID: ${order.id}`);
 
-      // Add order items
+      // Add order items for each cart item
       await Promise.all(
         cartItems.map(async (cartItem) => {
           const product = cartItem.Product || cartItem.product;
-
           if (!product) {
             console.error('Product not found for cart item.');
             return;
           }
-
           await OrderItem.create({
             orderId: order.id,
             productId: product.id,
@@ -130,7 +122,6 @@ const handleWebhook = async (req, res) => {
           });
         })
       );
-
       console.log(`Order items created for order ID: ${order.id}`);
 
       // Clear guest cart if applicable
@@ -139,14 +130,13 @@ const handleWebhook = async (req, res) => {
         console.log(`Cleared guest cart for session ID: ${sessionId}`);
       }
 
-      // Send email notification to the user
+      // Send email notifications
       const orderItems = cartItems.map(cartItem => ({
         name: cartItem.Product?.name || cartItem.product?.name,
         quantity: cartItem.quantity,
         price: cartItem.Product?.price || cartItem.product?.price,
       }));
 
-      // Send user email based on guest or existing user
       await sendOrderEmail(
         isNewGuest ? 'newGuest' : 'existingUser',
         customerEmail,
@@ -156,13 +146,10 @@ const handleWebhook = async (req, res) => {
           orderUrl: `${process.env.ORDER_URL}/${order.id}`,
         }
       );
-
       console.log(`User email sent to ${customerEmail}.`);
 
-      // Send admin notification email
       const admins = await User.findAll({ where: { role: 'admin' } });
       const adminEmails = admins.map(admin => admin.email).filter(email => email);
-
       if (adminEmails.length > 0) {
         await sendOrderEmail('adminNotification', adminEmails.join(','), {
           total,
@@ -174,7 +161,29 @@ const handleWebhook = async (req, res) => {
         console.warn('No admin emails found to send admin notification.');
       }
 
-      console.log('Webhook processing completed.');
+      console.log('Webhook processing for checkout.session.completed completed.');
+    }
+    // Handle checkout session expiration
+    else if (event.type === 'checkout.session.expired') {
+      console.log('Processing checkout.session.expired event...');
+      const session = event.data.object;
+      const sessionId = session.metadata?.sessionId;
+      if (sessionId) {
+        // Fetch all guest cart items for this session
+        const cartItems = await GuestCart.findAll({ where: { sessionId } });
+        if (cartItems && cartItems.length > 0) {
+          // Call your unlockInventory function to restore product quantities
+          await unlockInventory(cartItems);
+          console.log(`Inventory unlocked for expired session: ${sessionId}`);
+          // Optionally, you could clear the guest cart here if desired.
+        } else {
+          console.log(`No cart items found for session: ${sessionId}`);
+        }
+      } else {
+        console.warn('No sessionId found in expired session metadata.');
+      }
+    } else {
+      console.log(`Unhandled event type: ${event.type}`);
     }
 
     res.status(200).send('Webhook received successfully');
@@ -183,6 +192,7 @@ const handleWebhook = async (req, res) => {
     res.status(400).send(`Webhook Error: ${err.message}`);
   }
 };
+
 
 
 // Cancel checkout session (moved outside `handleWebhook`)

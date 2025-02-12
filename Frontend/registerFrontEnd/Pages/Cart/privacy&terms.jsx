@@ -4,6 +4,7 @@ import TermsOfService from "../../Components/Privacy&Terms/termsOfService";
 import { useNavigate } from "react-router-dom";
 import { registerApi } from "../../config/axios";
 import "./privacy_terms.css";
+import Cookies from "js-cookie";
 
 const PrivacyPolicyAndTerms = () => {
   const [isPolicyModalOpen, setIsPolicyModalOpen] = useState(false);
@@ -18,41 +19,50 @@ const PrivacyPolicyAndTerms = () => {
   const [pendingToggle, setPendingToggle] = useState(null);
 
   const navigate = useNavigate();
-
   const handleCheckout = async () => {
     setLoading(true);
     setError(null);
-  
+
     try {
-      const sessionId = localStorage.getItem("sessionId");
-  
-      // Ensure both policies are accepted before making the API call
-      if (!isPolicyChecked || !isToSChecked) {
-        setError("You must accept the Privacy Policy and Terms of Service to proceed.");
-        setLoading(false);
-        return;
-      }
-  
-      const response = await registerApi.post("/register-cart/create-checkout-session", {
-        sessionId,
-        metadata: {
-          hasAcceptedPrivacy: isPolicyChecked,
-          hasAcceptedTermsOfService: isToSChecked,
-        },
-      });
-  
-      // Redirect user to the checkout session URL
-      window.location.href = response.data.url;
+        const sessionId = localStorage.getItem("sessionId");
+        const shippingDetails = Cookies.get("shippingDetails") 
+            ? JSON.parse(Cookies.get("shippingDetails")) 
+            : {};
+
+        console.log("🚀 Sending Metadata to Backend:", shippingDetails);
+
+        const response = await registerApi.post("/register-cart/create-checkout-session", {
+            sessionId,
+            metadata: {
+                hasAcceptedPrivacy: isPolicyChecked,
+                hasAcceptedTermsOfService: isToSChecked,
+                ...shippingDetails,  // ✅ Include shipping details
+            },
+        });
+
+        window.location.href = response.data.url;
     } catch (err) {
-      console.error("Checkout error:", err.response?.data || err.message);
-      setError(
-        err.response?.data?.message ||
-        "Failed to initiate checkout. Please try again."
-      );
+        setError("Failed to initiate checkout.");
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
-  };
+};
+
+
+  const updateCookieBeforeCheckout = () => {
+    const shippingDetails = Cookies.get("shippingDetails") ? JSON.parse(Cookies.get("shippingDetails")) : {};
+    
+    const updatedShippingDetails = {
+        ...shippingDetails,
+        timestamp: Date.now(),  // Force update
+    };
+
+    Cookies.set("shippingDetails", JSON.stringify(updatedShippingDetails), { expires: 1 });
+    console.log("✅ Updated Cookie Before Checkout:", updatedShippingDetails);
+};
+
+updateCookieBeforeCheckout();
+  updateCookieBeforeCheckout();
   
 
   const handleToggle = (type) => {

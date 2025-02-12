@@ -5,6 +5,7 @@ import UPSRates from "./upsRates";
 import FedExRates from "./fedexRates";
 import USPSRates from "./uspsRates";
 import TrashIcon from "../../assets/Icons/trash.png";
+import CheckoutSummary from "./CheckoutSummary";
 import "./cart.css";
 
 // Dummy tax rate lookup based on ZIP code prefix.
@@ -28,6 +29,9 @@ const CartPage = () => {
   const [receiverZip, setReceiverZip] = useState("");
   const [shippingCost, setShippingCost] = useState(null);
   const [zipSubmitted, setZipSubmitted] = useState(false);
+  const [showSummaryModal, setShowSummaryModal] = useState(false);
+  const [selectedCarrier, setSelectedCarrier] = useState(null);
+  const [selectedService, setSelectedService] = useState(null); // ✅ Add missing state
   // State to track which carrier dropdown is open: "UPS", "FedEx", "USPS", or null.
   const [openCarrier, setOpenCarrier] = useState(null);
   const navigate = useNavigate();
@@ -43,14 +47,31 @@ const CartPage = () => {
 
   const sessionId = getSessionId();
 
-  const saveShippingOption = (shippingData) => {
-    const dataToStore = {
-      shippingData,
-      timestamp: Date.now(), // Optional: add a timestamp if you want to expire it later.
-    };
-    localStorage.setItem("shippingOption", JSON.stringify(dataToStore));
+  const taxRate = zipSubmitted ? getTaxRateForZip(receiverZip) : 0;
+  const taxAmount = shippingCost ? (totalPrice + shippingCost) * taxRate : 0;
+  const grandTotal = shippingCost ? totalPrice + shippingCost + taxAmount : totalPrice;
+
+  const handleProceedToCheckout = () => {
+    if (!shippingCost || !selectedCarrier) {
+      alert("Please select a shipping option before proceeding.");
+      return;
+    }
+    setShowSummaryModal(true);
   };
-  
+
+  const handleConfirmCheckout = () => {
+    const shippingDetails = {
+      shippingCost,
+      selectedCarrier,
+      receiverZip,
+      taxAmount,
+      grandTotal,
+    };
+    
+    Cookies.set("shippingDetails", JSON.stringify(shippingDetails), { expires: 1 });
+
+    navigate("/checkout-options");
+  };
 
   useEffect(() => {
     const fetchCartItems = async () => {
@@ -129,9 +150,7 @@ const CartPage = () => {
   };
 
   // Calculate tax rate, tax amount, and grand total if shippingCost is set.
-  const taxRate = zipSubmitted ? getTaxRateForZip(receiverZip) : 0;
-  const taxAmount = shippingCost ? (totalPrice + shippingCost) * taxRate : 0;
-  const grandTotal = shippingCost ? totalPrice + shippingCost + taxAmount : totalPrice;
+
 
   if (cart.length === 0) {
     return (
@@ -143,6 +162,15 @@ const CartPage = () => {
       </div>
     );
   }
+
+
+  const handleSelectShipping = (carrier, serviceType, cost) => {
+    setSelectedCarrier(carrier);
+    setSelectedService(serviceType);
+    setShippingCost(cost);
+  };
+
+  
 
   return (
     <div className="form-section">
@@ -201,36 +229,35 @@ const CartPage = () => {
       {/* Carrier Rate Components */}
       {zipSubmitted && (
         <div className="carrier-buttons">
-          <UPSRates
-            receiverZip={receiverZip}
-            totalWeight={totalWeight}
-            totalDimensions={totalDimensions}
-            onSelectRate={setShippingCost}
-            isOpen={openCarrier === "UPS"}
-            onToggle={() =>
-              setOpenCarrier(openCarrier === "UPS" ? null : "UPS")
-            }
-          />
-          <FedExRates
-            receiverZip={receiverZip}
-            totalWeight={totalWeight}
-            totalDimensions={totalDimensions}
-            onSelectRate={setShippingCost}
-            isOpen={openCarrier === "FedEx"}
-            onToggle={() =>
-              setOpenCarrier(openCarrier === "FedEx" ? null : "FedEx")
-            }
-          />
-          <USPSRates
-            receiverZip={receiverZip}
-            totalWeight={totalWeight}
-            totalDimensions={totalDimensions}
-            onSelectRate={setShippingCost}
-            isOpen={openCarrier === "USPS"}
-            onToggle={() =>
-              setOpenCarrier(openCarrier === "USPS" ? null : "USPS")
-            }
-          />
+<UPSRates
+  receiverZip={receiverZip}
+  totalWeight={totalWeight}
+  totalDimensions={totalDimensions}
+  onSelectRate={(serviceType, cost) => handleSelectShipping("UPS", serviceType, cost)}
+  isOpen={openCarrier === "UPS"}
+  onToggle={() => setOpenCarrier(openCarrier === "UPS" ? null : "UPS")}
+/>
+
+
+<FedExRates
+  receiverZip={receiverZip}
+  totalWeight={totalWeight}
+  totalDimensions={totalDimensions}
+  onSelectRate={(serviceType, cost) => handleSelectShipping("FedEx", serviceType, cost)}
+  isOpen={openCarrier === "FedEx"}
+  onToggle={() => setOpenCarrier(openCarrier === "FedEx" ? null : "FedEx")}
+/>
+
+<USPSRates
+  receiverZip={receiverZip}
+  totalWeight={totalWeight}
+  totalDimensions={totalDimensions}
+  onSelectRate={(serviceType, cost) => handleSelectShipping("USPS", serviceType, cost)}
+  isOpen={openCarrier === "USPS"}
+  onToggle={() => setOpenCarrier(openCarrier === "USPS" ? null : "USPS")}
+/>
+
+
         </div>
       )}
 
@@ -248,19 +275,28 @@ const CartPage = () => {
       </div>
 
       {/* Checkout Button */}
-      <Link
-        
-        to="/checkout-options"
+      <button
+        onClick={handleProceedToCheckout}
         className={`proceed-checkout ${!shippingCost ? "disabled" : ""}`}
-        onClick={(e) => {
-          if (!shippingCost) {
-            e.preventDefault();
-            alert("Please select a shipping option before proceeding.");
-          }
-        }}
       >
         Proceed to Checkout
-      </Link>
+      </button>
+      {/* Show Summary Modal */}
+      {showSummaryModal && (
+       <CheckoutSummary
+       cart={cart}
+       shippingCost={shippingCost}
+       taxAmount={taxAmount}
+       grandTotal={grandTotal}
+       selectedCarrier={selectedCarrier}
+       selectedService={selectedService}  // ✅ Add this to pass service type
+       receiverZip={receiverZip}  // ✅ Ensure ZIP code is passed too
+       onClose={() => setShowSummaryModal(false)}
+       onConfirm={handleConfirmCheckout}
+     />
+     
+      
+      )}
     </div>
   );
 };

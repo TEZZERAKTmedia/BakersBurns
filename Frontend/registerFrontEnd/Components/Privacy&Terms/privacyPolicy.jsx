@@ -31,7 +31,7 @@ const PrivacyPolicy = ( {onReachBottom}) => {
     return (
         <div
        
-         className="privacy-policy" style={{padding:'10px'}}>
+         className="privacy-policy" style={{padding:'10px', width:'100%'}}>
             <h1>Privacy Policy</h1>
             <p><strong>Effective Date:</strong> 12/8/2024</p>
 
@@ -45,7 +45,7 @@ const PrivacyPolicy = ( {onReachBottom}) => {
                         textDecoration: 'none',
                         color: 'inherit',
                         cursor: 'pointer',
-                        fontSize:'4vw'
+                        fontSize:'1rem'
                     }}
                 >
                     trentyn.nicholas@gmail.com
@@ -277,17 +277,7 @@ const PrivacyPolicy = ( {onReachBottom}) => {
             <section className='privacy-section'>
                 <p>If you have any questions or concerns about this Privacy Policy, please contact us at </p>
                 <strong>
-                <a
-                    href="mailto:trentyn.nicholas@gmail.com"
-                    style={{
-                        textDecoration: 'none',
-                        color: 'inherit',
-                        cursor: 'pointer',
-                        fontSize:'4vw'
-                    }}
-                >
-                    trentyn.nicholas@gmail.com
-                </a>
+               
                 
                 </strong>
                 
@@ -312,6 +302,17 @@ const PrivacyPolicy = ( {onReachBottom}) => {
                     </li>
                 </ul>
             </section>
+            <a
+                    href="mailto:trentyn.nicholas@gmail.com"
+                    style={{
+                        textDecoration: 'none',
+                        color: 'inherit',
+                        cursor: 'pointer',
+                        fontSize:'1rem'
+                    }}
+                >
+                    trentyn.nicholas@gmail.com
+                </a>
 
       <div ref={bottomRef} style={{ height: "1px" }}></div>
         </div>

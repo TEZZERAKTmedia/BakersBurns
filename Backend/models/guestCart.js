@@ -58,6 +58,19 @@ const GuestCart = sequelize.define('GuestCart', {
     allowNull: false,
     defaultValue: 'standard',
   },
+  // Shipping details columns:
+  selectedCarrier: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  selectedService: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  shippingCost: {
+    type: DataTypes.FLOAT,
+    allowNull: true,
+  },
 }, {
   timestamps: true,
   tableName: 'GuestCarts',

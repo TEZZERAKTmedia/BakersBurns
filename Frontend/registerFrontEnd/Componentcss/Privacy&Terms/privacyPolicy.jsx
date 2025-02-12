@@ -17,7 +17,7 @@ const PrivacyPolicy = () => {
                         textDecoration: 'none',
                         color: 'inherit',
                         cursor: 'pointer',
-                        fontSize:'4vw'
+                        fontSize:'1rem'
                     }}
                 >
                     trentyn.nicholas@gmail.com

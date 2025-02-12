@@ -139,7 +139,37 @@ const deleteCartItem = async (req, res) => {
     res.status(500).json({ message: 'Failed to delete cart item.' });
   }
 };
-
+const updateShippingDetails = async (req, res) => {
+  const { sessionId, shippingDetails } = req.body;
+  
+  // Ensure that sessionId and shippingDetails are provided.
+  if (!sessionId || !shippingDetails) {
+    return res.status(400).json({ message: 'Session ID and shipping details are required.' });
+  }
+  
+  const { selectedCarrier, selectedService, shippingCost } = shippingDetails;
+  
+  if (!selectedCarrier || !selectedService || shippingCost === undefined) {
+    return res.status(400).json({ message: 'Incomplete shipping details.' });
+  }
+  
+  try {
+    // Update all rows in the GuestCart for this session.
+    await GuestCart.update(
+      {
+        selectedCarrier,
+        selectedService,
+        shippingCost,
+      },
+      { where: { sessionId } }
+    );
+    
+    return res.status(200).json({ message: 'Shipping details updated successfully.' });
+  } catch (error) {
+    console.error('Error updating shipping details:', error);
+    return res.status(500).json({ message: 'Failed to update shipping details.' });
+  }
+};
 
 // Lock Inventory
 const lockInventory = async (req, res, next) => {
@@ -200,14 +230,34 @@ const createCheckoutSession = async (req, res) => {
     }
 
     // Validate metadata for acceptance of terms
-    if (!metadata || !metadata.hasAcceptedPrivacy || !metadata.hasAcceptedTermsOfService) {
+    if (
+      !metadata ||
+      !metadata.hasAcceptedPrivacy ||
+      !metadata.hasAcceptedTermsOfService
+    ) {
       return res.status(400).json({
         message: 'Must accept Terms and Conditions and Privacy Policy to proceed.',
-        redirect: '/accept-privacy-terms', // Optional: Provide a link to redirect
+        redirect: '/accept-privacy-terms',
       });
     }
 
-    // Fetch cart items with the correct alias
+    // Retrieve shipping details from the GuestCart (assumes all items share the same shipping info)
+    const shippingInfo = await GuestCart.findOne({
+      where: { sessionId },
+      attributes: ['selectedCarrier', 'selectedService', 'shippingCost'],
+    });
+
+    if (
+      !shippingInfo ||
+      !shippingInfo.selectedCarrier ||
+      !shippingInfo.selectedService ||
+      shippingInfo.shippingCost === null ||
+      shippingInfo.shippingCost === undefined
+    ) {
+      return res.status(400).json({ message: 'Shipping details are incomplete.' });
+    }
+
+    // Fetch cart items with associated product details
     const cartItems = await GuestCart.findAll({
       where: { sessionId },
       include: [
@@ -219,25 +269,23 @@ const createCheckoutSession = async (req, res) => {
     });
 
     if (cartItems.length === 0) {
-      return res.status(400).json({ message: 'Cart is empty' });
+      return res.status(400).json({ message: 'Cart is empty.' });
     }
 
-    // Lock inventory
+    // Lock inventory for each cart item
     for (const cartItem of cartItems) {
       const product = cartItem.Product;
-
       if (!product) {
-        return res.status(404).json({ message: `Product with ID ${cartItem.productId} not found` });
+        return res.status(404).json({ message: `Product with ID ${cartItem.productId} not found.` });
       }
-
       if (product.quantity < cartItem.quantity) {
-        return res.status(400).json({ message: `Not enough quantity for ${product.name}` });
+        return res.status(400).json({ message: `Not enough quantity for ${product.name}.` });
       }
-
       product.quantity -= cartItem.quantity;
       await product.save();
     }
 
+    // Prepare Stripe line items from the cart items
     const lineItems = cartItems.map((item) => ({
       price_data: {
         currency: 'usd',
@@ -245,11 +293,26 @@ const createCheckoutSession = async (req, res) => {
           name: item.Product.name,
           images: [`${process.env.BASE_URL}/uploads/${item.Product.thumbnail}`],
         },
-        unit_amount: Math.round(item.Product.price * 100),
+        unit_amount: Math.round(item.Product.price * 100), // in cents
       },
       quantity: item.quantity,
     }));
 
+    // Add a separate shipping line item so that shipping cost is included in the total.
+    const shippingLineItem = {
+      price_data: {
+        currency: 'usd',
+        product_data: {
+          name: `Shipping (${shippingInfo.selectedCarrier} - ${shippingInfo.selectedService})`,
+        },
+        unit_amount: Math.round(shippingInfo.shippingCost * 100), // in cents
+      },
+      quantity: 1,
+    };
+
+    lineItems.push(shippingLineItem);
+
+    // Create a Stripe checkout session with metadata (shipping info is also passed in metadata for reference)
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: lineItems,
@@ -258,21 +321,26 @@ const createCheckoutSession = async (req, res) => {
       cancel_url: `${process.env.REGISTER_FRONTEND}/cancel?session_id={CHECKOUT_SESSION_ID}`,
       metadata: {
         sessionId,
-        hasAcceptedPrivacy: metadata.hasAcceptedPrivacy, // Log for audit
-        hasAcceptedTermsOfService: metadata.hasAcceptedTermsOfService, // Log for audit
+        hasAcceptedPrivacy: metadata.hasAcceptedPrivacy,
+        hasAcceptedTermsOfService: metadata.hasAcceptedTermsOfService,
+        selectedCarrier: shippingInfo.selectedCarrier,
+        selectedService: shippingInfo.selectedService,
+        shippingCost: shippingInfo.shippingCost,
       },
       shipping_address_collection: {
-        allowed_countries: ['US', 'CA'], // Add or remove countries as needed
+        allowed_countries: ['US', 'CA'],
       },
-      billing_address_collection: 'required', // Require billing address
+      billing_address_collection: 'required',
     });
 
+    console.log("✅ Stripe Session Created:", session.id);
     res.status(200).json({ url: session.url });
   } catch (error) {
-    console.error('Error creating checkout session:', error);
+    console.error('❌ Error creating checkout session:', error);
     res.status(500).json({ message: 'Error creating checkout session' });
   }
 };
+
 
 
 
@@ -368,5 +436,6 @@ module.exports = {
   createCheckoutSession,
   cancelCheckoutSession,
   deleteCartItem,
-  setPassword
+  setPassword, 
+  updateShippingDetails
 };

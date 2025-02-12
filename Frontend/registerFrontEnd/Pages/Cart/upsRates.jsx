@@ -44,9 +44,10 @@ const UPSRates = ({
   };
 
   const handleSelectRate = (rate) => {
-    setSelectedRate(rate.serviceCode);
-    onSelectRate(rate.cost);
+    setSelectedRate(rate.serviceName);  // ✅ Use serviceName for human-readable selection
+    onSelectRate(rate.serviceName, rate.cost);  // ✅ Ensure function receives both values
   };
+  
 
   const toggleDropdown = () => {
     if (isControlled) {
@@ -89,7 +90,7 @@ const UPSRates = ({
                   exit={{ opacity: 0, x: -20 }}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className={`rate-option ${selectedRate === rate.serviceCode ? "selected" : ""}`}
+                  className={`rate-option ${selectedRate === rate.serviceName ? "selected" : ""}`}
                   style={{
                     position: "relative",
                     overflow: "hidden",
@@ -102,7 +103,7 @@ const UPSRates = ({
                   {/* Background fill animation */}
                   <motion.div 
                     initial={{ width: "0%" }}
-                    animate={{ width: selectedRate === rate.serviceCode ? "100%" : "0%" }}
+                    animate={{ width: selectedRate === rate.serviceName ? "100%" : "0%" }}
                     transition={{ duration: 0.4 }}
                     className="absolute top-0 left-0 h-full bg-blue-600 opacity-20"
                   />

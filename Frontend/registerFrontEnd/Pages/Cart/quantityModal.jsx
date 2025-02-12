@@ -83,7 +83,7 @@ const QuantityModal = ({
               max={maxQuantity}
               style={styles.input}
             />
-            <button style={styles.button} onClick={handleIncrease}>
+            <button  style={styles.button} onClick={handleIncrease}>
               +
             </button>
           </div>
@@ -147,6 +147,7 @@ const styles = {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
+    color:'white',
     padding: "0", // Reset default padding
     fontSize: "1.5rem",
     background: "black",
