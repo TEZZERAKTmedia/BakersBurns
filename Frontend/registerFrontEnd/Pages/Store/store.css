@@ -19,6 +19,7 @@
   display: grid;
   grid-template-columns: 1fr;
   gap: 16px;
+  
 }
 
 @media (min-width: 768px) {
@@ -29,16 +30,19 @@
 
 /* Product Tile - Horizontal Layout */
 .store-product-tile {
+  
   background-color: var(--tile-bg);
   border: 1px solid var(--tile-border);
   border-radius: 8px;
-  padding: 16px;
+  padding: 20px;
   box-shadow: var(--tile-shadow);
   display: flex;
   flex-direction: row;
   align-items: center;
   text-align: left;
   width: 100%;
+  height:100%;
+
   max-width: 600px;
   cursor: pointer;
   margin: 1rem auto;
@@ -67,6 +71,7 @@
   flex-direction: column;
   justify-content: center;
   height: 150px;
+  
 }
 
 .store-product-info__title {
@@ -101,7 +106,7 @@
 /* Mobile Adjustments */
 @media (max-width: 480px) {
   .store-product-tile {
-    padding: 8px;
+    padding:10%;
     gap: 8px;
     max-width: 100%;
   }

@@ -1,38 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { registerApi } from '../config/axios';
-import loadingImage from '../assets/loading.png'; // Import your loading image
-
-// Inline styles for simplicity
-const styles = {
-  container: {
-    display: 'flex',
-    justifyContent: 'center',
-    gap: '15px',
-    padding: '10px 0',
-    
-    
-  },
-  link: {
-    display: 'inline-block',
-    width: '40px',
-    height: '40px',
-    marginTop: '50px'
-  },
-  icon: {
-    width: '100%',
-    height: '100%',
-    objectFit: 'contain',
-  },
-  loadingContainer: {
-    textAlign: 'center',
-    marginTop: '20px',
-    
-  },
-  loadingImage: {
-    height: '100px',
-    width: '100px'
-  },
-};
+import { registerApi } from '../../config/axios';
+import loadingImage from '../../assets/loading.png';
+import './social_links.css';
 
 const SocialLinks = () => {
   const [socialLinks, setSocialLinks] = useState([]);
@@ -84,34 +53,32 @@ const SocialLinks = () => {
   };
 
   return (
-    <div>
-      <div style={styles.container}>
-        {loading ? (
-          <div style={styles.loadingContainer}>
-            <img src={loadingImage} alt="Loading..." style={styles.loadingImage} />
+    <div className="social-links-container">
+      {loading ? (
+        <div className="social-links-loading">
+          <img src={loadingImage} alt="Loading..." className="social-links-loading-img" />
+        </div>
+      ) : error ? (
+        <p className="social-links-error">{error}</p>
+      ) : socialLinks.length > 0 ? (
+        socialLinks.map((link) => (
+          <div
+            key={link.id}
+            onClick={() => handleLinkClick(link.platform, link.url)}
+            className="social-link-item"
+            role="button"
+            tabIndex={0}
+          >
+            <img
+              src={`${import.meta.env.VITE_BACKEND}/socialIcons/${link.image}`}
+              alt={link.platform}
+              className="social-link-icon"
+            />
           </div>
-        ) : error ? (
-          <p style={{ color: 'red' }}>{error}</p>
-        ) : socialLinks.length > 0 ? (
-          socialLinks.map((link) => (
-            <div
-              key={link.id}
-              onClick={() => handleLinkClick(link.platform, link.url)}
-              style={styles.link}
-              role="button"
-              tabIndex={0}
-            >
-              <img
-                src={`${import.meta.env.VITE_BACKEND}/socialIcons/${link.image}`}
-                alt={link.platform}
-                style={styles.icon}
-              />
-            </div>
-          ))
-        ) : (
-          <p>No social links available</p>
-        )}
-      </div>
+        ))
+      ) : (
+        <p className="social-links-no-available">No social links available</p>
+      )}
     </div>
   );
 };

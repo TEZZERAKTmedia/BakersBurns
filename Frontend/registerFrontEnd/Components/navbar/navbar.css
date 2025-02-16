@@ -85,9 +85,24 @@
 .inverted-button {
   background-color: var(--inverted-button-bg);
   color: var(--inverted-button-text);
-  padding: .5rem;
-  margin: .5rem;
+  width: 50%;
+  margin: 10px;
   border-radius: 10px;
+}
+.inverted-button-p-t {
+  background-color: var(--inverted-button-bg);
+  color: var(--inverted-button-text);
+
+  padding: 10px;
+  margin: 10px;
+  border-radius: 10px;
+}
+.inverted-button-container {
+  background-color: var(--inverted-button-bg);
+  color: var(--inverted-button-text);
+  padding: 5px 10px;
+  border-radius: 10px;
+  margin:  5px 10px;
 }
 
 .nav-button:hover {
@@ -102,7 +117,7 @@
   justify-content: center;
   align-items: center;
   position: fixed;
-  top: 50px;
+  
   left: 0;
   width: 100vw;
   height: 100vh;

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import SocialLinks from '../socialLinks';
+import SocialLinks from './socialLinks';
 import ThemeToggle from '../themetoggle/Dark-Light';
 import './navbar.css'; // Import the CSS file for styling
 
@@ -57,11 +57,11 @@ const Navbar = () => {
         
 
         {/* Login/Sign-up buttons */}
-        <div className="navbar-buttons">
-          <button className="nav-button" onClick={closeMenu}>
+        <div >
+          <button className='inverted-button-container' onClick={closeMenu}>
             <Link to="/sign-up" className='inverted-button'>Sign up</Link>
           </button>
-          <button className="nav-button" onClick={closeMenu}>
+          <button className='inverted-button-container' onClick={closeMenu}>
             <Link to="/login" className='inverted-button'>Login</Link>
           </button>
         </div>
@@ -81,10 +81,10 @@ const Navbar = () => {
         <li className="nav-item" onClick={closeMenu}>
           <Link to="/about">About</Link>
         </li>
-        <li  className="inverted-button"onClick={closeMenu}>
+        <li  className="inverted-button-p-t"onClick={closeMenu}>
           <Link to="/privacy-policy" className="inverted-button">Privacy Policy</Link>
         </li>
-        <li className="inverted-button" onClick={closeMenu}>
+        <li className="inverted-button-p-t" onClick={closeMenu}>
           <Link to="/terms-of-service" className="inverted-button">Terms of Service</Link>
         </li>
         <ThemeToggle />
