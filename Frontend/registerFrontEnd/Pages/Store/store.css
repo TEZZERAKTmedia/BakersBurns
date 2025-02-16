@@ -6,6 +6,7 @@
 .store-container {
   padding: 2%;
   margin-top: 10%;
+  color: var(--bg-color);
 }
 
 .store-container__header {

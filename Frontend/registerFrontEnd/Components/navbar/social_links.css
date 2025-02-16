@@ -23,7 +23,7 @@
     justify-content: center;
     gap: 15px;
     padding: 10px 0;
-    background-color: var(--social-bg);
+    
   }
   
   /* Loading Container */
@@ -50,8 +50,7 @@
     height: 40px;
     margin-top: 30px;
     cursor: pointer;
-    background-color: var(--social-item-bg);
-    border: 1px solid var(--social-border-color);
+    
     border-radius: 5px;
     transition: transform 0.2s ease, background-color 0.3s ease;
   }
