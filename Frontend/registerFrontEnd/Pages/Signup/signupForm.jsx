@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import DOMPurify from 'dompurify';  // For sanitization
-import { registerApi } from '../config/axios'; // Import the configured axios instance
-import '../Componentcss/sign_up_form.css';
+import { registerApi } from '../../config/axios'; // Import the configured axios instance
+import './sign_up_form.css';
 import { Link, useNavigate } from 'react-router-dom';
-import eyeOpenIcon from '../assets/password-visibility-icon.png';
-import eyeCloseIcon from '../assets/password-visibility-icon-reverse.png';
-import PrivacyPolicy from './Privacy&Terms/privacyPolicy';
-import TermsOfService from './Privacy&Terms/termsOfService';
+import eyeOpenIcon from '../../assets/password-visibility-icon.png';
+import eyeCloseIcon from '../../assets/password-visibility-icon-reverse.png';
+import PrivacyPolicy from '../../Components/Privacy&Terms/privacyPolicy';
+import TermsOfService from '../../Components/Privacy&Terms/termsOfService';
 import GoogleSignInButton from './googleSignup';
 
 

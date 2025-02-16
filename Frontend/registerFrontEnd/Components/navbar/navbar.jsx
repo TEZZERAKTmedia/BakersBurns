@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import SocialLinks from '../Components/socialLinks';
-import '../Componentcss/navbar.css'; // Import the CSS file for styling
+import SocialLinks from '../socialLinks';
+import ThemeToggle from '../themetoggle/Dark-Light';
+import './navbar.css'; // Import the CSS file for styling
 
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -53,14 +54,15 @@ const Navbar = () => {
             {currentPageTitle}
           </motion.div>
         </AnimatePresence>
+        
 
         {/* Login/Sign-up buttons */}
         <div className="navbar-buttons">
           <button className="nav-button" onClick={closeMenu}>
-            <Link to="/sign-up">Sign up</Link>
+            <Link to="/sign-up" className='inverted-button'>Sign up</Link>
           </button>
           <button className="nav-button" onClick={closeMenu}>
-            <Link to="/login">Login</Link>
+            <Link to="/login" className='inverted-button'>Login</Link>
           </button>
         </div>
       </div>
@@ -79,12 +81,13 @@ const Navbar = () => {
         <li className="nav-item" onClick={closeMenu}>
           <Link to="/about">About</Link>
         </li>
-        <li className="nav-item-privacy" onClick={closeMenu}>
-          <Link to="/privacy-policy">Privacy Policy</Link>
+        <li  className="inverted-button"onClick={closeMenu}>
+          <Link to="/privacy-policy" className="inverted-button">Privacy Policy</Link>
         </li>
-        <li className="nav-item-terms" onClick={closeMenu}>
-          <Link to="/terms-of-service">Terms of Service</Link>
+        <li className="inverted-button" onClick={closeMenu}>
+          <Link to="/terms-of-service" className="inverted-button">Terms of Service</Link>
         </li>
+        <ThemeToggle />
       </ul>
 
       {/* Social Media Links */}

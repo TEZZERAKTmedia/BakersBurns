@@ -1,11 +1,11 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Navbar from './Components/navbar';
+import Navbar from './Components/navbar/navbar';
 import Home from './Pages/Home';
 import Store from './Pages/Store/Store';
 import About from './Pages/About';
 import VerifyEmail from './Components/verifyEmail';
-import Signup from './Pages/SignUp';
+import Signup from './Pages/Signup/SignUp';
 import Login from './Pages/Login';
 import PasswordResetForm from './Components/verification/passwordReset';
 import ForgotPassword from './Components/passwordForgot';

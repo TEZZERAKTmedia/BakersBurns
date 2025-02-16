@@ -228,37 +228,41 @@ const cleanupMediaCron = require('./utils/mediaCronJob');
 const scheduleCronJob = require('./utils/ordersCronJob');
 
 sequelize.authenticate()
-  .then(() => {
-    console.log('Database connected successfully.');
+  .then(async () => {
+    console.log('✅ Database connected successfully.');
 
-    // Start the cron job
-    console.log("Initializing order cron job...");
+    const ENABLE_SYNC = false; // ✅ Toggle this to false if you don't want to sync
+
+    if (ENABLE_SYNC) {
+      await db.sequelize.sync({ alter: true });
+      console.log('✅ Database synchronized successfully.');
+    } else {
+      console.log('⚠️ Database sync skipped (ENABLE_SYNC = false).');
+    }
+
+    // ✅ Now it's safe to start cron jobs
+    console.log("🚀 Initializing order cron job...");
     scheduleCronJob();
     cleanupMediaCron();
 
-    console.log("Initializing discount cron job...");
+    console.log("🚀 Initializing discount cron job...");
     startDiscountCron();
     
-    console.log("Initializing UPS tracking cron job...");
+    console.log("🚀 Initializing UPS tracking cron job...");
     checkShippedOrders();
     checkShippedOrdersUsps();
+
+    // ✅ Start the Express server
+    const PORT = process.env.PORT || 3450;
+    app.listen(PORT, () => {
+      console.log(`🚀 Server running on port ${PORT}`);
+    });
   })
   .catch((err) => {
-    console.error('Database connection failed:', err.message);
+    console.error('❌ Database connection failed:', err.message);
     process.exit(1); // Exit if database connection fails
   });
-/*
-db.sequelize.sync({ alter: true })
-  .then(() => {
-    console.log('Database synchronized successfully.');
-  })
-  .catch(err => {
-    console.error('Error synchronizing database:', err);
-  });
-  */
+
+
 // Start the server
 
-const PORT = process.env.PORT || 3450;
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});

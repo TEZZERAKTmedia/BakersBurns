@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { registerApi } from '../config/axios';
-import OptInModal from '../Components/pp&tos'; // Import the OptInModal component
+import { registerApi } from '../../config/axios';
+import OptInModal from '../../Components/pp&tos'; // Import the OptInModal component
 import {jwtDecode} from 'jwt-decode';
 
 const GoogleSignInButton = ({ onSuccess, onFailure }) => {

@@ -1,7 +1,6 @@
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
-
 class Order extends Model {}
 
 Order.init({
@@ -24,18 +23,12 @@ Order.init({
     allowNull: false,
     defaultValue: 'Processing'
   },
-  shippingAddress: {
-    type: DataTypes.STRING,
-    allowNull: true,
-    
-  },
-
-  shippingAddress: {
-    type: DataTypes.TEXT, // Changed to TEXT to allow longer strings
+  shippingAddress: { // ✅ Removed duplicate definition
+    type: DataTypes.TEXT,
     allowNull: true,
   },
   billingAddress: {
-    type: DataTypes.TEXT, // Changed to TEXT to allow longer strings
+    type: DataTypes.TEXT,
     allowNull: true,
   },
   carrier: {
@@ -46,14 +39,18 @@ Order.init({
     type: DataTypes.STRING,
     allowNull: true,
   },
-  
+  shippingService: { // ✅ New field for shipping method
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  shippingCost: { // ✅ New field for shipping cost
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: true,
+  },
 }, {
   sequelize,
   modelName: 'Order',
-  tableName: 'Orders' // Match the actual table name in the database
+  tableName: 'Orders'
 });
-
-// Associations
-
 
 module.exports = Order;

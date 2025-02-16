@@ -1,5 +1,5 @@
 body {
-    background-color: #f4f4f9;
+    background-color: var(--body-bg);
     font-family: 'Roboto', sans-serif;
     display: flex;
     justify-content: center;
@@ -11,16 +11,15 @@ body {
 }
 
 .container {
-    background: #fff;
+    background: var(--container-bg);
     padding: 1.5rem;
     border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--container-shadow);
     max-width: 90%; /* Fit within the viewport */
     width: 100%; /* Responsive width */
     text-align: center;
-    
-
 }
+
 .center-container {
     display: flex;
     justify-content: center; /* Horizontally center the content */
@@ -28,24 +27,23 @@ body {
     flex-direction: column; /* Stack inputs vertically */
     min-height: 100vh;      /* Full viewport height */
     width: 100%;            /* Full width of the container */
-    padding: .5rem;          /* Add some padding for mobile screens */
-    box-sizing: border-box; /* Ensure padding doesn’t affect width/height */
+    padding: 0.5rem;          /* Add some padding for mobile screens */
+    box-sizing: border-box;
 }
-
 
 h2 {
     margin-bottom: 1.5rem;
-    color: #333;
+    color: var(--header-color);
 }
 
 form ul li {
-    color: #333;
+    color: var(--header-color);
     margin-left: 5%;
 }
 
 label {
     text-align: left;
-    color: #333;
+    color: var(--header-color);
     font-weight: bold;
     margin-bottom: 0.5rem;
     align-self: center;
@@ -53,23 +51,25 @@ label {
 }
 
 .user-email {
-    background-color: rgb(52, 52, 52);
-    color: white;
+    background-color: var(--user-email-bg);
+    color: var(--user-email-text);
     padding: 10px;
     border-radius: 10px;
     margin: 20px;
 }
+
 input, select {
     width: 100%;             /* Ensure inputs/buttons stretch to container width */
     max-width: 400px;        /* Optional: Limit width for readability */
     margin-bottom: 1rem;     /* Space between form elements */
     padding: 0.75rem;
     font-size: 1rem;
-    border: 1px solid #ccc;
+    border: 1px solid var(--form-input-border);
     border-radius: 5px;
     box-sizing: border-box;
+    background-color: var(--container-bg);
+    color: var(--body-text);
 }
-
 
 button {
     cursor: pointer;
@@ -77,28 +77,26 @@ button {
 }
 
 button:disabled {
-    background-color: grey;
+    background-color: var(--button-disabled, grey);
     cursor: not-allowed;
 }
 
-
 .success-message {
     padding: 20px;
-    background-color: #dedede;
+    background-color: var(--success-bg);
     margin-top: -30%;
     position: relative;
     border-radius: 8px;
     overflow: hidden;
-    z-index: 0; /* Ensure the text is above the animation */
-    
-    
+    z-index: 0;
 }
+
 .signup-button {
     width: 100%;
     padding: 0.75rem;
     font-size: 1rem;
-    background-color: #28a745;
-    color: white;
+    background-color: var(--signup-button-bg);
+    color: var(--signup-button-text);
     border: none;
     border-radius: 4px;
     cursor: pointer;
@@ -107,10 +105,9 @@ button:disabled {
 }
 
 .signup-button:disabled {
-    background-color: grey;
+    background-color: var(--button-disabled, grey);
     cursor: not-allowed;
 }
-
 
 .success-message::before {
     content: '';
@@ -139,40 +136,48 @@ button:disabled {
     }
 }
 
-
-
-
-
 input:focus {
-    border-color: #007bff;
+    border-color: var(--blue-button-bg, #007bff);
     outline: none;
 }
 
 .blue-button {
     padding: 0.75rem;
-    background-color: #007bff;
-    color: #fff;
+    background-color: var(--blue-button-bg, #007bff);
+    color: var(--blue-button-text, #fff);
     border: none;
     border-radius: 5px;
     font-size: 1rem;
     cursor: pointer;
     transition: background-color 0.3s ease;
 }
+.blue-button:hover {
+    background-color: var(--blue-button-hover-bg, #e53e3e);
+}
 
-
+.sign-up-form-section {
+    border: 5px solid var(--signup-form-section-border);
+    border-radius: 30px;
+    padding: 20px;
+    background: var(--signup-form-section-bg);
+    box-shadow: var(--signupform-section-shadow);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    margin: 10px;
+}
 
 p {
     margin-top: 1rem;
-    color: #e74c3c;
+    color: var(--error-color, #e74c3c);
 }
 
 .bullet-point::before {
     content: "•";
-    color: black;
+    color: var(--bullet-color);
     display: inline-block;
     width: 1em;
     margin-left: -1em;
 }
+
 .username {
     margin-left: 0%;
     margin-bottom: -30px;
@@ -181,14 +186,13 @@ p {
 
 .email {
     margin-left: 0%;
-
 }
 
 .check-boxes {
     display: flex;
     align-items: center;
     margin-bottom: 20px;
-    flex-wrap: wrap; /* Wrap content on smaller screens */
+    flex-wrap: wrap;
 }
 
 .check-boxes input[type="checkbox"] {
@@ -198,9 +202,10 @@ p {
 .check-boxes label {
     position: relative;
     display: inline-block;
-    width: auto; /* Allow flexible width */
+    width: auto;
     padding: 10px;
     cursor: pointer;
+    color: var(--text-color);
 }
 
 .check-boxes label::before {
@@ -210,7 +215,7 @@ p {
     left: 0;
     width: 40px;
     height: 20px;
-    background-color: #ccc;
+    background-color: var(--checkbox-bg, #ccc);
     border-radius: 50px;
     transition: background-color 0.3s ease;
 }
@@ -222,13 +227,13 @@ p {
     left: 2px;
     width: 16px;
     height: 16px;
-    background-color: white;
+    background-color: var(--bg-color);
     border-radius: 50%;
     transition: transform 0.3s ease;
 }
 
 .check-boxes input[type="checkbox"]:checked + label::before {
-    background-color: #4CAF50;
+    background-color: var(--checkbox-checked-bg, #4CAF50);
 }
 
 .check-boxes input[type="checkbox"]:checked + label::after {
@@ -238,20 +243,21 @@ p {
 .check-boxes label span {
     font-size: 1rem;
     font-weight: bold;
-    color: #333;
+    color: var(--text-color);
     margin-left: 10px;
 }
 
 .opt-in-description {
-   color: black;
+   color: var(--text-color);
 }
+
 .phone-input-wrapper {
     display: flex;
     align-items: center;
-    border: 1px solid #ccc;
+    border: 1px solid var(--phone-input-border);
     border-radius: 4px;
     padding: 0.5em;
-    width: 100%; /* Fit to the container */
+    width: 100%;
     margin-bottom: 1em;
 }
 
@@ -281,9 +287,11 @@ p {
 .phone-input-wrapper select:focus {
     outline: none;
 }
+
 .visibility-animation {
   margin-right: 30px;
 }
+
 /* Responsive adjustments */
 @media (max-width: 600px) {
     h2 {
@@ -291,11 +299,11 @@ p {
     }
 
     .country-code {
-        width:50px
+        width: 50px;
     }
   
     label, .check-boxes label span {
-        font-size: 0.875rem; /* Smaller font size on small screens */
+        font-size: 0.875rem;
         padding: 20px;
         margin: 20px;
     }
@@ -317,13 +325,13 @@ p {
     }
 
     .country-code {
-        width:50px
+        width: 50px;
     }
     .visibility-animation {
         margin-left: 10px;
     }
     label, .check-boxes label span {
-        font-size: 0.875rem; /* Smaller font size on small screens */
+        font-size: 0.875rem;
         padding: 20px;
         margin: 20px;
     }

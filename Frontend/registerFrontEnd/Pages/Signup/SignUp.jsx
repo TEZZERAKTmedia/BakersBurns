@@ -1,8 +1,8 @@
 import React from 'react';
-import SignUpForm from '../Components/signupForm';
-import GoogleSignInButton from '../Components/googleSignup';
-import {registerApi} from '../config/axios'; // Ensure this is the correct import
-import PrivacyPolicyAndToS from '../Components/pp&tos';
+import SignUpForm from './signupForm';
+import GoogleSignInButton from './googleSignup';
+import {registerApi} from '../../config/axios'; // Ensure this is the correct import
+import PrivacyPolicyAndToS from '../../Components/pp&tos';
 
 const Signup = () => {
   console.log('VITE_GOOGLE_CLIENT_ID:', import.meta.env.VITE_GOOGLE_CLIENT_ID);
@@ -31,14 +31,15 @@ const Signup = () => {
   };
 
   return (
-    <div>
+    <div className='sign-up-form-section'>
       <div style={{ marginTop: '200px' }}>
         <GoogleSignInButton
           onSuccess={handleGoogleSuccess}
           onFailure={handleGoogleFailure}
         />
+        <SignUpForm />
       </div>
-      <SignUpForm />
+      
     </div>
   );
 };
