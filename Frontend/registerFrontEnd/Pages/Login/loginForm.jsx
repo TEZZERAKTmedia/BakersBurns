@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { registerApi } from '../config/axios';
-import LoadingPage from './loading'; // Import the loading component
-import GoogleSignInButton from '../Pages/Signup/googleSignup'; // Import GoogleSignInButton
-import '../Componentcss/login.css';
-import eyeOpenIcon from '../assets/password-visibility-icon.png';
-import eyeCloseIcon from '../assets/password-visibility-icon-reverse.png';
+import { registerApi } from '../../config/axios';
+import LoadingPage from '../../Components/loading'; // Import the loading component
+import GoogleSignInButton from '../Signup/googleSignup'; // Import GoogleSignInButton
+import './login.css';
+import eyeOpenIcon from '../../assets/password-visibility-icon.png';
+import eyeCloseIcon from '../../assets/password-visibility-icon-reverse.png';
 
 const LoginForm = () => {
   const [identifier, setIdentifier] = useState('');

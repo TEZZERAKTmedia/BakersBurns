@@ -5,7 +5,7 @@ const userAuthMiddleware = require('../middleware/userAuthMiddleware');
 
 
 // Email verification route
-router.post('/email', userAuthMiddleware(), emailVerificationController.sendEmailVerification);
+router.post('/email', emailVerificationController.sendEmailVerification);
 
 // Route for code verification
 router.get('/code-verification', userAuthMiddleware(), emailVerificationController.verificationCode); 

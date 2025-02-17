@@ -1,28 +1,22 @@
-const RateLimiterLogs = require('../models/rateLimiterLogs'); // Import the model
+const RateLimiterLogs = require('../models/rateLimiterLogs'); // Sequelize model
 const moment = require('moment');
 const { Op } = require('sequelize');
-const nodemailer = require('nodemailer'); 
+const nodemailer = require('nodemailer');
 
-/**
- * Handles failed login attempts with exponential backoff blocking.
- * @param {string} ip - The client IP address.
- * @param {string} routeName - The route being accessed.
- * @param {number} maxAttempts - Maximum attempts before blocking.
- * @param {Array<number>} blockDurations - Array of block durations in minutes.
- */
-const ROOT_EMAIL = process.env.RootEmail; // Ensure this is set in your environment variables
-
-// 🛠️ Configure Nodemailer with Hostinger-style SMTP settings
+/***************************************************
+ * Nodemailer Setup (for rate limiter alerts)
+ ***************************************************/
+const ROOT_EMAIL = process.env.RootEmail; // Ensure this is in your .env
 const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST, // SMTP Host (e.g., smtp.hostinger.com)
-  port: parseInt(process.env.EMAIL_PORT, 10), // Port (e.g., 465 for SSL, 587 for TLS)
-  secure: process.env.EMAIL_SECURE === 'true', // true for SSL, false for TLS
+  host: process.env.EMAIL_HOST,
+  port: parseInt(process.env.EMAIL_PORT, 10),
+  secure: process.env.EMAIL_SECURE === 'true',
   auth: {
-    user: process.env.EMAIL_USER, // Your SMTP user (email)
-    pass: process.env.EMAIL_PASS, // Your SMTP password
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
   },
-  logger: true, // Enable logging of SMTP communication
-  debug: true, // Enable debugging
+  logger: true,
+  debug: true,
 });
 
 /**
@@ -45,11 +39,29 @@ const sendRateLimiterAlert = async (ip, routeName) => {
     console.error('❌ Error sending rate limiter alert:', error);
   }
 };
-const handleFailedLogin = async (ip, routeName, maxAttempts = 5, blockDurations = [3, 5, 10, 15, 30, 60, 1440]) => {
+
+/***************************************************
+ * Exponential Backoff for Actual "Failed Attempts"
+ *   e.g. for wrong credentials, invalid email, etc.
+ ***************************************************/
+/**
+ * Handles failed login attempts with exponential backoff blocking.
+ * Call this only when a real failure occurs (bad email, bad password, etc.).
+ *
+ * @param {string} ip - The client IP address.
+ * @param {string} routeName - The route being accessed.
+ * @param {number} maxAttempts - Maximum attempts before blocking.
+ * @param {Array<number>} blockDurations - Array of block durations in minutes.
+ */
+const handleFailedLogin = async (
+  ip,
+  routeName,
+  maxAttempts = 5,
+  blockDurations = [3, 5, 10, 15, 30, 60, 1440]
+) => {
   try {
     const now = moment();
 
-    // Fetch existing log entry
     const log = await RateLimiterLogs.findOne({
       where: { ip_address: ip, route_name: routeName },
     });
@@ -59,8 +71,12 @@ const handleFailedLogin = async (ip, routeName, maxAttempts = 5, blockDurations 
       log.last_request = now.toDate();
 
       if (log.request_count > maxAttempts) {
-        const currentIndex = blockDurations.findIndex((duration) => moment(log.blocked_until).isSameOrBefore(now));
-        const nextDuration = blockDurations[currentIndex + 1] || blockDurations[blockDurations.length - 1];
+        // Determine which block duration to apply
+        const currentIndex = blockDurations.findIndex(
+          (duration) => moment(log.blocked_until).isSameOrBefore(now)
+        );
+        const nextDuration =
+          blockDurations[currentIndex + 1] || blockDurations[blockDurations.length - 1];
 
         log.blocked_until = now.add(nextDuration, 'minutes').toDate();
         log.request_count = 0; // Reset count after block
@@ -70,7 +86,6 @@ const handleFailedLogin = async (ip, routeName, maxAttempts = 5, blockDurations 
         // 📧 Send an email alert
         await sendRateLimiterAlert(ip, routeName);
       }
-
       await log.save();
     } else {
       // Create a new log entry
@@ -86,58 +101,132 @@ const handleFailedLogin = async (ip, routeName, maxAttempts = 5, blockDurations 
   }
 };
 
-
 /**
  * Clears failed login attempts for an IP and route.
+ * Typically used when the user eventually succeeds or an admin resets attempts.
  * @param {string} ip - The client IP address.
  * @param {string} routeName - The route being accessed.
  */
 const clearFailedAttempts = async (ip, routeName) => {
-    try {
-      await RateLimiterLogs.destroy({
-        where: { ip_address: ip, route_name: routeName },
-      });
-      console.log(`Cleared failed attempts for IP ${ip} on ${routeName}`);
-    } catch (err) {
-      console.error('Error clearing failed attempts:', err);
-    }
-  };
-
-/**
- * Middleware for rate limiting requests and handling logs.
- * @param {string} routeName - Name of the route being accessed.
- * @param {number} maxRequests - Maximum requests allowed within the time window.
- * @param {number} blockDurationMinutes - Duration to block the IP after exceeding requests.
- * @param {boolean} isSensitive - If true, applies custom rules for sensitive routes.
- */
-const rateLimiter = (routeName, maxRequests = 5, blockDurationMinutes = 3) => {
-    return async (req, res, next) => {
-        try {
-            // Extract client IP
-            let ip = req.headers['x-forwarded-for']?.split(',')[0] || req.socket.remoteAddress;
-            if (ip.startsWith('::ffff:')) ip = ip.substring(7);
-
-            const now = moment();
-
-            // Check if IP is blacklisted
-            const blacklistedIp = await RateLimiterLogs.findOne({
-                where: { ip_address: ip, blocked_until: { [Op.gt]: now.toDate() } },
-            });
-
-            if (blacklistedIp) {
-                console.log(`Blocked IP: ${ip} on ${routeName}`);
-                return res.status(429).json({
-                    error: `Access denied. This IP is temporarily blocked until ${moment(blacklistedIp.blocked_until).format('YYYY-MM-DD HH:mm:ss')}.`,
-                });
-            }
-
-            next(); // Allow request to proceed
-        } catch (err) {
-            console.error('Rate limiter error:', err);
-            res.status(500).json({ error: 'Internal server error' });
-        }
-    };
+  try {
+    await RateLimiterLogs.destroy({
+      where: { ip_address: ip, route_name: routeName },
+    });
+    console.log(`Cleared failed attempts for IP ${ip} on ${routeName}`);
+  } catch (err) {
+    console.error('Error clearing failed attempts:', err);
+  }
 };
 
+/***************************************************
+ * Generic Request Volume Rate Limiting
+ *   For controlling total requests/route.
+ ***************************************************/
+/**
+ * Base function that creates a rate limiter middleware.
+ *
+ * @param {string} routeName - Name of the route being accessed.
+ * @param {number} maxRequests - Maximum requests allowed in the time window.
+ * @param {number} blockDurationMinutes - Duration to block after exceeding maxRequests.
+ * @returns Express middleware for rate limiting.
+ */
+function createRateLimiter(routeName, maxRequests, blockDurationMinutes) {
+  return async (req, res, next) => {
+    try {
+      let ip = req.headers['x-forwarded-for']?.split(',')[0] || req.socket.remoteAddress;
+      if (ip.startsWith('::ffff:')) ip = ip.substring(7);
 
-module.exports = { rateLimiter, handleFailedLogin, clearFailedAttempts };
+      const now = moment();
+
+      // Check if currently blocked
+      const blacklistedIp = await RateLimiterLogs.findOne({
+        where: {
+          ip_address: ip,
+          route_name: routeName,
+          blocked_until: { [Op.gt]: now.toDate() },
+        },
+      });
+
+      if (blacklistedIp) {
+        console.log(`Blocked IP: ${ip} on ${routeName}`);
+        return res.status(429).json({
+          error: `Access denied. This IP is temporarily blocked until ${moment(
+            blacklistedIp.blocked_until
+          ).format('YYYY-MM-DD HH:mm:ss')}.`,
+        });
+      }
+
+      // Find or create a log entry for this IP/route to track request volume
+      let log = await RateLimiterLogs.findOne({
+        where: { ip_address: ip, route_name: routeName },
+      });
+
+      if (!log) {
+        log = await RateLimiterLogs.create({
+          ip_address: ip,
+          route_name: routeName,
+          request_count: 1,
+          last_request: now.toDate(),
+        });
+      } else {
+        // If enough time has passed since last request, reset
+        const timeSinceLast = moment().diff(moment(log.last_request), 'minutes');
+        if (timeSinceLast >= blockDurationMinutes) {
+          log.request_count = 1;
+        } else {
+          log.request_count += 1;
+        }
+        log.last_request = now.toDate();
+
+        // Check if we exceeded maxRequests within the current block window
+        if (log.request_count > maxRequests) {
+          // Block for blockDurationMinutes
+          log.blocked_until = now.add(blockDurationMinutes, 'minutes').toDate();
+          log.request_count = 0;
+          console.log(`🚫 IP ${ip} blocked on ${routeName} for ${blockDurationMinutes} minutes.`);
+          await sendRateLimiterAlert(ip, routeName);
+        }
+
+        await log.save();
+      }
+
+      next(); // Not blocked => proceed
+    } catch (err) {
+      console.error('Rate limiter error:', err);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+  };
+}
+
+/***************************************************
+ *  Pre-Built Rate Limiters with Different Levels
+ ***************************************************/
+/**
+ * Low Security => e.g. 1000 requests / 60 minutes
+ */
+const lowSecurityRateLimiter = (routeName) => createRateLimiter(routeName, 1000, 60);
+
+/**
+ * Medium Security => e.g. 100 requests / 60 minutes
+ */
+const mediumSecurityRateLimiter = (routeName) => createRateLimiter(routeName, 100, 60);
+
+/**
+ * High Security => e.g. 10 requests / 60 minutes
+ */
+const highSecurityRateLimiter = (routeName) => createRateLimiter(routeName, 10, 60);
+
+/***************************************************
+ * Exports
+ ***************************************************/
+module.exports = {
+  // Exponential backoff for actual failures:
+  handleFailedLogin,
+  clearFailedAttempts,
+
+  // Generic request volume limiting:
+  createRateLimiter,
+  lowSecurityRateLimiter,
+  mediumSecurityRateLimiter,
+  highSecurityRateLimiter,
+};

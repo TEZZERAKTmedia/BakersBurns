@@ -22,7 +22,13 @@ const db = require('./models/index');
 const sequelize = require('./config/database'); // Import the Sequelize instance
 const helmet = require('helmet');
  // Applies all default security headers
-const rateLimit = require('express-rate-limit'); 
+ const {
+  lowSecurityRateLimiter,
+  mediumSecurityRateLimiter,
+  highSecurityRateLimiter,
+  handleFailedLogin,
+  clearFailedAttempts,
+} = require('./utils/rateLimiter'); 
 // Import routes
 const cartRoutes = require('./routes/user/cartRoutes');
 const emailVerificationRoutes = require('./routes/verificationRoutes');
@@ -147,33 +153,33 @@ app.use('/user', express.static(path.join(__dirname, 'public/user')));
 app.use('/sign-up', signupRoutes);
 
 //Passkey Routes 
-app.use('/login-passkey-routes', rateLimiter('passkey'), passkeyRoutes);
+app.use('/login-passkey-routes', highSecurityRateLimiter('passkey'), passkeyRoutes);
 
 
 //Register routes
-app.use('/register-store', rateLimiter('register-store'), registerStoreRoutes);
-app.use('/register-cart', rateLimiter('register-cart'), registerCartRoutes); 
-app.use('/register-rates', rateLimiter('register-rates'), registerRates);
+app.use('/register-store', lowSecurityRateLimiter('register-store'), registerStoreRoutes);
+app.use('/register-cart', lowSecurityRateLimiter('register-cart'), registerCartRoutes); 
+app.use('/register-rates', lowSecurityRateLimiter('register-rates'), registerRates);
 
 
 // User routes
-app.use('/auth', rateLimiter('auth'), authRoutes);
-app.use('/verification', rateLimiter('verification'), emailVerificationRoutes);
-app.use('/verified', userAuthMiddleware('user'), rateLimiter('verified'), verifiedRoutes);
-app.use('/account-settings', rateLimiter('account-settings'), accountSettingsRoutes);
-app.use('/cart', userAuthMiddleware('user'), rateLimiter('cart'), cartRoutes);
-app.use('/user', userAuthMiddleware('user'), rateLimiter('user'), userRoutes);
-app.use('/store', userAuthMiddleware('user'), rateLimiter('store'), storeRoutes);
-app.use('/user-message-routes', userAuthMiddleware('user'), rateLimiter('user-messaging'), userMessagingRoutes);
-app.use('/user-orders', userAuthMiddleware('user'), rateLimiter('user-orders'), userOrderRoutes);
-app.use('/user-event', userAuthMiddleware('user'), rateLimiter('user-event'), userEventRoutes);
-app.use('/user-gallery', userAuthMiddleware('user'), rateLimiter('user-gallery'), userGalleryRoutes);
+app.use('/auth', mediumSecurityRateLimiter('auth'), authRoutes);
+app.use('/verification', mediumSecurityRateLimiter('verification'), emailVerificationRoutes);
+app.use('/verified', userAuthMiddleware('user'), mediumSecurityRateLimiter('verified'), verifiedRoutes);
+app.use('/account-settings', mediumSecurityRateLimiter('account-settings'), accountSettingsRoutes);
+app.use('/cart', userAuthMiddleware('user'), mediumSecurityRateLimiter('cart'), cartRoutes);
+app.use('/user', userAuthMiddleware('user'), mediumSecurityRateLimiter('user'), userRoutes);
+app.use('/store', userAuthMiddleware('user'), mediumSecurityRateLimiter('store'), storeRoutes);
+app.use('/user-message-routes', userAuthMiddleware('user'), mediumSecurityRateLimiter('user-messaging'), userMessagingRoutes);
+app.use('/user-orders', userAuthMiddleware('user'), mediumSecurityRateLimiter('user-orders'), userOrderRoutes);
+app.use('/user-event', userAuthMiddleware('user'), mediumSecurityRateLimiter('user-event'), userEventRoutes);
+app.use('/user-gallery', userAuthMiddleware('user'), mediumSecurityRateLimiter('user-gallery'), userGalleryRoutes);
 app.use('/user-social', socialRoutes);
 
 
 
 //STRIPE ROUTES
-app.use('/stripe', rateLimiter('stripe'),stripeRoutes); 
+app.use('/stripe', lowSecurityRateLimiter('stripe'),stripeRoutes); 
 
 // Google Routes
 app.use('/google', googleRoutes);
@@ -181,16 +187,16 @@ app.use('/google', googleRoutes);
 
 
 // Admin routes (protected by adminAuthMiddleware)
-app.use('/invoice-routes', adminAuthMiddleware('admin'), rateLimiter('invoice-routes'), invoiceRoutes);
-app.use('/products', adminAuthMiddleware('admin'), rateLimiter('admin-products'), productRoutes);
-app.use('/gallery-manager', adminAuthMiddleware('admin'), rateLimiter('gallery-manager'), galleryRoutes);
-app.use('/admin-mail', adminAuthMiddleware('admin'), rateLimiter('admin-mail'), adminEmailRoutes);
-app.use('/orders', adminAuthMiddleware('admin'), rateLimiter('orders'), ordersRoutes);
-app.use('/admin-message-routes', adminAuthMiddleware('admin'), rateLimiter('admin-messaging'), adminMessagingRoutes);
-app.use('/admin-event', adminAuthMiddleware('admin'), rateLimiter('admin-event'), adminEventRoutes);
+app.use('/invoice-routes', adminAuthMiddleware('admin'), mediumSecurityRateLimiter('invoice-routes'), invoiceRoutes);
+app.use('/products', adminAuthMiddleware('admin'), mediumSecurityRateLimiter('admin-products'), productRoutes);
+app.use('/gallery-manager', adminAuthMiddleware('admin'), mediumSecurityRateLimiter('gallery-manager'), galleryRoutes);
+app.use('/admin-mail', adminAuthMiddleware('admin'), mediumSecurityRateLimiter('admin-mail'), adminEmailRoutes);
+app.use('/orders', adminAuthMiddleware('admin'), mediumSecurityRateLimiter('orders'), ordersRoutes);
+app.use('/admin-message-routes', adminAuthMiddleware('admin'), mediumSecurityRateLimiter('admin-messaging'), adminMessagingRoutes);
+app.use('/admin-event', adminAuthMiddleware('admin'), mediumSecurityRateLimiter('admin-event'), adminEventRoutes);
 app.use('/admin-notifications', adminAuthMiddleware('admin'), notificationRoutes);
 app.use('/admin-social', adminSocialRoutes);
-app.use('/discount', adminAuthMiddleware('admin'), adminDiscountRoutes);
+app.use('/discount', adminAuthMiddleware('admin'),mediumSecurityRateLimiter('discounts'), adminDiscountRoutes);
 // Static file serving
 // Static file serving
 app.use('/uploads', express.static(path.resolve(__dirname, 'uploads')));
