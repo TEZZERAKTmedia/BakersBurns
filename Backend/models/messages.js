@@ -27,8 +27,9 @@ const Message = sequelize.define(
       allowNull: true,
     },
     threadId: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.UUID,
       allowNull: false,
+      unique: true,
     },
     createdAt: {
       type: DataTypes.DATE,

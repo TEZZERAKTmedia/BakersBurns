@@ -13,7 +13,7 @@ Thread.init({
     primaryKey: true,
   },
   threadId: {
-    type: DataTypes.STRING(36),
+    type: DataTypes.UUID,
     allowNull: false,
     unique: true,
   },
