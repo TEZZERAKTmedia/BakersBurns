@@ -155,7 +155,7 @@ input:focus {
     background-color: var(--blue-button-hover-bg, #e53e3e);
 }
 
-.sign-up-form-section {
+.form-section {
     border: 5px solid var(--signup-form-section-border);
     border-radius: 30px;
     padding: 20px;

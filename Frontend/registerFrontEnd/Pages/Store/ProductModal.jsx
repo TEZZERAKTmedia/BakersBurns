@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import QuantityModal from "../Cart/quantityModal";
 import { useNavigate } from "react-router-dom";
 import { registerApi } from "../../config/axios";
-import "./product-modal.css"; // Import the external CSS file
+import "./product-modal.css"; // External CSS with variable styling
 
 const ProductModal = ({ product, onClose }) => {
   const [showQuantityModal, setShowQuantityModal] = useState(false);
@@ -48,8 +48,8 @@ const ProductModal = ({ product, onClose }) => {
 
   const openQuantityModal = () => setShowQuantityModal(true);
   const closeQuantityModal = () => setShowQuantityModal(false);
-  const handleNextSlide = () => currentMediaIndex < media.length - 1 && setCurrentMediaIndex((prev) => prev + 1);
-  const handlePrevSlide = () => currentMediaIndex > 0 && setCurrentMediaIndex((prev) => prev - 1);
+  const handleNextSlide = () => currentMediaIndex < media.length - 1 && setCurrentMediaIndex(prev => prev + 1);
+  const handlePrevSlide = () => currentMediaIndex > 0 && setCurrentMediaIndex(prev => prev - 1);
   const handleTouchStart = (e) => setStartX(e.touches[0].clientX);
   const handleTouchMove = (e) => {
     const diffX = startX - e.touches[0].clientX;
@@ -95,46 +95,85 @@ const ProductModal = ({ product, onClose }) => {
         )}
 
         <div className="product-modal-info">
-          <h2 className="product-modal-title">{product.name}</h2>
-          <div className="product-modal-price">
+          
+
+          {/* Pricing Section */}
+          <div className="form-section">
             {isDiscounted ? (
               <>
-                <p className="product-modal-original-price">${parseFloat(product.price).toFixed(2)}</p>
-                <p className="product-modal-discounted-price">${discountPrice}</p>
-                <p className="product-modal-sale-end">Sale Ends: {saleEndDate}</p>
+                <p className="product-modal-price">
+                  <span className="product-modal-label">Original Price: </span>
+                  <span className="product-modal-original-price">
+                    ${parseFloat(product.price).toFixed(2)}
+                  </span>
+                </p>
+                <p className="product-modal-price">
+                  <span className="product-modal-label">Discounted Price: </span>
+                  <span className="product-modal-discounted-price">
+                    ${discountPrice}
+                  </span>
+                </p>
+                
               </>
             ) : (
-              <p className="product-modal-normal-price">${parseFloat(product.price).toFixed(2)}</p>
+              <p className="product-modal-price">
+                <span className="product-modal-label">Price: </span>
+                <span className="product-modal-normal-price">
+                  ${parseFloat(product.price).toFixed(2)}
+                </span>
+              </p>
             )}
           </div>
-
-          <div className="product-modal-details">
-            <h4 className="product-modal-section-title">Description</h4>
-            <p className="product-modal-description">{product.description}</p>
+          <div className="product-modal-button-container">
+            <button className="product-modal-purchase-button" onClick={openQuantityModal}>
+              Purchase
+            </button>
           </div>
+          
 
-          <div className="product-modal-dimensions">
-            <h4 className="product-modal-section-title">Dimensions</h4>
-            <div className="product-modal-dimension-content">
-              <p>Length: {(product.length * 2.54).toFixed(2)} cm | {product.length} in</p>
-              <p>Width: {(product.width * 2.54).toFixed(2)} cm | {product.width} in</p>
-              <p>Height: {(product.height * 2.54).toFixed(2)} cm | {product.height} in</p>
+          {/* Details Grid */}
+          <div className="product-modal-details-grid">
+          <p className="product-modal-sale-end">
+                  <span className="sale-end-product-modal-label">Sale Ends: </span>
+                  {saleEndDate}
+                </p>
+          </div>
+          
+          <div className="product-modal-details-grid">
+          
+          <div className="grid-item">
+
+            <div className="grid-label"></div>
+            <h2 className="product-modal-title">{product.name}</h2>
+            </div>
+            <div className="grid-item">
+
+              <div className="grid-label">Description:</div>
+              <div className="grid-value product-modal-description">{product.description}</div>
+            </div>
+            <div className="grid-item">
+              <div className="grid-label">Dimensions:</div>
+              <div className="grid-value product-modal-dimension-content">
+                <p>Length: {(product.length * 2.54).toFixed(2)} cm | {product.length} in</p>
+                <p>Width: {(product.width * 2.54).toFixed(2)} cm | {product.width} in</p>
+                <p>Height: {(product.height * 2.54).toFixed(2)} cm | {product.height} in</p>
+              </div>
+            </div>
+            <div className="grid-item">
+              <div className="grid-label">Weight:</div>
+              <div className="grid-value">
+                {product.weight} lbs
+              </div>
+            </div>
+            <div className="grid-item">
+              <div className="grid-label">Quantity Available:</div>
+              <div className="grid-value">
+                {product.quantity}
+              </div>
             </div>
           </div>
 
-          <div className="product-modal-weight">
-            <h4 className="product-modal-section-title">Weight</h4>
-            <p>{product.weight} lbs</p>
-          </div>
-
-          <div className="product-modal-quantity">
-            <h4 className="product-modal-section-title">Quantity Available</h4>
-            <p>{product.quantity}</p>
-          </div>
-
-          <button className="product-modal-purchase-button" onClick={openQuantityModal}>
-            Purchase
-          </button>
+          
         </div>
 
         {showQuantityModal && (
