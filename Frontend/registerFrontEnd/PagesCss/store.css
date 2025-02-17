@@ -29,7 +29,7 @@
     align-items: center;
     text-align: center;
     width: 100%;
-    max-width: 200px;
+    
     cursor: pointer;
   }
   
@@ -203,5 +203,27 @@
     text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7); /* Adds a stronger shadow to the price */
     text-align: center;
     margin-top: 10px;
+  }
+  .store-product-price {
+    font-size: 1.5rem;
+    font-weight: bold;
+  }
+  
+  .store-product-price__original {
+    text-decoration: line-through;
+    color: red;
+    font-size: 1.2rem;
+    margin-right: 8px;
+  }
+  
+  .store-product-price__active {
+    color: white;
+    font-size: 1.5rem;
+  }
+  
+  .store-product-price__discounted {
+    color: green;
+    font-size: 1.8rem;
+    font-weight: bold;
   }
   

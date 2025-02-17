@@ -101,25 +101,30 @@ const Store = () => {
                     )}
                   </div>
                   <div className="store-product-info">
-                    <h3 className="store-product-info__title">{product.name}</h3>
-                    <div className="store-product-price">
-                      {isDiscounted ? (
-                        <>
-                          <p className="store-product-price__original">
-                            ${parseFloat(product.price).toFixed(2)}
-                          </p>
-                          <p>${parseFloat(product.discountPrice).toFixed(2)}</p>
-                        </>
-                      ) : (
-                        <p>${parseFloat(product.price).toFixed(2)}</p>
-                      )}
-                    </div>
-                    {isDiscounted && (
-                      <p className="store-sale-end">
-                        Sale Ends: {saleEndDate}
-                      </p>
-                    )}
-                  </div>
+  <h3 className="store-product-info__title">{product.name}</h3>
+  <div className="store-product-price">
+    {isDiscounted ? (
+      <>
+        <p className="store-product-price__original">
+          ${parseFloat(product.price).toFixed(2)}
+        </p>
+        <p className="store-product-price__discounted">
+          ${parseFloat(product.discountPrice).toFixed(2)}
+        </p>
+      </>
+    ) : (
+      <p className="store-product-price__active">
+        ${parseFloat(product.price).toFixed(2)}
+      </p>
+    )}
+  </div>
+  {isDiscounted && (
+    <p className="store-sale-end">
+      Sale Ends: {saleEndDate}
+    </p>
+  )}
+</div>
+
                 </div>
               );
             })

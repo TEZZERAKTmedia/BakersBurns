@@ -41,9 +41,9 @@
   flex-direction: row;
   align-items: center;
   text-align: left;
-  width: 100%;
+ 
   height:100%;
-
+  width: 80vw;
   max-width: 600px;
   cursor: pointer;
   margin: 1rem auto;
@@ -87,13 +87,24 @@
 .store-product-price {
   font-size: 1.5rem;
   font-weight: bold;
-  color: var(--price-color);
 }
 
 .store-product-price__original {
-  font-size: 1rem;
   text-decoration: line-through;
-  color: var(--price-original-color);
+  color: red;
+  font-size: 1.2rem;
+  margin-right: 8px;
+}
+
+.store-product-price__active {
+  color: white;
+  font-size: 1.5rem;
+}
+
+.store-product-price__discounted {
+  color: green;
+  font-size: 1.8rem;
+  font-weight: bold;
 }
 
 /* Sale End Message */
