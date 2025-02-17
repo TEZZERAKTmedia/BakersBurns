@@ -29,6 +29,7 @@ body {
     width: 100%;            /* Full width of the container */
     padding: 0.5rem;          /* Add some padding for mobile screens */
     box-sizing: border-box;
+    margin-top: 15%;
 }
 
 h2 {
@@ -95,7 +96,8 @@ button:disabled {
     width: 100%;
     padding: 0.75rem;
     font-size: 1rem;
-    background-color: var(--signup-button-bg);
+    background-color: #ff956b
+    ;
     color: var(--signup-button-text);
     border: none;
     border-radius: 4px;
@@ -165,10 +167,7 @@ input:focus {
     margin: 10px;
 }
 
-p {
-    margin-top: 1rem;
-    color: var(--error-color, #e74c3c);
-}
+
 
 .bullet-point::before {
     content: "•";
@@ -193,6 +192,7 @@ p {
     align-items: center;
     margin-bottom: 20px;
     flex-wrap: wrap;
+    background-color: var(--bg-color);
 }
 
 .check-boxes input[type="checkbox"] {
@@ -233,7 +233,8 @@ p {
 }
 
 .check-boxes input[type="checkbox"]:checked + label::before {
-    background-color: var(--checkbox-checked-bg, #4CAF50);
+    background-color: var(--checkbox-checked-bg, #ff956b
+    );
 }
 
 .check-boxes input[type="checkbox"]:checked + label::after {
@@ -351,4 +352,25 @@ p {
         width: auto;
         padding: 0.5rem;
     }
+}
+
+.accept-toggle-wrapper {
+    margin-bottom: 1rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.6);
+    margin: 20px;
+    padding: 2vw;
+    background-color:var(--bg-color);
+}
+
+.signup-form-paragraph {
+    margin: 10% 5%;
+}
+.p-t-link {
+    color: var(--body-text);
+    background-color: #ff956b
+    ;
+    text-decoration: underline;
+    cursor: pointer;
+    padding: 10px;
+
 }

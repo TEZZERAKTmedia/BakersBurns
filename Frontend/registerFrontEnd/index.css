@@ -94,7 +94,7 @@
    --inverted-button-bg: #ffffff;
    --inverted-button-text: rgb(25, 25, 25);
    /*HOME*/
-   --bg-color: #121212;
+ 
    --text-color: #ffffff;
    --hero-bg-overlay: rgba(0, 0, 0, 0.63);
    --hero-title-color: white;
@@ -110,7 +110,7 @@
    --product-shadow: rgba(255, 255, 255, 0.1);
    --contact-bg: #1e1e1e;
    /*STORE*/
-  --bg-color: #121212;
+  --bg-color: #262626;
   --text-color: #ffffff;
   --header-color: #fff;
   --tile-bg: rgba(0, 0, 0, 0.85);
@@ -124,7 +124,7 @@
   --discount-tag-bg: #ff4d4d;
   --discount-tag-color: #fff;
   /*THEME*/
-    --bg-color: #121212;
+
   --text-color: #ffffff;
   --toggle-bg: #555;
   --toggle-slider: #222;
@@ -132,7 +132,7 @@
   --toggle-slider-active: #f1f1f1;
   /*SIGNUPFORM*/
 
-  --body-bg: #121212;
+
   --body-text: #fff;
   --container-bg: #1e1e1e;
   --container-shadow: 0 4px 6px rgba(255, 255, 255, 0.2);
@@ -161,12 +161,16 @@ body {
   color: var(--text-color);
 }
 
+p {
+  color: var(--text-color);
+}
 
 a {
   font-weight: 500;
   color: #646cff;
   text-decoration: inherit;
 }
+
 a:hover {
   color: #535bf2;
 }
@@ -216,6 +220,7 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
 
 
 

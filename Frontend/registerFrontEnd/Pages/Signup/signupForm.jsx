@@ -271,14 +271,14 @@ const SignUpForm = () => {
     return (
         <div >
             {emailSent ? (
-    <div className="success-message" style={{color: 'black'}}>
-    Registration successful! A verification email has been sent to your inbox: 
-    <div className='user-email'>{registeredEmail}</div>
-    Please check your inbox to verify your account.
-    <p style={{backgroundColor:'black',color: 'white', padding:'10px' , borderRadius:'10px'}}>If this email is incorrect please sign up again</p>
-</div>
+    <div className="success-message" style={{color: 'black', }}>
+        Registration successful! A verification email has been sent to your inbox: 
+        <div className='user-email'>{registeredEmail}</div>
+        Please check your inbox to verify your account.
+        <p style={{backgroundColor:'black',color: 'white', padding:'10px' , borderRadius:'10px'}}>If this email is incorrect please sign up again</p>
+    </div>
             ) : (
-                <div className="center-container" style={{marginTop:'20vh'}}>
+                <div className="center-container" >
                 <form onSubmit={handleSubmit}>
                     {errorMessage && <div className="error-message" style={{padding:'20%'}}>{errorMessage}</div>}
                     
@@ -421,8 +421,8 @@ const SignUpForm = () => {
                         data-index="4"
                             onKeyDown={(e) => handleKeyDown(e, 4)}
                     />
-
-                    <div className='check-boxes' style={{ marginBottom: '1rem', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.6)', margin:'20px', padding:'2vw', backgroundColor:'#ffffffd1' }}>
+                 <div className="accept-toggle-wrapper">
+                    <div className='check-boxes' >
                         <input 
                             type="checkbox" 
                             name="isOptedInForPromotions" 
@@ -430,10 +430,13 @@ const SignUpForm = () => {
                             onChange={handleChange} 
                             id="optInPromotions"
                         />
-                        <label htmlFor="optInPromotions" className="opt-in-description"><p>Opt-in for Promotions</p></label>
+                        <label htmlFor="optInPromotions" className="opt-in-description">
+                        <p className='signup-form-paragraph'>Opt-in for Promotions</p>
+                        </label>
                     </div>
-
-                    <div className='check-boxes' style={{ marginBottom: '1rem', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.6)', margin:'20px', padding:'2vw', backgroundColor:'#ffffffd1' }}>
+                </div>
+                <div className="accept-toggle-wrapper">
+                    <div className='check-boxes'>
                         <input 
                             type="checkbox" 
                             name="isOptedInForEmailUpdates" 
@@ -443,17 +446,18 @@ const SignUpForm = () => {
                         />
                         <label htmlFor="optInEmailUpdates" className="opt-in-description">
                            
-                            <p>Opt-in for Email Updates (This includes tracking updates)</p>
+                            <p className='signup-form-paragraph'>Opt-in for Email Updates (This includes tracking updates)</p>
                             
                         </label>
                         
+                    </div>
                     </div>
                     
                    
                     
                     <Modal isVisible={isModalVisible} content={modalContent} onClose={handleCloseModal} />
 
-                    <div style={{ marginBottom: '1rem', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.6)', margin: '20px', padding: '2vw', backgroundColor:'#ffffffd1' }}>
+                    <div className="accept-toggle-wrapper">
                         <div className="check-boxes">
                             {/* Privacy Policy Checkbox */}
                             <input
@@ -470,14 +474,14 @@ const SignUpForm = () => {
                                 className="toggle-input"
                             />
                             <label htmlFor="acceptPrivacyPolicy" className="toggle-label">
-                                <p style={{ color: 'black' }}>I have read and agree to the</p>
-                                <div onClick={() => handleOpenModal(<PrivacyPolicy />)} style={linkStyles}>
+                                <p className='signup-form-paragraph'>I have read and agree to the</p>
+                                <div onClick={() => handleOpenModal(<PrivacyPolicy />)} className='p-t-link'>
                                     Privacy Policy
                                 </div>
                             </label>
                         </div>
                     </div>
-                    <div style={{ marginBottom: '1rem', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.6)', margin: '20px', padding: '2vw', backgroundColor:'#ffffffd1' }}>
+                    <div  className="accept-toggle-wrapper">
                         <div className="check-boxes">
                             {/* Terms of Service Checkbox */}
                             <input
@@ -494,8 +498,8 @@ const SignUpForm = () => {
                                 className="toggle-input"
                             />
                             <label htmlFor="acceptTermsOfService" className="toggle-label">
-                                <p style={{ color: 'black' }}>I have read and agree to the</p>
-                                <div onClick={() => handleOpenModal(<TermsOfService />)} style={linkStyles}>
+                                <p className='signup-form-paragraph'>I have read and agree to the</p>
+                                <div onClick={() => handleOpenModal(<TermsOfService />)} className='p-t-link'>
                                     Terms of Service
                                 </div>
                             </label>
@@ -503,16 +507,16 @@ const SignUpForm = () => {
                     </div>
 
                     <button
-    type="submit"
-    disabled={!formData.hasAcceptedPrivacyPolicy || !formData.hasAcceptedTermsOfService}
-    className="signup-button"
->
-    {formData.hasAcceptedPrivacyPolicy && formData.hasAcceptedTermsOfService
-        ? 'Sign Up'
-        : 'Accept Terms and Conditions'}
-</button>
+                        type="submit"
+                        disabled={!formData.hasAcceptedPrivacyPolicy || !formData.hasAcceptedTermsOfService}
+                        className="signup-button"
+                    >
+                        {formData.hasAcceptedPrivacyPolicy && formData.hasAcceptedTermsOfService
+                            ? 'Sign Up'
+                            : 'Accept Terms and Conditions'}
+                    </button>
                 </form>
-                <GoogleSignInButton />
+                
                 </div>
             )}
         </div>

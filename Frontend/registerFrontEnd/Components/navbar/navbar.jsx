@@ -22,10 +22,12 @@ const Navbar = () => {
 
   const currentPageTitle = pageTitles[location.pathname] || '';
 
+  // Toggles the entire menu
   const toggleMenu = () => {
     setMenuOpen(!menuOpen);
   };
 
+  // Closes the entire menu
   const closeMenu = () => {
     setMenuOpen(false);
   };
@@ -34,14 +36,8 @@ const Navbar = () => {
     <nav className="navbar">
       {/* Top Section */}
       <div className="navbar-top">
-        {/* Hamburger menu */}
-        <div className={`hamburger-menu ${menuOpen ? 'open' : ''}`} onClick={toggleMenu}>
-          <div className="bar1"></div>
-          <div className="bar2"></div>
-          <div className="bar3"></div>
-        </div>
 
-        {/* Page title with animation */}
+        {/* Page title FIRST */}
         <AnimatePresence>
           <motion.div
             className="navbar-title"
@@ -50,20 +46,32 @@ const Navbar = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
             transition={{ duration: 0.5 }}
+            onClick={toggleMenu}
           >
             {currentPageTitle}
           </motion.div>
         </AnimatePresence>
-        
 
-        {/* Login/Sign-up buttons */}
-        <div >
-          <button className='inverted-button-container' onClick={closeMenu}>
-            <Link to="/sign-up" className='inverted-button'>Sign up</Link>
-          </button>
-          <button className='inverted-button-container' onClick={closeMenu}>
-            <Link to="/login" className='inverted-button'>Login</Link>
-          </button>
+        {/* Conditionally render Login/Sign-up only if menuOpen is true */}
+        {menuOpen && (
+          <div className="navbar-auth-buttons">
+            <button className="inverted-button-container" onClick={closeMenu}>
+              <Link to="/sign-up" className="inverted-button">Sign up</Link>
+            </button>
+            <button className="inverted-button-container" onClick={closeMenu}>
+              <Link to="/login" className="inverted-button">Login</Link>
+            </button>
+          </div>
+        )}
+
+        {/* Hamburger menu LAST */}
+        <div
+          className={`hamburger-menu ${menuOpen ? 'open' : ''}`}
+          onClick={toggleMenu}
+        >
+          <div className="bar1"></div>
+          <div className="bar2"></div>
+          <div className="bar3"></div>
         </div>
       </div>
 
@@ -81,18 +89,19 @@ const Navbar = () => {
         <li className="nav-item" onClick={closeMenu}>
           <Link to="/about">About</Link>
         </li>
-        <li  className="inverted-button-p-t"onClick={closeMenu}>
+        <li className="inverted-button-p-t" onClick={closeMenu}>
           <Link to="/privacy-policy" className="inverted-button">Privacy Policy</Link>
         </li>
         <li className="inverted-button-p-t" onClick={closeMenu}>
           <Link to="/terms-of-service" className="inverted-button">Terms of Service</Link>
         </li>
+        {/* Theme Toggle */}
         <ThemeToggle />
       </ul>
 
       {/* Social Media Links */}
       {menuOpen && (
-        <div >
+        <div>
           <SocialLinks />
         </div>
       )}

@@ -31,8 +31,8 @@ const Signup = () => {
   };
 
   return (
-    <div className='sign-up-form-section'>
-      <div style={{ marginTop: '200px' }}>
+    <div className='form-section'>
+      <div >
         <GoogleSignInButton
           onSuccess={handleGoogleSuccess}
           onFailure={handleGoogleFailure}
