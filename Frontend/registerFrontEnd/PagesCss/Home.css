@@ -65,7 +65,7 @@ body {
 .hero-btn, .about-btn, .upcoming-event-btn, .contact-btn {
   padding: 15px 40px;
   background-color: var(--btn-bg);
-  color: #fff;
+  color: var(--inverted-button-text);
   text-decoration: none;
   font-size: 1.2rem;
   border-radius: 5px;
