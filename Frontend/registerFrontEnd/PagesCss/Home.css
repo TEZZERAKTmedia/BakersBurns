@@ -25,6 +25,11 @@ body {
 /* Home Container */
 .home-container {
   font-family: 'Arial', sans-serif;
+  background-color: var(--bg-overlay);
+  z-index: 101;
+  height: 100vh;
+  width: 100vw;
+
 }
 
 /* Hero Section */
@@ -47,6 +52,7 @@ body {
   padding: 50px;
   border-radius: 10px;
   
+  
 }
 
 .hero-title {
@@ -58,7 +64,7 @@ body {
 .hero-description {
   font-size: clamp(1rem, 2.5vw, 1.5rem);
   margin-bottom: 30px;
-  color: #ff6347;
+  color: var(--text-color);
 }
 
 /* Buttons */
@@ -81,7 +87,7 @@ body {
 .about-section {
   padding:  5px;
   text-align: center;
-  background-color: var(--about-bg);
+  background-color: var(--bg-section);
   color: var(--about-text);
 }
 
@@ -103,12 +109,12 @@ body {
   font-size: 1.2rem;
   line-height: 1.8;
   margin-bottom: 20px;
-  color: #ff6347;
+  color: var(--text-color);
 }
 
 /* Upcoming Event Section */
 .upcoming-event-section {
-  background-color: var(--event-bg);
+  background-color: var(--bg-section);
   color: var(--text-color);
   padding: 2.5rem;
   border-radius: 1.2rem;
@@ -125,7 +131,8 @@ body {
 .upcoming-event-title {
   font-family: 'Dancing Script', cursive;
   font-size: 2.5rem;
-  color: var(--event-title);
+  
+  color: var(--text-color);
 }
 
 .upcoming-event-name {
@@ -135,15 +142,17 @@ body {
 
 /* Featured Products Section */
 .featured-products-section {
-  background-color: var(--bg-color);
+  background-color: var(--bg-section);
   padding: 100px 20px;
   text-align: center;
+  color: var(--text-color);
 }
 
 .featured-products-title {
   font-family: 'Dancing Script', cursive;
   font-size: 4rem;
-  color: var(--hero-title-color);
+  color: var(--text-color);
+
 }
 
 .products-gallery {
@@ -190,9 +199,10 @@ body {
 
 /* Contact Section */
 .contact-section {
-  background-color: var(--contact-bg);
+  background-color: var(--bg-section);
   padding: 100px 20px;
   text-align: center;
+  color: var(--text-color);
 }
 
 .contact-title {
@@ -207,7 +217,7 @@ body {
   margin: 0 auto;
   line-height: 1.8;
   margin-bottom: 20px;
-  color: #ff6347;
+  color: var(--text-color);
 }
 
 .contact-btn {

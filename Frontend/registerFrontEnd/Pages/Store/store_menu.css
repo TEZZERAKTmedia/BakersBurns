@@ -4,9 +4,9 @@
     top: 0px; /* Adjust to match the height of your main navbar */
     left: 0;
     width: 100vw;
-    height: calc(100vh - 60px); /* Subtract main navbar height */
-    background-color: rgba(255, 255, 255, 0.95); /* Semi-transparent background */
-    z-index: 1; /* Sits above most content but below other overlays */
+    height: 100vh; /* Subtract main navbar height */
+    background-color: #fffffff2; /* Semi-transparent background */
+    z-index: 0; /* Sits above most content but below other overlays */
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -53,7 +53,7 @@
   /* Special styling for "All Products" */
   .store-navbar-item.all-products {
     font-weight: bold;
-    background-color: #007bff;
+    background: var(--btn-bg);
     color: white;
   }
   
@@ -81,8 +81,8 @@
     right: 20px;
     z-index: 10;
     padding: 10px 20px;
-    background: #007bff;
-    color: white;
+    background: var(--inverted-button-bg);
+    color: var(--inverted-button-text);
     border: none;
     border-radius: 5px;
     cursor: pointer;

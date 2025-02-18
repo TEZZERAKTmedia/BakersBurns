@@ -4,8 +4,12 @@
     align-items: center;
     justify-content: center;
     padding: 20px;
-    margin-top: 100px;
+    
     font-family: Arial, sans-serif;
+    background-color: var(--bg-overlay);
+    z-index: 101;
+    height: 100vh;
+    width: 100vw;
   }
   
   .cart-title {
@@ -14,11 +18,12 @@
     text-align: center;
     
   }
-  .cart-form-section {
+  .cart-section {
     border: 5px solid #333; /* Solid border */
     border-radius: 30px; /* Rounded corners */
     padding: 20px; /* Add padding for spacing inside */
-    background: linear-gradient(145deg, #ffffff, #d3d3d3); /* Soft gradient background */
+    background: var(--bg-color);
+    /*background: linear-gradient(145deg, #ffffff, #d3d3d3); /* Soft gradient background */
     box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.2), inset 0px -5px 15px rgba(255, 255, 255, 0.4); /* Outer and inner shadows */
     transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth transition on hover */
     margin: 10px;
@@ -37,7 +42,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 15px;
-    background-color: #f9f9f9;
+    background-color: var(--bg-overlay);
     border-radius: 10px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   }
@@ -79,7 +84,7 @@
   .quantity-button {
     padding: 10px;
     font-size: 1.2rem;
-    background-color: #007bff;
+    background-color: var(--btn-bg);
     color: white;
     border: none;
     border-radius: 5px;
@@ -114,7 +119,7 @@
   .cart-back-button {
     margin-top: 20px;
     padding: 10px 20px;
-    background-color: #007bff;
+    background-color: var(--btn-bg);
     color: white;
     border: none;
     border-radius: 5px;

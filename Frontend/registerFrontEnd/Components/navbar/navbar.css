@@ -160,7 +160,11 @@
 }
 
 .nav-item a:hover {
-  background-color: var(--nav-list-item-bg-hover);
+  background-color: var(--button-bg);
+  border-radius: 20px;
+  color: var(--text-color);
+  margin: 10px 0;
+  border: 5px solid var(--nav-list-item-border);
 }
 
 /* Desktop View */

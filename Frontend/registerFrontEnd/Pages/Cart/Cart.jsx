@@ -173,7 +173,8 @@ const CartPage = () => {
   
 
   return (
-    <div className="form-section">
+    <div className="cart-container">
+    <div className="cart-section">
       <h2 className="cart-title">Your Cart</h2>
       {error && <p className="cart-error">{error}</p>}
       <div className="cart-items">
@@ -198,13 +199,13 @@ const CartPage = () => {
               />
             </div>
             <div className="cart-item-quantity-control">
-              <button className="blue-button" onClick={() => handleQuantityChange(item.id, item.quantity - 1)}>-</button>
+              <button className="quantity-button" onClick={() => handleQuantityChange(item.id, item.quantity - 1)}>-</button>
               <input
                 type="number"
                 value={item.quantity}
                 onChange={(e) => handleQuantityChange(item.id, parseInt(e.target.value, 10))}
               />
-              <button className="blue-button" onClick={() => handleQuantityChange(item.id, item.quantity + 1)}>+</button>
+              <button className="quantity-button" onClick={() => handleQuantityChange(item.id, item.quantity + 1)}>+</button>
             </div>
           </div>
         ))}
@@ -221,7 +222,7 @@ const CartPage = () => {
           placeholder="Enter your ZIP code"
           disabled={zipSubmitted}
         />
-        <button className="blue-button" onClick={handleZipSubmit} disabled={zipSubmitted}>
+        <button className="quantity-button" onClick={handleZipSubmit} disabled={zipSubmitted}>
           {zipSubmitted ? "ZIP Code Submitted" : "Submit ZIP Code"}
         </button>
       </div>
@@ -297,6 +298,7 @@ const CartPage = () => {
      
       
       )}
+    </div>
     </div>
   );
 };

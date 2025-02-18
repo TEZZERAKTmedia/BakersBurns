@@ -2,12 +2,13 @@
 :root,
 [data-theme="light"] {
    /*NAVBAR*/
-   --navbar-bg: rgba(255, 255, 255, 0.9);
+   --navbar-bg: #ffd7b5;
+   --wood-bg-dark: #ffd7b5;
    --navbar-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
    --navbar-text: #000;
    --navbar-hover: rgba(0, 0, 0, 0.1);
    --hamburger-bar: #000;
-   --nav-list-bg: rgba(255, 255, 255, 0.9);
+   --nav-list-bg: #ffd7b5;
    --nav-list-item-border: #000;
    --nav-list-item-bg-hover: #ddd;
    --button-bg: white;
@@ -16,23 +17,25 @@
    --inverted-button-bg: #ff6347;
    --inverted-button-text: rgb(249, 249, 249);
    /*HOME*/
-   --bg-color: #ffffff;
+   --bg-color: #ffd7b5;
+   --bg-overlay: #ffffff8b;
+   --bg-section: #ffd8b5e4;
    --text-color: #000000;
-   --hero-bg-overlay: rgba(255, 255, 255, 0.5);
+   --hero-bg-overlay: #ffd8b5c6;
    --hero-title-color: black;
-   --hero-desc-color: #fff;
-   --btn-bg: #ff6347;
+   --hero-desc-color: #ffffff89;
+   --btn-bg: #ff4747;
    --btn-hover: #e53e3e;
-   --about-bg: #ffffff97;
+   --about-bg: #fabe8a89;
    --about-text: #333;
    --event-bg: #000;
    --event-title: #ffeb3b;
    --event-text: #e0e0e0;
    --product-card-bg: #fff;
    --product-shadow: rgba(0, 0, 0, 0.1);
-   --contact-bg: #fff;
+   --contact-bg: #fabe8a89;
    /*STORE*/
-  --bg-color: #ffffff;
+
   --text-color: #000000;
   --header-color: #000;
   --tile-bg: rgba(0, 0, 0, 0.618);
@@ -46,7 +49,7 @@
   --discount-tag-bg: #ff4d4d;
   --discount-tag-color: #fff;
   /*THEME*/
-  --bg-color: #ffffff;
+ 
   --text-color: #000000;
   --toggle-bg: #ccc;
   --toggle-slider: #fff;
@@ -94,7 +97,7 @@
    --inverted-button-bg: #ffffff;
    --inverted-button-text: rgb(25, 25, 25);
    /*HOME*/
- 
+   --bg-overlay: #0c0c0c8b;
    --text-color: #ffffff;
    --hero-bg-overlay: rgba(0, 0, 0, 0.63);
    --hero-title-color: white;
@@ -157,8 +160,9 @@
 
 /* Apply Theme to Body */
 body {
-  background-color: var(--bg-color);
+  background-color: var(--wood-bg-dark);
   color: var(--text-color);
+  z-index: 1000;
 }
 
 p {
@@ -175,14 +179,7 @@ a:hover {
   color: #535bf2;
 }
 
-body {
-  margin: 0;
-  min-width: 320px;
-  min-height: 100vh;
-  /* Remove these to avoid centering issues */
-  /* display: flex; */
-  /* place-items: center; */
-}
+
 
 h1 {
   font-size: 3.2em;
