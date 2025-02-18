@@ -2,13 +2,13 @@
 :root,
 [data-theme="light"] {
    /*NAVBAR*/
-   --navbar-bg: #ffd7b5;
-   --wood-bg-dark: #ffd7b5;
+   --navbar-bg: #ffe6d0;
+   --wood-bg-dark: #ffe6d0;
    --navbar-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
    --navbar-text: #000;
    --navbar-hover: rgba(0, 0, 0, 0.1);
    --hamburger-bar: #000;
-   --nav-list-bg: #ffd7b5;
+   --nav-list-bg: #ffe6d0;
    --nav-list-item-border: #000;
    --nav-list-item-bg-hover: #ddd;
    --button-bg: white;
@@ -19,9 +19,9 @@
    /*HOME*/
    --bg-color: #ffd7b5;
    --bg-overlay: #ffffff8b;
-   --bg-section: #ffd8b5e4;
+   --bg-section: #0a0908e4;
    --text-color: #000000;
-   --hero-bg-overlay: #ffd8b5c6;
+   --hero-bg-overlay: #ffecdcc6;
    --hero-title-color: black;
    --hero-desc-color: #ffffff89;
    --btn-bg: #ff4747;

@@ -4,7 +4,8 @@
 
 /* Store Container */
 .store-container {
-  
+  padding: 0;
+  margin-top: 10%;
   background-color: var(--bg-overlay);
   z-index: 101;
   height: 100vh;
