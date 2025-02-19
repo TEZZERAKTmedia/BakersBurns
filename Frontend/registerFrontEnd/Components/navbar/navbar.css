@@ -140,7 +140,7 @@
 
 .nav-list.show {
   display: flex;
-  z-index: 999; /* ensure it appears above other elements */
+  z-index: 1; /* ensure it appears above other elements */
 }
 
 /* Nav Item Styling */
