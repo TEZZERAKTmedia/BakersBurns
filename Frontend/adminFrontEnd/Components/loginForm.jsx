@@ -91,22 +91,17 @@ const AdminLoginForm = ({ onLoginSuccess }) => {
                 />
               </button>
             </div>
-            <button type="submit">Login</button>
+            <button
+             type="submit"
+             className='modal-buttons'
+              >Login</button>
           </form>
           {message && <p style={{ color: 'red', marginTop: '10px' }}>{message}</p>}
 
           {/* Button to redirect to user app */}
           <button
             onClick={redirectToUserApp}
-            style={{
-              marginTop: '20px',
-              padding: '10px 20px',
-              backgroundColor: '#007bff',
-              color: 'white',
-              border: 'none',
-              borderRadius: '5px',
-              cursor: 'pointer',
-            }}
+            className='modal-buttons'
           >
             Access User App
           </button>

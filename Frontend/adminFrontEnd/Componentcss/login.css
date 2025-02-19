@@ -1,20 +1,3 @@
-/* General reset for consistent styling */
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
-
-/* Full viewport settings */
-html, body {
-    height: 100%;
-    margin: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: #f4f4f9;
-    font-family: 'Roboto', sans-serif;
-}
 
 /* Container for the login form */
 /* Assuming the parent element takes up the full viewport height */
@@ -25,12 +8,12 @@ html, body {
   align-items: center; /* Center vertically */
   height: 100vh; /* Full viewport height */
   width: 100vw; /* Full viewport width */
-  background-color: #f4f4f9; /* Example background color */
+  background-color: var(--body-overlay); /* Example background color */
   margin: 0; /* Ensure no default margin */
 }
 
 .login-form-container {
-  background: #fff;
+  background:var(--body-overlay);
   padding: 2rem;
   border-radius: 10px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -69,14 +52,14 @@ input {
 
 /* Input focus effect */
 input:focus {
-    border-color: #007bff;
+    border-color: var(--btn-bg);
     outline: none;
 }
 
 /* Button styling */
 button {
     padding: 0.75rem;
-    background-color: #007bff;
+    background-color: var(--btn-bg);
     color: #fff;
     border: none;
     border-radius: 5px;
@@ -87,7 +70,7 @@ button {
 
 /* Button hover effect */
 button:hover {
-    background-color: #0056b3;
+    background-color: var(--button-hover);
 }
 
 /* Error message styling */

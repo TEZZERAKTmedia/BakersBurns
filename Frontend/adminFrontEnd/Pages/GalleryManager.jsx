@@ -93,7 +93,7 @@ const Gallery = () => {
     };
 
     return (
-        <div className="form-section">
+        <div className="gallery-container">
             <ToastContainer />
             <button onClick={toggleModal} className="add-image-btn">Add New Image</button>
             {loading && <div className="loading">Loading...</div>}
