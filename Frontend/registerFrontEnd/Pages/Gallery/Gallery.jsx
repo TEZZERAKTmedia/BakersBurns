@@ -49,7 +49,7 @@ const Gallery = () => {
                         onClick={() => openModal(item)} // Open modal on click
                     >
                         <img 
-                            src={`${import.meta.env.VITE_GALLERY_IMAGE_BASE_URL}/${item.image}`} 
+                            src={`${import.meta.env.VITE_BACKEND}/galleryuploads/${item.image}`} 
                             alt={item.title} 
                             className="gallery-image"
                         />
@@ -63,7 +63,7 @@ const Gallery = () => {
                     <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                         <button className="close-button" onClick={closeModal}>×</button>
                         <img 
-                            src={`${import.meta.env.VITE_GALLERY_VITE_BACKEND}/galleryuploads/${modalData.image}`} 
+                            src={`${import.meta.env.VITE_BACKEND}/galleryuploads/${modalData.image}`} 
                             alt={modalData.title} 
                             className="modal-image"
                             onClick={closeModal}
