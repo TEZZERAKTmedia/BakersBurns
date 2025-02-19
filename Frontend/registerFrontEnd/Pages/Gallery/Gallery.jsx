@@ -15,6 +15,7 @@ const Gallery = () => {
     const fetchGallery = async () => {
         try {
             const response = await registerApi.get('/user-gallery/get-gallery');
+            console.log(response.data);
             setGallery(response.data);
         } catch (error) {
             console.error('Unable to display gallery!', error);
@@ -30,6 +31,7 @@ const Gallery = () => {
         setIsModalOpen(false);
         setModalData(null);
     };
+    
 
     return (
         <div className="home-container">
@@ -49,10 +51,15 @@ const Gallery = () => {
                         onClick={() => openModal(item)} // Open modal on click
                     >
                         <img 
-                            src={`${import.meta.env.VITE_BACKEND}/galleryuploads/${item.image}`} 
+                            src={`${import.meta.env.VITE_BACKEND}/galleryuploads/${
+                                Array.isArray(item.image) 
+                                ? item.image[0] 
+                                : JSON.parse(item.image.replace(/\\"/g, '"'))[0]
+                            }`} 
                             alt={item.title} 
                             className="gallery-image"
-                        />
+                            />
+
                     </div>
                 ))}
             </div>
@@ -62,6 +69,16 @@ const Gallery = () => {
                 <div className="modal-overlay" onClick={closeModal}>
                     <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                         <button className="close-button" onClick={closeModal}>×</button>
+                        <img 
+                            src={`${import.meta.env.VITE_BACKEND}/galleryuploads/${
+                                Array.isArray(modalData.image) 
+                                ? modalData.image[0] 
+                                : JSON.parse(modalData.image.replace(/\\"/g, '"'))[0]
+                            }`} 
+                            alt={modalData.title} 
+                            className="modal-image"
+                            />
+
                         <img 
                             src={`${import.meta.env.VITE_BACKEND}/galleryuploads/${modalData.image}`} 
                             alt={modalData.title} 
