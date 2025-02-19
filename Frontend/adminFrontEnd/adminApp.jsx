@@ -4,7 +4,7 @@ import axios from 'axios';
 import Navbar from './Components/navbar';
 import Home from './Pages/Home';
 import GalleryManagement from './Pages/GalleryManager';
-import Messaging from './Pages/inAppMessaging';
+import Messaging from './Pages/Messaging/inAppMessaging';
 import Email from './Pages/Email';
 import Layout from './Pages/Layout';
 import Orders from './Pages/Order/Orders';

@@ -83,6 +83,7 @@ h1 {
    /*STORE*/
 
   --text-color: #000000;
+  --invrt-text-color: #ffffff;
   --header-color: #000;
   --tile-bg: rgba(0, 0, 0, 0.618);
   --tile-border: rgba(221, 221, 221, 0.35);
@@ -127,6 +128,10 @@ h1 {
   --nav-list-item-border: #000;
   --nav-list-item-bg: #fff; /* NEW => background for nav items in light mode */
   --nav-list-item-bg-hover: #ddd;
+
+  /**MESSAGES*/
+  --msg-admin: #ffffff;
+  --msg-admin-text: rgba(34, 34, 34, 0.794);
   
 
 }
@@ -170,6 +175,7 @@ h1 {
    /*STORE*/
   --bg-color: #262626;
   --text-color: #ffffff;
+  --invrt-text-color: #000000;
   --header-color: #fff;
   --tile-bg: rgba(0, 0, 0, 0.85);
   --tile-border: rgba(221, 221, 221, 0.2);
@@ -190,7 +196,7 @@ h1 {
   --toggle-slider-active: #f1f1f1;
   /*SIGNUPFORM*/
 
-
+  --body-bg: #1e1e1e;
   --body-text: #fff;
   --container-bg: #1e1e1e;
   --container-shadow: 0 4px 6px rgba(255, 255, 255, 0.2);
@@ -215,6 +221,12 @@ h1 {
   --nav-list-item-border: #fff;
   --nav-list-item-bg: #333; /* NEW => background for nav items in dark mode */
   --nav-list-item-bg-hover: #444;
+  --msg-admin: #ffe6d0;
+  --msg-admin-text: rgba(34, 34, 34, 0.794);
+
+  --msg-admin:  rgba(34, 34, 34, 0.794);
+  --msg-admin-text: #ffe6d0;
+  
   
 }
 

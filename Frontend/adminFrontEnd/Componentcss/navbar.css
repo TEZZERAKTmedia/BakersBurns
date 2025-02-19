@@ -9,7 +9,7 @@
   background-color: var(--navbar-bg);
   box-shadow: var(--navbar-shadow);
   
-  z-index: 10;
+  z-index: 9999;
 
   /* If you only want 'Dancing Script' in certain themes, keep it. 
      Otherwise, consider using var(--font) if you want a universal font from your theme. */

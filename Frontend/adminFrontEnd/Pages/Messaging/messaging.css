@@ -1,0 +1,358 @@
+/* ========== Desktop View Styles ========== */
+.messaging-app {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+    font-family: Arial, sans-serif;
+    background-color: var(--body-overlay);
+  }
+  
+  /* Sidebar (threads list) */
+  .sidebar {
+    width: 300px;
+    border-right: 1px solid #ddd;
+    padding: 10px;
+  }
+  
+  .sidebar h3 {
+    font-size: 2rem;
+    font-family: 'Dancing Script', cursive;
+    margin-top: 30%;
+  }
+  
+  /* Search section */
+  .search-container {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 10px;
+  }
+  
+  .search-input {
+    flex: 1;
+    padding: 5px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+  }
+  
+  .search-button {
+    padding: 5px 10px;
+    border-radius: 4px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+  }
+  
+  /* Lists */
+  .user-list,
+  .thread-list,
+  .message-list {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 10px;
+  }
+  
+  .thread-list {
+    overflow: auto;
+  }
+  
+  /* Thread items */
+  .thread-item {
+    padding: 10px;
+    cursor: pointer;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .thread-item .thread-username {
+    color: var(--text-color);
+    font-family: 'Dancing Script', cursive;
+    font-size: 1.5rem;
+  }
+  
+  .thread-item .thread-message {
+    font-size: 14px;
+    color: #555;
+  }
+  
+  .thread-item .thread-timestamp {
+    font-size: 12px;
+    color: #999;
+  }
+  
+  /* Main Message Window */
+  .message-window {
+    flex: 1;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: auto;
+  }
+
+  .message-list {
+    padding-top: 50px;
+    padding-bottom: 100px;
+  }
+  
+  /* Message items */
+  .message-item {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 10px;
+    max-width: 70%;
+  }
+  
+  /* Message bubbles – updated to mirror mobile */
+  .message-bubble {
+    padding: 10px;
+    border-radius: 15px;
+    word-wrap: break-word;
+   
+    /* Removed negative padding */
+  }
+  
+  .message-bubble.dsk-admin {
+    align-self: flex-end;
+    text-align: right;
+    background-color: var(--msg-admin);      /* Use the admin background color (e.g., #ffe6d0) */
+    color: var(--text-color);            /* Use the admin text color (e.g., rgba(34,34,34,0.794)) */
+  }
+  
+  .message-bubble.user {
+    align-self: flex-start;
+    text-align: left;
+    background-color: var(--msg-admin-text);
+    /* Matching mobile: using the alternate color */
+          /* Assuming this variable defines the proper contrasting text color */
+  }
+  .message-text.user-text {
+    color: var(--invrt-text-color); 
+  }
+  
+  /* Message timestamps */
+  .message-timestamp {
+    font-size: 10px;
+    color: #999;
+    margin-top: 5px;
+  }
+  
+  .timestamp-left {
+    text-align: left;
+    margin-left: 0;
+  }
+  
+  .timestamp-right {
+    text-align: right;
+    margin-right: 0;
+  }
+  
+  /* Send Message Form */
+  .send-form {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+    width: 80%;
+  }
+  
+  .send-form-container {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+    align-items: center;
+    background-color: white;
+    width: 50vw;
+  }
+  
+  .send-input {
+    padding: 10px;
+    border-radius: 20px;
+    border: 1px solid #ddd;
+  }
+  
+  .send-button {
+    padding: 10px 20px;
+    border-radius: 20px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    margin-bottom: 100px;
+  }
+  
+  
+  /* ========== Mobile View Styles ========== */
+  .mobile-container {
+    height: 100vh;
+    width: 100vw;
+    flex-direction: column;
+    position: relative;
+    background-color: var(--body-overlay);
+  }
+  
+  .mobile-message-view {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+  
+  /* Back button in mobile view */
+  .mobile-back-button {
+    padding: 5px 10px;
+    border-radius: 4px;
+    background-color: black;
+    color: white;
+    border: none;
+    font-size: 2rem;
+    margin-top: 10%;
+    width: 50px;
+    height: 50px;
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    z-index: 1000;
+  }
+  
+  /* Mobile header */
+  .mobile-header {
+    color: black;
+    font-size: 2rem;
+    font-family: 'Dancing Script', cursive;
+    background-color: black;
+    text-align: center;
+    padding: 10px;
+  }
+
+  
+  /* Mobile message list */
+  .mobile-message-list {
+    list-style: none;
+    padding: 0;
+    flex: 1;
+    overflow-y: auto;
+    padding-top: 200px;
+    padding-bottom: 100px;
+  }
+  
+  .mobile-message-item {
+    display: flex;
+    flex-direction: column;
+    max-width: 100%;
+    padding: 30px;
+  }
+  
+  /* Mobile message bubble (similar to desktop but without extra borders) */
+  .mobile-message-bubble {
+    padding: 10px;
+    border-radius: 15px;
+    word-wrap: break-word;
+    padding-top: 0px;
+    
+  }
+  
+  .mobile-message-bubble.mbl-admin {
+    align-self: flex-end;
+    text-align: right;
+    background-color: var(--msg-admin);
+    color: var(--text-color);
+    padding-top: -20px;
+    
+  }
+  .admin-text {
+    color: var(--inverted-button-text);
+  }
+  
+  .mobile-message-bubble.mbl-user {
+    align-self: flex-start;
+    text-align: left;
+    background-color: var(--msg-admin-text);
+    
+  }
+  .mbl-user-text {
+    color: var(--inverted-button-text);
+  }
+  
+  /* Mobile message timestamp */
+  .mbl-timestamp-left {
+    text-align: right;
+    margin-left: 0;
+    margin-top: 10px;
+    color: var(--text-color);
+  }
+  
+  .mbl-timestamp-right {
+    text-align: left;
+    margin-right: 0;
+    color: var(--text-color);
+    margin-top: 10px;
+  }
+  
+  
+  /* Mobile send message form */
+  .mobile-send-form {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    background-color: var(--body-bg);
+    border-top: 1px solid #ddd;
+    z-index: 9999;
+  }
+  
+  .mobile-send-input {
+    flex: 1;
+    padding: 10px;
+    border-radius: 20px;
+    border: 1px solid #ddd;
+  }
+  
+  .mobile-send-button {
+    padding: 10px 20px;
+    margin-right: 10px;
+    border-radius: 20px;
+    background-color: var(--btn-bg);
+    color: var(--inverted-button-text);
+    border: none;
+  }
+  
+  /* Mobile default view (threads and search) */
+  .mobile-default {
+    padding: 10px;
+  }
+  
+  .mobile-title {
+    font-family: 'Dancing Script', cursive;
+    margin-top: 10%;
+    padding-top: 20%;
+    text-align: center;
+  }
+  
+  .mobile-thread-list {
+    list-style: none;
+    padding-bottom: 200px;
+    height: 90vh;
+    overflow-y: auto;
+  }
+  
+  .mobile-thread-item {
+    padding: 10px;
+    border-bottom: 1px solid var(--text-color);
+  }
+  
+  .mobile-thread-username {
+    font-family: Arial, sans-serif;
+    font-size: 1.2rem;
+    color: var(--text-color);
+  }
+  
+  .mobile-thread-message {
+    font-size: 14px;
+    color: #555;
+  }
+  
+  .mobile-thread-timestamp {
+    font-size: 12px;
+    color: var(--text-color);
+  }
+  
