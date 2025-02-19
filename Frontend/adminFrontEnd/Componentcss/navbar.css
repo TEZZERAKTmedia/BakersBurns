@@ -1,16 +1,22 @@
-/* Navbar */
+/* Navbar Container */
 .navbar {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
-  background-color: rgba(0, 0, 0, 0.8);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  z-index: 1000;
+  
+  /* Use our theme variables: */
+  background-color: var(--navbar-bg);
+  box-shadow: var(--navbar-shadow);
+  
+  z-index: 10;
+
+  /* If you only want 'Dancing Script' in certain themes, keep it. 
+     Otherwise, consider using var(--font) if you want a universal font from your theme. */
   font-family: 'Dancing Script';
 }
 
-/* Top section of the navbar */
+/* Top Section of the Navbar */
 .navbar-top {
   display: flex;
   justify-content: space-between;
@@ -18,10 +24,11 @@
   padding: 10px 20px;
 }
 
+/* Navbar Title */
 .navbar-title {
   font-size: 1.5rem;
   font-weight: bold;
-  color: white;
+  color: var(--navbar-text);
   z-index: 9999;
 }
 
@@ -41,7 +48,7 @@
 .hamburger-menu .bar3 {
   width: 100%;
   height: 5px;
-  background-color: white;
+  background-color: var(--hamburger-bar);
   transition: transform 0.4s ease, opacity 0.4s ease;
 }
 
@@ -66,50 +73,52 @@
   gap: 1rem;
   justify-content: center;
   align-content: start;
-  grid-template-columns: repeat(auto-fit, minmax(150px,  1fr));
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   width: 100%;
   
   position: fixed;
-  top: 60px; /* Space below the navbar-top */
+  top: 60; /* Space below the navbar-top */
   left: 0;
-  height: calc(100vh - 60px); /* Full height minus navbar-top */
-  background-color: rgba(0, 0, 0, 0.9);
+  height: 100vh; /* Full height minus navbar-top */
+  
+  /* The background for the expanded nav: */
+  background-color: var(--nav-list-bg);
+  
   z-index: 9999;
   overflow-y: auto;
-  
 }
 
 .nav-grid.show {
   display: grid;
-  
 }
 
-/* Grid items */
+/* Grid items (Nav Item) */
 .nav-item {
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #333;
+  
+  /* Use the new variable for item background */
+  background-color: var(--nav-list-item-bg);
+  
   border-radius: 8px;
   padding: 1rem;
   text-align: center;
   cursor: pointer;
-  padding: rem rem;
   
   transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 .nav-item:hover {
-  background-color: #444;
+  /* Use your hover var: --nav-list-item-bg-hover */
+  background-color: var(--nav-list-item-bg-hover);
   transform: scale(1.05);
 }
 
+/* Nav Link Style */
 .nav-link {
   text-decoration: none;
-  color: white;
+  color: var(--navbar-text);
   font-size: 1.5rem;
   font-weight: bold;
 }
-
-/* Adjust grid for larger screens */
-

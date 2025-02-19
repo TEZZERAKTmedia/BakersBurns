@@ -5,7 +5,7 @@
 /* Store Container */
 .store-container {
   padding: 0;
-  margin-top: 10%;
+  margin-top: 0%;
   background-color: var(--bg-overlay);
   z-index: 101;
   height: 100vh;
@@ -86,6 +86,7 @@
   background-color: var(--info-title-bg);
   padding: 8px;
   border-radius: 8px;
+  font-family:Arial, Helvetica, sans-serif;
 }
 
 .store-product-price {

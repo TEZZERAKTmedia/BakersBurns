@@ -163,7 +163,7 @@ app.use('/register-rates', lowSecurityRateLimiter('register-rates'), registerRat
 
 
 // User routes
-app.use('/auth', mediumSecurityRateLimiter('auth'), authRoutes);
+app.use('/auth', lowSecurityRateLimiter('auth'), authRoutes);
 app.use('/verification', mediumSecurityRateLimiter('verification'), emailVerificationRoutes);
 app.use('/verified', userAuthMiddleware('user'), mediumSecurityRateLimiter('verified'), verifiedRoutes);
 app.use('/account-settings', mediumSecurityRateLimiter('account-settings'), accountSettingsRoutes);
@@ -173,7 +173,7 @@ app.use('/store', userAuthMiddleware('user'), mediumSecurityRateLimiter('store')
 app.use('/user-message-routes', userAuthMiddleware('user'), mediumSecurityRateLimiter('user-messaging'), userMessagingRoutes);
 app.use('/user-orders', userAuthMiddleware('user'), mediumSecurityRateLimiter('user-orders'), userOrderRoutes);
 app.use('/user-event', userAuthMiddleware('user'), mediumSecurityRateLimiter('user-event'), userEventRoutes);
-app.use('/user-gallery', userAuthMiddleware('user'), mediumSecurityRateLimiter('user-gallery'), userGalleryRoutes);
+app.use('/user-gallery', mediumSecurityRateLimiter('user-gallery'), userGalleryRoutes);
 app.use('/user-social', socialRoutes);
 
 

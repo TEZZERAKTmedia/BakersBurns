@@ -1,174 +1,155 @@
-/* Set the body or the main container to have a fixed background */
-body {
-  margin: 0;
-  padding: 0;
-  height: 100vh;
-  background: url('../assets/Floral1x1metallix.png') no-repeat center center fixed; /* Use your background image */
-  background-size: cover; /* Make sure the background covers the entire area */
-  overflow: hidden; /* Prevent the body itself from scrolling */
-  font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
-  
-}
-
+/***********************************************/
+/* 1. Page Header                              */
+/***********************************************/
 .page-header {
   font-size: 5rem;
   margin-top: 10%;
+  color: var(--text-color); /* Reuse your theme's text color */
 }
 @media (max-width: 768px) {
   .page-header {
     margin-top: 15%;
-    font-size: 3rem;/* 1 column on small screens */
+    font-size: 3rem;
   }
 }
-/* Main content container to scroll over the background */
+
+/***********************************************/
+/* 2. Main Content Container (Scrollable)      */
+/***********************************************/
 .product-manager-container {
-  
   max-width: 100vw;
   margin: 0 auto;
   padding: 20px;
-  height: 100vh; /* Take the full height of the viewport */
-  overflow-y: auto; /* Enable vertical scrolling for the content */
-  background: rgba(255, 255, 255, 0.85); /* Add a slight background opacity to differentiate content */
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2); /* Stronger shadow for a modern effect */
+  height: 100vh;            /* Occupies full viewport height */
+  overflow-y: auto;         /* Enable vertical scrolling */
+  background: var(--bg-overlay); /* Semi-transparent white from your theme (#ffffff8b) */
+  box-shadow: var(--container-shadow); /* e.g. 0 4px 6px rgba(0, 0, 0, 0.1) from your theme */
   border-radius: 10px;
-  color: #333;
+  color: var(--header-color); /* Replaces #333 with a darker text variable, e.g. #333 in light mode */
 }
 
-/* Form layout and buttons */
+/***********************************************/
+/* 3. Add Forms / Add Buttons Section          */
+/***********************************************/
 .add-forms {
-  display: flex;               /* Use flexbox for layout */
-  justify-content: center;     /* Center the buttons horizontally */
-        /* Center the buttons vertically */
-                /* Ensure it takes the full height of the parent, if needed */
-            /* Optional spacing above */
+  display: flex;
+  justify-content: center;
 }
 
 .add-buttons {
-  display: flex;              /* Use flexbox for layout */
-  justify-content: center;    /* Center the buttons horizontally */
-  gap: 20px;                  /* Add spacing between the buttons */
-  align-items: center;        /* Center buttons vertically if needed */
-  flex-wrap: wrap;            /* Ensure buttons wrap on smaller screens */
-  margin-top: 20px;           /* Add some spacing from the top */
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 20px;
 }
 
+/* Reuse the 'blue-button' or 'btn-bg' from your theme for these buttons */
 .add-buttons button {
-  padding: 10px 20px;         /* Add padding for better click area */
-  font-size: 16px;            /* Set font size for readability */
-  border: none;               /* Remove borders for a cleaner look */
-  background-color: #007BFF;  /* Add a background color */
-  color: white;               /* Button text color */
-  border-radius: 5px;         /* Rounded corners */
-  cursor: pointer;            /* Pointer cursor for hover effect */
-  transition: background-color 0.3s ease; /* Smooth hover transition */
+  padding: 12px 20px;
+  background-color: var(--blue-button-bg); /* #007bff */
+  color: var(--button-text); /* black in light mode, white in dark mode, or pick another if you want white */
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
-
 .add-buttons button:hover {
-  background-color: #0056b3;  /* Darker background color on hover */
+  background-color: var(--blue-button-hover-bg); /* #e53e3e in your theme, note this is red */
+  transform: translateY(-2px);
 }
 
+/***********************************************/
+/* 4. Form Sections                            */
+/***********************************************/
 .form-section {
-  border: 5px solid #333; /* Solid border */
-  border-radius: 30px; /* Rounded corners */
-  padding: 20px; /* Add padding for spacing inside */
-  background: linear-gradient(145deg, #ffffff, #d3d3d3); /* Soft gradient background */
-  box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.2), inset 0px -5px 15px rgba(255, 255, 255, 0.4); /* Outer and inner shadows */
-  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth transition on hover */
+  border: 5px solid var(--header-color); /* Replaces #333 with your darker text var */
+  border-radius: 30px;
+  padding: 20px;
+  color:var(--text-color);
+  background: var(--signup-form-section-bg); /* e.g. linear-gradient(145deg, #ffffff, #d3d3d3) */
+  box-shadow: var(--signup-form-section-shadow); 
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
   margin: 10px;
-  
 }
 
-
-/* Animated glow effect */
+/* Animated glow effect (unchanged) */
 @keyframes glow {
   0% {
-    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.2), 0 0 10px rgba(255, 255, 255, 0.3);
+    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.2),
+                0 0 10px rgba(255, 255, 255, 0.3);
   }
   50% {
-    box-shadow: 0px 15px 25px rgba(0, 0, 0, 0.3), 0 0 20px rgba(255, 255, 255, 0.6);
+    box-shadow: 0px 15px 25px rgba(0, 0, 0, 0.3),
+                0 0 20px rgba(255, 255, 255, 0.6);
   }
   100% {
-    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.2), 0 0 10px rgba(255, 255, 255, 0.3);
+    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.2),
+                0 0 10px rgba(255, 255, 255, 0.3);
   }
 }
-
 .form-section.glow {
-  animation: glow 1.5s infinite alternate; /* Pulsating glow effect */
+  animation: glow 1.5s infinite alternate;
 }
 
-/* Input fields styling */
+/* Input fields */
 .form-section input {
   width: 100%;
   padding: 10px;
   margin-bottom: 15px;
-  border: 2px solid #ddd;
+  border: 2px solid var(--form-input-border); /* #ccc in light mode */
   border-radius: 8px;
   font-size: 16px;
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .form-section input:focus {
-  border-color: #007bff; /* Highlight border color on focus */
-  box-shadow: 0 0 8px rgba(0, 123, 255, 0.6); /* Glowing shadow on focus */
-  outline: none; /* Remove default outline */
+  border-color: var(--blue-button-bg); /* #007bff */
+  box-shadow: 0 0 8px rgba(0, 123, 255, 0.6);
+  outline: none;
 }
 
-/* Button styling */
+/* Form section button */
 .form-section button {
   padding: 10px 20px;
   font-size: 18px;
-  color: #fff;
-  background: linear-gradient(145deg, #007bff, #0056b3);
+  color: var(--button-text); /* e.g. black or white from theme */
+  background: var(--blue-button-bg); /* #007bff gradient replaced with single color or you can keep gradient if you want */
   border: none;
   border-radius: 10px;
   box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.2);
   cursor: pointer;
   transition: background 0.3s ease, transform 0.2s ease;
 }
-
 .form-section button:hover {
-  background: linear-gradient(145deg, #0056b3, #007bff);
-  transform: translateY(-2px); /* Slight lift on hover */
+  background: var(--blue-button-hover-bg); /* #e53e3e in your theme (red) */
+  transform: translateY(-2px);
 }
-
 .form-section button:active {
-  transform: translateY(2px); /* Pressed effect */
+  transform: translateY(2px);
 }
 
-.add-buttons button {
-  padding: 12px 20px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.add-buttons button:hover {
-  background-color: #0056b3;
-  transform: translateY(-2px); /* Hover effect */
-}
-
-/* Form fields */
+/***********************************************/
+/* 5. Product & Discount Form Input/Labels     */
+/***********************************************/
 .product-form-section input,
 .discount-form-section input,
 .product-edit-form input,
 .discount-edit-form input {
   width: 100%;
   padding: 12px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--form-input-border);
   border-radius: 5px;
   margin-bottom: 15px;
   font-size: 14px;
   transition: border-color 0.3s ease;
 }
-
 .product-form-section input:focus,
 .discount-form-section input:focus,
 .product-edit-form input:focus,
 .discount-edit-form input:focus {
-  border-color: #007bff;
+  border-color: var(--blue-button-bg);
   outline: none;
 }
 
@@ -179,7 +160,7 @@ body {
 .discount-edit-form label {
   margin-bottom: 5px;
   font-size: 14px;
-  color: #333;
+  color: var(--header-color); /* Replaces #333 with something from your theme */
 }
 
 /* Form section titles */
@@ -188,7 +169,7 @@ body {
   font-size: 20px;
   font-weight: bold;
   margin-bottom: 20px;
-  color: #333;
+  color: var(--header-color);
 }
 
 /* Form action buttons */
@@ -197,41 +178,44 @@ body {
 .product-edit-form button,
 .discount-edit-form button {
   padding: 10px 20px;
-  background-color: #4c4c4c;
-  color: white;
+  background-color: var(--button-bg); /* white or black depending on theme */
+  color: var(--button-text);
   border: none;
   border-radius: 5px;
   cursor: pointer;
   transition: background-color 0.3s ease;
   margin-right: 10px;
 }
-
 .product-form-section button:hover,
 .discount-form-section button:hover,
 .product-edit-form button:hover,
 .discount-edit-form button:hover {
-  background-color: #9a9a9ad1;
+  background-color: var(--button-hover); /* #f0f0f0 in light theme */
 }
 
+/***********************************************/
+/* 6. Special Buttons (Delete, etc.)           */
+/***********************************************/
 .delete-button {
-  background-color: #dc3545;
+  background-color: var(--discount-tag-bg); /* #ff4d4d from theme (red) */
 }
-
 .delete-button:hover {
-  background-color: #c82333;
+  background-color: var(--nav-list-item-bg-hover); /* #ddd or #444 in dark mode, or pick a better red if you want */
 }
 
-/* Image cropping modal */
+/***********************************************/
+/* 7. Image Cropping Modal                     */
+/***********************************************/
 .cropper-modal {
   position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 1000;
-  background-color: white;
+  background-color: var(--product-card-bg); /* #fff from theme */
   padding: 20px;
   border-radius: 10px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--container-shadow);
 }
 
 /* Cropper container */
@@ -244,25 +228,26 @@ body {
 .crop-button {
   margin-top: 15px;
   padding: 10px 15px;
-  background-color: #007bff;
-  color: white;
+  background-color: var(--blue-button-bg);
+  color: var(--button-text);
   border: none;
   border-radius: 5px;
   cursor: pointer;
   transition: background-color 0.3s ease;
 }
-
 .crop-button:hover {
-  background-color: #0056b3;
+  background-color: var(--blue-button-hover-bg);
 }
 
-/* Discount banner styling */
+/***********************************************/
+/* 8. Discount Banner, Price, Savings          */
+/***********************************************/
 .discount-banner {
   position: absolute;
   top: 10px;
   left: -30px;
-  background-color: #ff0000;
-  color: white;
+  background-color: var(--discount-tag-bg); /* #ff4d4d */
+  color: var(--inverted-button-text);        /* e.g. #f9f9f9 or white */
   font-weight: bold;
   transform: rotate(-45deg);
   width: 120px;
@@ -270,47 +255,45 @@ body {
   padding: 5px 0;
   font-size: 12px;
   z-index: 1;
-  
 }
 
 /* Original and discounted price styling */
 .price {
   font-size: 16px;
   margin: 5px 0;
-  
+  color: var(--header-color);
 }
 .price.original-price {
-  color: #999;
+  color: var(--price-original-color); /* #ccc in your theme */
   text-decoration: line-through;
   font-size: 14px;
 }
 .price.discounted-price {
-  color: #007bff;
+  color: var(--blue-button-bg); /* #007bff for highlight */
   font-size: 18px;
   font-weight: bold;
 }
-
-/* Savings text */
 .price-difference {
   font-size: 14px;
-  color: #27ae60;
+  color: var(--about-text); /* e.g. #333 or #ddd in dark mode */
   font-weight: bold;
 }
 
-/* Buttons inside product cards */
+/***********************************************/
+/* 9. Product Card Buttons                     */
+/***********************************************/
 .product-card button {
   padding: 10px;
-  background-color: #007bff;
-  color: white;
+  background-color: var(--blue-button-bg);
+  color: var(--button-text);
   border: none;
   border-radius: 5px;
   cursor: pointer;
   transition: all 0.3s ease;
   margin-top: 10px;
 }
-
 .product-card button:hover {
-  background-color: #0056b3;
+  background-color: var(--blue-button-hover-bg);
   transform: translateY(-2px);
 }
 
@@ -319,10 +302,12 @@ body {
   margin-top: 10px;
 }
 
-/* General button styling for action buttons */
+/***********************************************/
+/* 10. Action Buttons (Edit/Delete)            */
+/***********************************************/
 .action-button {
-  background-color: #007bff;
-  color: white;
+  background-color: var(--blue-button-bg);
+  color: var(--button-text);
   border: none;
   padding: 10px 20px;
   border-radius: 5px;
@@ -330,59 +315,58 @@ body {
   cursor: pointer;
   transition: all 0.3s ease;
 }
-
 .action-button:hover {
-  background-color: #0056b3;
+  background-color: var(--blue-button-hover-bg);
   transform: translateY(-2px);
 }
-
-/* Edit and delete button styling */
 .action-button.edit {
-  background-color: #28a745;
+  background-color: var(--signup-button-bg); /* #28a745 => greenish */
 }
 .action-button.edit:hover {
-  background-color: #218838;
+  background-color: var(--btn-hover); /* #ffad65 => an orange, not exact match but we reuse existing */
 }
 .action-button.delete {
-  background-color: #dc3545;
+  background-color: var(--discount-tag-bg); /* #ff4d4d => red */
 }
 .action-button.delete:hover {
-  background-color: #c82333;
+  background-color: var(--nav-list-item-bg-hover); /* #ddd in light or #444 in dark */
 }
 
-/* Responsive Design */
-/* Individual product card */
+/***********************************************/
+/* 11. Responsive Product Card Layout          */
+/***********************************************/
 .product-card {
-  width: calc(33.33% - 20px); /* Default: 3 columns */
+  width: calc(33.33% - 20px);
   margin: 10px;
   padding: 15px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--form-input-border);
   border-radius: 10px;
-  background-color: white;
-  display: inline-block; /* Ensure the cards behave like block elements */
-  position: relative; /* Ensure absolute positioned discount banner is relative to the product card */
-  vertical-align: top; /* Align cards to the top */
+  background-color: var(--product-card-bg); /* #fff */
+  display: inline-block;
+  position: relative;
+  vertical-align: top;
   font-size: large;
   overflow: hidden;
-  font-family:'Courier New';
+  font-family: 'Courier New'; /* or var(--font) if you like */
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
 }
 
-/* Responsive adjustments for larger screens */
+/* 2 columns at max-width 1200px */
 @media (max-width: 1200px) {
   .product-card {
-    width: calc(50% - 20px); /* 2 columns on medium screens */
+    width: calc(50% - 20px);
   }
 }
-
+/* 1 column on smaller screens */
 @media (max-width: 768px) {
   .product-card {
-    width: calc(100% - 20px); /* 1 column on small screens */
+    width: calc(100% - 20px);
   }
 }
 
-
-/* Product image styling */
+/***********************************************/
+/* 12. Product Image Styling                   */
+/***********************************************/
 .product-image img {
   max-width: 100px;
   max-height: 100px;
@@ -392,27 +376,23 @@ body {
 }
 
 .price {
-  
   margin: 5px 0;
-  color: #333;
+  color: var(--header-color);
   font-size: 20px;
 }
 .price.original-price {
-  color: #999;
+  color: var(--price-original-color);
   text-decoration: line-through;
   font-size: 20px;
-
 }
 .price.discounted-price {
-  color: #007bff;
+  color: var(--blue-button-bg);
   font-size: 20px;
   font-weight: bold;
 }
-
-/* Savings text */
 .price-difference {
   font-size: 12px;
-  color: #333;
+  color: var(--header-color);
 }
 
 .product-title {

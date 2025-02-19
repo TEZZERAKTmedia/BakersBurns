@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import '../Componentcss/navbar.css';
+import ThemeToggle from '../../registerFrontEnd/Components/themetoggle/Dark-Light';
 
 const AdminNavbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -90,8 +91,15 @@ const AdminNavbar = () => {
             >
               {title}
             </Link>
+            
           </li>
+          
         ))}
+        {menuOpen && (
+          <ThemeToggle />
+        )}
+
+
         <li className="nav-item">
           <a
             href={import.meta.env.VITE_USER}
@@ -103,6 +111,7 @@ const AdminNavbar = () => {
           </a>
         </li>
       </ul>
+      
     </motion.nav>
   );
 };

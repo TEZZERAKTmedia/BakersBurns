@@ -81,6 +81,7 @@ body {
 
 .hero-btn:hover, .about-btn:hover, .upcoming-event-btn:hover, .contact-btn:hover {
   background-color: var(--btn-hover);
+  color: var(--btn-hover-text);
 }
 
 /* About Section */

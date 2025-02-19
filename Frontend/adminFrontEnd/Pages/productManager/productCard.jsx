@@ -1,21 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import EditProductForm from './editProduct';
 import DiscountByProductForm from './discountByProduct';
-import { useProductContext } from './ProductsContext'; // Import context
-import './product_card.css';
+import { useProductContext } from './ProductsContext';
 import { toast } from 'react-toastify';
 import DiscountIcon from '../../assets/Icons/discount.png';
 import TrashIcon from '../../assets/Icons/trash.png';
 import { Link } from 'react-router-dom';
 
-const ProductCard = ({ product, onDeleteProduct }) => { 
+import './product_card.css'; // Updated CSS filename with prefix classes
+
+const ProductCard = ({ product, onDeleteProduct }) => {
   const [isEditingProduct, setIsEditingProduct] = useState(false);
   const [isEditingDiscount, setIsEditingDiscount] = useState(false);
   const [media, setMedia] = useState([]);
   const [isLoadingMedia, setIsLoadingMedia] = useState(false);
   const [productDetails, setProductDetails] = useState(null);
   const [isLoadingDetails, setIsLoadingDetails] = useState(false);
-  const [showConfirmModal, setShowConfirmModal] = useState(false);  
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   const { fetchProducts, fetchProductDetails, fetchProductMedia } = useProductContext();
 
@@ -45,36 +46,36 @@ const ProductCard = ({ product, onDeleteProduct }) => {
         const details = await fetchProductDetails(product.id);
         setProductDetails(details);
       } catch (error) {
-        console.error("Error fetching product details:", error);
+        console.error('Error fetching product details:', error);
       } finally {
         setIsLoadingDetails(false);
       }
     };
-
     fetchDetails();
   }, [product.id, fetchProductDetails]);
 
   const handleDelete = async () => {
     try {
-      await onDeleteProduct(product.id); // Pass product id to delete
-      toast.success('Product deleted successfully!');
-    } catch (error) {
-      console.error('Error deleting product:', error);
-      toast.error('Failed to delete product. This product might have been purchased or is in use.');
-    }
-  };
-  const handleDeleteConfirm = async () => {
-    try {
       await onDeleteProduct(product.id);
       toast.success('Product deleted successfully!');
-      setShowConfirmModal(false); // Close modal after deleting
     } catch (error) {
       console.error('Error deleting product:', error);
       toast.error('Failed to delete product. This product might have been purchased or is in use.');
     }
   };
 
-  // Function to format date
+  const handleDeleteConfirm = async () => {
+    try {
+      await onDeleteProduct(product.id);
+      toast.success('Product deleted successfully!');
+      setShowConfirmModal(false);
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      toast.error('Failed to delete product. This product might have been purchased or is in use.');
+    }
+  };
+
+  // Format date for discount details
   const formatDate = (date) => {
     const d = new Date(date);
     const day = d.getDate().toString().padStart(2, '0');
@@ -84,7 +85,7 @@ const ProductCard = ({ product, onDeleteProduct }) => {
   };
 
   return (
-    <div className="form-section" style={{marginBottom:'20%'}}>
+    <div className="pc-container">
       {isEditingProduct ? (
         <EditProductForm
           productId={product.id}
@@ -92,156 +93,123 @@ const ProductCard = ({ product, onDeleteProduct }) => {
           onClose={() => setIsEditingProduct(false)}
           onCancel={handleCancelEdit}
         />
-      ) :
-      isEditingDiscount ? (
+      ) : isEditingDiscount ? (
         <DiscountByProductForm
-          product={product} // Pass the product to the form
+          product={product}
           onClose={() => setIsEditingDiscount(false)}
           onSuccess={() => {
             setIsEditingDiscount(false);
-            fetchProducts(); // Refresh the products list after discount is added
+            fetchProducts(); // Refresh product list
           }}
         />
       ) : (
         <>
-          <div className="product-info" style={{paddingBottom: '10%'}}>
+          <div className="pc-product-info">
             {product.thumbnail ? (
               <img
                 src={`${import.meta.env.VITE_BACKEND}/uploads/${product.thumbnail}`}
                 alt={`${product.name} Thumbnail`}
-                className="thumbnail-image"
+                className="pc-thumbnail"
               />
             ) : (
-              <p>No thumbnail available</p>
+              <p className="pc-no-thumbnail">No thumbnail available</p>
             )}
-            <h3>{product.name}</h3>
-            <p style={{ color: 'black' }}>${product.price}</p>
-         
+
+            <h3 className="pc-product-name">{product.name}</h3>
+            <p className="pc-price">${product.price}</p>
+
+            {/* Add Discount Button (only if product is not discounted) */}
             {!product.isDiscounted && (
-              <div style={{width: '100%', marginLeft:' 0%', marginTop:'10px'}}> 
-              <Link to='/discount'>
-            <button
-              className='add-discount-by-product'
-              
-             
-            >
-              <img src={DiscountIcon}  style={{height:'50px', width:'50px'}}/>
-              Add Discount
-            </button>
-            </Link>
-            </div>
-          )}
-          
+              <div className="pc-add-discount-wrapper">
+                <Link to="/discount">
+                  <button className="pc-add-discount-button">
+                    <img src={DiscountIcon} className="pc-discount-icon" alt="Discount Icon" />
+                    Add Discount
+                  </button>
+                </Link>
+              </div>
+            )}
 
-
-            {/* Check if product is discounted and show discount details */}
+            {/* If product is discounted, show discount info */}
             {product.isDiscounted && (
-              <div style={{ position: 'relative', display: 'inline-block' }} className="discount-overlay">
-                <div className='form-section'>
-                {/* Image */}
-                <div style={{ position: 'relative' }}>
-                  <img src={DiscountIcon} alt="Discount Icon" style={{ width: '100px', height: '100px' }} />
-
-                  {/* Text over the image */}
-                  <div
-                    style={{
-                      position: 'absolute',
-                      top: '50%', // Center vertically
-                      left: '50%', // Center horizontally
-                      transform: 'translate(-50%, -50%)', // Align center
-                      zIndex: 2, // Ensure text appears above the image
-                      textAlign: 'center',
-                      color: 'white', // White text for contrast on the image
-                      fontSize: '2rem', // Font size for discount text
-                      fontWeight: 'bold', // Bold text
-                    }}
-                  >
-                    <p>
+              <div className="pc-discount-overlay">
+                <div className="pc-discount-details">
+                  <div className="pc-discount-image-wrapper">
+                    <img src={DiscountIcon} alt="Discount Icon" className="pc-discount-image" />
+                    <div className="pc-discount-overlay-text">
                       {product.discountType === 'percentage'
                         ? `${parseInt(product.discountAmount)}%`
                         : `$${product.discountAmount}`}
+                    </div>
+                  </div>
+
+                  {/* Start / End Dates */}
+                  <div className="pc-discount-dates">
+                    <p>
+                      <strong>Start Date:</strong>{' '}
+                      {product.discountStartDate ? formatDate(product.discountStartDate) : 'N/A'}
+                    </p>
+                    <p>
+                      <strong>End Date:</strong>{' '}
+                      {product.discountEndDate ? formatDate(product.discountEndDate) : 'N/A'}
                     </p>
                   </div>
-                </div>
-                
 
-                {/* Discount Start and End Dates */}
-                <div >
-                <div
-                  className="form-section"
-                 
-                >
-                  <p style={{color:'black'}}>
-                    <strong>Start Date:</strong> {product.discountStartDate ? formatDate(product.discountStartDate) : 'N/A'}
-                  </p>
-                  <p style={{color:'black'}}>
-                    <strong>End Date:</strong> {product.discountEndDate ? formatDate(product.discountEndDate) : 'N/A'}
-                  </p>
-                </div>
-                </div>
-                
+                  {/* Discounted Price */}
+                  <div className="pc-discount-price">
+                    <h3>Discounted Price</h3>
+                    <p>{product.discountPrice ? `$${product.discountPrice}` : 'No discounted price available'}</p>
+                  </div>
 
-                {/* Discounted price */}
-                <div className="form-section">
-                  <h3>Discounted Price</h3>
-                  <p style={{ color: 'black' }}>
-                    {product.discountPrice ? `$${product.discountPrice}` : 'No discounted price available'}
-                  </p>
+                  {/* Edit Discount Button */}
+                  {!isEditingDiscount && (
+                    <button
+                      className="pc-edit-discount-button"
+                      onClick={() => setIsEditingDiscount(true)}
+                    >
+                      Edit Discount
+                    </button>
+                  )}
                 </div>
-
-                {/* Conditional logic for showing the Edit Discount form */}
-                {isEditingDiscount ? (
-                  <DiscountByProductForm
-                    product={product} // Pass the entire product object to the form
-                    onClose={() => setIsEditingDiscount(false)}
-                    onSuccess={() => setIsEditingDiscount(false)}
-                  />
-                ) : (
-                  <button
-                    className="product-card-buttons"
-                    onClick={() => setIsEditingDiscount(true)}
-                  >
-                    Edit Discount
-                  </button>
-                )}
-              </div>
               </div>
             )}
           </div>
 
+          {/* Product Details */}
           {isLoadingDetails ? (
-            <p>Loading product details...</p>
+            <p className="pc-loading">Loading product details...</p>
           ) : productDetails ? (
-            <div className="form-section">
-              <p style={{ color: 'black' }}>
+            <div className="pc-product-details">
+              <p>
                 <strong>Description:</strong> {productDetails.description}
               </p>
-              <p style={{ color: 'black' }}>
+              <p>
                 <strong>Type:</strong> {productDetails.type}
               </p>
-              <p style={{ color: 'black' }}>
+              <p>
                 <strong>Quantity:</strong> {productDetails.quantity}
               </p>
             </div>
           ) : (
-            <p>No additional details available</p>
+            <p className="pc-no-details">No additional details available</p>
           )}
 
-          <div>
+          {/* Media */}
+          <div className="pc-media-container">
             {isLoadingMedia ? (
-              <p>Loading media...</p>
+              <p className="pc-loading">Loading media...</p>
             ) : media.length > 0 ? (
               media.map((item, index) => (
-                <div key={item.id} className="image-uploader-grid-item">
-                  {item.type === "image" ? (
+                <div key={item.id} className="pc-media-item">
+                  {item.type === 'image' ? (
                     <img
                       src={`${import.meta.env.VITE_BACKEND}/uploads/${item.url}`}
                       alt={`Media ${index + 1}`}
-                      className="media-preview"
+                      className="pc-media-preview"
                     />
                   ) : (
                     <video
-                      className="media-preview"
+                      className="pc-media-preview"
                       src={`${import.meta.env.VITE_BACKEND}/uploads/${item.url}`}
                       loop
                       muted
@@ -252,44 +220,44 @@ const ProductCard = ({ product, onDeleteProduct }) => {
                 </div>
               ))
             ) : (
-              <p>No media available</p>
+              <p className="pc-no-media">No media available</p>
             )}
           </div>
-          
 
-          <button
-            className="product-card-buttons"
-            onClick={() => setIsEditingProduct(true)}
-          >
+          {/* Edit Product button */}
+          <button className="pc-edit-product-button" onClick={() => setIsEditingProduct(true)}>
             Edit Product
           </button>
         </>
       )}
 
-        <div>
+      {/* Delete Product (trash icon) */}
+      <div className="pc-trash-wrapper">
         <img
-        onClick={setShowConfirmModal}
-        src={TrashIcon}
-        style={{width: '50px', height: '50px'}}
+          src={TrashIcon}
+          alt="Trash Icon"
+          className="pc-trash-icon"
+          onClick={() => setShowConfirmModal(true)}
+        />
+      </div>
 
-        
-         />
-        </div>
-     
-       
-          {showConfirmModal && (
-        <div className="modal-overlay">
-          <div className="form-section">
+      {/* Confirm Modal */}
+      {showConfirmModal && (
+        <div className="pc-modal-overlay">
+          <div className="pc-modal-content">
             <h3>Are you sure?</h3>
             <p>Deleting this product cannot be undone.</p>
-            <div className="modal-buttons">
-              <button onClick={handleDeleteConfirm} className="confirm-button">Yes, Delete</button>
-              <button onClick={() => setShowConfirmModal(false)} className="cancel-button">Cancel</button>
+            <div className="pc-modal-buttons">
+              <button onClick={handleDeleteConfirm} className="pc-confirm-button">
+                Yes, Delete
+              </button>
+              <button onClick={() => setShowConfirmModal(false)} className="pc-cancel-button">
+                Cancel
+              </button>
             </div>
           </div>
         </div>
       )}
-        
     </div>
   );
 };

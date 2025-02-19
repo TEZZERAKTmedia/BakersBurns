@@ -4,7 +4,7 @@
   border-radius: 8px; /* Rounded corners */
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.06); /* Soft shadow */
   padding: 16px; /* Add padding inside the box */
-  background-color: #fff; /* White background */
+  background-color: var(--bg-overlay); /* White background */
   transition: transform 0.2s, box-shadow 0.2s; 
 }
   
@@ -246,4 +246,266 @@
   border: none;
   border-radius: 5px;
   cursor: pointer;
+}
+
+/* Variables: Adjust these to your preference */
+:root {
+  --pc-margin-bottom: 20%;
+  --pc-padding-bottom: 10%;
+  --pc-thumbnail-width: 100px;
+  --pc-thumbnail-height: 100px;
+  --pc-discount-icon-size: 50px;
+  --pc-trash-icon-size: 50px;
+  --pc-discount-image-size: 100px;
+  --pc-text-color: #000;
+  --pc-font-size-default: 1rem;
+  --pc-modal-overlay-bg: rgba(0, 0, 0, 0.5);
+  --pc-card-background: #fff;
+  --pc-border-radius: 8px;
+  --pc-box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  --pc-spacing-sm: 0.5rem;
+  --pc-spacing-md: 1rem;
+  --pc-spacing-lg: 2rem;
+  --pc-primary-color: #007BFF;
+  --pc-danger-color: #dc3545;
+  --pc-success-color: #28a745;
+}
+
+/* Main Container */
+.pc-container {
+  margin-bottom: var(--pc-margin-bottom);
+  background-color: var(--bg-overlay);
+  border-radius: var(--pc-border-radius);
+  box-shadow: var(--pc-box-shadow);
+  padding: var(--pc-spacing-md);
+  color: var(--text-color);
+  font-size: var(--pc-font-size-default);
+}
+
+/* Product Info Section */
+.pc-product-info {
+  padding-bottom: var(--pc-padding-bottom);
+  color: var(--text-color);
+}
+
+.pc-thumbnail {
+  width: var(--pc-thumbnail-width);
+  height: var(--pc-thumbnail-height);
+  object-fit: cover;
+  border-radius: var(--pc-border-radius);
+  color: var(--text-color);
+}
+
+.pc-no-thumbnail {
+  color: var(--text-color);
+  margin-bottom: var(--pc-spacing-sm);
+}
+
+.pc-product-name {
+  margin: var(--pc-spacing-sm) 0;
+  color: var(--text-color);
+}
+
+.pc-price {
+  
+  margin-bottom: var(--pc-spacing-sm);
+  color: var(--text-color);
+}
+
+/* Discount Button */
+.pc-add-discount-wrapper {
+  width: 100%;
+  margin-left: 0;
+  margin-top: var(--pc-spacing-sm);
+}
+
+.pc-add-discount-button {
+  background-color: var(--pc-primary-color);
+  color: #fff;
+  border: none;
+  padding: var(--pc-spacing-sm) var(--pc-spacing-md);
+  border-radius: var(--pc-border-radius);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: var(--pc-spacing-sm);
+}
+
+.pc-discount-icon {
+  width: var(--pc-discount-icon-size);
+  height: var(--pc-discount-icon-size);
+}
+
+/* Discount Overlay */
+.pc-discount-overlay {
+  position: relative;
+  display: inline-block;
+}
+
+/* The discount info container inside the overlay */
+.pc-discount-details {
+  background-color: #f9f9f9;
+  padding: var(--pc-spacing-sm);
+  border-radius: var(--pc-border-radius);
+  color: var(--text-color);
+}
+
+/* Discount Image & Overlay Text */
+.pc-discount-image-wrapper {
+  position: relative;
+}
+
+.pc-discount-image {
+  width: var(--pc-discount-image-size);
+  height: var(--pc-discount-image-size);
+}
+
+.pc-discount-overlay-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  text-align: center;
+  color: #fff;
+  font-size: 2rem;
+  font-weight: bold;
+  
+}
+
+/* Discount Dates & Price */
+.pc-discount-dates p,
+.pc-discount-price p {
+  color: var(--pc-text-color);
+  margin: 0.25rem 0;
+}
+
+.pc-discount-price h3 {
+  margin-top: var(--pc-spacing-sm);
+  margin-bottom: 0.25rem;
+  color: var(--pc-text-color);
+}
+
+/* Edit Discount Button */
+.pc-edit-discount-button {
+  margin-top: var(--pc-spacing-sm);
+  background-color: var(--pc-primary-color);
+  color: #fff;
+  border: none;
+  padding: var(--pc-spacing-sm) var(--pc-spacing-md);
+  border-radius: var(--pc-border-radius);
+  cursor: pointer;
+}
+
+/* Loading and No Details */
+.pc-loading,
+.pc-no-details,
+.pc-no-media {
+  color: var(--pc-text-color);
+  margin: var(--pc-spacing-sm) 0;
+}
+
+/* Product Details */
+.pc-product-details {
+  margin-bottom: var(--pc-spacing-md);
+  color: var(--text-color);
+}
+
+.pc-product-details p {
+  margin: 0.25rem 0;
+  color: var(--text-color);
+}
+
+/* Media Section */
+.pc-media-container {
+  margin-bottom: var(--pc-spacing-md);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--pc-spacing-sm);
+}
+
+.pc-media-item {
+  width: 100px;
+  height: 100px;
+  position: relative;
+}
+
+.pc-media-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Edit Product Button */
+.pc-edit-product-button {
+  background-color: var(--pc-primary-color);
+  color: #fff;
+  border: none;
+  padding: var(--pc-spacing-sm) var(--pc-spacing-md);
+  border-radius: var(--pc-border-radius);
+  cursor: pointer;
+}
+
+/* Trash Icon */
+.pc-trash-wrapper {
+  margin-top: var(--pc-spacing-md);
+  display: flex;
+  justify-content: flex-end;
+}
+
+.pc-trash-icon {
+  width: var(--pc-trash-icon-size);
+  height: var(--pc-trash-icon-size);
+  cursor: pointer;
+}
+
+/* Modal */
+.pc-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--pc-modal-overlay-bg);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.pc-modal-content {
+  background-color: var(--pc-card-background);
+  padding: var(--pc-spacing-md);
+  border-radius: var(--pc-border-radius);
+  text-align: center;
+  max-width: 400px;
+  width: 90%;
+}
+
+.pc-modal-content h3 {
+  margin-bottom: var(--pc-spacing-sm);
+}
+
+.pc-modal-buttons {
+  display: flex;
+  justify-content: space-evenly;
+  margin-top: var(--pc-spacing-md);
+}
+
+.pc-confirm-button,
+.pc-cancel-button {
+  border: none;
+  padding: var(--pc-spacing-sm) var(--pc-spacing-md);
+  border-radius: var(--pc-border-radius);
+  cursor: pointer;
+}
+
+.pc-confirm-button {
+  background-color: var(--pc-danger-color);
+  color: #fff;
+}
+
+.pc-cancel-button {
+  background-color: #ccc;
+  color: #333;
 }

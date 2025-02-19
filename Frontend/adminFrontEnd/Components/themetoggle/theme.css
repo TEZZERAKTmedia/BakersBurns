@@ -1,0 +1,48 @@
+/* Theme Toggle Button */
+.theme-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    margin-top: 20px;
+  }
+  
+  /* Labels (Light/Dark) */
+  .theme-label {
+    font-size: 1rem;
+    color: var(--text-color);
+  }
+  
+  /* Toggle Switch */
+  .toggle-switch {
+    
+    width: 50px;
+    height: 24px;
+    background-color: var(--toggle-bg, #ccc);
+    border-radius: 50px;
+    position: relative;
+    transition: background-color 0.3s ease;
+  }
+  
+  /* Toggle Slider */
+  .toggle-slider {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 20px;
+    height: 20px;
+    background-color: var(--toggle-slider, #fff);
+    border-radius: 50%;
+    transition: transform 0.3s ease;
+  }
+  
+  /* When Active (Dark Mode) */
+  .toggle-switch.active {
+    background-color: var(--toggle-bg-active, #4a4a4a);
+  }
+  
+  .toggle-switch.active .toggle-slider {
+    transform: translateX(26px);
+    background-color: var(--toggle-slider-active, #f9f9f9);
+  }
+  
