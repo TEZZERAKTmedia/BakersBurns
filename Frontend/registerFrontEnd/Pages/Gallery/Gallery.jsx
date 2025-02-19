@@ -39,7 +39,7 @@ const Gallery = () => {
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 1 }}
           >
-            Gallery
+            
           </motion.h1>
             <div className="gallery-grid">
                 {gallery.map(item => (
