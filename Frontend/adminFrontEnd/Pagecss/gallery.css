@@ -1,88 +1,113 @@
 .gallery-container {
-  height: 100vh;
-  max-height: 100vh;
+  /* Full page height with scrolling */
   width: 100vw;
-  background-color: var(--body-overlay);
-  margin: 0 auto;
-  /* 20px padding isn't defined as a variable; keeping it as-is */
-  padding: 20px;
+  height: 100vh;
   overflow-y: auto;
-  
+  background-color: var(--body-overlay);
+  padding: 20px;
+  margin: 0;
 }
 
-/* Uses the “blue button background” var, fallback to #007bff */
+/* Button to add new images */
 .add-image-btn {
-  display: block;
-  margin: 50px auto;
-  padding: 10px 20px;
-  background-color: var(--btn-bg);
-  color: var(--inverted-button-text);
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: var(--btn-bg, #007bff);
+  color: var(--inverted-button-text, #fff);
   border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 16px;
-}
-
-/* Basic grid; no direct variable equivalents used here */
-.gallery-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  grid-gap: 20px;
-  margin-top: 20px;
-}
-
-/* Use “product-card-bg” var for background and “container-shadow” for shadow */
-.gallery-card {
-  background-color: var(--product-card-bg, #ffffff);
-  border-radius: 10px;
-  box-shadow: var(--container-shadow, 0 4px 6px rgba(0, 0, 0, 0.1));
-  padding: 15px;
-  min-height: 500px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-.gallery-card img {
-  max-width: 150px;
-  max-height: 150px;
-  border-radius: 10px;
-}
-
-/* Use “header-color” var for the h3 text */
-.gallery-card h3 {
-  margin-top: 10px;
-  font-size: 1.2rem;
-  color: var(--header-color, #333);
-}
-
-/* Use “body-text” var for paragraph text */
-.gallery-card p {
-  font-size: 1rem;
-  color: var(--body-text, #666);
-}
-
-/* Action area styling unchanged except using a pointer cursor */
-.gallery-card .actions {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 10px;
-}
-
-.gallery-card .actions button,
-.gallery-card .actions .icon {
-  cursor: pointer;
-}
-
-.gallery-card .actions .icon {
+  font-size: 1.5rem;
   display: flex;
   align-items: center;
-  /* Re-using header-color as a fallback for icon text */
-  color: var(--header-color, #333);
-  font-size: 1.2rem;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 1000;
 }
 
-/* Re-use “body-overlay” for dim background (fallback: rgba(0, 0, 0, 0.5)) */
+
+/* 
+  A responsive grid for Instagram-like squares.
+  We use minmax(100px, 1fr) so each cell is at least 100px wide,
+  but it flexes up to fill the row.
+*/
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  grid-gap: 8px;
+  margin-top: 20%;
+}
+@keyframes shake {
+  0% { transform: rotate(0deg); }
+  25% { transform: rotate(-3deg); }
+  50% { transform: rotate(3deg); }
+  75% { transform: rotate(-3deg); }
+  100% { transform: rotate(0deg); }
+}
+/* Each item container for the image */
+.gallery-item {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.shake-container.shake {
+  animation: shake 0.7s infinite;
+}
+
+/* Shake container applies the shake animation */
+.shake-container {
+  display: block;
+  /* Other styling for the image container, if needed */
+}
+
+.gallery-item:hover {
+  border-color: var(--btn-bg, #007bff);
+}
+
+/* The image that fills the item. 
+   Use object-fit: cover to maintain aspect ratio,
+   making the tile look like a square (or near-square).
+*/
+.gallery-image {
+  width: 100%;
+  aspect-ratio: 1 / 1; /* Ensures a square ratio (if supported) */
+  object-fit: cover;   /* Crop the image to fill the container */
+  display: block;
+}
+
+/* The red delete icon (hidden by default; shown on long press) */
+.delete-icon {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: red;
+  color: white;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  /* Ensure the delete icon doesn't inherit the transform from shake */
+  transform: none;
+  z-index: 10; /* Make sure it stays on top */
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+/* When in delete mode, show the delete icon */
+.delete-mode .delete-icon {
+  opacity: 1;
+}
+
+
+/* Modal Overlay (dims background) */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -91,39 +116,53 @@
   height: 100%;
   background-color: var(--body-overlay, rgba(0, 0, 0, 0.5));
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
+  z-index: 9999;
 }
 
-/* Use “container-bg” var for modal background (fallback: #fff) */
+/* Modal Content */
 .modal-content {
   background-color: var(--container-bg, #ffffff);
   padding: 30px;
   border-radius: 10px;
-  max-width: 500px;
-  width: 100%;
-  position: relative;
+  max-width: 400px;
+  width: 90%;
   text-align: center;
-  /* If you want the same shadow as .gallery-card, you can use container-shadow here too: */
-  /* box-shadow: var(--container-shadow, 0 4px 6px rgba(0, 0, 0, 0.1)); */
+  position: relative;
 }
 
-/*
-  Re-using the “price-color” (red) for the close modal button, 
-  fallback to #dc3545. Also re-using “button-text” for text color.
-*/
-.close-modal-btn {
-  margin-top: 10px;
-  padding: 10px 20px;
-  background-color: var(--price-color, #dc3545);
-  color: var(--button-text, #ffffff);
+/* Larger image in the modal */
+.modal-img {
+  max-width: 100%;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+/* Confirmation area for delete */
+.confirmation-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+/* Close modal button */
+.close-modal-btn,
+.confirm-delete-btn,
+.cancel-delete-btn {
+  padding: 8px 16px;
+  border-radius: 5px;
   border: none;
-  border-radius: 4px;
   cursor: pointer;
 }
 
-/* No direct variable usage needed for loading class */
-.loading {
-  text-align: center;
-  font-size: 18px;
+/* Style the "Confirm" (danger) and "Cancel" buttons differently */
+.confirm-delete-btn {
+  background-color: var(--price-color, #dc3545);
+  color: #fff;
+}
+.cancel-delete-btn {
+  background-color: #666;
+  color: #fff;
 }

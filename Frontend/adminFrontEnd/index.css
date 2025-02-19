@@ -1,3 +1,22 @@
+/* Minimal Reset */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box; 
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden; /* prevents horizontal scroll if any element overflows */
+}
+
+
 @font-face {
   font-family: 'Dancing Script';
   src: url('./assets/CarnivaleeFreakshow-DLrm.ttf') format('truetype');
@@ -204,6 +223,7 @@ body {
   margin: 0;
   padding: 0;
   height: 100vh;
+  width: 100vw;
 
   /* The color must be translucent & we also specify blend-mode: */
   background:
