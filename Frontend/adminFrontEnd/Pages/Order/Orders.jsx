@@ -7,6 +7,8 @@ import TrackingNumber from './tracking';
 import OrderDetailsModal from './OrderDetailsModal';
 import OrderSummary from './orderSummary';
 
+import './order_management.css'; // <--- Import the new CSS file
+
 const OrderManagement = () => {
   const [orders, setOrders] = useState([]);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -19,20 +21,19 @@ const OrderManagement = () => {
     try {
       const response = await adminApi.get('/orders/get');
       const fetchedOrders = response.data.orders;
-  
-      // Sort orders: 'processing' status comes first
+
+      // Sort orders: 'processing' status first
       const sortedOrders = fetchedOrders.sort((a, b) => {
         if (a.status === 'processing' && b.status !== 'processing') return -1;
         if (a.status !== 'processing' && b.status === 'processing') return 1;
-        return 0; // Preserve relative order for other statuses
+        return 0;
       });
-  
+
       setOrders(sortedOrders);
     } catch (error) {
       console.error('Error fetching orders:', error);
     }
   };
-  
 
   useEffect(() => {
     fetchOrders();
@@ -64,29 +65,41 @@ const OrderManagement = () => {
   };
 
   return (
-    <div style={styles.container}>
-      <h1 style={{marginTop:'100px'}}></h1>
-      <button onClick={() => setDialogOpen(true)} style={styles.addButton}>
+    <div className="om-container">
+      {/* Title or heading */}
+      <h1 className="om-title"></h1>
+
+      {/* Add Order Button */}
+      <button onClick={() => setDialogOpen(true)} className="om-add-button">
         Add Order
       </button>
 
-      {dialogOpen && <AddOrderForm onClose={() => setDialogOpen(false)} onOrderCreated={fetchOrders} />}
-
-      {isOrderDetailsOpen && selectedOrderId && (
-        <OrderDetailsModal orderId={selectedOrderId} onClose={() => setIsOrderDetailsOpen(false)} />
+      {/* Add Order Modal */}
+      {dialogOpen && (
+        <AddOrderForm onClose={() => setDialogOpen(false)} onOrderCreated={fetchOrders} />
       )}
 
-      <div style={styles.ordersContainer}>
+      {/* Order Details Modal */}
+      {isOrderDetailsOpen && selectedOrderId && (
+        <OrderDetailsModal
+          orderId={selectedOrderId}
+          onClose={() => setIsOrderDetailsOpen(false)}
+        />
+      )}
+
+      <div className="om-orders-container">
         {orders.map((order) => (
-          <div key={order.id} style={styles.orderCard}>
+          <div key={order.id} className="om-order-card">
+            {/* Make status banner clickable for details */}
             <div
+              className="om-clickable"
               onClick={() => {
-                handleViewDetails(order.id); // Open details when clicked
+                handleViewDetails(order.id);
               }}
-              style={{ cursor: 'pointer' }} // Make it clear that this is clickable
             >
               <StatusBanner status={order.status} />
             </div>
+
             {editingOrderId === order.id ? (
               <EditOrderForm
                 editingOrder={editingOrder}
@@ -97,41 +110,45 @@ const OrderManagement = () => {
               />
             ) : (
               <div>
-                 <OrderSummary orderId={order.id} />
-                <div style={styles.orderSection}>
+                <OrderSummary orderId={order.id} />
+
+                <div className="om-order-section">
                   <strong>Order ID:</strong> {order.id}
                 </div>
-                <div style={styles.orderSection}>
+
+                <div className="om-order-section">
                   <strong>Status:</strong> {order.status}
                 </div>
-                <div style={styles.orderSection} className='form-section'>
+
+                <div className="om-order-section form-section">
                   <TrackingNumber
                     orderId={order.id}
                     initialTrackingNumber={order.trackingNumber}
                     initialCarrier={order.carrier}
                     onTrackingUpdated={(newTrackingNumber, newCarrier) => {
-                      // Update the state of orders locally (if needed)
                       setOrders((prevOrders) =>
                         prevOrders.map((o) =>
                           o.id === order.id
-                            ? { ...o, trackingNumber: newTrackingNumber, carrier: newCarrier }
+                            ? {
+                                ...o,
+                                trackingNumber: newTrackingNumber,
+                                carrier: newCarrier,
+                              }
                             : o
                         )
                       );
-
-                      // Refetch orders from the backend to ensure data consistency
                       fetchOrders();
                     }}
                   />
                 </div>
 
                 <button
+                  className="om-edit-button"
                   onClick={(e) => {
-                    e.stopPropagation(); // Prevent triggering `handleViewDetails`
+                    e.stopPropagation(); // Prevent the parent onClick from firing
                     setEditingOrderId(order.id);
                     setEditingOrder(order);
                   }}
-                  style={styles.editButton}
                 >
                   Edit
                 </button>
@@ -142,47 +159,6 @@ const OrderManagement = () => {
       </div>
     </div>
   );
-};
-
-const styles = {
-  container: {
-    padding: '20px',
-  },
-  addButton: {
-    marginBottom: '20px',
-  },
-  ordersContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '20px',
-    maxHeight: '70vh',
-    overflowY: 'auto',
-    border: '1px solid #ddd',
-    borderRadius: '10px',
-    padding: '10px',
-    backgroundColor: 'black',
-  },
-  orderCard: {
-    padding: '10px',
-    border: '1px solid #ddd',
-    borderRadius: '10px',
-    backgroundColor: '#fff',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '10px',
-  },
-  orderSection: {
-    marginBottom: '10px',
-  },
-  editButton: {
-    marginTop: '10px',
-    padding: '5px 10px',
-    backgroundColor: '#007bff',
-    color: '#fff',
-    border: 'none',
-    borderRadius: '5px',
-    cursor: 'pointer',
-  },
 };
 
 export default OrderManagement;

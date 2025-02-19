@@ -111,17 +111,17 @@
 }
 
 /* Form section button */
-.form-section button {
-  padding: 10px 20px;
-  font-size: 18px;
-  color: var(--button-text); /* e.g. black or white from theme */
-  background: var(--blue-button-bg); /* #007bff gradient replaced with single color or you can keep gradient if you want */
-  border: none;
-  border-radius: 10px;
-  box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.2);
-  cursor: pointer;
-  transition: background 0.3s ease, transform 0.2s ease;
+.form-section {
+  border: 5px solid var(--signup-form-section-border);
+  border-radius: 30px;
+  padding: 20px;
+  background: var(--section-bg);
+  box-shadow: var(--signupform-section-shadow);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  margin: 10px;
 }
+
+
 .form-section button:hover {
   background: var(--blue-button-hover-bg); /* #e53e3e in your theme (red) */
   transform: translateY(-2px);

@@ -225,7 +225,7 @@ const ProductCard = ({ product, onDeleteProduct }) => {
           </div>
 
           {/* Edit Product button */}
-          <button className="pc-edit-product-button" onClick={() => setIsEditingProduct(true)}>
+          <button className="modal-buttons" onClick={() => setIsEditingProduct(true)}>
             Edit Product
           </button>
         </>

@@ -29,8 +29,8 @@ const ProductManagementContent = () => {
 
       <div className="add-forms">
         {!showAddProductForm && (
-          <div className="add-buttons">
-            <button style={{ padding: '10px' }} onClick={() => setShowAddProductForm(true)}>
+          <div className="modal-buttons">
+            <button className='modal-buttons' onClick={() => setShowAddProductForm(true)}>
               Add Product
             </button>
           </div>

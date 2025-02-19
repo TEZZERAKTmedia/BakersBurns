@@ -1,0 +1,96 @@
+.sc-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center all children horizontally */
+    justify-content: center; /* Center content vertically */
+    text-align: center;
+    margin: 10%; /* Center within the parent */
+    padding: var(--pc-spacing-md);
+    background-color: var(--body-overlay);
+    border-radius: var(--pc-border-radius);
+    box-shadow: var(--pc-box-shadow);
+    max-width: 500px;
+  }
+  
+  /* Sort Button */
+  .sc-sort-button {
+    background-color: var(--btn-bg);
+    color: var(--inverted-button-text);
+    padding: var(--pc-spacing-sm) var(--pc-spacing-md);
+    border: none;
+    border-radius: var(--pc-border-radius);
+    cursor: pointer;
+    margin-bottom: var(--pc-spacing-sm);
+    transition: background-color 0.3s ease;
+  }
+  
+  .sc-sort-button:hover {
+    background-color: var(--btn-hover);
+  }
+  
+  /* Sorting Options Container */
+  .sc-sorting-options {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    padding: var(--pc-spacing-sm);
+  }
+  
+  /* Individual Sorting Buttons */
+  .sc-sorting-options button {
+    background-color: var(--btn-bg);
+    color: var(--inverted-button-text);
+    padding: var(--pc-spacing-sm) var(--pc-spacing-md);
+    border: none;
+    border-radius: var(--pc-border-radius);
+    cursor: pointer;
+    margin: var(--pc-spacing-xs);
+    transition: background-color 0.3s ease;
+    margin: 5px
+  }
+  
+  .sc-sorting-options button:hover {
+    background-color: var(--btn-hover);
+  }
+  
+  .sc-sorting-options .active-sort {
+    background-color: var(--btn-hover);
+    font-weight: bold;
+  }
+  
+  /* Recency Sorting */
+  .sc-recency-sort {
+    display: flex;
+    justify-content: center;
+    gap: var(--pc-spacing-sm);
+  }
+  
+  /* Filter Type Container */
+  .sc-type-filter {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: var(--pc-spacing-md);
+  }
+  
+  .sc-type-filter label {
+    font-weight: bold;
+    margin-bottom: var(--pc-spacing-xs);
+    color: var(--text-color);
+  }
+  
+  .sc-type-filter select {
+    padding: var(--pc-spacing-sm);
+    border-radius: var(--pc-border-radius);
+    border: 1px solid var(--form-input-border);
+    background-color: var(--body-overlay);
+    color: var(--text-color);
+    cursor: pointer;
+    transition: border 0.3s ease;
+  }
+  
+  .sc-type-filter select:hover {
+    border: 1px solid var(--btn-hover);
+  }
+  

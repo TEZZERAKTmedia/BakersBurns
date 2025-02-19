@@ -67,6 +67,9 @@ const AdminNavbar = () => {
       {/* Navbar top section */}
       <div className="navbar-top">
         <div className="navbar-title">{currentPageTitle}</div>
+        {menuOpen && (
+          <ThemeToggle />
+        )}
         <div
           className={`hamburger-menu ${menuOpen ? 'open' : ''}`}
           onClick={toggleMenu}
@@ -75,6 +78,7 @@ const AdminNavbar = () => {
           <div className="bar2"></div>
           <div className="bar3"></div>
         </div>
+        
       </div>
 
       {/* Navigation Links */}
@@ -95,9 +99,7 @@ const AdminNavbar = () => {
           </li>
           
         ))}
-        {menuOpen && (
-          <ThemeToggle />
-        )}
+        
 
 
         <li className="nav-item">

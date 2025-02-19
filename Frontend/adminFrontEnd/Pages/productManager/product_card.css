@@ -1,12 +1,20 @@
 .product-tile {
   margin: 10px;
-  border: 1px solid rgba(0, 0, 0, 0.1); /* Light border */
-  border-radius: 8px; /* Rounded corners */
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.06); /* Soft shadow */
-  padding: 16px; /* Add padding inside the box */
-  background-color: var(--bg-overlay); /* White background */
-  transition: transform 0.2s, box-shadow 0.2s; 
+  /* existing styling... */
+  border: 1px solid rgba(0, 0, 0, 0.1); 
+  border-radius: 8px; 
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.06);
+  padding: 16px;
+  background-color: var(--bg-overlay);
+  transition: transform 0.2s, box-shadow 0.2s;
+
+  /* Add these two lines: */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center; /* ensures text is centered */
 }
+
   
   /* Product Info */
   .product-info img {
@@ -228,6 +236,9 @@
   display: flex;
   justify-content: center;
   gap: 10px;
+  background-color: var(--btn-bg);
+  color: var(--inverted-button-text);
+  border-radius: 10px;
 }
 
 .confirm-button {
@@ -273,14 +284,21 @@
 
 /* Main Container */
 .pc-container {
-  margin-bottom: var(--pc-margin-bottom);
-  background-color: var(--bg-overlay);
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Center all children horizontally */
+  justify-content: center; /* Center content vertically */
+  text-align: center;
+  margin: 10%; /* Center within the parent */
+  padding: var(--pc-spacing-md);
+  background-color: var(--body-overlay);
   border-radius: var(--pc-border-radius);
   box-shadow: var(--pc-box-shadow);
-  padding: var(--pc-spacing-md);
-  color: var(--text-color);
-  font-size: var(--pc-font-size-default);
+  max-width: 500px;
+
 }
+
+
 
 /* Product Info Section */
 .pc-product-info {
@@ -320,8 +338,8 @@
 }
 
 .pc-add-discount-button {
-  background-color: var(--pc-primary-color);
-  color: #fff;
+  background-color: var(--btn-bg);
+  color: var(--inverted-button-text);
   border: none;
   padding: var(--pc-spacing-sm) var(--pc-spacing-md);
   border-radius: var(--pc-border-radius);
@@ -389,8 +407,8 @@
 /* Edit Discount Button */
 .pc-edit-discount-button {
   margin-top: var(--pc-spacing-sm);
-  background-color: var(--pc-primary-color);
-  color: #fff;
+  background-color: var(--btn-bg);
+  color: var(--inverted-button-text);
   border: none;
   padding: var(--pc-spacing-sm) var(--pc-spacing-md);
   border-radius: var(--pc-border-radius);
@@ -438,7 +456,7 @@
 
 /* Edit Product Button */
 .pc-edit-product-button {
-  background-color: var(--pc-primary-color);
+  background-color: var(--btn-bg);
   color: #fff;
   border: none;
   padding: var(--pc-spacing-sm) var(--pc-spacing-md);
@@ -484,6 +502,8 @@
 
 .pc-modal-content h3 {
   margin-bottom: var(--pc-spacing-sm);
+  
+  
 }
 
 .pc-modal-buttons {

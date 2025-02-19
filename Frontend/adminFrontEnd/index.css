@@ -28,7 +28,7 @@ h1 {
    
    /*NAVBAR*/
    --navbar-bg: rgb(255, 230, 208);
-   --body-overlay: rgba(255, 230, 208, 0.794);
+   --body-overlay: rgba(255, 230, 208, 0.876);
    --wood-bg-dark: #ffe6d0;
    --navbar-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
    --navbar-text: #000;
