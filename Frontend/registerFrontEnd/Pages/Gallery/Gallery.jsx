@@ -79,12 +79,7 @@ const Gallery = () => {
                             className="modal-image"
                             />
 
-                        <img 
-                            src={`${import.meta.env.VITE_BACKEND}/galleryuploads/${modalData.image}`} 
-                            alt={modalData.title} 
-                            className="modal-image"
-                            onClick={closeModal}
-                        />
+                        
                         <h3 className="modal-title">{modalData.title}</h3>
                         <p className="modal-description">{modalData.description}</p>
                     </div>
