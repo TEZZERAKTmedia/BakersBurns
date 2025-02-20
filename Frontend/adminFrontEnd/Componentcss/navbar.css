@@ -99,8 +99,8 @@
   align-items: center;
   
   /* Use the new variable for item background */
-  background-color: var(--nav-list-item-bg);
-  
+  background-color: var(--btn-bg);
+  color: var(--invrt-text-color);
   border-radius: 8px;
   padding: 1rem;
   text-align: center;
@@ -118,7 +118,8 @@
 /* Nav Link Style */
 .nav-link {
   text-decoration: none;
-  color: var(--navbar-text);
+  color: var(--invrt-text-color);
   font-size: 1.5rem;
   font-weight: bold;
+
 }

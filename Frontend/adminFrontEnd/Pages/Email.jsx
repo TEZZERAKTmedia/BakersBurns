@@ -307,15 +307,8 @@ const AdminEmailComponent = () => {
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => sendUpdateEmail('privacyPolicy')}
-            style={{
-              marginTop: '15px',
-              padding: '10px 20px',
-              backgroundColor: '#007bff',
-              color: 'white',
-              border: 'none',
-              borderRadius: '5px',
-              cursor: 'pointer',
-            }}
+            className='button'
+
           >
             Send Privacy Policy Update
           </motion.button>
@@ -330,15 +323,7 @@ const AdminEmailComponent = () => {
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => sendUpdateEmail('termsOfService')}
-            style={{
-              marginTop: '15px',
-              padding: '10px 20px',
-              backgroundColor: '#007bff',
-              color: 'white',
-              border: 'none',
-              borderRadius: '5px',
-              cursor: 'pointer',
-            }}
+            className='button'
           >
             Send Terms of Service Update
           </motion.button>

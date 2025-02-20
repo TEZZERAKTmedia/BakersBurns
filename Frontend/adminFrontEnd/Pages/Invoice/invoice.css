@@ -4,10 +4,10 @@
     max-width: 1200px;
     margin: 0 auto;
     font-family: sans-serif;
-    background: #f5f5f5;
+    background: var(--body-overlay);
     display: flex;
     flex-direction: column;
-    height: 85vh; /* Full viewport height */
+    height: 100vh; /* Full viewport height */
   }
   
   .invoice-header {
@@ -31,16 +31,17 @@
   
   .invoice-controls button {
     padding: 8px 16px;
-    background: #007bff;
+    background: var(--btn-bg);
+    color: var(--inverted-button-text);
     border: none;
-    color: white;
     border-radius: 4px;
     cursor: pointer;
     transition: background 0.2s ease;
   }
   
   .invoice-controls button:hover {
-    background: #0056b3;
+    background: var(--inverted-button-text);
+    color: var(--text-color);
   }
   
   .sort-options {
@@ -52,17 +53,18 @@
   
   .sort-options button {
     padding: 6px 12px;
-    border: 1px solid #007bff;
-    background: white;
-    color: #007bff;
+    border: 1px solid var(--text-color);
+    background: var(--btn-bg);
+    color: var(--inverted-button-text);
     border-radius: 4px;
     cursor: pointer;
     transition: background 0.2s ease;
   }
   
   .sort-options button:hover {
-    background: #007bff;
-    color: white;
+    border: 1px solid var(--text-color);
+    background: var(--inverted-button-text);
+    color: var(--text-color);
   }
   
   /* Scrollable grid container */
@@ -81,11 +83,12 @@
   }
   
   .invoice-card {
-    background: white;
+    background: var(--bg-overlay);
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     transition: transform 0.2s ease;
+    
   }
   
   .invoice-card:hover {
@@ -95,6 +98,7 @@
   .invoice-card h3 {
     margin: 0 0 10px 0;
     font-size: 1.2em;
+    color:var(--text-color);
   }
   
   /* Unique prefixed classname for paragraphs within invoice cards */
@@ -102,6 +106,6 @@
     margin: 5px 0;
     font-size: 0.9em;
     /* You can override red text here if needed, e.g.: */
-    color: #333;
+    color:var(--text-color);
   }
   
