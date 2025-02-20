@@ -45,6 +45,10 @@
   margin-top: 20px;
 }
 
+.add-prdct-button {
+  background-color: var(--btn-bg);
+ color: var(--inverted-button-text);
+}
 /* Reuse the 'blue-button' or 'btn-bg' from your theme for these buttons */
 .add-buttons button {
   padding: 12px 20px;

@@ -22,6 +22,18 @@ const AdminApp = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userRole, setUserRole] = useState(null);
   const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    const storedDarkMode = localStorage.getItem('darkMode') === 'true';
+    const root = document.documentElement;
+    if (storedDarkMode) {
+      root.classList.add('dark-mode');
+      root.setAttribute("data-theme", "dark");
+    } else {
+      root.classList.remove('dark-mode');
+      root.setAttribute("data-theme", "light");
+    }
+  }, []);
+  
 
   useEffect(() => {
     const checkAuth = async () => {

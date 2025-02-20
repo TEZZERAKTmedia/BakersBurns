@@ -107,7 +107,7 @@ const ProductForm = ({ product = {}, onClose }) => {
   };
 
   return (
-    <div className="product-form-section">
+    <div className="form-section">
       {isLoading ? (
         <LoadingPage /> // Render loading page
       ) : (
@@ -257,17 +257,27 @@ const ProductForm = ({ product = {}, onClose }) => {
       </div>
       {/* Media Uploader */}
       <div className="form-section">
-        <h1>Media Uploader</h1>
+        <h1 className="title">Media Uploader</h1>
         <p style={{color:'black'}}>Accepted formats: JPEG, PNG, JPG, MP4, MOV, and AVI</p>
       <MediaUploader mode="add" maxMedia={10} initialMedia={mediaPreviews} onMediaChange={setMediaPreviews} />
       </div>
 
-      <div style={{ marginTop: "20px" }}>
-        <button onClick={handleSave} disabled={isLoading}>
-          {isLoading ? "Saving..." : "Save"}
-        </button>
-        <button onClick={onClose}>Cancel</button>
-      </div>
+      <div
+  className="form-section"
+  style={{
+    marginTop: "20px",
+    display: "flex",
+    justifyContent: "center",
+    gap: "10px" // optional: adds space between buttons
+  }}
+>
+<button onClick={onClose}>Cancel</button>
+  <button onClick={handleSave} disabled={isLoading}>
+    {isLoading ? "Saving..." : "Save"}
+  </button>
+  
+</div>
+
       </>
       )}
     </div>

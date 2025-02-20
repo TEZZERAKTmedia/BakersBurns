@@ -31,7 +31,7 @@ const ProductManagementContent = () => {
         {!showAddProductForm && (
           <div className="modal-buttons">
            
-            <button className="add-image-btn" onClick={() => setShowAddProductForm(true)}>+</button>
+            <button className="add-prdct-button" onClick={() => setShowAddProductForm(true)}>+</button>
           </div>
         )}
       </div>
