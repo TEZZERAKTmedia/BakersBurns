@@ -91,7 +91,7 @@ const Navbar = () => {
           <Link to="/about">About</Link>
         </li>
         <li className="nav-item" onClick={closeMenu}>
-          <Link to="/gallery"></Link>
+          <Link to="/gallery"> Gallery</Link>
         </li>
         <li className="inverted-button-p-t" onClick={closeMenu}>
           <Link to="/privacy-policy" className="inverted-button">Privacy Policy</Link>
