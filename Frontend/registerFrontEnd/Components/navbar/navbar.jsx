@@ -105,7 +105,7 @@ const Navbar = () => {
 
       {/* Social Media Links */}
       {menuOpen && (
-        <div>
+        <div className="social-links-nav">
           <SocialLinks />
         </div>
       )}

@@ -199,16 +199,17 @@ body {
 }
 
 /* Contact Section */
-.contact-section {
+.home-section {
   background-color: var(--bg-section);
   padding: 100px 20px;
   text-align: center;
   color: var(--text-color);
 }
 
-.contact-title {
+.home-title {
   font-family: 'Dancing Script', cursive;
   font-size: 2.5rem;
+  margin-top: 2%;
   color: var(--hero-title-color);
 }
 

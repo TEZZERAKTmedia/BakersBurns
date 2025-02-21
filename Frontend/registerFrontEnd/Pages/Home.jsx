@@ -4,7 +4,8 @@ import '../PagesCss/Home.css';
 import { Link } from 'react-router-dom'; 
 import { registerApi } from '../config/axios';
 import moment from 'moment';
-import SocialLinks from '../Components/svgComponent';
+
+import SocialLinks from '../Components/navbar/socialLinks';
 
 const Home = () => {
   const [featuredProducts, setFeaturedProducts] = useState([]);                       
@@ -71,6 +72,7 @@ const Home = () => {
           </motion.h1>
           <p className="hero-description">Unique Wood Burning Art by Kalea Baker</p>
           <Link to="/store" className="hero-btn">Shop Now</Link>
+          
         </div>
       </motion.section>
       
@@ -94,18 +96,34 @@ const Home = () => {
           <Link to="/event" className="upcoming-event-btn">See All Events</Link>
         </motion.section>
       )}
-
-      {/* About Section */}
       <motion.section 
-        className="about-section"
+        className="home-section"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.2 }}
         variants={fadeIn}
       >
+        <h2 className="home-title">Get In Touch</h2>
+        <p className="contact-description">
+          For commissions, inquiries, or collaborations, feel free to contact me. Let's create something beautiful together!
+        </p>
+
+          <SocialLinks />
+
+      </motion.section>
+
+      {/* About Section */}
+      <motion.section 
+        className="home-section"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.2 }}
+        variants={fadeIn}
+      >
+        
         <div className="about-content">
           <motion.h1 
-            className="about-title"
+            className="home-title"
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 1 }}
@@ -122,24 +140,7 @@ const Home = () => {
 
 
       {/* Contact Section */}
-      <motion.section 
-  className="contact-section"
-  initial="hidden"
-  whileInView="visible"
-  viewport={{ once: true, amount: 0.2 }}
-  variants={fadeIn}
->
-  <h2 className="contact-title">Get In Touch</h2>
-  <p className="contact-description">
-    For commissions, inquiries, or collaborations, feel free to contact me. Let's create something beautiful together!
-  </p>
-  <a 
-    href="mailto:bakersburns@gmail.com?subject=Inquiry from Website&body=Hello BakersBurns," 
-    className="contact-btn"
-  >
-    Contact Me
-  </a>
-</motion.section>
+      
     </div>
   );
 };
