@@ -123,7 +123,7 @@ const ProductModal = ({ product, onClose }) => {
                 
               </>
             ) : (
-              <p className="product-modal-price">
+              <p className="product-modal-details-grid">
                 <span className="product-modal-label">Price: </span>
                 <span className="product-modal-normal-price">
                   ${parseFloat(product.price).toFixed(2)}
