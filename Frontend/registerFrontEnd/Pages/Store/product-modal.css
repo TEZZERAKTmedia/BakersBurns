@@ -79,11 +79,16 @@
   }
   
   .product-modal-media {
-    
-    
-    height: 10rem;
-    width: 10rem;
+    width: 100%;                /* Full width of the container */
+    max-width: 500px;           /* Limit max width */
+    aspect-ratio: 1 / 1;        /* Enforce square aspect ratio */
+    max-height: 70vh;           /* Prevent overflow vertically */
+    object-fit: cover;          /* Fill the container without distortion */
+    border-radius: 10px;        /* Optional: rounded corners */
+    background-color: #f0f0f0;  /* Fallback color while media loads */
+    margin: 0 auto;             /* Center the media */
   }
+  
   
   /* ===============================
      Info Section & Pricing
