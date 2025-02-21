@@ -64,11 +64,7 @@ const ProductModal = ({ product, onClose }) => {
           <p className="product-modal-loading">Loading media...</p>
         ) : media.length > 0 ? (
           <div className="product-modal-carousel" onTouchStart={handleTouchStart} onTouchMove={handleTouchMove}>
-            {currentMediaIndex > 0 && (
-              <button className="product-modal-arrow left" onClick={handlePrevSlide}>
-                &#8249;
-              </button>
-            )}
+            
             <div className="product-modal-slide">
               {media[currentMediaIndex].type === "image" ? (
                 <img
@@ -84,6 +80,11 @@ const ProductModal = ({ product, onClose }) => {
                 />
               )}
             </div>
+            {currentMediaIndex > 0 && (
+              <button className="product-modal-arrow left" onClick={handlePrevSlide}>
+                &#8249;
+              </button>
+            )}
             {currentMediaIndex < media.length - 1 && (
               <button className="product-modal-arrow right" onClick={handleNextSlide}>
                 &#8250;

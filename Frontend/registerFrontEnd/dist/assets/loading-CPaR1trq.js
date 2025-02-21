@@ -1,1 +1,0 @@
-import{j as a,l as i}from"./index-Bdxe63Ve.js";const s=()=>a.jsxs("div",{className:"loading-page",children:[a.jsx("img",{className:"animation",src:i,alt:"Loading animation"}),a.jsx("p",{children:"Loading, please wait..."})]});export{s as L};
