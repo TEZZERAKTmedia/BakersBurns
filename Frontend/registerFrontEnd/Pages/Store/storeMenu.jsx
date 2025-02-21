@@ -53,7 +53,7 @@ const StoreNavbar = ({ onTypeSelect }) => {
                 className="store-navbar-title"
                 onClick={() => handleTypeClick(productType.type)}
               >
-                {productType.type}
+                {productType.type}s
               </h2>
               <div className="thumbnail-container">
                 {Array.isArray(productType.thumbnails) && productType.thumbnails.length > 0 ? (
