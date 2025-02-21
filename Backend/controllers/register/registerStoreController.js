@@ -76,25 +76,40 @@ const getProductMedia = async (req, res) => {
 };
 const getProductTypes = async (req, res) => {
   try {
-    // Fetch distinct product types from the database
-    const productTypes = await Product.findAll({
-      attributes: [[Sequelize.fn('DISTINCT', Sequelize.col('type')), 'type']], // Get unique 'type' values
+    // First, fetch distinct product types
+    const productTypesResult = await Product.findAll({
+      attributes: [[Sequelize.fn('DISTINCT', Sequelize.col('type')), 'type']],
       where: {
         type: {
-          [Op.not]: null, // Exclude null values
+          [Op.not]: null,
         },
       },
     });
 
-    // Map the result to extract the 'type' field
-    const types = productTypes.map((product) => product.type);
+    // Map to get an array of types
+    const types = productTypesResult.map((product) => product.get('type'));
 
-    res.status(200).json(types); // Send the product types as a simple array
+    // For each type, fetch the 4 most recent product thumbnails
+    const result = await Promise.all(
+      types.map(async (type) => {
+        const products = await Product.findAll({
+          where: { type },
+          attributes: ['thumbnail'],
+          order: [['createdAt', 'DESC']],
+          limit: 4,
+        });
+        const thumbnails = products.map((product) => product.thumbnail);
+        return { type, thumbnails };
+      })
+    );
+
+    res.status(200).json(result);
   } catch (error) {
     console.error('Error fetching product types:', error);
     res.status(500).json({ message: 'Error fetching product types', error });
   }
 };
+
 
 
 

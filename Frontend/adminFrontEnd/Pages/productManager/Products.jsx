@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { ProductsProvider, useProductContext } from './ProductsContext'; // Import the provider
 import LoadingPage from '../../Components/loading';
 import ProductForm from './productForm';
@@ -6,6 +6,7 @@ import DiscountForm from './discountForm';
 import ProductList from './productList';
 import SortingControls from './sortingControls';
 import './product_management.css';
+import BackToTop from './components/BackToTop';
 
 const ProductManagementContent = () => {
   const {
@@ -21,10 +22,16 @@ const ProductManagementContent = () => {
   const [editingProduct, setEditingProduct] = useState(null);
   const [editingDiscount, setEditingDiscount] = useState(null); // Specific product discount editing
 
+  const containerRef = useRef(null);
+
   return isLoading ? (
     <LoadingPage />
   ) : (
-    <div className="product-manager-container" style={{width:'1000px'}}>
+    <div 
+    className="product-manager-container" 
+    
+    ref={containerRef}
+    >
       <h1 className="page-header" style={{ marginTop: '100px' }}></h1>
 
       <div className="add-forms">
@@ -64,6 +71,7 @@ const ProductManagementContent = () => {
           setEditingDiscount({ productId: product.id, ...product.discount });
         }}
       />
+      <BackToTop containerRef={containerRef}/>
     </div>
   );
 };

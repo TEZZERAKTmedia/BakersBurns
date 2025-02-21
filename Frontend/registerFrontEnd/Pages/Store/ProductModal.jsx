@@ -113,6 +113,12 @@ const ProductModal = ({ product, onClose }) => {
                     ${discountPrice}
                   </span>
                 </p>
+                <div className="product-modal-details-grid">
+          <p className="product-modal-sale-end">
+                  <span className="sale-end-product-modal-label">Sale Ends: </span>
+                  {saleEndDate}
+                </p>
+          </div>
                 
               </>
             ) : (
@@ -132,12 +138,7 @@ const ProductModal = ({ product, onClose }) => {
           
 
           {/* Details Grid */}
-          <div className="product-modal-details-grid">
-          <p className="product-modal-sale-end">
-                  <span className="sale-end-product-modal-label">Sale Ends: </span>
-                  {saleEndDate}
-                </p>
-          </div>
+         
           
           <div className="product-modal-details-grid">
           

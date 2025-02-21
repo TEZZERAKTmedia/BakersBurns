@@ -289,7 +289,7 @@
 /* Main Container */
 .pc-container {
   display: flex;
-  flex-direction: column;
+  flex-direction: column; /* Default: Single column for mobile */
   align-items: center; /* Center all children horizontally */
   justify-content: center; /* Center content vertically */
   text-align: center;
@@ -298,8 +298,21 @@
   background-color: var(--body-overlay);
   border-radius: var(--pc-border-radius);
   box-shadow: var(--pc-box-shadow);
-  max-width: 500px;
+  gap: 20px; /* Space between items */
+}
 
+/* Two-column layout for wider screens */
+@media (min-width: 768px) {
+  .pc-container {
+    flex-direction: row; /* Switch to row layout for two columns */
+    flex-wrap: wrap; /* Allow wrapping if content overflows */
+    justify-content: space-between; /* Space out columns */
+  }
+
+  .pc-container > * {
+    flex: 1 1 calc(50% - 20px); /* Each child takes 50% width minus gap */
+    max-width: calc(50% - 20px); /* Prevents overflow */
+  }
 }
 
 
@@ -324,14 +337,18 @@
 }
 
 .pc-product-name {
-  margin: var(--pc-spacing-sm) 0;
+  margin: .5rem;
   color: var(--text-color);
+  border-bottom: .1rem solid var(--text-color);
+  padding-bottom: .5rem;
 }
 
 .pc-price {
   
-  margin-bottom: var(--pc-spacing-sm);
+  margin: .5rem;
   color: var(--text-color);
+  border-bottom: .1rem solid var(--text-color);
+  padding-bottom: .5rem;
 }
 
 /* Discount Button */
@@ -370,6 +387,7 @@
   padding: var(--pc-spacing-sm);
   border-radius: var(--pc-border-radius);
   color: var(--text-color);
+  
 }
 
 /* Discount Image & Overlay Text */
@@ -434,8 +452,13 @@
 }
 
 .pc-product-details p {
-  margin: 0.25rem 0;
+  margin: .5rem;
   color: var(--text-color);
+  border: .1rem solid var(--text-color);
+  border-right: none;
+  border-left: none;
+  padding: .5rem;
+  
 }
 
 /* Media Section */

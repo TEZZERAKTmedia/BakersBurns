@@ -1,96 +1,148 @@
-/* Store Navbar */
+/* Sidebar container */
 .store-navbar {
-    position: fixed;
-    top: 0px; /* Adjust to match the height of your main navbar */
-    left: 0;
-    width: 100vw;
-    height: 100vh; /* Subtract main navbar height */
-    background-color: #fffffff2; /* Semi-transparent background */
-    z-index: 0; /* Sits above most content but below other overlays */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    overflow-y: auto; /* Scrollable if content overflows */
-    transition: transform 0.3s ease-in-out; /* Smooth open/close animation */
-    transform: translateY(-100%); /* Initially hidden off-screen */
-  }
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 30%; /* Default width for larger screens */
+  height: 100%;
+  background-color: var(--hero-bg-overlay);
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.3);
+  z-index: 1;
+  transform: translateX(100%); /* Hidden by default */
+  transition: transform 0.3s ease;
+}
+
+.store-navbar.open {
+  transform: translateX(0);
+}
+
+/* Close button */
+.close-button {
+  background: none;
+  background: var(--btn-bg);
+
+  color: var(--inverted-button-text);
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+}
+
+/* Content container */
+.store-navbar-content {
+  padding: 60px 20px 20px;
+  overflow-y: auto;
+  height: 100%;
+}
+
+/* Each product type section */
+.store-navbar-section {
+  margin-bottom: 3rem;
+  padding: 3rem;
+  border-top: 0.1rem solid var(--btn-bg);
+  border-bottom: 0.1rem solid var(--btn-bg);
+  border-left: none;
+  border-right: none;
   
-  /* Open state for the store navbar */
-  .store-navbar.open {
-    transform: translateY(0); /* Slide into view */
-  }
+}
+
+.store-navbar-title {
+  margin-bottom: 3rem;
+  border-top: 0.1rem solid var(--btn-bg);
+  border-bottom: 0.1rem solid var(--btn-bg);
+  border-left: none;
+  border-right: none;
   
-  /* Store Navbar Content */
-  .store-navbar-content {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 15px;
-    padding: 20px;
-    text-align: center;
-    width: 80%;
-    max-width: 1200px;
+}
+
+
+/* 'All Products' button */
+.all-products {
+  background: none;
+  background: var(--btn-bg);
+
+  color: var(--inverted-button-text);
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+}
+
+/* General button styling */
+.store-navbar-item {
+  display: block;
+  width: 100%;
+  background: var(--btn-bg);
+
+  color: var(--inverted-button-text);
+  border: none;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  text-align: left;
+  font-size: 14px;
+}
+
+/* Thumbnail container set as a grid */
+.thumbnail-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 8px;
+  height: 150px; /* Adjust height as needed */
+}
+
+/* Grid placement for images */
+/* First image occupies the entire left column, spanning two rows */
+.thumbnail-container img:nth-child(1) {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+}
+
+/* Second image goes in the top right cell */
+.thumbnail-container img:nth-child(2) {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+/* Third image goes in the bottom right cell */
+.thumbnail-container img:nth-child(3) {
+  grid-column: 2;
+  grid-row: 2;
+}
+
+/* Ensure images fill their grid cells */
+.thumbnail-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Reopen button styling */
+.reopen-button {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: var(--btn-bg);
+
+  color: var(--inverted-button-text);
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  z-index: 10000;
+  font-size: 16px;
+}
+
+/* Media query for smaller devices (full screen width) */
+@media (max-width: 600px) {
+  .store-navbar {
+    width: 100%;
+    transform: translateX(100%);
   }
-  
-  /* Individual Items */
-  .store-navbar-item {
-    padding: 10px;
-    border: 1px solid rgba(0, 0, 0, 0.2);
-    border-radius: 8px;
-    background-color: white;
-    color: #333;
-    text-decoration: none;
-    font-weight: 500;
-    transition: all 0.3s ease;
-    cursor: pointer;
-  }
-  
-  .store-navbar-item:hover {
-    background-color: #f0f0f0;
-    transform: scale(1.05);
-  }
-  
-  /* Special styling for "All Products" */
-  .store-navbar-item.all-products {
-    font-weight: bold;
-    background: var(--btn-bg);
-    color: white;
-  }
-  
-  /* Close Button */
-  .close-button {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    font-size: 1.5rem;
-    background: transparent;
-    border: none;
-    color: #333;
-    cursor: pointer;
-    transition: color 0.2s ease;
-  }
-  
-  .close-button:hover {
-    color: #007bff;
-  }
-  
-  /* Menu Reopen Button */
-  .reopen-button {
-    position: fixed;
-    bottom: 20px; /* Adjust for footer spacing */
-    right: 20px;
-    z-index: 10;
-    padding: 10px 20px;
-    background: var(--inverted-button-bg);
-    color: var(--inverted-button-text);
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 1rem;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-  }
-  
-  .reopen-button:hover {
-    background: #0056b3;
-  }
-  
+}

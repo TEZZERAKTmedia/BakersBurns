@@ -23,8 +23,8 @@ const Product = sequelize.define('Product', {
     type: DataTypes.INTEGER,
     allowNull: false,
     validate: {
-      min: 0 // Ensure quantity is never negative
-    }
+      min: 0, // Ensure quantity is never negative
+    },
   },
   type: {
     type: DataTypes.STRING,
@@ -32,15 +32,15 @@ const Product = sequelize.define('Product', {
   },
   isDiscounted: {
     type: DataTypes.BOOLEAN,
-    defaultValue: false, // Discount is not active by default
+    defaultValue: false,
   },
   discountType: {
     type: DataTypes.STRING,
-    allowNull: true, // Make this nullable if not always used
+    allowNull: true,
   },
   discountAmount: {
     type: DataTypes.DECIMAL(10, 2),
-    allowNull: true, // Make this nullable if not always used
+    allowNull: true,
   },
   discountPrice: {
     type: DataTypes.DECIMAL(10, 2),
@@ -48,53 +48,50 @@ const Product = sequelize.define('Product', {
   },
   discountStartDate: {
     type: DataTypes.DATE,
-    allowNull: true, // Make this nullable if not always used
+    allowNull: true,
   },
   discountEndDate: {
     type: DataTypes.DATE,
-    allowNull: true, // Fixed typo and made it nullable if not always used
+    allowNull: true,
   },
-  // New fields for dimensions and weight
   length: {
     type: DataTypes.FLOAT,
-    allowNull: true, // Nullable in case some products don't have dimensions
+    allowNull: true,
     validate: {
-      min: 0, // Ensure non-negative values
-    }
+      min: 0,
+    },
   },
   width: {
     type: DataTypes.FLOAT,
     allowNull: true,
     validate: {
-      min: 0, // Ensure non-negative values
-    }
+      min: 0,
+    },
   },
   height: {
     type: DataTypes.FLOAT,
     allowNull: true,
     validate: {
-      min: 0, // Ensure non-negative values
-    }
+      min: 0,
+    },
   },
   weight: {
     type: DataTypes.FLOAT,
-    allowNull: true, // Nullable in case weight is not provided
+    allowNull: true,
     validate: {
-      min: 0, // Ensure non-negative values
+      min: 0,
     },
-    
   },
   unit: {
     type: DataTypes.ENUM('metric', 'standard'),
     allowNull: false,
-    defaultValue: 'standard', // Default to metric if not specified
+    defaultValue: 'standard',
   }
 }, {
-  timestamps: false,
+  timestamps: true, // Enables createdAt and updatedAt
   tableName: 'Products',
   hooks: {
     beforeValidate: (product) => {
-      // Sanitize only the string fields
       product.name = xss(product.name);
       product.description = xss(product.description);
       product.image = product.image ? xss(product.image) : null;

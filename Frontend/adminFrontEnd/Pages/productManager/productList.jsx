@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import ProductCard from './productCard';
 import SortingControls from './sortingControls';
 import { useProductContext } from './ProductsContext';
 import { adminApi } from '../../config/axios';
+import BackToTop from './components/BackToTop';
 
 
 const ProductList = () => {
@@ -13,6 +14,7 @@ const ProductList = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
+  
   useEffect(() => {
     setFilteredProducts(products);
   }, [products]);
@@ -78,26 +80,15 @@ const ProductList = () => {
   };
 
   return (
-    <div>
+    <div style= {{
+      display:'block',
+      alignItems:'center',
+      alignContent: 'center',
+    }}>
       {/* 🔹 SUCCESS MESSAGE */}
+      
       {successMessage && (
-        <div style={{
-          position: 'fixed',
-          top: '20px',
-          right: '20px',
-          backgroundColor: '#28a745',
-          color: 'white',
-          padding: '10px 20px',
-          borderRadius: '8px',
-          fontSize: '0.9rem',
-          fontWeight: 'bold',
-          zIndex: 9999,
-          boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
-          maxWidth: '300px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between'
-        }}>
+        <div >
           <span>{successMessage}</span>
           <button
             onClick={() => setSuccessMessage('')}
@@ -171,6 +162,7 @@ const ProductList = () => {
           </div>
         ))}
       </div>
+      
     </div>
   );
 };
