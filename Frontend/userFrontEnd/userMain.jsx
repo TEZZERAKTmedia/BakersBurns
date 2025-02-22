@@ -8,7 +8,7 @@ import { ThemeProvider } from './Components/themeProvider.jsx';
 import LoadingPage from './Components/loading'; // Assuming you have a reusable loading component
 
 const RootUserApp = () => {
-  const [showLoading, setShowLoading] = useState(false);
+  const [showLoading, setShowLoading] = useState(true);
 
   useEffect(() => {
     // Check if it's the user's first visit
@@ -18,7 +18,7 @@ const RootUserApp = () => {
       setShowLoading(true);
       // Show loading screen for 10 seconds on the first visit
       setTimeout(() => {
-        setShowLoading(false);
+        setShowLoading(true);
         localStorage.setItem('firstUserVisit', 'true');
       }, 10000); // 10 seconds
     }

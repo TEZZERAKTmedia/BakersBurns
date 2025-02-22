@@ -7,8 +7,10 @@ const LoadingPage = () => {
   return (
     <div className='loading-overlay'>
     <div className="loading-page"  >
+      <div className='loading-section'>
       <img className="animation" src={loadingAnimation} alt="Loading animation" />
       <p>Loading, please wait...</p>
+      </div>
     </div>
     </div>
   );
