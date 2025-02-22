@@ -32,15 +32,17 @@
     "framer-motion": "^11.11.9",
     "js-cookie": "^3.0.5",
     "jsonwebtoken": "^9.0.2",
-    "jspdf": "^3.0.0",
-    "jspdf-autotable": "^3.5.6",
+    "jspdf": "^2.5.1",
+    "jspdf-autotable": "^3.8.4",
     "jwt-decode": "^4.0.0",
     "node-cron": "^3.0.3",
     "postman": "^0.2.0",
+    "react": "^18.3.1",
     "react-beautiful-dnd": "^13.1.1",
     "react-big-calendar": "^1.15.0",
     "react-calendar": "^5.0.0",
     "react-datepicker": "^7.5.0",
+    "react-dom": "^18.3.1",
     "react-dropzone": "^14.2.9",
     "react-flatpickr": "^3.10.13",
     "react-google-recaptcha": "^3.1.0",
@@ -56,6 +58,7 @@
     "xss": "^1.0.15"
   },
   "devDependencies": {
-    "concurrently": "^9.1.0"
+    "concurrently": "^9.1.0",
+    "eslint-plugin-security": "^3.0.1"
   }
 }
