@@ -3,37 +3,31 @@
    ======================= */
 
 /* Store Container */
-/* Store Container */
 .store-container {
   padding: 0;
   margin-top: 0%;
   background-color: var(--bg-overlay);
   z-index: 101;
-  height: 100vh; /* Full viewport height */
-  width: 100vw;  /* Full viewport width */
-  overflow: hidden; /* Prevent any overflow on the container */
-  display: flex;
-  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
 }
+
+
 
 /* Product Grid */
 .store-product-grid {
   display: grid;
-  grid-template-columns: 1fr; /* Default: single column */
+  grid-template-columns: 1fr;
   gap: 16px;
-  padding-top: 10vh; /* Space for the navbar/header */
-  height: calc(100vh - 10vh); /* Take remaining space after header */
-  overflow-y: auto; /* Enable vertical scrolling */
-  padding-bottom: 2rem; /* Extra space at the bottom for better UX */
+  padding-top: 10vh;
+  
 }
 
-/* Two columns for larger screens */
 @media (min-width: 768px) {
   .store-product-grid {
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   }
 }
-
 
 .store-container__header {
   font-size: calc(3rem + 2vw);
