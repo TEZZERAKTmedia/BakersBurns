@@ -60,40 +60,48 @@ const ProductModal = ({ product, onClose }) => {
   return (
     <div className="product-modal-overlay" onClick={onClose}>
       <div className="product-modal-container" onClick={(e) => e.stopPropagation()}>
-        {loadingMedia ? (
-          <p className="product-modal-loading">Loading media...</p>
-        ) : media.length > 0 ? (
-          <div className="product-modal-carousel" onTouchStart={handleTouchStart} onTouchMove={handleTouchMove}>
-            
-            <div className="product-modal-slide">
-              {media[currentMediaIndex].type === "image" ? (
-                <img
-                  src={`${import.meta.env.VITE_IMAGE_BASE_URL}/uploads/${media[currentMediaIndex].url}`}
-                  alt={`Media ${currentMediaIndex + 1}`}
-                  className="product-modal-media"
-                />
-              ) : (
-                <video
-                  src={`${import.meta.env.VITE_IMAGE_BASE_URL}/uploads/${media[currentMediaIndex].url}`}
-                  controls
-                  className="product-modal-media"
-                />
-              )}
+      {loadingMedia ? (
+  <p className="product-modal-loading">Loading media...</p>
+          ) : media.length > 0 ? (
+            <div className="product-modal-carousel" onTouchStart={handleTouchStart} onTouchMove={handleTouchMove}>
+              <div className="product-modal-slide">
+                {media[currentMediaIndex].type === "image" ? (
+                  <img
+                    src={`${import.meta.env.VITE_IMAGE_BASE_URL}/uploads/${media[currentMediaIndex].url}`}
+                    alt={`Media ${currentMediaIndex + 1}`}
+                    className="product-modal-media"
+                  />
+                ) : (
+                  <video
+                    src={`${import.meta.env.VITE_IMAGE_BASE_URL}/uploads/${media[currentMediaIndex].url}`}
+                    controls
+                    className="product-modal-media"
+                  />
+                )}
+              </div>
+
+              {/* Move arrows below the media */}
+              <div className="product-modal-arrow-container">
+                <button
+                  className="product-modal-arrow"
+                  onClick={handlePrevSlide}
+                  disabled={currentMediaIndex === 0}
+                >
+                  &#8249;
+                </button>
+                <button
+                  className="product-modal-arrow"
+                  onClick={handleNextSlide}
+                  disabled={currentMediaIndex === media.length - 1}
+                >
+                  &#8250;
+                </button>
+              </div>
             </div>
-            {currentMediaIndex > 0 && (
-              <button className="product-modal-arrow left" onClick={handlePrevSlide}>
-                &#8249;
-              </button>
-            )}
-            {currentMediaIndex < media.length - 1 && (
-              <button className="product-modal-arrow right" onClick={handleNextSlide}>
-                &#8250;
-              </button>
-            )}
-          </div>
-        ) : (
-          <p className="product-modal-no-media">No media available.</p>
-        )}
+          ) : (
+            <p className="product-modal-no-media">No media available.</p>
+          )}
+
 
         <div className="product-modal-info">
           

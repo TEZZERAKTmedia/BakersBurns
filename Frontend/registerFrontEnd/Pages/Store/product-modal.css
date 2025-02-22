@@ -43,7 +43,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 1000;
+    z-index: 1;
     padding: 20px;
   }
   
@@ -136,19 +136,28 @@
     font-weight: bold;
   }
   /* Arrow Buttons Styling */
-.product-modal-arrow {
-  position: absolute;
-  bottom: 10px; /* Place both arrows at the bottom */
-  background-color: var(--btn-bg); /* Semi-transparent background */
-  color: var(--inverted-button-text);
-  border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 1.5rem;
-  z-index: 10;
-  transition: background-color 0.3s ease;
-}
+  .product-modal-arrow-container {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin-top: 10px; /* Space below the media */
+  }
+  
+  /* Arrow Buttons Styling */
+  .product-modal-arrow {
+    background-color: var(--btn-bg);
+    color: var(--inverted-button-text);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1.5rem;
+    transition: background-color 0.3s ease;
+  }
+  
+  .product-modal-arrow:hover {
+    background-color: rgba(0, 0, 0, 0.8);
+  }
 
 /* Position left arrow to the bottom-left */
 .product-modal-arrow.left {
