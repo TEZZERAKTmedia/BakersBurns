@@ -200,7 +200,7 @@ body {
 
 /* Contact Section */
 .home-section {
-  background-color: var(--bg-section);
+  background-color: var(--bg-color);
   padding: 100px 20px;
   text-align: center;
   color: var(--text-color);

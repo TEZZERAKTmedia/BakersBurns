@@ -230,10 +230,11 @@ body {
   height: 100vh;
   width: 100vw;
 
-  /* The color must be translucent & we also specify blend-mode: */
+  /* The color must be translucent & we also specify blend-mode: 
   background:
   linear-gradient(rgba(255, 230, 208, 0.5), rgba(255, 230, 208, 0.5)), 
   url('./assets/tree.jpg');
+  
   background-blend-mode: overlay; /* or multiply */
   background-size: cover;
   background-position: center;
