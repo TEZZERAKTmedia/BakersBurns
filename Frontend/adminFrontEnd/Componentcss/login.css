@@ -13,7 +13,8 @@
 }
 
 .login-form-container {
-  background:var(--body-overlay);
+    font-family: 'Montserrat', sans-serif;
+  background:var(--bg-overlay);
   padding: 2rem;
   border-radius: 10px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
