@@ -20,13 +20,15 @@
   filter: drop-shadow(0 0 2em #61dafbaa);
 }
 body {
-  /*background-image: url('./assets/tree.jpg');/* Replace with the actual path to your image */
-  background-color: var(--wood-bg-dark);
-
-  z-index: 1;
-  
-  
+  font-family: 'Montserrat', sans-serif;
+  /* If you want a solid color fallback plus the image: */
+  background-image: url('./assets/tree.jpg'); 
+  background-size: cover; /* Ensures the image covers the entire viewport */
+  color: var(--text-color);
+  z-index: 1000;
+  font-family: var(--font);
 }
+
 
 
 .card {

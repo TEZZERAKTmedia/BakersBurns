@@ -3,8 +3,9 @@
     padding: 1rem;
     max-width: 800px;
     margin: 0 auto;
-    background-color: var(--about-bg);
+    background-color: var(--hero-bg-overlay);
     border-radius: 8px;
+    height: 100vh;
 }
 
 /* About Title */
