@@ -1,0 +1,26 @@
+.collage-overlay {
+    position: absolute;
+    top: 1205;
+    left: 0;
+    width: 90vw;
+    height: 100%;
+    pointer-events: none; /* So underlying elements remain interactive */
+    z-index: 20; /* Ensure it's above the background but adjust as needed */
+  }
+  
+  .collage-item {
+    position: absolute;
+    width: 150px;  /* Adjust size as needed */
+    height: 150px;
+    overflow: hidden;
+    border-radius: 8px;
+  }
+  
+  .collage-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    opacity: 0.9;
+  }
+  

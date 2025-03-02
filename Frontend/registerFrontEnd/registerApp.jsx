@@ -1,7 +1,7 @@
 import React, { Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './Components/navbar/navbar';
-import Home from './Pages/Home'; // Import Home directly (no lazy) for fastest load
+import Home from './Pages/Home/Home'; // Import Home directly (no lazy) for fastest load
 
 // Lazy-load other pages
 const Store = React.lazy(() => import('./Pages/Store/Store'));

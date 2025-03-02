@@ -21,7 +21,8 @@ const convertImageToWebP = async (inputPath) => {
     return;
   }
   
-  const outputPath = inputPath.replace(ext, '.webp');
+  // Use a case-insensitive regex to replace the extension at the end of the string
+  const outputPath = inputPath.replace(new RegExp(ext + '$', 'i'), '.webp');
   try {
     await sharp(inputPath)
       .toFormat('webp', { quality: 80 }) // Adjust quality as needed
