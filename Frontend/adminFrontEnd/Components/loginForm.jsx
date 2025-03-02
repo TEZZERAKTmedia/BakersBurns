@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { adminApi } from '../config/axios';
 import LoadingPage from './loading';
 import '../Componentcss/login.css';
-import eyeOpenIcon from '../assets/password-visibility-icon.png';
-import eyeCloseIcon from '../assets/password-visibility-icon-reverse.png';
+import eyeOpenIcon from '../assets/password-visibility-icon.gif';
+import eyeCloseIcon from '../assets/password-visibility-icon-reverse.gif';
 
 const AdminLoginForm = ({ onLoginSuccess }) => {
   const [identifier, setIdentifier] = useState('');

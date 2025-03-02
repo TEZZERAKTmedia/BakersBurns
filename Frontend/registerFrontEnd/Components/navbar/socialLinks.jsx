@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { registerApi } from '../../config/axios';
-import loadingImage from '../../assets/loading.png';
+import loadingImage from '../../assets/loading.gif';
 import './social_links.css';
 
 const SocialLinks = () => {

@@ -4,8 +4,8 @@ import { registerApi } from '../../config/axios';
 import LoadingPage from '../../Components/loading'; // Import the loading component
 import GoogleSignInButton from '../Signup/googleSignup'; // Import GoogleSignInButton
 import './login.css';
-import eyeOpenIcon from '../../assets/password-visibility-icon.png';
-import eyeCloseIcon from '../../assets/password-visibility-icon-reverse.png';
+import eyeOpenIcon from '../../assets/password-visibility-icon.gif';
+import eyeCloseIcon from '../../assets/password-visibility-icon-reverse.gif';
 
 const LoginForm = () => {
   const [identifier, setIdentifier] = useState('');

@@ -35,9 +35,10 @@ async function convertImageToWebP(filePath) {
     await sharp(filePath)
       .webp({ quality: 80 }) // Adjust quality if needed
       .toFile(newFilePath);
+      await fs.remove(inputPath);
       
     console.log(`✅ Converted ${path.basename(filePath)} to ${path.basename(newFilePath)}`);
-    await fs.remove(filePath);
+    
 
     return path.basename(newFilePath);
   } catch (err) {

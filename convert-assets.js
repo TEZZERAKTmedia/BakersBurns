@@ -11,17 +11,22 @@ const assetDirs = [
 
 // Define the image formats to convert (excluding GIF)
 const convertibleExtensions = ['.jpg', '.jpeg', '.png'];
+const ignoredExtensions = ['.gif'];
 
 const convertImageToWebP = async (inputPath) => {
   const ext = path.extname(inputPath).toLowerCase();
   // Skip GIF files
-  if (ext === '.gif') return;
+  if (ignoredExtensions.includes(ext)) {
+    console.log(`🚫 Ignoring GIF file: ${inputPath}`);
+    return;
+  }
   
   const outputPath = inputPath.replace(ext, '.webp');
   try {
     await sharp(inputPath)
       .toFormat('webp', { quality: 80 }) // Adjust quality as needed
       .toFile(outputPath);
+    await fs.remove(inputPath);
     console.log(`✅ Converted: ${inputPath} → ${outputPath}`);
   } catch (err) {
     console.error(`❌ Error converting ${inputPath}:`, err.message);

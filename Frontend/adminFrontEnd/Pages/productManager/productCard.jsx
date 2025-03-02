@@ -3,8 +3,8 @@ import EditProductForm from './editProduct';
 import DiscountByProductForm from './discountByProduct';
 import { useProductContext } from './ProductsContext';
 import { toast } from 'react-toastify';
-import DiscountIcon from '../../assets/Icons/discount.png';
-import TrashIcon from '../../assets/Icons/trash.png';
+import DiscountIcon from '../../assets/Icons/discount.webp';
+import TrashIcon from '../../assets/Icons/trash.webp';
 import { Link } from 'react-router-dom';
 
 import './product_card.css'; // Updated CSS filename with prefix classes

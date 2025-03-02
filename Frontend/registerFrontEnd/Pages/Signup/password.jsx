@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import DOMPurify from 'dompurify'; // For sanitization
 import { useNavigate } from 'react-router-dom';
 import { registerApi } from '../../config/axios';
-import eyeOpenIcon from '../../assets/password-visibility-icon.png';
-import eyeCloseIcon from '../../assets/password-visibility-icon-reverse.png';
+import eyeOpenIcon from '../../assets/password-visibility-icon.gif';
+import eyeCloseIcon from '../../assets/password-visibility-icon-reverse.gif';
 
 const PasswordSetupForm = () => {
   const [password, setPassword] = useState('');

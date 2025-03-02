@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { adminApi } from '../../config/axios';
-import editIcon from '../../assets/Icons/edit.png';
+import editIcon from '../../assets/Icons/edit.webp';
 
 import './tracking.css'; // <-- Import the new CSS
 

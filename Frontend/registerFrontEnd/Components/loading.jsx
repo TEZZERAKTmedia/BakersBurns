@@ -1,6 +1,6 @@
 // src/components/LoadingPage.js
 import React from 'react';
-import loadingAnimation from '../assets/loading.png';
+import loadingAnimation from '../assets/loading.gif';
 import '../Componentcss/loading-page.css';
 
 const LoadingPage = () => {
