@@ -4,7 +4,7 @@ import { registerApi } from "../../config/axios";
 import UPSRates from "./upsRates";
 import FedExRates from "./fedexRates";
 import USPSRates from "./uspsRates";
-import TrashIcon from "../../assets/Icons/trash.png";
+import TrashIcon from "../../assets/Icons/trash.webp";
 import CheckoutSummary from "./CheckoutSummary";
 import "./cart.css";
 

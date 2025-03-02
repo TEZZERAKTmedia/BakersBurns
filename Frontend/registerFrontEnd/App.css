@@ -22,7 +22,7 @@
 body {
   font-family: 'Montserrat', sans-serif;
   /* If you want a solid color fallback plus the image: */
-  background-image: url('./assets/tree.jpg'); 
+  background-image: url('./assets/tree.webp'); 
   background-size: cover; /* Ensures the image covers the entire viewport */
   color: var(--text-color);
   z-index: 1000;

@@ -13,7 +13,8 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 
 
-
+const cron = require('node-cron');
+const { exec } = require('child_process');
 
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
@@ -232,6 +233,25 @@ const { checkShippedOrdersUsps } = require("./controllers/carrier/cronjobs/uspsC
 const {startDiscountCron} = require('./controllers/admin/cron/discountCronJob.js');
 const cleanupMediaCron = require('./utils/mediaCronJob');
 const scheduleCronJob = require('./utils/ordersCronJob');
+
+
+
+
+
+cron.schedule('* * * * *', () => {
+  console.log('Cron job running every minute...');
+  exec('node convert-assets.js', (error, stdout, stderr) => {
+    if (error) {
+      console.error(`Error: ${error.message}`);
+      return;
+    }
+    if (stderr) {
+      console.error(`Stderr: ${stderr}`);
+    }
+    console.log(`Stdout: ${stdout}`);
+  });
+});
+
 
 sequelize.authenticate()
   .then(async () => {
