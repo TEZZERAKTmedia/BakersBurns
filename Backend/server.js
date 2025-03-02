@@ -240,7 +240,9 @@ const scheduleCronJob = require('./utils/ordersCronJob');
 
 cron.schedule('* * * * *', () => {
   console.log('Cron job running every minute...');
-  exec('node convert-assets.js', (error, stdout, stderr) => {
+
+  const scriptPath = path.join(__dirname, 'convert-assets.js');
+  exec(`node "${scriptPath}"`, (error, stdout, stderr) => {
     if (error) {
       console.error(`Error: ${error.message}`);
       return;
