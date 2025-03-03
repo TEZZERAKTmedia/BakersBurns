@@ -67,12 +67,12 @@
   .cart-item-name {
     font-size: 1.2rem;
     margin: 0;
-    color: #007bff;
+    color: var(--text-color);
   }
   
   .cart-item-price {
     font-size: 1rem;
-    color: #555;
+    color: var(--text-color);
   }
   
   .cart-item-quantity-control {
@@ -178,6 +178,37 @@
      
    
   }
+  .shipping-section {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px; /* Adds space between the label, input, and button */
+  margin-bottom: 20px; /* Extra spacing from other sections */
+}
+
+.shipping-section label {
+  font-size: 1rem;
+  margin-bottom: 5px;
+}
+
+.shipping-section input[type="text"] {
+  padding: 10px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.shipping-section button {
+  align-self: flex-start;
+  padding: 10px 20px;
+  background-color: var(--btn-bg);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
   .carrier-disabled {
     background: gray;
     color: white;
@@ -395,4 +426,8 @@
   cursor: not-allowed;
   opacity: 0.6;
   pointer-events: none; /* Prevent clicks */
+}
+.delete-icon {
+  width: 30px;
+  margin: 30px;
 }

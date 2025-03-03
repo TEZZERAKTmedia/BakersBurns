@@ -192,7 +192,7 @@ const CartPage = () => {
               </div>
               <img
                 src={TrashIcon}
-                style={{ height: "3vh", width: "auto", marginLeft: "50%" }}
+                
                 alt="Delete"
                 className="delete-icon"
                 onClick={() => handleDelete(item.id)}
