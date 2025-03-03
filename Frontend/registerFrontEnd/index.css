@@ -22,7 +22,7 @@
    --bg-overlay: #ffffff8b;
    --bg-section: #ffebdea0;
    --text-color: #000000;
-   --hero-bg-overlay: #e7cfb4;
+   --hero-bg-overlay: #874130;
    --hero-title-color: black;
    --hero-desc-color: #ffffff89;
    --btn-bg: #84240c;
@@ -180,7 +180,7 @@ p {
 
 a {
   font-weight: 500;
-  color: #646cff;
+  color: var(--inverted-button-text);
   text-decoration: inherit;
 }
 
@@ -202,7 +202,8 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
+  background-color: var(--hero-bg-overlay);
+  color: var(--inverted-button-text);
   cursor: pointer;
   transition: border-color 0.25s;
 }

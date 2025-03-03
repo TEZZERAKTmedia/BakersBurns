@@ -46,3 +46,11 @@
     background-color: var(--toggle-slider-active, #f9f9f9);
   }
   
+  @media (min-width: 1000px) {
+    .theme-toggle {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      margin-top: 0; /* remove margin since we're positioning it fixed */
+    }
+  }

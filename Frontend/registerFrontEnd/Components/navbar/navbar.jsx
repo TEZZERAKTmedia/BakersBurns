@@ -1,12 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import SocialLinks from './socialLinks';
 import ThemeToggle from '../themetoggle/Dark-Light';
-import './navbar.css'; // Import the CSS file for styling
+import './navbar.css';
 
 const Navbar = () => {
-  const [menuOpen, setMenuOpen] = useState(false);
+  // On large screens (width ≥ 1000px) we always want the menu open.
+  const [menuOpen, setMenuOpen] = useState(window.innerWidth >= 1000);
+  const [isLargeScreen, setIsLargeScreen] = useState(window.innerWidth >= 1000);
   const location = useLocation();
 
   const pageTitles = {
@@ -16,29 +18,43 @@ const Navbar = () => {
     '/store': 'Store',
     '/cart': 'Cart',
     '/about': 'About',
-    '/gallery' : 'Gallery',
+    '/gallery': 'Gallery',
     '/privacy-policy': 'Privacy Policy',
     '/terms-of-service': 'Terms of Service',
   };
 
   const currentPageTitle = pageTitles[location.pathname] || '';
 
-  // Toggles the entire menu
+  // Listen for window resize and force menu open on desktop.
+  useEffect(() => {
+    const handleResize = () => {
+      const isWide = window.innerWidth >= 1000;
+      setIsLargeScreen(isWide);
+      setMenuOpen(isWide); // Always open on large screens.
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Toggle only for mobile.
   const toggleMenu = () => {
-    setMenuOpen(!menuOpen);
+    if (!isLargeScreen) {
+      setMenuOpen(prev => !prev);
+    }
   };
 
-  // Closes the entire menu
+  // Close mobile menu on nav item click.
   const closeMenu = () => {
-    setMenuOpen(false);
+    if (!isLargeScreen) {
+      setMenuOpen(false);
+    }
   };
 
   return (
     <nav className="navbar">
-      {/* Top Section */}
       <div className="navbar-top">
-
-        {/* Page title FIRST */}
+        {/* Page Title */}
         <AnimatePresence>
           <motion.div
             className="navbar-title"
@@ -53,61 +69,111 @@ const Navbar = () => {
           </motion.div>
         </AnimatePresence>
 
-        {/* Conditionally render Login/Sign-up only if menuOpen is true */}
-        {menuOpen && (
-          <div className="navbar-auth-buttons">
-            <button className="inverted-button-container" onClick={closeMenu}>
-              <Link to="/sign-up" className="inverted-button">Sign up</Link>
-            </button>
-            <button className="inverted-button-container" onClick={closeMenu}>
-              <Link to="/login" className="inverted-button">Login</Link>
-            </button>
-          </div>
-        )}
+        {isLargeScreen ? (
+          // Desktop: All nav items and auth buttons inline
+          <>
+            <ul className="nav-list desktop">
+              <li className="nav-item" onClick={closeMenu}>
+                <Link to="/">Home</Link>
+              </li>
+              <li className="nav-item" onClick={closeMenu}>
+                <Link to="/store">Store</Link>
+              </li>
+              <li className="nav-item" onClick={closeMenu}>
+                <Link to="/cart">Cart</Link>
+              </li>
+              <li className="nav-item" onClick={closeMenu}>
+                <Link to="/about">About</Link>
+              </li>
+              <li className="nav-item" onClick={closeMenu}>
+                <Link to="/gallery">Gallery</Link>
+              </li>
+              <li className="nav-item" onClick={closeMenu}>
+                <Link to="/privacy-policy">Privacy Policy</Link>
+              </li>
+              <li className="nav-item" onClick={closeMenu}>
+                <Link to="/terms-of-service">Terms of Service</Link>
+              </li>
+              <li className="nav-item">
+                <ThemeToggle />
+              </li>
+              <li>
+              <div className="navbar-auth-buttons">
+              <li >
+              <button className="inverted-button-container">
+                
+                <Link to="/sign-up" className="inverted-button">Sign up</Link>
+              </button>
+              </li>
+              <button className="inverted-button-container">
+                <Link to="/login" className="inverted-button">Login</Link>
+              </button>
+            </div>
+              </li>
 
-        {/* Hamburger menu LAST */}
-        <div
-          className={`hamburger-menu ${menuOpen ? 'open' : ''}`}
-          onClick={toggleMenu}
-        >
-          <div className="bar1"></div>
-          <div className="bar2"></div>
-          <div className="bar3"></div>
-        </div>
+
+            </ul>
+          </>
+        ) : (
+          // Mobile: Show hamburger menu and auth buttons (if menu is open)
+          <>
+            {menuOpen && (
+              <div className="navbar-auth-buttons">
+                <button className="inverted-button-container" onClick={closeMenu}>
+                  <Link to="/sign-up" className="inverted-button">Sign up</Link>
+                </button>
+                <button className="inverted-button-container" onClick={closeMenu}>
+                  <Link to="/login" className="inverted-button">Login</Link>
+                </button>
+              </div>
+            )}
+            <div
+              className={`hamburger-menu ${menuOpen ? 'open' : ''}`}
+              onClick={toggleMenu}
+            >
+              <div className="bar1"></div>
+              <div className="bar2"></div>
+              <div className="bar3"></div>
+            </div>
+          </>
+        )}
       </div>
 
-      {/* Navigation Links */}
-      <ul className={`nav-list ${menuOpen ? 'show' : ''}`}>
-        <li className="nav-item" onClick={closeMenu}>
-          <Link to="/">Home</Link>
-        </li>
-        <li className="nav-item" onClick={closeMenu}>
-          <Link to="/store">Store</Link>
-        </li>
-        <li className="nav-item" onClick={closeMenu}>
-          <Link to="/cart">Cart</Link>
-        </li>
-        <li className="nav-item" onClick={closeMenu}>
-          <Link to="/about">About</Link>
-        </li>
-        <li className="nav-item" onClick={closeMenu}>
-          <Link to="/gallery"> Gallery</Link>
-        </li>
-        <li className="inverted-button-p-t" onClick={closeMenu}>
-          <Link to="/privacy-policy" className="inverted-button">Privacy Policy</Link>
-        </li>
-        <li className="inverted-button-p-t" onClick={closeMenu}>
-          <Link to="/terms-of-service" className="inverted-button">Terms of Service</Link>
-        </li>
-        {/* Theme Toggle */}
-        <ThemeToggle />
-      </ul>
-
-      {/* Social Media Links */}
-      {menuOpen && (
-        <div className="social-links-nav">
-          <SocialLinks />
-        </div>
+      {/* Mobile nav overlay */}
+      {!isLargeScreen && (
+        <>
+          <ul className={`nav-list mobile ${menuOpen ? 'show' : ''}`}>
+            <li className="nav-item" onClick={closeMenu}>
+              <Link to="/">Home</Link>
+            </li>
+            <li className="nav-item" onClick={closeMenu}>
+              <Link to="/store">Store</Link>
+            </li>
+            <li className="nav-item" onClick={closeMenu}>
+              <Link to="/cart">Cart</Link>
+            </li>
+            <li className="nav-item" onClick={closeMenu}>
+              <Link to="/about">About</Link>
+            </li>
+            <li className="nav-item" onClick={closeMenu}>
+              <Link to="/gallery">Gallery</Link>
+            </li>
+            <div className="nav-item-tiny" onClick={closeMenu}>
+              <Link to="/privacy-policy">Privacy Policy</Link>
+            </div>
+            <li className="nav-item-tiny" onClick={closeMenu}>
+              <Link to="/terms-of-service">Terms of Service</Link>
+            </li>
+            <li className="nav-item">
+              <ThemeToggle />
+            </li>
+          </ul>
+          {menuOpen && (
+            <div className="social-links-nav">
+              <SocialLinks />
+            </div>
+          )}
+        </>
       )}
     </nav>
   );
