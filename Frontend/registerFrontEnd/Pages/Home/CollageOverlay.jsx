@@ -1,16 +1,21 @@
 import React from 'react';
 import CollageImage from './ParallaxImage'; // the updated component
+import './CollageOverlay.css';
+// Import images from your assets folder
+import img1 from '../../assets/img1.webp';
+import img2 from '../../assets/img2.webp';
+import img3 from '../../assets/img3.webp';
+import img4 from '../../assets/img4.webp';
+import img5 from '../../assets/img5.webp';
+import img6 from '../../assets/img7.webp';
 
-// Define your collage items with more drastic differences.
-// The ones with higher zIndex (closer) have lower parallaxFactor (move slower).
-// The ones with lower zIndex (further back) have higher parallaxFactor (move faster).
 const collageItems = [
-  { src: require('../assets/img1.webp'), top: '10%', left: '5%', zIndex: 9, parallaxFactor: 0.3 },
-  { src: require('../assets/img2.webp'), top: '15%', left: '60%', zIndex: 7, parallaxFactor: 0.6 },
-  { src: require('../assets/img3.webp'), top: '40%', left: '20%', zIndex: 5, parallaxFactor: 1.0 },
-  { src: require('../assets/img4.webp'), top: '55%', left: '70%', zIndex: 3, parallaxFactor: 1.5 },
-  { src: require('../assets/img5.webp'), top: '70%', left: '15%', zIndex: 10, parallaxFactor: 0.2 },
-  { src: require('../assets/img6.webp'), top: '85%', left: '50%', zIndex: 4, parallaxFactor: 1.8 },
+  { src: img1, top: '10%', left: '10%', zIndex: 9, parallaxFactor: 1 },
+  { src: img2, top: '15%', left: '60%', zIndex: 7, parallaxFactor: 2 },
+  { src: img3, top: '40%', left: '10%', zIndex: 5, parallaxFactor: 1},
+  { src: img4, top: '45%', left: '60%', zIndex: 3, parallaxFactor: 2 },
+  { src: img5, top: '70%', left: '10%', zIndex: 10, parallaxFactor: 1 },
+  { src: img6, top: '75%', left: '60%', zIndex: 4, parallaxFactor: 2 },
 ];
 
 const CollageOverlay = () => {
