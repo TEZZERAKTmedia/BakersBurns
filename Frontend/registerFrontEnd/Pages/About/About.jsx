@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './about.css'; // Import external CSS
+import Headshot from '../../assets/headshot.webp';
 
 const About = () => {
     useEffect(() => {
@@ -13,7 +14,7 @@ const About = () => {
             <div>
                 <h1 className="about-title" data-aos="fade-up">About the Artist</h1>
                 <img
-                    src="path_to_artist_photo.jpg"
+                    src={Headshot}
                     alt="Artist's portrait"
                     className="about-image"
                     data-aos="fade-up"

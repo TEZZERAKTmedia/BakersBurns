@@ -245,6 +245,7 @@
   font-weight: bold;
   border: none;
   cursor: pointer;
+  width: 100%;
   transition: background 0.3s ease, transform 0.2s ease;
 }
 
@@ -394,6 +395,10 @@
   color: #6b7280; /* Tailwind gray-500 */
 }
 
+.zip-button {
+  width: 100%;
+}
+
 
 
 
@@ -409,6 +414,7 @@
   text-align: center;
   text-decoration: none;
   border: none;
+  width: 100%;
   border-radius: 4px;
   cursor: pointer;
   transition: background-color 0.3s ease, opacity 0.3s ease;

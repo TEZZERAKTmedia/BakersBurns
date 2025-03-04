@@ -88,12 +88,16 @@ const Navbar = () => {
               <li className="nav-item" onClick={closeMenu}>
                 <Link to="/gallery">Gallery</Link>
               </li>
-              <li className="nav-item" onClick={closeMenu}>
+              <div className='nav-item-tiny-desk-box'>
+
+              <li className="nav-item-tiny-desk" onClick={closeMenu}>
                 <Link to="/privacy-policy">Privacy Policy</Link>
               </li>
-              <li className="nav-item" onClick={closeMenu}>
+              <li className="nav-item-tiny-desk" onClick={closeMenu}>
                 <Link to="/terms-of-service">Terms of Service</Link>
               </li>
+              </div>
+              
               <li className="nav-item">
                 <ThemeToggle />
               </li>

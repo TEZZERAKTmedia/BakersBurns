@@ -222,7 +222,7 @@ const CartPage = () => {
           placeholder="Enter your ZIP code"
           disabled={zipSubmitted}
         />
-        <button className="quantity-button" onClick={handleZipSubmit} disabled={zipSubmitted}>
+        <button className="zip-button" onClick={handleZipSubmit} disabled={zipSubmitted}>
           {zipSubmitted ? "ZIP Code Submitted" : "Submit ZIP Code"}
         </button>
       </div>
@@ -230,17 +230,17 @@ const CartPage = () => {
       {/* Carrier Rate Components */}
       {zipSubmitted && (
         <div className="carrier-buttons">
-<UPSRates
-  receiverZip={receiverZip}
-  totalWeight={totalWeight}
-  totalDimensions={totalDimensions}
-  onSelectRate={(serviceType, cost) => handleSelectShipping("UPS", serviceType, cost)}
-  isOpen={openCarrier === "UPS"}
-  onToggle={() => setOpenCarrier(openCarrier === "UPS" ? null : "UPS")}
-/>
+          <UPSRates
+            receiverZip={receiverZip}
+            totalWeight={totalWeight}
+            totalDimensions={totalDimensions}
+            onSelectRate={(serviceType, cost) => handleSelectShipping("UPS", serviceType, cost)}
+            isOpen={openCarrier === "UPS"}
+            onToggle={() => setOpenCarrier(openCarrier === "UPS" ? null : "UPS")}
+          />
 
 
-<FedExRates
+{/*<FedExRates
   receiverZip={receiverZip}
   totalWeight={totalWeight}
   totalDimensions={totalDimensions}
@@ -256,7 +256,7 @@ const CartPage = () => {
   onSelectRate={(serviceType, cost) => handleSelectShipping("USPS", serviceType, cost)}
   isOpen={openCarrier === "USPS"}
   onToggle={() => setOpenCarrier(openCarrier === "USPS" ? null : "USPS")}
-/>
+      /> */}
 
 
         </div>

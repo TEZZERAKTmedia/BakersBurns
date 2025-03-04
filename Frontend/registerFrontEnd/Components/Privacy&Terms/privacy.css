@@ -4,6 +4,8 @@
     border-radius: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for the container */
     max-width: 600px;
+    height: 100vh;
+    
     margin: 0 auto; /* Center the container */
     overflow-y: auto; /* Enable vertical scrolling if necessary */
     color: #000; /* Ensure all text in the container is black */
@@ -14,7 +16,7 @@
     color: #000; /* Black text for the main heading */
     margin-bottom: 20px;
     text-align: center;
-    margin-top: 10%;
+    margin-top: 20%;
   }
   
   .privacy-policy p {
@@ -73,7 +75,7 @@
   
   /* Ensure the container is scrollable if the content overflows */
   .privacy-policy {
-    max-height: 90vh; /* Prevent the container from taking up the entire viewport */
+    max-height: 100vh; /* Prevent the container from taking up the entire viewport */
     overflow-y: auto;
+    background-color: var(--navbar-bg);
   }
-  

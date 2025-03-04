@@ -3,7 +3,7 @@
     padding: 1rem;
     max-width: 800px;
     margin: 0 auto;
-    background-color: var(--hero-bg-overlay);
+    background-color: var(--navbar-bg);
     border-radius: 8px;
     height: 100%;
     min-height: 100vh;
@@ -22,9 +22,10 @@
 .about-image {
     display: block;
     margin: 1rem auto;
-    max-width: 100%;
+    max-width: 50%;
     height: auto;
     border-radius: 8px;
+
 }
 
 /* Section Title */
