@@ -306,8 +306,8 @@ const ProductForm = ({ product = {}, onClose }) => {
               gap: "10px"
             }}
           >
-            <button onClick={onClose}>Cancel</button>
-            <button onClick={handleSave} disabled={isLoading}>
+            <button className="btn" onClick={onClose}>Cancel</button>
+            <button className="btn" onClick={handleSave} disabled={isLoading}>
               {isLoading ? "Saving..." : "Save"}
             </button>
           </div>

@@ -123,6 +123,7 @@
   border: 2px solid var(--form-input-border); /* #ccc in light mode */
   border-radius: 8px;
   font-size: 16px;
+  width: 90%;
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
@@ -420,4 +421,9 @@
 .product-title {
   font-family: 'Dancing Script', cursive;
   font-size: 3rem;
+}
+
+.btn {
+  background-color: var(--btn-bg);
+  color: var(--inverted-button-text);
 }

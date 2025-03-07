@@ -2,7 +2,15 @@ import React, { useEffect } from 'react';
 import { userApi } from './config/axios';
 
 const AuthWrapper = ({ children }) => {
+  // Read the environment variable to enable or disable authentication
+  const isAuthEnabled = true;
+
   useEffect(() => {
+    if (!isAuthEnabled) {
+      console.log('AuthWrapper is disabled, skipping authentication.');
+      return;
+    }
+
     const verifySession = async () => {
       try {
         // Check if the user session is valid
@@ -10,13 +18,12 @@ const AuthWrapper = ({ children }) => {
         console.log('User session verified successfully.');
       } catch (error) {
         console.error('User session invalid, redirecting to register app...');
-        // Redirect to the registration app if not authenticated
         window.location.href = import.meta.env.VITE_LOG_OUT_REDIRECTION;
       }
     };
 
     verifySession();
-  }, []);
+  }, [isAuthEnabled]);
 
   return <>{children}</>;
 };
