@@ -1,14 +1,4 @@
-body {
-    background-color: var(--body-bg);
-    font-family: 'Roboto', sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    margin: 0;
-    padding: 10px; /* Padding for mobile devices */
-    box-sizing: border-box;
-}
+
 
 .container {
     background: var(--container-bg);
@@ -18,6 +8,7 @@ body {
     max-width: 90%; /* Fit within the viewport */
     width: 100%; /* Responsive width */
     text-align: center;
+
 }
 
 .center-container {
@@ -96,7 +87,7 @@ button:disabled {
     width: 100%;
     padding: 0.75rem;
     font-size: 1rem;
-    background-color: #ff956b
+    background-color: var(--btn-bg);
     ;
     color: var(--signup-button-text);
     border: none;

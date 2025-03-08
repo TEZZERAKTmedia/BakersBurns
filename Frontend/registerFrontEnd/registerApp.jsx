@@ -7,7 +7,7 @@ import Home from './Pages/Home/Home'; // Import Home directly (no lazy) for fast
 const Store = React.lazy(() => import('./Pages/Store/Store'));
 const About = React.lazy(() => import('./Pages/About/About'));
 const Gallery = React.lazy(() => import('./Pages/Gallery/Gallery'));
-const VerifyEmail = React.lazy(() => import('./Components/verifyEmail'));
+const VerifyEmail = React.lazy(() => import('./Pages/Signup/verifyEmail'));
 const Signup = React.lazy(() => import('./Pages/Signup/SignUp'));
 const Login = React.lazy(() => import('./Pages/Login/Login'));
 const PasswordResetForm = React.lazy(() => import('./Components/verification/passwordReset'));

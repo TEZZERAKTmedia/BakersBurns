@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
+import './privacy_terms.css';
 import { userApi } from "../../config/axios"; // or userApi if that's correct
 import { loadStripe } from "@stripe/stripe-js";
 

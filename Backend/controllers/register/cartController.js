@@ -312,11 +312,14 @@ const createCheckoutSession = async (req, res) => {
 
     lineItems.push(shippingLineItem);
 
+    const expiresAt = Math.floor(Date.now() / 1000) + 5 * 60;
+
     // Create a Stripe checkout session with metadata (shipping info is also passed in metadata for reference)
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: lineItems,
       mode: 'payment',
+      expires_at: expiresAt,
       success_url: `${process.env.REGISTER_FRONTEND}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.REGISTER_FRONTEND}/cancel?session_id={CHECKOUT_SESSION_ID}`,
       metadata: {

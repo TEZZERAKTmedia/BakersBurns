@@ -1,6 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { registerApi } from "../../config/axios";
+import "./checkout_summary.css"; // Import the external CSS file
 
 const CheckoutSummary = ({ 
   cart, 
@@ -21,26 +22,20 @@ const CheckoutSummary = ({
       selectedCarrier,
       selectedService,
       shippingCost,
-      // You might also send receiverZip, taxAmount, grandTotal if needed on your backend,
-      // but for now we’re updating only the three fields.
-      // timestamp can be added on the backend if needed.
     };
 
     try {
-      // Retrieve the sessionId from local storage
       const sessionId = localStorage.getItem("sessionId");
       if (!sessionId) {
         throw new Error("Session ID not found.");
       }
       
-      // Update shipping details in the database for the guest cart
       await registerApi.post("/register-cart/update-shipping", {
         sessionId,
         shippingDetails,
       });
-      console.log("🚀 Shipping details stored in the database.");
 
-      // Now, navigate to the checkout options page.
+      console.log("🚀 Shipping details stored in the database.");
       navigate("/checkout-options");
     } catch (error) {
       console.error("Error saving shipping details:", error);
@@ -49,32 +44,52 @@ const CheckoutSummary = ({
   };
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-content">
-        <h2>Order Summary</h2>
-        <div className="summary-details">
-          <h3>Items in Cart</h3>
-          <ul>
-            {cart.map((item) => (
-              <li key={item.id}>
-                {item.quantity}x {item.name} - ${item.price.toFixed(2)}
-              </li>
-            ))}
-          </ul>
-          <h3>Shipping Method</h3>
-          <p>{selectedCarrier ? `${selectedCarrier} - ${selectedService}` : "Not Selected"}</p>
-          <h3>Shipping Cost</h3>
-          <p>${shippingCost ? shippingCost.toFixed(2) : "Not Selected"}</p>
-          <h3>Tax</h3>
-          <p>${taxAmount.toFixed(2)}</p>
-          <h3>Grand Total</h3>
-          <p><strong>${grandTotal.toFixed(2)}</strong></p>
+    <div className="cksm-modal-overlay">
+      <div className="cksm-modal-content">
+        <h2 className="cksm-title">Order Summary</h2>
+
+        <div className="cksm-summary-details">
+          <div className="cksm-detail-row">
+            <span className="cksm-detail-label">Items in Cart:</span>
+            <span className="cksm-detail-value">
+              {cart.map((item) => (
+                <div key={item.id}>
+                  {item.quantity}x {item.name} - ${item.price.toFixed(2)}
+                </div>
+              ))}
+            </span>
+          </div>
+          <div className="cksm-detail-row">
+            <span className="cksm-detail-label">Shipping Method:</span>
+            <span className="cksm-detail-value">
+              {selectedCarrier ? `${selectedCarrier} - ${selectedService}` : "Not Selected"}
+            </span>
+          </div>
+          <div className="cksm-detail-row">
+            <span className="cksm-detail-label">Shipping Cost:</span>
+            <span className="cksm-detail-value">
+              ${shippingCost ? shippingCost.toFixed(2) : "Not Selected"}
+            </span>
+          </div>
+          <div className="cksm-detail-row">
+            <span className="cksm-detail-label">Tax:</span>
+            <span className="cksm-detail-value">
+              ${taxAmount.toFixed(2)}
+            </span>
+          </div>
+          <div className="cksm-detail-row">
+            <span className="cksm-detail-label">Grand Total:</span>
+            <span className="cksm-detail-value">
+              <strong>${grandTotal.toFixed(2)}</strong>
+            </span>
+          </div>
         </div>
-        <div className="modal-buttons">
-          <button onClick={handleConfirmCheckout} className="proceed-checkout">
+
+        <div className="cksm-modal-buttons">
+          <button onClick={handleConfirmCheckout} className="cksm-proceed-checkout">
             Confirm & Proceed
           </button>
-          <button onClick={onClose} className="cancel-button">
+          <button onClick={onClose} className="cksm-cancel-button">
             Cancel
           </button>
         </div>

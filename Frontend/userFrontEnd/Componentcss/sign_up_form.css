@@ -1,13 +1,3 @@
-body {
-    background-color: #f4f4f9;
-    font-family: 'Roboto', sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    margin: 0;
-    padding: 10px; /* Add padding to avoid cut-off on smaller screens */
-}
 
 .container {
     background: #fff;

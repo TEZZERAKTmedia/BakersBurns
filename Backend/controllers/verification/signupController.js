@@ -6,6 +6,7 @@ const Message = require('../../models/messages');
 const Thread = require('../../models/threads');
 const sendVerificationEmail = require('../../utils/buildEmail'); // Nodemailer utility
 const { v4: uuidv4 } = require('uuid');
+const { mergeGuestCartToUserCart } = require('./cartUtil');
 
 
 // Signup Controller
@@ -73,6 +74,7 @@ if (!hasAcceptedPrivacyPolicy || !hasAcceptedTermsOfService) {
         termsAcceptedAt: hasAcceptedTermsOfService ? new Date() : null, 
         createdAt: new Date() // Store creation time for expiration check
       });
+      
 
       return res.status(200).json({ message: 'Verification email sent. Please verify your email.' });
     } else {
@@ -165,8 +167,13 @@ const createAccount = async (req, res) => {
       isVerified: true, // This user is verified after the email verification process
       role: 'user', // Default role for the user
   });
-  console.log("User moved to Users table with ID:", newUser.id);
-  
+      console.log("User moved to Users table with ID:", newUser.id);
+      if (guestSessionId) {
+        await mergeGuestCartToUserCart(guestSessionId, newUser.id);
+        console.log("✅ Guest cart merged into user cart");
+      } else {
+        console.log("⚠️ No guestSessionId provided, skipping cart merge");
+      }
 
     // Delete the pending user entry
     await PendingUser.destroy({ where: { email } });

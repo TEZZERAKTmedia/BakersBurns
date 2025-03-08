@@ -147,12 +147,14 @@ const createCheckoutSession = async (req, res) => {
       },
       quantity: item.quantity,
     }));
+    const expiresAt = Math.floor(Date.now() / 1000) + 5 * 60;
 
     // Create Stripe checkout session
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: lineItems,
       mode: 'payment',
+      expires_at: expiresAt,
       success_url: `${process.env.USER_FRONTEND}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.USER_FRONTEND}/cancel`,
       billing_address_collection: 'required',

@@ -1,7 +1,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { findUserByUsername, findUserByEmail } = require('../../models/loginUser');
-
+const { mergeGuestCartToUserCart} = require('./cartUtil');
 // Allowed sameSite values from environment variables
 const allowedSameSiteValues = ['Strict', 'Lax', 'None'];
 
@@ -31,6 +31,8 @@ const loginUser = async (req, res) => {
       process.env.JWT_SECRET,  // JWT secret from .env
       { expiresIn: '1h' }
     );
+
+    await mergeGuestCartToUserCart(guestSessionId, user.id);
 
     console.log('Generated token:', token);
     console.log('User role:', user.role);

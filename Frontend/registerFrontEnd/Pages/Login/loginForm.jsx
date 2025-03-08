@@ -23,10 +23,11 @@ const LoginForm = () => {
   };
 
   const handleSubmit = async (e) => {
+    const guestSessionId = localStorage.getItem("sessionId");
     e.preventDefault();
     setLoading(true); // Start loading animation
     try {
-      await registerApi.post('/auth/login', { identifier, password });
+      await registerApi.post('/auth/login', { identifier, password, guestSessionId });
       // Redirect to the user URL upon success
       window.location.href = import.meta.env.VITE_USER_URL;
     } catch (error) {

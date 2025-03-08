@@ -1,0 +1,103 @@
+/* Modal Overlay */
+.cksm-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+  
+  /* Modal Content */
+  .cksm-modal-content {
+    background-color: var(--navbar-bg);
+    color: var(--text-color);
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    width: 90%;
+    max-width: 500px;
+    text-align: center;
+    position: relative;
+  }
+  
+  /* Title */
+  .cksm-title {
+    margin-bottom: 15px;
+    font-size: 1.5rem;
+    font-weight: bold;
+  }
+  
+  /* Summary Details */
+  .cksm-summary-details {
+    margin: 15px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  /* Detail Row - Makes Name on the Left & Value on the Right */
+  .cksm-detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--text-color);
+    padding: 8px 0;
+  }
+  
+  /* Label (Left Side) */
+  .cksm-detail-label {
+    font-weight: bold;
+    text-align: left;
+    flex: 1;
+  }
+  
+  /* Value (Right Side) */
+  .cksm-detail-value {
+    text-align: right;
+    flex: 1;
+  }
+  
+  /* Buttons Container */
+  .cksm-modal-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  
+  /* Confirm Checkout Button */
+  .cksm-proceed-checkout {
+    background-color: #28a745;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.2s ease-in-out;
+  }
+  
+  .cksm-proceed-checkout:hover {
+    background-color: #218838;
+  }
+  
+  /* Cancel Button */
+  .cksm-cancel-button {
+    background-color: #dc3545;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.2s ease-in-out;
+  }
+  
+  .cksm-cancel-button:hover {
+    background-color: #c82333;
+  }
+  

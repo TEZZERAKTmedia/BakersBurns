@@ -53,7 +53,7 @@ const Store = () => {
 
   if (isLoading || error) {
     return (
-      <div>
+      <div className="full-page-loading-overlay">
         <LoadingPage />
         {error && <p style={{ color: 'red' }}>{error}</p>}
       </div>

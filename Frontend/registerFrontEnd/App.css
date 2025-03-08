@@ -25,6 +25,8 @@ body {
   background-image: url('./assets/tree.webp'); 
   background-size: cover; /* Ensures the image covers the entire viewport */
   color: var(--text-color);
+  width: 100vw;
+  height: 100vh;
   z-index: 1000;
   font-family: var(--font);
 }

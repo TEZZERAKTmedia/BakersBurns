@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { registerApi } from '../config/axios';
+import { registerApi } from '../../config/axios';
 
 const VerifyEmail = () => {
   const [verificationStatus, setVerificationStatus] = useState(null);
@@ -22,6 +22,7 @@ const VerifyEmail = () => {
 
   useEffect(() => {
     const { email, token } = getQueryParams();
+    const sessionId = localStorage.getItem("sessionId")
 
     // Check if email and token exist
     if (email && token) {
@@ -29,7 +30,7 @@ const VerifyEmail = () => {
       const verifyEmail = async () => {
         try {
           const response = await registerApi.get(`/sign-up/create-account`, {
-            params: { email, token },
+            params: { email, token, sessionId },
           });
         
           if (response.status === 200 && response.data.verified) {

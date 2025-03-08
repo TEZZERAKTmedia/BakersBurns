@@ -62,7 +62,7 @@
    /* SIGNUP FORM */
    --body-bg: #f4f4f9;
    --body-text: #333;
-   --container-bg: #fff;
+   --container-bg: #ffffffb0;
    --container-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
    --header-color: #333;
    --form-input-border: #ccc;
@@ -168,11 +168,17 @@
 
 /* Apply Theme to Body */
 body {
-  background-color: var(--wood-bg-dark);
+  font-family: 'Montserrat', sans-serif;
+  /* If you want a solid color fallback plus the image: */
+  background-image: url('./assets/tree.webp'); 
+  background-size: cover; /* Ensures the image covers the entire viewport */
   color: var(--text-color);
+  width: 100vw;
+  height: 100vh;
   z-index: 1000;
   font-family: var(--font);
 }
+
 
 p {
   color: var(--text-color);

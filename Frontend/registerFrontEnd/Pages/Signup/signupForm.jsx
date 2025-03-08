@@ -177,6 +177,7 @@ const SignUpForm = () => {
     }, [formData.password]);
 
     const handleSubmit = async (e) => {
+        
         e.preventDefault();
         
         console.log("Form data before submission:", formData);
@@ -271,12 +272,12 @@ const SignUpForm = () => {
     return (
         <div >
             {emailSent ? (
-    <div className="success-message" style={{color: 'black', }}>
-        Registration successful! A verification email has been sent to your inbox: 
-        <div className='user-email'>{registeredEmail}</div>
-        Please check your inbox to verify your account.
-        <p style={{backgroundColor:'black',color: 'white', padding:'10px' , borderRadius:'10px'}}>If this email is incorrect please sign up again</p>
-    </div>
+                <div className="success-message" style={{color: 'black', }}>
+                    Registration successful! A verification email has been sent to your inbox: 
+                    <div className='user-email'>{registeredEmail}</div>
+                    Please check your inbox to verify your account.
+                    <p style={{backgroundColor:'black',color: 'white', padding:'10px' , borderRadius:'10px'}}>If this email is incorrect please sign up again</p>
+                </div>
             ) : (
                 <div className="center-container" >
                 <form onSubmit={handleSubmit}>
