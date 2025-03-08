@@ -6,7 +6,7 @@ const stripeWebhookController = require('../../controllers/hybrid/stripeWebhookC
 const userAuthMiddleware = require('../../middleware/userAuthMiddleware');
 
 // Route to create a checkout session
-router.post('/create-checkout-session', userAuthMiddleware(), stripeController.createCheckoutSession);
+router.post('/create-checkout-session', userAuthMiddleware('user'), stripeController.createCheckoutSession);
 
 // Route to retrieve all past Stripe events (for logging/debugging)
 router.get('/events', stripeController.getStripeEvents);

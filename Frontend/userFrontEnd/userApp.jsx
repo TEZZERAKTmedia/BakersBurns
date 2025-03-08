@@ -6,7 +6,7 @@ import Store from './Pages/Store/Store';
 import About from './Pages/About';
 import Create from './Pages/Create';
 import Orders from './Pages/Orders';
-import Cart from './Pages/Cart';
+import Cart from './Pages/Cart/Cart';
 import Settings from './Pages/Settings';
 import Success from './Components/purchase/successfulPurchase';
 import InAppMessaging from './Pages/inAppMessaging';

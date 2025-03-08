@@ -11,13 +11,19 @@ function generateOrderNumber(orderId) {
 
 // Checkout shoulsession creation
 const createCheckoutSession = async (req, res) => {
-  const transaction = await sequelize.transaction(); // Start a transaction
+  console.log("🚀 Received request to create checkout session.");
+  console.log("🔍 Checking req.user:", req.user);
+  if (!req.user || !req.user.id) {
+    console.error("❌ Error: req.user or req.user.id is undefined!");
+    return res.status(401).json({ message: "Unauthorized: User not found." });
+  }
+  const transaction = await sequelize.transaction();
 
   try {
-    const userId = req.user.id; // Assuming userId is attached by your auth middleware
-    console.log(`Creating checkout session for userId: ${userId}`);
+    const userId = req.user.id;
+    console.log(`🛒 Creating checkout session for userId: ${userId}`);
 
-    // Fetch cart items for the user within the transaction
+    // Fetch cart items including product details
     const cartItems = await Cart.findAll({
       where: { userId },
       include: [
@@ -27,41 +33,117 @@ const createCheckoutSession = async (req, res) => {
           attributes: ['id', 'name', 'price', 'thumbnail', 'quantity'],
         },
       ],
-      lock: transaction.LOCK.UPDATE, // Lock rows to prevent concurrent modifications
-      transaction, // Ensure query runs within the transaction
+      lock: transaction.LOCK.UPDATE,
+      transaction,
     });
 
-    if (cartItems.length === 0) {
-      console.log('No items in cart for userId:', userId);
+    if (!cartItems.length) {
+      console.log('⚠️ No items in cart for userId:', userId);
       await transaction.rollback();
       return res.status(400).json({ message: 'No items in cart' });
     }
 
-    // Validate stock and lock inventory
-    for (const cartItem of cartItems) {
-      const product = cartItem.product;
+    console.log("✅ Raw Cart Items:", JSON.stringify(cartItems, null, 2));
 
-      if (cartItem.quantity > product.quantity) {
-        await transaction.rollback();
-        return res
-          .status(400)
-          .json({ message: `Insufficient stock for product: ${product.name}` });
-      }
+    // Extract product details safely & fetch missing product IDs
+    const processedCartItems = await Promise.all(
+      cartItems.map(async (item) => {
+        console.log(`🛒 Processing Cart Item ID: ${item.id}`);
 
-      // Reduce stock and save product within the transaction
-      product.quantity -= cartItem.quantity;
-      await product.save({ transaction });
+        if (!item.product) {
+          console.error(`❌ Cart item ${item.id} has no associated product.`);
+          return null; // Mark as invalid
+        }
+
+        let productId = item.product.id;
+        let productName = item.product.name;
+        let productPrice = item.product.price;
+        let productThumbnail = item.product.thumbnail;
+
+        console.log(`🛒 Found Product: ID: ${productId}, Name: ${productName}`);
+
+        if (!productId) {
+          console.error(`❌ Product ID missing for cart item ${item.id}. Fetching from DB...`);
+
+          if (!productName) {
+            console.error(`❌ No product name available for cart item ID: ${item.id}, skipping.`);
+            return null;
+          }
+
+          try {
+            const foundProduct = await Product.findOne({
+              where: { name: productName },
+              attributes: ['id', 'name', 'price', 'thumbnail'],
+            });
+
+            if (!foundProduct) {
+              console.error(`❌ No product found with name: ${productName}`);
+              return null;
+            }
+
+            console.log(`✅ Retrieved product ID ${foundProduct.id} for ${foundProduct.name}`);
+
+            // Update product details
+            productId = foundProduct.id;
+            productPrice = foundProduct.price;
+            productThumbnail = foundProduct.thumbnail;
+          } catch (dbError) {
+            console.error(`❌ Error fetching product from DB: ${dbError.message}`);
+            return null;
+          }
+        }
+
+        return {
+          productId,
+          name: productName,
+          price: productPrice,
+          thumbnail: productThumbnail,
+          quantity: item.quantity,
+        };
+      })
+    );
+
+    // Remove any null items
+    const validCartItems = processedCartItems.filter(Boolean);
+
+    if (validCartItems.length === 0) {
+      console.error('❌ No valid products found in cart');
+      await transaction.rollback();
+      return res.status(400).json({ message: 'Error processing cart items' });
     }
 
-    // Map cart items to Stripe line items
-    const lineItems = cartItems.map((item) => ({
+    console.log("✅ Final Processed Cart Items:", validCartItems);
+
+    // Validate stock
+    for (const cartItem of validCartItems) {
+      console.log(`🔍 Checking stock for Product ID ${cartItem.productId}`);
+
+      const product = await Product.findByPk(cartItem.productId, { transaction });
+
+      if (!product) {
+        console.error(`❌ Product ID ${cartItem.productId} not found in database`);
+        await transaction.rollback();
+        return res.status(400).json({ message: `Product not found: ${cartItem.productId}` });
+      }
+
+      if (cartItem.quantity > product.quantity) {
+        console.error(`❌ Not enough stock for ${product.name}`);
+        await transaction.rollback();
+        return res.status(400).json({ message: `Insufficient stock for product: ${product.name}` });
+      }
+
+      
+    }
+
+    // Stripe line items
+    const lineItems = validCartItems.map((item) => ({
       price_data: {
         currency: 'usd',
         product_data: {
-          name: item.product.name,
-          images: [`${process.env.USER_FRONTEND}/uploads/${item.product.thumbnail}`],
+          name: item.name,
+          images: [`${process.env.USER_FRONTEND}/uploads/${item.thumbnail}`],
         },
-        unit_amount: item.product.price * 100, // Convert to cents
+        unit_amount: item.price * 100,
       },
       quantity: item.quantity,
     }));
@@ -79,21 +161,21 @@ const createCheckoutSession = async (req, res) => {
       },
       metadata: {
         userId: `${userId}`,
-        productIds: cartItems.map((item) => item.product.id).join(','),
+        productIds: validCartItems.map((item) => item.productId).join(','),
       },
     });
 
-    // Commit the transaction to lock inventory
     await transaction.commit();
 
-    // Respond with the session ID to the frontend
+    console.log("✅ Stripe Checkout Session Created:", session.id);
     res.status(200).json({ sessionId: session.id });
   } catch (error) {
-    console.error('Error creating checkout session:', error);
-    await transaction.rollback(); // Rollback transaction on error
+    console.error('❌ Error creating checkout session:', error);
+    await transaction.rollback();
     res.status(500).json({ message: 'Failed to create checkout session', error: error.message });
   }
 };
+
 
 // Refund payment
 const refundPayment = async (req, res) => {

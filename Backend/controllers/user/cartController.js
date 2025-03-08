@@ -2,12 +2,9 @@ const Cart = require('../../models/cart');
 const Product = require('../../models/product');
 const User = require('../../models/user');
 
-// Fetch Cart Items
-// Fetch Cart Items
-// cartController.js
 const getCart = async (req, res) => {
   try {
-    const userId = req.user.id; // Get the userId from the middleware (attached via the token)
+    const userId = req.user.id; // Get the userId from the middleware
     console.log('Fetching cart items for userId:', userId);
 
     const cartItems = await Cart.findAll({
@@ -15,7 +12,7 @@ const getCart = async (req, res) => {
       include: [{
         model: Product,
         as: 'product',
-        attributes: ['name', 'price', 'thumbnail']
+        attributes: ['id','name', 'price', 'thumbnail', 'length', 'width', 'height', 'weight'] // Added dimensions and weight
       }]
     });
 
@@ -31,6 +28,7 @@ const getCart = async (req, res) => {
     res.status(500).json({ message: 'Error fetching cart items', error });
   }
 };
+
 
 
 

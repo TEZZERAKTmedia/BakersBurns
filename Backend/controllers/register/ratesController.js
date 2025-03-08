@@ -424,9 +424,24 @@ const getShippingRates = async (req, res) => {
 const getUPSRatesHandler = async (req, res) => {
   try {
     const { shipperZip, receiverZip, weight, dimensions } = req.body;
-    if (!shipperZip || !receiverZip || !weight || !dimensions) {
-      return res.status(400).json({ error: "Missing required parameters" });
+    
+    // Collect which parameters are missing:
+    const missingParams = [];
+    if (!shipperZip) missingParams.push("shipperZip");
+    if (!receiverZip) missingParams.push("receiverZip");
+    if (!weight) missingParams.push("weight");
+    if (!dimensions) missingParams.push("dimensions");
+
+    // If any are missing, return a 400 with the details:
+    if (missingParams.length > 0) {
+      return res.status(400).json({
+        error: "Missing required parameters",
+        missingParams, // e.g. ["shipperZip", "dimensions"]
+        received: req.body
+      });
     }
+
+    // Otherwise, proceed with fetching UPS rates
     const options = await getUPSRates(shipperZip, receiverZip, weight, dimensions);
     res.json({ ups: options });
   } catch (error) {
@@ -434,6 +449,7 @@ const getUPSRatesHandler = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch UPS rates" });
   }
 };
+
 
 const getUSPSRatesHandler = async (req, res) => {
     try {
