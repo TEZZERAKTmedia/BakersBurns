@@ -13,10 +13,12 @@
   width: 150px;
   height: 150px;
   object-fit: cover;
-  display: block;
   border-radius: 8px;
-  transition: transform 1.5s ease-in-out, z-index 0.5s ease-in-out;
+  transition: transform 1s ease-in-out, opacity 1s ease-in-out;
+  opacity: 0; /* Start hidden */
 }
+
+
 
 
 .parallax-image {

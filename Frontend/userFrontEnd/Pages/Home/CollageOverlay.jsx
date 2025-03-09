@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import "./CollageOverlay.css";
 
 // Import images
 import img1 from "../../assets/img1.webp";
@@ -17,16 +16,16 @@ import img10 from "../../assets/img10.webp";
 // Generates a random value within a range
 const getRandom = (min, max) => Math.random() * (max - min) + min;
 
-// Initial collage setup
+// Initial image positions
 const initialCollageItems = [
   { src: img1, top: "10%", left: "10%" },
-  { src: img2, top: "12%", left: "60%" },
-  { src: img3, top: "15%", left: "20%" },
+  { src: img2, top: "12%", left: "70%" },
+  { src: img3, top: "15%", left: "40%" },
   { src: img4, top: "20%", left: "55%" },
-  { src: img5, top: "30%", left: "15%" },
-  { src: img6, top: "40%", left: "70%" },
-  { src: img7, top: "50%", left: "10%" },
-  { src: img8, top: "55%", left: "60%" },
+  { src: img5, top: "20%", left: "25%" },
+  { src: img6, top: "70%", left: "70%" },
+  { src: img7, top: "65%", left: "10%" },
+  { src: img8, top: "65%", left: "60%" },
   { src: img9, top: "70%", left: "25%" },
   { src: img10, top: "75%", left: "50%" },
 ];
@@ -35,46 +34,84 @@ const CollageOverlay = () => {
   const [collageItems, setCollageItems] = useState([]);
 
   useEffect(() => {
-    // Generate initial randomized zIndex and scale for images
-    const updatedItems = initialCollageItems.map((item) => ({
-      ...item,
-      zIndex: Math.floor(getRandom(1, 10)), // Random zIndex between 1-10
-      scale: getRandom(0.8, 1.5), // Scale varies from 0.8 (farther) to 1.5 (closer)
-    }));
+    const generateRandomStyles = () =>
+      initialCollageItems.map((item) => ({
+        ...item,
+        opacity: 1, // Visible initially
+        zIndex: Math.floor(getRandom(1, 10)), // Random z-index
+        scale: getRandom(0.8, 1.5), // Random scale (0.8 = smaller, 1.5 = larger)
+        rotate: getRandom(-15, 15), // Small random tilt (-15 to 15 degrees)
+      }));
 
-    setCollageItems(updatedItems);
+    setCollageItems(generateRandomStyles());
 
-    // Update images periodically to create animation effect
-    const interval = setInterval(() => {
+    const animateCycle = () => {
+      // Step 1: Fade Out Before Moving
       setCollageItems((prevItems) =>
         prevItems.map((item) => ({
           ...item,
-          zIndex: Math.floor(getRandom(1, 10)), // Random new zIndex
-          scale: getRandom(0.8, 1.5), // Adjust scale accordingly
+          opacity: 0, // Fade out
         }))
       );
-    }, 3000); // Change every 3 seconds
+
+      setTimeout(() => {
+        // Step 2: Move, Change Scale, Z-Index While Hidden
+        setCollageItems(generateRandomStyles());
+      }, 1200); // Wait for fade-out before repositioning
+
+      setTimeout(() => {
+        // Step 3: Fade In After Repositioning
+        setCollageItems((prevItems) =>
+          prevItems.map((item) => ({
+            ...item,
+            opacity: 1, // Fade back in
+          }))
+        );
+      }, 2200); // Reappear after repositioning
+    };
+
+    // Repeat animation every 6 seconds
+    const interval = setInterval(animateCycle, 6000);
 
     return () => clearInterval(interval);
   }, []);
 
   return (
-    <div className="collage-overlay">
+    <div
+      style={{
+        position: "absolute",
+        top: 0,
+        left: 0,
+        width: "100vw",
+        height: "100vh",
+        pointerEvents: "none",
+        zIndex: 2,
+      }}
+    >
       {collageItems.map((item, i) => (
         <motion.img
           key={i}
           src={item.src}
-          className="collage-item"
           style={{
+            position: "absolute",
             top: item.top,
             left: item.left,
+            width: "150px",
+            height: "150px",
+            objectFit: "cover",
+            borderRadius: "8px",
             zIndex: item.zIndex,
           }}
           animate={{
-            scale: item.scale, // Animate scale based on z-index
-            rotate: getRandom(-10, 10), // Random tilt between -10 to 10 degrees
+            opacity: item.opacity,
+            scale: item.scale,
+            rotate: item.rotate,
           }}
-          transition={{ duration: 2, ease: "easeInOut" }}
+          transition={{
+            opacity: { duration: 1.2 },
+            scale: { duration: 2, ease: "easeInOut" },
+            rotate: { duration: 2, ease: "easeInOut" },
+          }}
         />
       ))}
     </div>
