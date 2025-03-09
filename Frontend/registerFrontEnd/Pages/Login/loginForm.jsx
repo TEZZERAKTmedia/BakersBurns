@@ -24,6 +24,7 @@ const LoginForm = () => {
 
   const handleSubmit = async (e) => {
     const guestSessionId = localStorage.getItem("sessionId");
+    console.log("🚪 Login form submitted with guestSessionId:", guestSessionId);
     e.preventDefault();
     setLoading(true); // Start loading animation
     try {

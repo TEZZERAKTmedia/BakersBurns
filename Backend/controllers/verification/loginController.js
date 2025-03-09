@@ -6,7 +6,7 @@ const { mergeGuestCartToUserCart} = require('./cartUtil');
 const allowedSameSiteValues = ['Strict', 'Lax', 'None'];
 
 const loginUser = async (req, res) => {
-  const { identifier, password } = req.body;
+  const { identifier, password, guestSessionId } = req.body;
 
   console.log('Login request received with identifier:', identifier);
 

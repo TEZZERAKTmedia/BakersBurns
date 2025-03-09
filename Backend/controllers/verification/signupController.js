@@ -119,7 +119,7 @@ const checkUsername = async (req, res) => {
 // Verify and Move Controller
 
 const createAccount = async (req, res) => {
-  const { email, token } = req.query;
+  const { email, token, guestSessionId } = req.query;
 
   console.log("Starting account creation process for email:", email);
 
