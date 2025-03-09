@@ -120,17 +120,40 @@ async function processFolder(folderConfig) {
     }
 
     if (newFilename) {
-      // Update DB record: change the asset filename from the old to the new
       try {
-        const [affectedRows] = await model.update(
-          { [field]: newFilename },
-          { where: { [field]: file } }
-        );
-        console.log(`✅ Updated ${affectedRows} record(s) in ${model.name}: ${file} → ${newFilename}`);
+        // Fetch existing record
+        const record = await model.findOne({ where: { [field]: { [sequelize.Op.like]: `%${file}%` } } });
+    
+        if (record) {
+          let updatedImages;
+          
+          // Check if the field is a JSON stringified array
+          if (Array.isArray(record[field])) {
+            // Replace old filename with new filename in the array
+            updatedImages = record[field].map(img => img === file ? newFilename : img);
+          } else if (typeof record[field] === 'string' && record[field].startsWith('["')) {
+            // Parse JSON array if stored as string
+            const imageArray = JSON.parse(record[field]);
+            updatedImages = imageArray.map(img => img === file ? newFilename : img);
+          } else {
+            updatedImages = newFilename; // If it's just a string, replace it directly
+          }
+    
+          // Update the database with the modified array
+          await model.update(
+            { [field]: JSON.stringify(updatedImages) },  // Convert back to JSON
+            { where: { id: record.id } }
+          );
+    
+          console.log(`✅ Updated ${model.name}: ${file} → ${newFilename}`);
+        } else {
+          console.warn(`⚠️ No matching record found for ${file} in ${model.name}`);
+        }
       } catch (dbErr) {
         console.error(`❌ DB update error for ${file}: ${dbErr.message}`);
       }
     }
+    
   }
 }
 

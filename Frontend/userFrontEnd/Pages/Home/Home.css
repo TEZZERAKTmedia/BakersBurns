@@ -28,7 +28,7 @@ body {
   background-color: var(--bg-overlay);
   z-index: 101;
   height: 100vh;
-  
+  width: 100vw;
 
 }
 
@@ -44,8 +44,7 @@ body {
   align-items: center;
   justify-content: center;
   text-align: center;
-  position: relative;
-  z-index: 4;
+  
   
 }
 
@@ -54,7 +53,7 @@ body {
   padding: 50px;
   border-radius: 10px;
   
-  
+  z-index: 3;
 }
 
 .hero-title {

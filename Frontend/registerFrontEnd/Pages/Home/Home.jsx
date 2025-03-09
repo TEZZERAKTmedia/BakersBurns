@@ -117,17 +117,6 @@ const Home = () => {
           <Link to="/event" className="upcoming-event-btn">See All Events</Link>
         </motion.section>
       )}
-         <motion.section 
-        className="home-section"
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, amount: 0.2 }}
-        variants={fadeIn}
-        style={{height:'80%'}}
-      >
-       
-       
-      </motion.section>
 
       {/* Get In Touch Section */}
       <motion.section 

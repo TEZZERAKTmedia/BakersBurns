@@ -123,7 +123,7 @@
   padding: 0;
   display: none; /* Hidden by default */
   z-index: -1;
-  transition: all 0.3s ease-in-out;
+  
 }
 .nav-list.mobile.show {
   display: flex;
@@ -149,7 +149,7 @@
   text-decoration: none;
   padding: 8px 12px;
   font-size: 2rem;
-  transition: background-color 0.3s;
+  
 }
 .nav-list.mobile .nav-item a:hover {
   background-color: var(--button-bg);

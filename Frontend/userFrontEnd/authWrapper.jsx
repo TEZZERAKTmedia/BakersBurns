@@ -3,7 +3,7 @@ import { userApi } from './config/axios';
 
 const AuthWrapper = ({ children }) => {
   // Read the environment variable to enable or disable authentication
-  const isAuthEnabled = true;
+  const isAuthEnabled = false;
 
   useEffect(() => {
     if (!isAuthEnabled) {
