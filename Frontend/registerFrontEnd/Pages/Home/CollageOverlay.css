@@ -6,6 +6,7 @@
   height: 100vh;
   pointer-events: none;
   z-index: 2;
+  
 }
 
 .collage-item {
@@ -15,7 +16,7 @@
   object-fit: cover;
   border-radius: 8px;
   transition: transform 1s ease-in-out, opacity 1s ease-in-out;
-  opacity: 0; /* Start hidden */
+  opacity: 1; /* Start hidden */
 }
 
 
@@ -24,8 +25,8 @@
 .parallax-image {
   position: absolute;
   transition: transform 0.5s ease-out;
-  width: 140px; /* Slightly reduced size */
-  height: 140px;
+  width: 10%; /* Slightly reduced size */
+  height: 10%;
   overflow: hidden;
   border-radius: 8px;
 }
