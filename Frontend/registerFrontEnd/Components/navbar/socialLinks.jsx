@@ -3,19 +3,45 @@ import { registerApi } from '../../config/axios';
 import loadingImage from '../../assets/loading.gif';
 import './social_links.css';
 
+// Import local icons
+import Instagram from '../../assets/instagram.webp';
+import Facebook from '../../assets/facebook.webp';
+import Twitter from '../../assets/x.webp';
+//import YouTube from '../../assets/youtube.webp';
+import Phone from '../../assets/phone.webp';
+import Email from '../../assets/email.webp';
+
 const SocialLinks = () => {
   const [socialLinks, setSocialLinks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // Map of deep links for supported platforms
+  // Map of deep links with associated icons
   const deepLinkMap = {
-    Facebook: (url) => `fb://profile/${url.split('/').pop()}`,
-    Instagram: (url) => `instagram://user?username=${url.split('/').pop()}`,
-    Twitter: (url) => `twitter://user?screen_name=${url.split('/').pop()}`,
-    YouTube: (url) => `vnd.youtube:${url.split('/').pop()}`,
-    Phone: (url) => `tel:${url}`,
-    Email: (url) => `mailto:${url}`,
+    Facebook: {
+      deepLink: (url) => `fb://profile/${url.split('/').pop()}`,
+      icon: Facebook
+    },
+    Instagram: {
+      deepLink: (url) => `instagram://user?username=${url.split('/').pop()}`,
+      icon: Instagram
+    },
+    Twitter: {
+      deepLink: (url) => `twitter://user?screen_name=${url.split('/').pop()}`,
+      icon: Twitter
+    },
+    //YouTube: {
+     // deepLink: (url) => `vnd.youtube:${url.split('/').pop()}`,
+     // icon: YouTube
+    //},
+    Phone: {
+      deepLink: (url) => `tel:${url}`,
+      icon: Phone
+    },
+    Email: {
+      deepLink: (url) => `mailto:${url}`,
+      icon: Email
+    }
   };
 
   // Fetch social links from the backend
@@ -43,8 +69,10 @@ const SocialLinks = () => {
   const isMobile = () => /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
   const handleLinkClick = (platform, url) => {
-    const deepLink = deepLinkMap[platform] ? deepLinkMap[platform](url) : null;
+    if (!deepLinkMap[platform]) return;
 
+    const deepLink = deepLinkMap[platform].deepLink(url);
+    
     if (isMobile() && deepLink) {
       window.location.href = deepLink;
     } else {
@@ -61,21 +89,25 @@ const SocialLinks = () => {
       ) : error ? (
         <p className="social-links-error">{error}</p>
       ) : socialLinks.length > 0 ? (
-        socialLinks.map((link) => (
-          <div
-            key={link.id}
-            onClick={() => handleLinkClick(link.platform, link.url)}
-            className="social-link-item"
-            role="button"
-            tabIndex={0}
-          >
-            <img
-              src={`${import.meta.env.VITE_BACKEND}/socialIcons/${link.image}`}
-              alt={link.platform}
-              className="social-link-icon"
-            />
-          </div>
-        ))
+        socialLinks.map((link) => {
+          const iconSrc = deepLinkMap[link.platform]?.icon || loadingImage; // Default to loading if missing
+
+          return (
+            <div
+              key={link.id}
+              onClick={() => handleLinkClick(link.platform, link.url)}
+              className="social-link-item"
+              role="button"
+              tabIndex={0}
+            >
+              <img
+                src={iconSrc}
+                alt={link.platform}
+                className="social-link-icon"
+              />
+            </div>
+          );
+        })
       ) : (
         <p className="social-links-no-available">No social links available</p>
       )}
