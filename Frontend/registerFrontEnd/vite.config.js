@@ -10,16 +10,22 @@ export default defineConfig({
         optimizationLevel: 3, // Optimize GIFs
       },
       mozjpeg: {
-        quality: 30, // Optimize JPGs
+        quality: 10, // **Lower JPEG quality for extreme compression**
+        progressive: true, // Progressive loading for faster appearance
       },
       pngquant: {
-        quality: [0.3, 0.5], // Optimize PNGs
+        quality: [0.1, 0.3], // **Lower PNG quality even further**
+        speed: 1, // Maximum compression (slower but better)
       },
       svgo: {
         plugins: [{ removeViewBox: false }], // Optimize SVGs
       },
       webp: {
-        quality: 30, // Automatically convert all images to WebP
+        quality: 10, // **Ultra-small file size**
+        method: 6, // Best compression efficiency (0-6)
+        lossless: false, // **Lossy compression for best size reduction**
+        nearLossless: 80, // **Balance size & quality**
+        smartSubsample: true, // Improved color handling at low quality
       },
     }),
   ],
