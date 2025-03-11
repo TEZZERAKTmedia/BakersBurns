@@ -16,10 +16,22 @@ import img6 from '../../assets/img6.webp';
 // Import other components
 import SocialLinks from '../../Components/navbar/socialLinks';
 import CollageOverlay from './CollageOverlay';
+import DancingScript from '../../assets/CarnivaleeFreakshow-DLrm.ttf'
 
 const Home = () => {
   const [featuredProducts, setFeaturedProducts] = useState([]);                       
   const [upcomingEvent, setUpcomingEvent] = useState(null);
+  const [fontLoaded, setFontLoaded] = useState(false)
+
+  useEffect(() => {
+    const loadFont = async () => {
+      const font = new FontFace('Dancing Script', `url(${DancingScript})`)
+      await font.load();
+      document.fonts.add(font);
+      setFontLoaded(true);
+    }
+    loadFont();
+  }, []);
 
   useEffect(() => {
     const getFeaturedProducts = async () => {
@@ -70,6 +82,13 @@ const Home = () => {
     { src: img5, top: '30%', left: '80%', zIndex: 2, parallaxFactor: 2.2 },
     { src: img6, top: '70%', left: '30%', zIndex: 1, parallaxFactor: 2.5 },
   ];
+  const titleStyle = {
+    fontFamily: fontLoaded ? 'Dancing Script' : 'Arial, sans-serif', // ✅ Fallback to Arial until font loads
+    fontSize: '3rem',
+    color: 'white',
+    textAlign: 'center',
+    margin: '1rem 0',
+  };
 
   return (
     <div className="home-container">
@@ -87,6 +106,7 @@ const Home = () => {
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 1 }}
+            style={titleStyle}
           >
             BakersBurns
           </motion.h1>
@@ -107,7 +127,7 @@ const Home = () => {
           viewport={{ once: true, amount: 0.5 }}
           variants={fadeIn}
         >
-          <motion.h2 className="upcoming-event-title">Upcoming Event</motion.h2>
+          <motion.h2 className="upcoming-event-title" style={titleStyle}>Upcoming Event</motion.h2>
           <h3 className="upcoming-event-name">{upcomingEvent.name}</h3>
           <p className="upcoming-event-date">
             {moment(upcomingEvent.date).format('MMMM Do, YYYY')}
@@ -126,7 +146,7 @@ const Home = () => {
         viewport={{ once: true, amount: 0.2 }}
         variants={fadeIn}
       >
-        <h2 className="home-title">Get In Touch</h2>
+        <h2 className="home-title" style={titleStyle}>Get In Touch</h2>
         <p className="contact-description">
           For commissions, inquiries, or collaborations, feel free to contact me. Let's create something beautiful together!
         </p>
@@ -147,6 +167,7 @@ const Home = () => {
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 1 }}
+            style={titleStyle}
           >
             About the Artist
           </motion.h1>

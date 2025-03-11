@@ -1,7 +1,8 @@
 import React, { Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './Components/navbar/navbar';
-import Home from './Pages/Home/Home'; // Import Home directly (no lazy) for fastest load
+import Home from './Pages/Home/Home'; // Load Home directly (no lazy) for faster rendering
+import BackgroundImage from './assets/tree.webp'; // ✅ Import background image
 
 // Lazy-load other pages
 const Store = React.lazy(() => import('./Pages/Store/Store'));
@@ -24,20 +25,23 @@ const PasswordSetupForm = React.lazy(() => import('./Pages/Signup/password'));
 const AcceptPrivacyTerms = React.lazy(() => import('./Pages/Cart/privacy&terms'));
 
 function App() {
+  const appStyle = {
+    backgroundImage: `url(${BackgroundImage})`, // ✅ Set background image
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    minHeight: '100vh',
+    display: 'flex',
+    flexDirection: 'column',
+    
+  };
+
   return (
     <Router>
-      <div>
+      <div style={appStyle}> {/* ✅ Wrap everything with background */}
         <Navbar />
-        {/*
-          Suspense fallback: Shown briefly while the lazy-loaded routes are fetching.
-          You can style or customize this fallback as you like.
-        */}
         <Suspense fallback={<div>Loading...</div>}>
           <Routes>
-            {/* Home is loaded right away, no lazy-loading */}
             <Route path="/" element={<Home />} />
-
-            {/* All other pages are lazy-loaded */}
             <Route path="/store" element={<Store />} />
             <Route path="/about" element={<About />} />
             <Route path="/gallery" element={<Gallery />} />
