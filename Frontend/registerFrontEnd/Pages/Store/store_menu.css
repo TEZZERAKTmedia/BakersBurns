@@ -7,7 +7,7 @@
   height: 100%;
   background-color: var(--bg-color);
   box-shadow: -2px 0 5px rgba(0, 0, 0, 0.3);
-  z-index: 1;
+  z-index: 1000;
   transform: translateX(100%); /* Hidden by default */
   transition: transform 0.3s ease;
 }

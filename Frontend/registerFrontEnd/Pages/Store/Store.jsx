@@ -55,7 +55,7 @@ const Store = () => {
     return (
       <div className="full-page-loading-overlay">
         <LoadingPage />
-        {error && <p style={{ color: 'red' }}>{error}</p>}
+        {error && <p style={{ color: 'red', position: 'absolute', zIndex: '1000', fontSize: '1rem', bottom: '20%', backgroundColor: 'white', padding: '10px', borderRadius: '10px' }}>{error}</p>}
       </div>
     );
   }

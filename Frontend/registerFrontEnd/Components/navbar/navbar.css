@@ -6,7 +6,7 @@
   width: 100vw;
   background-color: var(--navbar-bg);
   box-shadow: var(--navbar-shadow);
-  z-index: 1000;
+  z-index: 9999;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -16,6 +16,7 @@
 
 /* Navbar Top Section */
 .navbar-top {
+  z-index: 9999;
   width: 100%;
   display: flex;
   align-items: center;
