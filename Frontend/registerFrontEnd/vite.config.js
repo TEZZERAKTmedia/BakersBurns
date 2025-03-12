@@ -21,7 +21,7 @@ export default defineConfig({
         plugins: [{ removeViewBox: false }], // Optimize SVGs
       },
       webp: {
-        quality: 10, // **Ultra-small file size**
+        quality: 5, // **Ultra-small file size**
         method: 6, // Best compression efficiency (0-6)
         lossless: false, // **Lossy compression for best size reduction**
         nearLossless: 80, // **Balance size & quality**

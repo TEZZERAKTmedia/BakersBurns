@@ -172,7 +172,7 @@ const Home = () => {
             About the Artist
           </motion.h1>
           <p>
-            Kalea is a passionate wood-burning artist specializing in creating intricate and one-of-a-kind designs. Each piece is made with dedication, precision, and a love for wood and fire. Explore our gallery to discover unique products that blend nature and craftsmanship.
+          Kalea is a passionate artist specializing in **burn designs on wood, felt, suede, leather, and hats**. Each piece is crafted with precision, bringing intricate and meaningful designs to life. Whether it's custom artwork for personal collections or unique branding for businesses, Kalea's work embodies craftsmanship and creativity
           </p>
           <Link to="/about" className="about-btn">Learn More</Link>
         </div>

@@ -26,28 +26,47 @@ const videoExtensions = ['.mp4', '.mov', '.avi'];
  * @param {string} filePath - Full path to the image.
  * @returns {Promise<string|null>} - Returns the new file's basename or null on error.
  */
-async function convertImageToWebP(filePath) {
-  const ext = path.extname(filePath);
-  const newFilePath = filePath.replace(ext, '.webp');
-  try {
-    // Convert to WebP using sharp
-    await sharp(filePath)
-      .webp({ quality: 80 }) // Adjust quality if needed
-      .toFile(newFilePath);
+    async function convertImageToWebP(filePath) {
+      const ext = path.extname(filePath);
+      const newFilePath = filePath.replace(ext, '.webp');
+      try {
+        // Load the image and retrieve its metadata.
+        let image = sharp(filePath);
+        const metadata = await image.metadata();
 
-    // Remove original file
-    if (await fs.pathExists(filePath)) {
-      await fs.remove(filePath);
+        // If the image is very high resolution, resize it (e.g., max width 1920px).
+        if (metadata.width && metadata.width > 1920) {
+          image = image.resize({ width: 1920 });
+        }
+
+        // Start converting to WebP with an initial quality.
+        let quality = 80;
+        let buffer = await image.webp({ quality }).toBuffer();
+        const MAX_SIZE = 1 * 1024 * 1024; // 1 MB in bytes
+
+        // Reduce quality if the file is larger than 1 MB.
+        while (buffer.length > MAX_SIZE && quality > 30) {
+          quality -= 10;
+          buffer = await image.webp({ quality }).toBuffer();
+        }
+
+        // Write the optimized image to disk.
+        await fs.writeFile(newFilePath, buffer);
+
+        // Remove the original file.
+        if (await fs.pathExists(filePath)) {
+          await fs.remove(filePath);
+        }
+
+        console.log(
+          `✅ Converted ${path.basename(filePath)} to ${path.basename(newFilePath)} at quality ${quality} (${(buffer.length / 1024).toFixed(2)} KB)`
+        );
+        return path.basename(newFilePath);
+      } catch (err) {
+        console.error(`❌ Error converting ${path.basename(filePath)}: ${err.message}`);
+        return null;
+      }
     }
-
-    console.log(`✅ Converted ${path.basename(filePath)} to ${path.basename(newFilePath)}`);
-    return path.basename(newFilePath);
-  } catch (err) {
-    console.error(`❌ Error converting ${path.basename(filePath)}: ${err.message}`);
-    return null;
-  }
-}
-
 /**
  * Converts a video file to WebM and removes the original file on success.
  * @param {string} filePath - Full path to the video.
