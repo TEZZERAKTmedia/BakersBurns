@@ -57,6 +57,10 @@
     height: 80px;
     border-radius: 10px;
     margin-right: 20px;
+  
+    /* Prevent distortion, crop to fill container */
+    object-fit: cover;        /* Maintains aspect ratio, crops overflow */
+    object-position: center;  /* Centers the cropping around the middle */
   }
   
   .cart-item-details {
