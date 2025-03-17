@@ -75,7 +75,7 @@ const GuestCheckout = () => {
   };
 
   return (
-    <div className="guest-checkout">
+    <div className="privacy-terms-container">
       <h2>Guest Checkout</h2>
       {error && <p className="error-message">{error}</p>}
 

@@ -6,7 +6,7 @@ const CheckoutOptions = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="cko-form-section">
+    <div className="privacy-terms-container">
       <h2 className="cko-title">Checkout Options</h2>
       <p className="cko-description">How would you like to proceed?</p>
       <div className="cko-button-group">

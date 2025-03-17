@@ -220,7 +220,8 @@ const unlockInventory = async (cartItems) => {
   }
 };
 
-// Create Stripe Checkout Session
+
+
 const createCheckoutSession = async (req, res) => {
   try {
     const { sessionId, metadata } = req.body;
@@ -251,8 +252,7 @@ const createCheckoutSession = async (req, res) => {
       !shippingInfo ||
       !shippingInfo.selectedCarrier ||
       !shippingInfo.selectedService ||
-      shippingInfo.shippingCost === null ||
-      shippingInfo.shippingCost === undefined
+      shippingInfo.shippingCost == null
     ) {
       return res.status(400).json({ message: 'Shipping details are incomplete.' });
     }
@@ -272,17 +272,20 @@ const createCheckoutSession = async (req, res) => {
       return res.status(400).json({ message: 'Cart is empty.' });
     }
 
-    // Lock inventory for each cart item
+    // OPTIONAL: Light inventory check
+    // (We do NOT subtract here - real lock/inventory decrement happens post-payment in the success flow or webhook.)
     for (const cartItem of cartItems) {
       const product = cartItem.Product;
       if (!product) {
-        return res.status(404).json({ message: `Product with ID ${cartItem.productId} not found.` });
+        return res
+          .status(404)
+          .json({ message: `Product with ID ${cartItem.productId} not found.` });
       }
       if (product.quantity < cartItem.quantity) {
-        return res.status(400).json({ message: `Not enough quantity for ${product.name}.` });
+        return res
+          .status(400)
+          .json({ message: `Not enough quantity for ${product.name}.` });
       }
-      product.quantity -= cartItem.quantity;
-      await product.save();
     }
 
     // Prepare Stripe line items from the cart items
@@ -298,7 +301,7 @@ const createCheckoutSession = async (req, res) => {
       quantity: item.quantity,
     }));
 
-    // Add a separate shipping line item so that shipping cost is included in the total.
+    // Add a separate shipping line item
     const shippingLineItem = {
       price_data: {
         currency: 'usd',
@@ -312,14 +315,15 @@ const createCheckoutSession = async (req, res) => {
 
     lineItems.push(shippingLineItem);
 
-    const expiresAt = Math.floor(Date.now() / 1000) + 5 * 60;
-
-    // Create a Stripe checkout session with metadata (shipping info is also passed in metadata for reference)
+    // Create Stripe checkout session
+    // (No expires_at since Stripe requires min 30 minutes. We'll rely on default or remove it entirely.)
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: lineItems,
       mode: 'payment',
-      expires_at: expiresAt,
+      // Remove expires_at or set to a value >= 30 minutes. For typical usage, omit it entirely.
+      expires_at: Math.floor(Date.now() / 1000) + 60 * 30, // optional if you want a 30-min expiry
+
       success_url: `${process.env.REGISTER_FRONTEND}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.REGISTER_FRONTEND}/cancel?session_id={CHECKOUT_SESSION_ID}`,
       metadata: {
@@ -336,7 +340,7 @@ const createCheckoutSession = async (req, res) => {
       billing_address_collection: 'required',
     });
 
-    console.log("✅ Stripe Session Created:", session.id);
+    console.log('✅ Stripe Session Created:', session.id);
     res.status(200).json({ url: session.url });
   } catch (error) {
     console.error('❌ Error creating checkout session:', error);

@@ -1,172 +1,199 @@
-/* privacyPolicyAndTerms.css */
+/* =========================
+   MAIN CONTAINER
+========================= */
+.privacy-terms-container {
+  /* Center the container horizontally & vertically */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;  /* centers vertically */
+  align-items: center;      /* centers horizontally */
 
-/* Toggle Button Styling */
-.toggle-wrapper {
-    display: flex;
-    align-items: center;
-    margin: 20px 0;
-    background-color: #505050c0;
-    padding: 50px;
-    
-  }
+  /* Full viewport height */
+  height: 100vh;
 
+  /* Limit horizontal width on large screens */
+  max-width: 700px;    
+  width: 100%;
+  margin: 0 auto;
+  padding: 20px;
   
-  .toggle-label {
-    margin-right: 10px;
-    font-size: 16px;
-    
-    color: white;
+  /* Background color & text alignment */
+  background-color: var(--bg-overlay);
+  text-align: center;
+}
+
+/* Adjust spacing if needed for smaller screens */
+@media (max-width: 768px) {
+  .privacy-terms-container {
+    padding: 15px;
   }
-  
-  .toggle-container {
-    position: relative;
-    width: 50px;
-    height: 25px;
-    background: #ccc;
-    border-radius: 25px;
-    cursor: pointer;
-    
-    transition: background-color 0.3s ease;
-  }
-  
-  .toggle-container.checked {
-    background: #007bff;
-  }
-  
-  .toggle-handle {
-    position: absolute;
-    top: 2px;
-    left: 2px;
-    width: 21px;
-    height: 21px;
-    background: #fff;
-    border-radius: 50%;
-    transition: left 0.3s ease;
-  }
-  
-  .toggle-container.checked .toggle-handle {
-    left: 26px;
-  }
-  
-  /* Modal Styling */
-  .modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100vh;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-  }
-  
-  .modal-content {
-    background: #fff;
-    padding: 20px;
-    border-radius: 10px;
-    width: 90%;
-    
-    max-width: 500px;
-  }
-  
-  .modal-buttons {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 20px;
-  }
-  
-  .modal-scrollable {
-    max-height: 400px;
-    overflow-y: auto;
+}
+
+@media (max-width: 480px) {
+  .privacy-terms-container {
     padding: 10px;
   }
-  
+}
+
+/* =========================
+   HEADING, ERROR
+========================= */
+.privacy-terms-container h2 {
+  margin-bottom: 20px;
+  font-size: 1.8rem;
+  color: #fff; 
+}
+
+.privacy-terms-container p.error {
+  color: red;
+}
+
+/* =========================
+   TOGGLE WRAPPER
+========================= */
+.toggle-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center; /* centers label & toggle horizontally */
+  margin: 20px 0;
+  background-color: #505050c0;
+  padding: 20px;
+  border-radius: 10px;
+  width: 100%; 
+}
+
+/* The label next to the toggle */
+.toggle-label {
+  margin-right: 10px;
+  font-size: 16px;
+  color: white;
+}
+
+/* Toggle container */
+.toggle-container {
+  position: relative;
+  width: 50px;
+  height: 25px;
+  background-color: #ccc; 
+  border-radius: 25px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.toggle-container.checked {
+  background: #007bff; /* blue background if checked */
+}
+
+/* The circle knob */
+.toggle-handle {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 21px;
+  height: 21px;
+  background: #fff;
+  border-radius: 50%;
+  transition: left 0.3s ease;
+}
+
+.toggle-container.checked .toggle-handle {
+  left: 26px;
+}
+
+/* =========================
+   BUTTON FOR CHECKOUT
+========================= */
+button.proceed-btn,
+.privacy-terms-container button {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background: green; 
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button.proceed-btn[disabled],
+.privacy-terms-container button[disabled] {
+  background: gray;
+  cursor: not-allowed;
+}
+
+/* =========================
+   MODALS
+========================= */
 .modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-  }
-  
-  .modal-content {
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    max-width: 600px;
-    width: 100%;
-    max-height: 80%;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .modal-scrollable {
-    flex-grow: 1;
-    overflow-y: auto;
-    margin-bottom: 20px;
-  }
-  
-  .modal-buttons {
-    display: flex;
-    justify-content: space-between;
-  }
-  
-  .modal-buttons button {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-  
-  .modal-buttons button:first-child {
-    background: green;
-    color: white;
-  }
-  
-  .modal-buttons button:last-child {
-    background: red;
-    color: white;
-  }
-  
-  .modal-buttons button:disabled {
-    background: gray;
-    cursor: not-allowed;
-  }
-  
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
 
-  .privacy-terms-container {
-    margin-top: 50px; /* Default margin-top */
-    padding: 20px; /* Optional: add some inner spacing */
-  }
-  
-  /* Adjust margin-top for smaller screens */
-  @media (max-width: 768px) {
-    .privacy-terms-container {
-      margin-top: 20vw; /* Smaller margin for tablets */
-    }
-  }
-  
-  @media (max-width: 480px) {
-    .privacy-terms-container {
-      margin-top: 25vw; /* Smaller margin for phones */
-    }
-  }
-  
-  @media (max-width: 360px) {
-    .privacy-terms-container {
-        margin-top: 30vw; /* Smallest margin for very small devices */
-    }
-  }
-  
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
 
+/* The content inside the modal */
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  max-width: 600px;  
+  width: 90%;        
+  max-height: 80%;   
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 
+  display: flex;
+  flex-direction: column;
+  text-align: left;  
+}
 
-  
+/* The scrollable area inside the modal (if you want to wrap content) */
+.modal-scrollable {
+  flex-grow: 1;
+  overflow-y: auto;
+  margin-bottom: 20px;
+  padding: 10px;
+  border: 1px solid #ccc;
+}
+
+/* Buttons in the modal */
+.modal-buttons {
+  display: flex;
+  justify-content: space-between;
+}
+
+.modal-buttons button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.modal-buttons button:first-child {
+  background: green;
+  color: white;
+}
+
+.modal-buttons button:last-child {
+  background: red;
+  color: white;
+}
+
+.modal-buttons button:disabled {
+  background: gray;
+  cursor: not-allowed;
+}
+
+/* =========================
+   CONFIRM DISAGREE MODAL
+========================= */
+.confirm-disagree-text {
+  margin-bottom: 20px;
+  font-size: 1rem;
+  color: #333;
+}
