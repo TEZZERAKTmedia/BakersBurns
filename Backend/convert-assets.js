@@ -97,7 +97,7 @@ async function convertImageToWebP(filePath) {
   const newFilePath = filePath.replace(ext, '.webp');
 
   try {
-    let image = sharp(filePath);
+    let image = sharp(filePath).rotate(); // ✅ Auto-rotate based on EXIF metadata
     const metadata = await image.metadata();
 
     if (metadata.width && metadata.width > 1920) {
@@ -122,6 +122,7 @@ async function convertImageToWebP(filePath) {
     return null;
   }
 }
+
 
 /**
  * Converts a video file to WebM and removes the original file on success.
