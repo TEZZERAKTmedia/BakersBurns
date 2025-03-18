@@ -13,7 +13,7 @@ const Media = require('./models/media');
 
 // Map folders to models and the field that stores the filename
 const folders = [
-  { folderPath: path.resolve(__dirname, './uploads'), model: Product, Media, field: 'thumbnail' },
+  { folderPath: path.resolve(__dirname, './uploads'), model: Product, field: 'thumbnail' },
   { folderPath: path.resolve(__dirname, '/uploads'), model: Media, field: 'url'},
   { folderPath: path.resolve(__dirname, './galleryuploads'), model: Gallery, field: 'image' },
   { folderPath: path.resolve(__dirname, './socialIcons'), model: SocialLink, field: 'image' },
