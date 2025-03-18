@@ -1,13 +1,25 @@
 import React, { useState, useRef, useEffect } from 'react';
-import '../Componentcss/image_uploader.css'; // Use your existing CSS
-import LoadingPage from './loading'; 
+import '../Componentcss/image_uploader.css'; // Your existing CSS
+import LoadingPage from './loading';
+import imageCompression from 'browser-image-compression';
 
+// Dynamic Import for FFmpeg
+let createFFmpeg, fetchFile, ffmpeg;
+
+(async () => {
+  const ffmpegModule = await import('@ffmpeg/ffmpeg');
+  createFFmpeg = ffmpegModule.createFFmpeg;
+  fetchFile = ffmpegModule.fetchFile;
+  ffmpeg = createFFmpeg({ log: true });
+
+  await ffmpeg.load(); // Load FFmpeg once
+})();
 
 const DesktopMediaUploader = ({
   mode = 'view', // Modes: 'view', 'edit', 'add'
   initialMedia = [],
   maxMedia = 10,
-  isLoading = false, 
+  isLoading = false,
   onMediaChange,
   onMediaDelete, // Function to delete media from the backend in edit mode
 }) => {
@@ -25,43 +37,100 @@ const DesktopMediaUploader = ({
   const [draggedIndex, setDraggedIndex] = useState(null);
   const dragImageRef = useRef(null);
 
-  const handleMediaChange = (event) => {
+  /**
+   * Handles media selection, compresses images/videos before adding them to the state
+   */
+  const handleMediaChange = async (event) => {
     const files = event.target.files;
-
     if (!files || files.length === 0) {
       console.warn('No files selected or invalid input.');
       return;
     }
 
-    const mediaFiles = Array.from(files)
-      .map((file, index) => {
-        if (file instanceof File) {
-          try {
-            const preview = URL.createObjectURL(file);
-            return {
-              id: `${Date.now()}-${file.name}`,
-              file,
-              src: preview,
-              order: mediaPreviews.length + index + 1,
-            };
-          } catch (err) {
-            console.error('Error generating preview for file:', file, err);
-            return null;
-          }
-        } else {
+    setLoading(true);
+
+    const mediaFiles = await Promise.all(
+      Array.from(files).map(async (file, index) => {
+        if (!(file instanceof File)) {
           console.warn('Invalid file type:', file);
           return null;
         }
-      })
-      .filter(Boolean);
 
-    setMediaPreviews((prev) => [...prev, ...mediaFiles]);
-    if (onMediaChange) onMediaChange([...mediaPreviews, ...mediaFiles]);
+        let optimizedFile = file;
+        let preview = URL.createObjectURL(file);
+        let fileType = file.type;
+
+        if (fileType.startsWith('image')) {
+          optimizedFile = await compressImage(file);
+        } else if (fileType.startsWith('video')) {
+          optimizedFile = await convertVideoToWebM(file);
+        }
+
+        return {
+          id: `${Date.now()}-${file.name}`,
+          file: optimizedFile,
+          src: preview,
+          order: mediaPreviews.length + index + 1,
+        };
+      })
+    );
+
+    const validMediaFiles = mediaFiles.filter(Boolean);
+    setMediaPreviews((prev) => [...prev, ...validMediaFiles]);
+    if (onMediaChange) onMediaChange([...mediaPreviews, ...validMediaFiles]);
+
+    setLoading(false);
+  };
+
+  /**
+   * Compress an image using `browser-image-compression`
+   */
+  const compressImage = async (file) => {
+    try {
+      const options = {
+        maxSizeMB: 1, // Max file size (1MB)
+        maxWidthOrHeight: 1920, // Max width or height
+        useWebWorker: true,
+        fileType: 'image/webp', // Convert to WebP
+      };
+      const compressedFile = await imageCompression(file, options);
+      return new File([compressedFile], file.name.replace(/\.[^.]+$/, '.webp'), { type: 'image/webp' });
+    } catch (error) {
+      console.error('❌ Image compression failed:', error);
+      return file;
+    }
+  };
+
+  /**
+   * Convert a video to WebM using FFmpeg
+   */
+  const convertVideoToWebM = async (file) => {
+    if (!ffmpeg.isLoaded()) {
+      await ffmpeg.load();
+    }
+
+    const inputName = file.name;
+    const outputName = inputName.replace(/\.[^.]+$/, '.webm');
+
+    ffmpeg.FS('writeFile', inputName, await fetchFile(file));
+
+    await ffmpeg.run(
+      '-i', inputName,   // Input file
+      '-c:v', 'libvpx',  // Use VP8/VP9 codec
+      '-b:v', '800k',    // Reduce bitrate
+      '-vf', 'scale=1280:-1', // Scale width to 1280px, maintain aspect ratio
+      '-an',             // Remove audio to save space
+      outputName
+    );
+
+    const outputData = ffmpeg.FS('readFile', outputName);
+    const blob = new Blob([outputData.buffer], { type: 'video/webm' });
+
+    return new File([blob], outputName, { type: 'video/webm' });
   };
 
   const handleDragStart = (index) => {
     setDraggedIndex(index);
-    
   };
 
   const handleDragOver = (index) => {
@@ -84,8 +153,7 @@ const DesktopMediaUploader = ({
 
   const handleRemoveMedia = (index) => {
     const mediaToRemove = mediaPreviews[index];
-    console.log('Removing media:', mediaToRemove)
-    // If in edit mode and the media has an `id`, call the delete function
+
     if (mode === 'edit' && mediaToRemove.id && onMediaDelete) {
       onMediaDelete(mediaToRemove.id);
     }
@@ -97,7 +165,6 @@ const DesktopMediaUploader = ({
   };
 
   useEffect(() => {
-    // Clean up object URLs when the component unmounts
     return () => {
       mediaPreviews.forEach((media) => {
         if (media.src) {
@@ -125,16 +192,15 @@ const DesktopMediaUploader = ({
             <div className="drag-handle">
               <span className="image-order-number">{preview.order}</span>
               {preview.src.endsWith('.mp4') || preview.src.endsWith('.avi') ? (
-               <video
-               loop
-               muted
-               playsInline
-               webkit-playsinline="true"
-               
-               className="media-preview"
-               src={preview.src}
-               alt={`Video ${index + 1}`}
-             />
+                <video
+                  loop
+                  muted
+                  playsInline
+                  webkit-playsinline="true"
+                  className="media-preview"
+                  src={preview.src}
+                  alt={`Video ${index + 1}`}
+                />
               ) : (
                 <img
                   className="media-preview"
@@ -159,33 +225,23 @@ const DesktopMediaUploader = ({
 
   const renderAddMediaSection = () => {
     return (
-      mode === 'add' || mode === 'edit' ? (
+      (mode === 'add' || mode === 'edit') && (
         <div className="image-grid-item-add-image">
           <label>
             +
-            <input
-              type="file"
-              accept="image/*,video/*"
-              onChange={handleMediaChange}
-              multiple
-              hidden
-            />
+            <input type="file" accept="image/*,video/*" onChange={handleMediaChange} multiple hidden />
           </label>
         </div>
-      ) : null
+      )
     );
   };
 
   return (
     <div className="media-uploader">
-      {isLoading ? (
-        <LoadingPage />
-      ) : (
-        <>
-          {renderMediaGrid()}
-          {renderAddMediaSection()}
-        </>
-      )}
+      {isLoading || loading ? <LoadingPage /> : <>
+        {renderMediaGrid()}
+        {renderAddMediaSection()}
+      </>}
     </div>
   );
 };
