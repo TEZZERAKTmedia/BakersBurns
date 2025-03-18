@@ -4,11 +4,11 @@ import MediaUploader from "../../Components/desktopMediaUploader";
 import { useProductContext } from "./ProductsContext";
 import { motion, AnimatePresence } from "framer-motion";
 import LoadingPage from "../../Components/loading";
+import imageCompression from "browser-image-compression";
 
 const ProductForm = ({ product = {}, onClose }) => {
   const { fetchProducts, addProductWithMedia, fetchProductTypes, productTypes } = useProductContext();
   const [isAddingNewType, setIsAddingNewType] = useState(false);
-  const [thumbnailPreview, setThumbnailPreview] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
   const [missingFields, setMissingFields] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -28,6 +28,7 @@ const ProductForm = ({ product = {}, onClose }) => {
     weight: useRef(null),
   };
 
+  // Initialize newProduct with defaults (for numeric fields, default to 0 or 1 as appropriate)
   const [newProduct, setNewProduct] = useState({
     name: product.name || "",
     description: product.description || "",
@@ -52,14 +53,11 @@ const ProductForm = ({ product = {}, onClose }) => {
 
   const validateFields = () => {
     const missing = [];
-
     if (!newProduct.name.trim()) missing.push("name");
     if (!newProduct.description.trim()) missing.push("description");
     if (!newProduct.price || newProduct.price <= 0) missing.push("price");
     if (!newProduct.quantity || newProduct.quantity <= 0) missing.push("quantity");
     if (!newProduct.thumbnail) missing.push("thumbnail");
-
-    // Check dimensions and weight fields
     if (!newProduct.length || newProduct.length <= 0) missing.push("length");
     if (!newProduct.width || newProduct.width <= 0) missing.push("width");
     if (!newProduct.height || newProduct.height <= 0) missing.push("height");
@@ -74,13 +72,11 @@ const ProductForm = ({ product = {}, onClose }) => {
     } else if (!newProduct.type.trim()) {
       missing.push("type");
     }
-
     return missing;
   };
 
   const handleSave = async () => {
     const missing = validateFields();
-
     if (missing.length > 0) {
       setMissingFields(missing);
       const firstMissingField = missing[0];
@@ -101,7 +97,6 @@ const ProductForm = ({ product = {}, onClose }) => {
 
       await addProductWithMedia(productData, mediaPreviews);
       fetchProducts();
-
       setSuccessMessage("Product saved successfully!");
       setTimeout(() => {
         setSuccessMessage("");
@@ -112,6 +107,47 @@ const ProductForm = ({ product = {}, onClose }) => {
       alert("Failed to save product. Please try again.");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // Utility functions for mobile-friendly number inputs
+  const handleNumberFocus = (field) => {
+    if (newProduct[field] === 0) {
+      setNewProduct((prev) => ({ ...prev, [field]: "" }));
+    }
+  };
+
+  const handleNumberBlur = (field, defaultValue = 0) => (e) => {
+    if (e.target.value === "") {
+      setNewProduct((prev) => ({ ...prev, [field]: defaultValue }));
+    }
+  };
+
+  const handleNumberChange = (field, parser = parseFloat) => (e) => {
+    const val = parser(e.target.value);
+    setNewProduct((prev) => ({ ...prev, [field]: val }));
+  };
+
+  /**
+   * Handle thumbnail change with compression to WebP
+   */
+  const handleThumbnailChange = async (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      try {
+        const options = {
+          maxSizeMB: 1, // maximum file size in MB
+          maxWidthOrHeight: 1920, // maximum dimension
+          useWebWorker: true,
+          fileType: "image/webp", // convert to WebP
+        };
+        const compressedFile = await imageCompression(file, options);
+        const newFile = new File([compressedFile], file.name.replace(/\.[^.]+$/, ".webp"), { type: "image/webp" });
+        setNewProduct((prev) => ({ ...prev, thumbnail: newFile }));
+      } catch (error) {
+        console.error("Thumbnail compression failed:", error);
+        setNewProduct((prev) => ({ ...prev, thumbnail: file }));
+      }
     }
   };
 
@@ -172,8 +208,12 @@ const ProductForm = ({ product = {}, onClose }) => {
             <input
               ref={inputRefs.price}
               type="number"
-              value={newProduct.price}
-              onChange={(e) => setNewProduct({ ...newProduct, price: parseFloat(e.target.value) })}
+              inputMode="decimal"
+              placeholder="Enter price"
+              value={newProduct.price === 0 ? "" : newProduct.price}
+              onFocus={() => handleNumberFocus("price")}
+              onBlur={handleNumberBlur("price", 0)}
+              onChange={handleNumberChange("price", parseFloat)}
               style={{ border: missingFields.includes("price") ? "2px solid red" : "" }}
             />
           </label>
@@ -183,8 +223,12 @@ const ProductForm = ({ product = {}, onClose }) => {
             <input
               ref={inputRefs.quantity}
               type="number"
-              value={newProduct.quantity}
-              onChange={(e) => setNewProduct({ ...newProduct, quantity: parseInt(e.target.value, 10) })}
+              inputMode="numeric"
+              placeholder="Enter quantity"
+              value={newProduct.quantity === 0 ? "" : newProduct.quantity}
+              onFocus={() => handleNumberFocus("quantity")}
+              onBlur={handleNumberBlur("quantity", 1)}
+              onChange={handleNumberChange("quantity", parseInt)}
               style={{ border: missingFields.includes("quantity") ? "2px solid red" : "" }}
             />
           </label>
@@ -197,24 +241,33 @@ const ProductForm = ({ product = {}, onClose }) => {
                 type="number"
                 placeholder="Length"
                 ref={inputRefs.length}
-                value={newProduct.length}
-                onChange={(e) => setNewProduct({ ...newProduct, length: parseFloat(e.target.value) })}
+                inputMode="numeric"
+                value={newProduct.length === 0 ? "" : newProduct.length}
+                onFocus={() => handleNumberFocus("length")}
+                onBlur={handleNumberBlur("length", 0)}
+                onChange={handleNumberChange("length", parseFloat)}
                 style={{ border: missingFields.includes("length") ? "2px solid red" : "" }}
               />
               <input
                 type="number"
                 placeholder="Width"
                 ref={inputRefs.width}
-                value={newProduct.width}
-                onChange={(e) => setNewProduct({ ...newProduct, width: parseFloat(e.target.value) })}
+                inputMode="numeric"
+                value={newProduct.width === 0 ? "" : newProduct.width}
+                onFocus={() => handleNumberFocus("width")}
+                onBlur={handleNumberBlur("width", 0)}
+                onChange={handleNumberChange("width", parseFloat)}
                 style={{ border: missingFields.includes("width") ? "2px solid red" : "" }}
               />
               <input
                 type="number"
                 placeholder="Height"
                 ref={inputRefs.height}
-                value={newProduct.height}
-                onChange={(e) => setNewProduct({ ...newProduct, height: parseFloat(e.target.value) })}
+                inputMode="numeric"
+                value={newProduct.height === 0 ? "" : newProduct.height}
+                onFocus={() => handleNumberFocus("height")}
+                onBlur={handleNumberBlur("height", 0)}
+                onChange={handleNumberChange("height", parseFloat)}
                 style={{ border: missingFields.includes("height") ? "2px solid red" : "" }}
               />
             </div>
@@ -222,10 +275,13 @@ const ProductForm = ({ product = {}, onClose }) => {
             <label>Weight (lbs/kg):</label>
             <input
               type="number"
-              placeholder="Weight"
+              placeholder="Enter weight"
               ref={inputRefs.weight}
-              value={newProduct.weight}
-              onChange={(e) => setNewProduct({ ...newProduct, weight: parseFloat(e.target.value) })}
+              inputMode="numeric"
+              value={newProduct.weight === 0 ? "" : newProduct.weight}
+              onFocus={() => handleNumberFocus("weight")}
+              onBlur={handleNumberBlur("weight", 0)}
+              onChange={handleNumberChange("weight", parseFloat)}
               style={{ border: missingFields.includes("weight") ? "2px solid red" : "" }}
             />
 
@@ -282,11 +338,12 @@ const ProductForm = ({ product = {}, onClose }) => {
             <label>
               Thumbnail:
               <p style={{ color: "black" }}>JPEG, PNG, and GIF</p>
+              {/* Use handleThumbnailChange to compress/convert the thumbnail */}
               <input
                 ref={inputRefs.thumbnail}
                 type="file"
                 accept="image/*"
-                onChange={(e) => setNewProduct({ ...newProduct, thumbnail: e.target.files[0] })}
+                onChange={handleThumbnailChange}
               />
             </label>
           </div>
