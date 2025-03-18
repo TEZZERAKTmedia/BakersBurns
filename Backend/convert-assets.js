@@ -25,6 +25,10 @@ const folders = [
 /**
  * Fix database entries by ensuring all images end in .webp and videos end in .webm
  */
+/**
+ * Fix database entries by ensuring all images end in .webp and videos end in .webm.
+ * Updates database **even if files don't exist**.
+ */
 async function fixDatabaseEntries() {
   console.log('🔍 Checking database for incorrect file formats...');
   const models = [
@@ -49,30 +53,39 @@ async function fixDatabaseEntries() {
       });
 
       for (const record of records) {
-        const oldFilePath = path.resolve(__dirname, 'uploads', record[field]);
-        const ext = path.extname(record[field]).toLowerCase();
+        let filePaths = record[field];
 
-        let newFilename = null;
-
-        if (imageExtensions.includes(ext)) {
-          newFilename = await convertImageToWebP(oldFilePath);
-        } else if (videoExtensions.includes(ext)) {
-          newFilename = await convertVideoToWebM(oldFilePath);
+        if (typeof filePaths === 'string' && filePaths.startsWith('["')) {
+          filePaths = JSON.parse(filePaths); // Parse JSON array
         }
 
-        if (newFilename) {
-          await model.update(
-            { [field]: newFilename },
-            { where: { id: record.id } }
-          );
-          console.log(`✅ Updated ${model.name} record: ${record[field]} → ${newFilename}`);
+        const updatedFiles = [];
+
+        for (let filePath of Array.isArray(filePaths) ? filePaths : [filePaths]) {
+          const ext = path.extname(filePath).toLowerCase();
+          let newFilename = filePath.replace(ext, ext === '.mp4' ? '.webm' : '.webp');
+
+          if (imageExtensions.includes(ext) || videoExtensions.includes(ext)) {
+            // ✅ Update DB **even if the file does not exist**
+            updatedFiles.push(newFilename);
+          }
         }
+
+        const finalValue = Array.isArray(filePaths) ? JSON.stringify(updatedFiles) : updatedFiles[0];
+
+        await model.update(
+          { [field]: finalValue },
+          { where: { id: record.id } }
+        );
+
+        console.log(`✅ Updated ${model.name} record: ${record[field]} → ${finalValue}`);
       }
     } catch (err) {
       console.error(`❌ Error fixing database for ${model.name}:`, err);
     }
   }
 }
+
 
 /**
  * Converts an image file to WebP and removes the original file on success.
