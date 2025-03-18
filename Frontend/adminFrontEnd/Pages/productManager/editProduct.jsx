@@ -310,6 +310,17 @@ const EditProductForm = ({ productId, onUpdate, onCancel }) => {
           onImageUpload={handleThumbnailChange}
         />
       </div>
+      <div className='form-section'>
+        <h3>Media Uploader</h3>
+      <DesktopMediaUploader 
+        mode="edit"
+        initialMedia={mediaPreviews}
+        onMediaChange={setMediaPreviews}
+        onMediaDelete={(id) => console.log("Delete media", id)}
+      /></div>
+
+
+      
 
       <div className="form-actions">
         <button onClick={handleSubmit} disabled={isSubmitting}>

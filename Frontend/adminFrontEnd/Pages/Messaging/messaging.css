@@ -106,7 +106,7 @@
     padding: 10px;
     border-radius: 15px;
     word-wrap: break-word;
-   
+    
     /* Removed negative padding */
   }
   
@@ -175,6 +175,7 @@
     color: #fff;
     border: none;
     margin-bottom: 100px;
+    
   }
   
   
@@ -251,19 +252,19 @@
   .mobile-message-bubble.mbl-admin {
     align-self: flex-end;
     text-align: right;
-    background-color: var(--msg-admin);
-    color: var(--text-color);
+    background-color: var(--inverted-button-bg);
     padding-top: -20px;
     
   }
-  .admin-text {
-    color: var(--inverted-button-text);
+  .mbl-admin-text {
+    
+    color: var(--navbar-bg);
   }
   
   .mobile-message-bubble.mbl-user {
     align-self: flex-start;
     text-align: left;
-    background-color: var(--msg-admin-text);
+    background-color: var(--btn-bg);
     
   }
   .mbl-user-text {
@@ -309,11 +310,13 @@
   
   .mobile-send-button {
     padding: 10px 20px;
-    margin-right: 10px;
+    margin-right: 10%;
     border-radius: 20px;
     background-color: var(--btn-bg);
     color: var(--inverted-button-text);
     border: none;
+    
+
   }
   
   /* Mobile default view (threads and search) */
@@ -333,10 +336,13 @@
     padding-bottom: 200px;
     height: 90vh;
     overflow-y: auto;
+    margin-left: clamp(-3rem, 0vw, -12rem);
+
   }
   
   .mobile-thread-item {
     padding: 10px;
+    
     border-bottom: 1px solid var(--text-color);
   }
   
@@ -348,7 +354,7 @@
   
   .mobile-thread-message {
     font-size: 14px;
-    color: #555;
+    color: var(--body-text);
   }
   
   .mobile-thread-timestamp {
