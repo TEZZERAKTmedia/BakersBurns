@@ -255,7 +255,7 @@ sequelize.authenticate()
   .then(async () => {
     console.log('✅ Database connected successfully.');
 
-    const ENABLE_SYNC = false; // ✅ Toggle this to false if you don't want to sync
+    const ENABLE_SYNC = false;
 
     if (ENABLE_SYNC) {
       await db.sequelize.sync({ alter: true });
@@ -264,10 +264,26 @@ sequelize.authenticate()
       console.log('⚠️ Database sync skipped (ENABLE_SYNC = false).');
     }
 
-    // ✅ Now it's safe to start cron jobs
+    // ✅ Run asset conversion BEFORE cleanup
+    console.log("🚀 Running asset conversion script before cleanup...");
+    const scriptPath = path.join(__dirname, 'convert-assets.js');
+    exec(`node "${scriptPath}"`, (error, stdout, stderr) => {
+      if (error) {
+        console.error(`❌ Error in convert-assets.js: ${error.message}`);
+        return;
+      }
+      if (stderr) {
+        console.error(`Stderr: ${stderr}`);
+      }
+      console.log(`✅ Asset conversion complete: ${stdout}`);
+
+      // ✅ Only run cleanup AFTER conversion is done
+      console.log("🚀 Running media cleanup cron...");
+      cleanupMediaCron();
+    });
+
     console.log("🚀 Initializing order cron job...");
     scheduleCronJob();
-    cleanupMediaCron();
 
     console.log("🚀 Initializing discount cron job...");
     startDiscountCron();
@@ -284,8 +300,9 @@ sequelize.authenticate()
   })
   .catch((err) => {
     console.error('❌ Database connection failed:', err.message);
-    process.exit(1); // Exit if database connection fails
+    process.exit(1);
   });
+
 
 
 // Start the server
