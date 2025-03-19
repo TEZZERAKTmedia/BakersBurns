@@ -13,6 +13,12 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
+      - name: Install Dependencies and Build Frontend
+        run: |
+          cd Frontend/registerFrontEnd
+          npm install
+          npm run build
+
       - name: Debug Repository Files
         run: |
           echo "Listing all files..."
@@ -28,6 +34,7 @@ jobs:
           target: "/home/bakersburns/htdocs/bakersburns.com/"
           strip_components: 3
           rm: true
+
 
   deploy-backend:
     name: Deploy Backend
