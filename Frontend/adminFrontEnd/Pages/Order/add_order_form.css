@@ -12,7 +12,7 @@
 }
 
 .add-order-modal {
-  background-color: #fff;
+  background-color: var(--navbar-bg);
   padding: 5vw; /* Use viewport width for padding */
   border-radius: 10px;
   width: 90%;

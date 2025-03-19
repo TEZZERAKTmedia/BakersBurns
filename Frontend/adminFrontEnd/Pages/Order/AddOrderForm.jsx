@@ -204,7 +204,7 @@ const AddOrderForm = ({ onClose, onOrderCreated }) => {
             onScroll={handleScroll}
             ref={productBoxRef}
           >
-            <h3 className="add-order-box-header">Existing Products</h3>
+            <h3 >Existing Products</h3>
             <div className="add-order-product-list">
               {productOptions.map((product) => (
                 <div
