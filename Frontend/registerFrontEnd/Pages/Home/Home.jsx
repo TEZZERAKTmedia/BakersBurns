@@ -120,24 +120,7 @@ const Home = () => {
       <CollageOverlay items={collageItems} />
 
       {/* Upcoming Event Section */}
-      {upcomingEvent && (
-        <motion.section 
-          className="upcoming-event-section"
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.5 }}
-          variants={fadeIn}
-        >
-          <motion.h2 className="upcoming-event-title" style={titleStyle}>Upcoming Event</motion.h2>
-          <h3 className="upcoming-event-name">{upcomingEvent.name}</h3>
-          <p className="upcoming-event-date">
-            {moment(upcomingEvent.date).format('MMMM Do, YYYY')}
-            {upcomingEvent.startTime && ` at ${moment(upcomingEvent.startTime, 'HH:mm').format('h:mm A')}`}
-          </p>
-          <p className="upcoming-event-description">{upcomingEvent.description}</p>
-          <Link to="/event" className="upcoming-event-btn">See All Events</Link>
-        </motion.section>
-      )}
+      
       <motion.section 
         className="home-section"
         initial="hidden"
@@ -163,6 +146,24 @@ const Home = () => {
         </p>
         <SocialLinks />
       </motion.section>
+      {upcomingEvent && (
+        <motion.section 
+          className="upcoming-event-section"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.5 }}
+          variants={fadeIn}
+        >
+          <motion.h2 className="upcoming-event-title" style={titleStyle}>Upcoming Event</motion.h2>
+          <h3 className="upcoming-event-name">{upcomingEvent.name}</h3>
+          <p className="upcoming-event-date">
+            {moment(upcomingEvent.date).format('MMMM Do, YYYY')}
+            {upcomingEvent.startTime && ` at ${moment(upcomingEvent.startTime, 'HH:mm').format('h:mm A')}`}
+          </p>
+          <p className="upcoming-event-description">{upcomingEvent.description}</p>
+          <Link to="/event" className="upcoming-event-btn">See All Events</Link>
+        </motion.section>
+      )}
 
       {/* About Section */}
       <motion.section 

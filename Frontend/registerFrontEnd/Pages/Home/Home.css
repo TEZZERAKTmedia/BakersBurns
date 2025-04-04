@@ -117,31 +117,69 @@ body {
 
 /* Upcoming Event Section */
 .upcoming-event-section {
-  background-color: var(--bg-section);
-  color: var(--text-color);
-  padding: 2.5rem;
-  border-radius: 1.2rem;
-  box-shadow: 0 8px 16px var(--product-shadow);
+  max-width: 800px;
+  margin: 4rem auto;
+  padding: 2rem;
   text-align: center;
-  transition: transform 0.3s ease;
-  margin-top: 30px;
-}
-
-.upcoming-event-section:hover {
-  transform: scale(1.05);
+  background-color: rgba(255, 255, 255, 0.05); /* Optional: subtle bg */
+  border-radius: 1rem;
+  backdrop-filter: blur(4px); /* Optional: glassy effect */
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
 }
 
 .upcoming-event-title {
-  font-family: 'Dancing Script', cursive;
   font-size: 2.5rem;
-  
-  color: var(--text-color);
+  margin-bottom: 1.5rem;
 }
 
 .upcoming-event-name {
-  font-family: 'Georgia', serif;
-  font-size: 2rem;
+  font-size: 1.75rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
 }
+
+.upcoming-event-date {
+  font-size: 1.2rem;
+  color: #ccc;
+  margin-bottom: 1rem;
+}
+
+.upcoming-event-description {
+  font-size: 1rem;
+  margin-bottom: 2rem;
+  line-height: 1.6;
+  color: #eee;
+}
+
+.upcoming-event-btn {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  background-color: #ff6b6b;
+  color: white;
+  text-decoration: none;
+  border-radius: 0.5rem;
+  transition: background-color 0.3s ease;
+}
+
+.upcoming-event-btn:hover {
+  background-color: #e25555;
+}
+
+/* Responsive tweaks */
+@media (max-width: 768px) {
+  .upcoming-event-section {
+    padding: 1.5rem 1rem;
+  }
+
+  .upcoming-event-title {
+    font-size: 2rem;
+  }
+
+  .upcoming-event-name {
+    font-size: 1.5rem;
+  }
+}
+
 
 /* Featured Products Section */
 .featured-products-section {
