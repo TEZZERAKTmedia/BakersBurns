@@ -173,7 +173,7 @@ app.use('/login-passkey-routes', highSecurityRateLimiter('passkey'), passkeyRout
 app.use('/register-store', lowSecurityRateLimiter('register-store'), registerStoreRoutes);
 app.use('/register-cart', lowSecurityRateLimiter('register-cart'), registerCartRoutes); 
 app.use('/register-rates', lowSecurityRateLimiter('register-rates'), registerRates);
-app.use('/register-events', lowSecurityRateLimiter('register-events', registerEventRoutes));
+app.use('/register-events', lowSecurityRateLimiter('register-events'), registerEventRoutes);
 
 
 // User routes
