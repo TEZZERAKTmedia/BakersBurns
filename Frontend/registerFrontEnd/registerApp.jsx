@@ -13,7 +13,7 @@ const Signup = React.lazy(() => import('./Pages/Signup/SignUp'));
 const Login = React.lazy(() => import('./Pages/Login/Login'));
 const PasswordResetForm = React.lazy(() => import('./Components/verification/passwordReset'));
 const ForgotPassword = React.lazy(() => import('./Pages/Login/passwordForgot'));
-const Events = React.lazy(() => import('../userFrontEnd/Pages/Events'));
+const Events = React.lazy(() => import('./Pages/Events/Events'));
 const PrivacyPolicy = React.lazy(() => import('./Components/Privacy&Terms/privacyPolicy'));
 const TermsOfService = React.lazy(() => import('./Components/Privacy&Terms/termsOfService'));
 const GuestCheckout = React.lazy(() => import('./Pages/Cart/guestCheckout'));
@@ -51,7 +51,7 @@ function App() {
             <Route path="/passwordreset" element={<PasswordResetForm />} />
             <Route path="/forgotpassword" element={<ForgotPassword />} />
             <Route path="/verify" element={<VerifyEmail />} />
-            <Route path="/event-manager" element={<Events />} />
+            <Route path="/events" element={<Events />} />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/terms-of-service" element={<TermsOfService />} />
             <Route path="/checkout-options" element={<CheckoutOptions />} />

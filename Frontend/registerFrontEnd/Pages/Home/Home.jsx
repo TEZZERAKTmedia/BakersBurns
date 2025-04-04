@@ -42,6 +42,7 @@ const Home = () => {
 
     const getUpcomingEvent = async () => {
       const event = await fetchUpcomingEvent();
+      console.log('📦 Event received in Home.js:', event); // 👈 This should definitely log
       setUpcomingEvent(event);
     };
 
@@ -70,6 +71,8 @@ const Home = () => {
       return null;
     }
   };
+
+  
 
   const fadeIn = {
     hidden: { opacity: 0, y: 20 },
@@ -163,7 +166,7 @@ const Home = () => {
             {upcomingEvent.startTime && ` at ${moment(upcomingEvent.startTime, 'HH:mm').format('h:mm A')}`}
           </p>
           <p className="upcoming-event-description">{upcomingEvent.description}</p>
-          <Link to="/event" className="upcoming-event-btn">See All Events</Link>
+          <Link to="/events" className="upcoming-event-btn">See All Events</Link>
         </motion.section>
       )}
 

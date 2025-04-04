@@ -71,8 +71,25 @@ const getUpcomingEvent = async (req, res) => {
   }
 };
 
+const getAllEvents = async (req, res) => {
+    try {
+        const events = await Event.findAll({
+         order: [
+            [startDate, 'ASC'],
+            [startTime, 'ASX'],
+         ],
+        });
+        res.status(200).json(events);
+    } catch (error) {
+        console.error('Error fetching all events:', error)
+;
+        res.status(500).json({ message: 'Error fetching all events' });
+    }
+ }
+
 
 module.exports = {
      getAllUserEvents,
-     getUpcomingEvent
+     getUpcomingEvent,
+     getAllEvents
 }
