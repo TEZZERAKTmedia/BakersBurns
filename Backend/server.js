@@ -62,6 +62,7 @@ const adminDiscountRoutes = require('./routes/admin/adminDiscountRoutes');
 const { rateLimiter } = require('./utils/rateLimiter');
 const googleRoutes = require('./routes/register/googleRoutes');
 const invoiceRoutes = require('./routes/admin/invoiceRoutes');
+const registerEventRoutes = require('./routes/register/eventRoutes');
 
  // Assuming passport.js is in the same directory
 
@@ -172,6 +173,7 @@ app.use('/login-passkey-routes', highSecurityRateLimiter('passkey'), passkeyRout
 app.use('/register-store', lowSecurityRateLimiter('register-store'), registerStoreRoutes);
 app.use('/register-cart', lowSecurityRateLimiter('register-cart'), registerCartRoutes); 
 app.use('/register-rates', lowSecurityRateLimiter('register-rates'), registerRates);
+app.use('/register-events', lowSecurityRateLimiter('register-events', registerEventRoutes));
 
 
 // User routes
@@ -240,6 +242,7 @@ const { checkShippedOrdersUsps } = require("./controllers/carrier/cronjobs/uspsC
 const {startDiscountCron} = require('./controllers/admin/cron/discountCronJob.js');
 const cleanupMediaCron = require('./utils/mediaCronJob');
 const scheduleCronJob = require('./utils/ordersCronJob');
+const { register } = require('module');
 
 
 
