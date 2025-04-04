@@ -62,7 +62,9 @@ const Home = () => {
   const fetchUpcomingEvent = async () => {
     try {
       const response = await registerApi.get('/register-events/get-events');
+      console.log(response.data);
       return response.data;
+      
     } catch (error) {
       console.error('Error fetching upcoming event:', error);
       return null;
