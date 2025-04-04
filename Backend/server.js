@@ -72,19 +72,30 @@ const invoiceRoutes = require('./routes/admin/invoiceRoutes');
 const app = express();
 
 // Set allowed origins based on environment
-const allowedOrigins = process.env.NODE_ENV === 'production' 
-  ? [] // Leave empty since CORS is handled at NGINX level
-  : [process.env.USER_FRONTEND, process.env.ADMIN_FRONTEND, process.env.REGISTER_FRONTEND, 'http://localhost:8080'];
+const allowedOrigins = process.env.NODE_ENV === 'production'
+  ? [
+      process.env.PROD_USER_FRONTEND,
+      process.env.PROD_ADMIN_FRONTEND,
+      process.env.PROD_REGISTER_FRONTEND
+    ]
+  : [
+      process.env.USER_FRONTEND,
+      process.env.ADMIN_FRONTEND,
+      process.env.REGISTER_FRONTEND
+    ];
 
-if (process.env.NODE_ENV !== 'production') {
-  // Only enable CORS middleware in development
-  app.use(cors({
-    origin: allowedOrigins,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    credentials: true,
-  }));
-  console.log('CORS middleware enabled for development');
-}
+
+    
+    app.use(cors({
+      origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+          callback(null, true);
+        } else {
+          callback(new Error('Not allowed by CORS'));
+        }
+      },
+      credentials: true,
+    }));
 app.use(
   helmet({
     crossOriginResourcePolicy: false, // ✅ Allows cross-origin images

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { Link } from 'react-router-dom'; 
 import moment from 'moment';
+import StoreGrid from '../../Pages/Store/StoreGrid';
 import './Home.css';
 import { registerApi } from '../../config/axios';
 
@@ -137,6 +138,16 @@ const Home = () => {
           <Link to="/event" className="upcoming-event-btn">See All Events</Link>
         </motion.section>
       )}
+      <motion.section 
+        className="home-section"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.2 }}
+        variants={fadeIn}
+      >
+        <StoreGrid />
+        
+      </motion.section>
 
       {/* Get In Touch Section */}
       <motion.section 

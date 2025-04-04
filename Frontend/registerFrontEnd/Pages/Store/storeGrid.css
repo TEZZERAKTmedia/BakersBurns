@@ -1,0 +1,58 @@
+/* Container centers the grid within any parent element */
+.store-grid-container {
+    width: 100%;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  /* Grid layout with a maximum width for larger screens */
+  .store-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  /* Individual grid item styling */
+  .store-grid-item {
+    background-color: var(--bg-section);
+    border-radius: 8px;
+    overflow: hidden;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+  }
+  
+  .store-grid-item:hover {
+    transform: scale(1.05);
+  }
+  
+  /* Image styling for grid items */
+  .store-grid-item-image img {
+    width: 100%;
+    height: 100px; /* Adjust as needed for a small preview */
+    object-fit: cover;
+  }
+  
+  /* Product info styling */
+  .store-grid-item-info {
+    padding: 0.5rem;
+  }
+  
+  /* Message when no products available */
+  .store-grid-no-products {
+    text-align: center;
+    margin-top: 1rem;
+  }
+  
+  /* Optional error styling */
+  .store-grid-error {
+    color: red;
+    text-align: center;
+    margin-top: 1rem;
+  }
+  
