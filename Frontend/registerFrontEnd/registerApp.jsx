@@ -7,7 +7,7 @@ import BackgroundImage from './assets/tree.webp'; // ✅ Import background image
 // Lazy-load other pages
 const Store = React.lazy(() => import('./Pages/Store/Store'));
 const About = React.lazy(() => import('./Pages/About/About'));
-const Gallery = React.lazy(() => import('./Pages/Gallery/InstagramGallery'));
+const Gallery = React.lazy(() => import('./Pages/Gallery/Gallery'));
 const VerifyEmail = React.lazy(() => import('./Pages/Signup/verifyEmail'));
 const Signup = React.lazy(() => import('./Pages/Signup/SignUp'));
 const Login = React.lazy(() => import('./Pages/Login/Login'));

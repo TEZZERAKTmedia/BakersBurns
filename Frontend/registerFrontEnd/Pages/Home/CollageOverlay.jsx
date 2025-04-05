@@ -19,18 +19,20 @@ const getRandom = (min, max) => Math.random() * (max - min) + min;
 
 // Initial image positions
 const initialCollageItems = [
-  { src: img1, top: "10%", left: "10%", zIndex: 5 },
-  { src: img2, top: "12%", left: "70%", zIndex: 6 },
-  { src: img3, top: "15%", left: "40%", zIndex: 4 },
-  { src: img4, top: "20%", left: "55%", zIndex: 7 },
-  { src: img5, top: "20%", left: "25%", zIndex: 3 },
-  { src: img6, top: "70%", left: "70%", zIndex: 8 },
-  { src: img7, top: "65%", left: "10%", zIndex: 2 },
-  { src: img8, top: "65%", left: "60%", zIndex: 9 },
-  { src: img9, top: "70%", left: "25%", zIndex: 1 },
-  { src: img10, top: "75%", left: "50%", zIndex: 10 },
-  { src: img11, top: "75%", left: "0%", zIndex: 10 },
+  { src: img1, top: "5%", left: "5%", zIndex: 5 },
+  { src: img2, top: "10%", left: "75%", zIndex: 6 },
+  { src: img3, top: "20%", left: "35%", zIndex: 4 },
+  { src: img4, top: "15%", left: "55%", zIndex: 7 },
+  { src: img5, top: "25%", left: "10%", zIndex: 3 },
+  { src: img6, top: "30%", left: "80%", zIndex: 8 },
+  { src: img7, top: "45%", left: "5%", zIndex: 2 },
+  { src: img8, top: "50%", left: "65%", zIndex: 9 },
+  { src: img9, top: "55%", left: "25%", zIndex: 1 },
+  { src: img10, top: "70%", left: "50%", zIndex: 10 },
+  { src: img11, top: "65%", left: "0%", zIndex: 10 },
+
 ];
+
 
 const CollageOverlay = () => {
   const [collageItems, setCollageItems] = useState([]);

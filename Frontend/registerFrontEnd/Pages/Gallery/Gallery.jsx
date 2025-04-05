@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { registerApi } from "../../config/axios";
 import './gallery.css'; // Assuming CSS file for custom styles
 import { motion } from "framer-motion";
+import CollageOverlay from "../Home/CollageOverlay"
 
 const Gallery = () => {
     const [gallery, setGallery] = useState([]);
@@ -41,7 +42,7 @@ const Gallery = () => {
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 1 }}
           >
-            
+            <CollageOverlay />
           </motion.h1>
             <div className="gallery-grid">
                 {gallery.map(item => (

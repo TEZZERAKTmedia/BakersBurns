@@ -125,9 +125,9 @@ const Home = () => {
       </motion.section>
       
 
-      {/* Collage Overlay */}
+      {/* Collage Overlay 
       <CollageOverlay items={collageItems} />
-
+*/}
       {/* Upcoming Event Section */}
       
       <motion.section 
