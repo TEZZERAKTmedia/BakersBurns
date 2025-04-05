@@ -53,7 +53,9 @@ const Navbar = () => {
 
   return (
     <nav className="navbar">
+      
       <div className="navbar-top">
+
         {/* Page Title */}
         <AnimatePresence>
           <motion.div
@@ -67,7 +69,12 @@ const Navbar = () => {
           >
             {currentPageTitle}
           </motion.div>
+          
         </AnimatePresence>
+        {!isLargeScreen && !menuOpen && (
+        <Link to="/" className="hero-title mobile-logo-link">BakersBurns</Link>
+      )}
+        
 
         {isLargeScreen ? (
           // Desktop: All nav items and auth buttons inline
@@ -119,8 +126,10 @@ const Navbar = () => {
             </ul>
           </>
         ) : (
+          
           // Mobile: Show hamburger menu and auth buttons (if menu is open)
           <>
+          
             {menuOpen && (
               <div className="navbar-auth-buttons">
                 <button className="inverted-button-container" onClick={closeMenu}>
@@ -135,6 +144,7 @@ const Navbar = () => {
               className={`hamburger-menu ${menuOpen ? 'open' : ''}`}
               onClick={toggleMenu}
             >
+              
               <div className="bar1"></div>
               <div className="bar2"></div>
               <div className="bar3"></div>

@@ -68,7 +68,7 @@ body {
 
 .hero-title {
   font-family: 'Dancing Script', cursive;
-  font-size: 5rem;
+  font-size: 3rem;
   color: var(--hero-title-color);
 }
 
@@ -290,7 +290,7 @@ body {
   }
 
   .hero-title {
-      font-size: 2rem;
+      font-size: 1.5rem;
   }
 
   .hero-description {
