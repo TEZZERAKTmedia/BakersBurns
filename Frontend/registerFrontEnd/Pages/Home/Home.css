@@ -48,9 +48,18 @@ body {
   z-index: 4;
   
 }
+.logo {
+  transition: filter 0.3s ease;
+}
+
+/* Invert the image when dark mode is active */
+.dark-mode .logo {
+  filter: invert(1) hue-rotate(180deg);
+}
+
 
 .hero-content {
-  background: var(--navbar-bg);
+  background: var(--bg-overlay);
   padding: 50px;
   border-radius: 10px;
   
@@ -75,7 +84,7 @@ body {
   background-color: var(--btn-bg);
   color: var(--inverted-button-text);
   text-decoration: none;
-  font-size: 1.2rem;
+  font-size: clamp(.7rem, 2vw, 1rem);
   border-radius: 5px;
   transition: background-color 0.3s;
   margin-top: 20px;
@@ -106,6 +115,8 @@ body {
   padding-bottom: 20px;
   
 }
+
+
 
 
 .about-content p {
@@ -266,6 +277,7 @@ body {
   margin-top: 30px;
 }
 
+
 /* Media Queries */
 @media (max-width: 768px) {
   .products-gallery {
@@ -278,16 +290,17 @@ body {
   }
 
   .hero-title {
-      font-size: 3rem;
+      font-size: 2rem;
   }
 
   .hero-description {
-      font-size: 1.2rem;
+    font-size: clamp(1rem, 2.5vw, 1.5rem);
   }
 
   .contact-btn {
       margin-top: 20px;
   }
+
 }
 
 

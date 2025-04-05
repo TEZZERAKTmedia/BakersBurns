@@ -14,6 +14,8 @@ import img4 from '../../assets/img4.webp';
 import img5 from '../../assets/img5.webp';
 import img6 from '../../assets/img6.webp';
 
+import Logo from'../../assets/bakers-burns-logo.webp';
+
 // Import other components
 import SocialLinks from '../../Components/navbar/socialLinks';
 import CollageOverlay from './CollageOverlay';
@@ -100,26 +102,28 @@ const Home = () => {
     <div className="home-container">
       
       {/* Hero Section */}
+      
       <motion.section 
         className="hero-section"
         initial="hidden"
         animate="visible"
         variants={fadeIn}
       >
+        <Link to='/store'>
         <div className="hero-content">
-          <motion.h1 
-            className="hero-title"
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 1 }}
-            style={titleStyle}
-          >
-            BakersBurns
-          </motion.h1>
-          <p className="hero-description">Unique Wood Burning Art by Kalea Baker</p>
-          <Link to="/store" className="hero-btn">Shop Now</Link>
+
+            <img src={Logo} alt="BakersBurns Logo" className="logo" style={{height:'30vh'}}/>
+            
+
+          <p className="hero-description">
+            Handcrafted pyrography and wood-burned art — every product is a one-of-a-kind creation.
+          </p>
+          <Link to="/store" className="hero-btn">Shop Unique Art</Link>
         </div>
+        </Link>
+
       </motion.section>
+      
 
       {/* Collage Overlay */}
       <CollageOverlay items={collageItems} />
@@ -179,6 +183,7 @@ const Home = () => {
         variants={fadeIn}
       >
         <div className="about-content">
+          <Link  to='/about'>
           <motion.h1 
             className="home-title"
             initial={{ scale: 0.8, opacity: 0 }}
@@ -192,6 +197,7 @@ const Home = () => {
           Kalea is a passionate artist specializing in **burn designs on wood, felt, suede, leather, and hats**. Each piece is crafted with precision, bringing intricate and meaningful designs to life. Whether it's custom artwork for personal collections or unique branding for businesses, Kalea's work embodies craftsmanship and creativity
           </p>
           <Link to="/about" className="about-btn">Learn More</Link>
+          </Link>
         </div>
       </motion.section>
     </div>
