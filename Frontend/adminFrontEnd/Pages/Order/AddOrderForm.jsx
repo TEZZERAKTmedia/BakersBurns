@@ -162,21 +162,27 @@ const AddOrderForm = ({ onClose, onOrderCreated }) => {
                 </option>
                 ))}
             </select>
-          </div>
-          <label>
-            <input
-              type="checkbox"
-              checked={manualOverride}
-              onChange={() => setManualOverride(!manualOverride)}
-            />
-            Override Total
-          </label>
-          <input
-            type="number"
-            disabled={!manualOverride}
-            value={orderTotal}
-            onChange={(e) => setOrderTotal(parseFloat(e.target.value) || 0)}
-          />
+            <div className="add-order-form-section">
+              <label className="add-order-label">
+                <input
+                  type="checkbox"
+                  checked={manualOverride}
+                  onChange={() => setManualOverride(!manualOverride)}
+                  className="add-order-checkbox"
+                />
+                Override Total
+              </label>
+
+              <input
+                type="number"
+                disabled={!manualOverride}
+                value={orderTotal}
+                onChange={(e) => setOrderTotal(parseFloat(e.target.value) || 0)}
+                className="add-order-input"
+              />
+            </div>
+            </div>
+
 
 
 
