@@ -3,7 +3,7 @@ const OrderItem = require('../../models/orderItem');
 const User = require('../../models/user');
 const Product = require('../../models/product');
 const {sendEmailNotification } = require('../../utils/statusEmail');
-const {decrypt} = require('../../utils/encrypt');
+const {encrypt, decrypt} = require('../../utils/encrypt');
 
 
 const sendStatusNotification = async (order, status) => {
@@ -34,7 +34,7 @@ const createOrder = async (req, res) => {
 
     const newOrder = await Order.create({
       userId: user.id,
-      shippingAddress,
+      shippingAddress: shippingAddress ? encrypt(JSON.stringify(shippingAddress)) : null,
       trackingNumber,
       carrier,
       total,
@@ -45,7 +45,7 @@ const createOrder = async (req, res) => {
       orderId: newOrder.id,
       productId: item.productId,
       quantity: item.quantity,
-      total: item.price * item.quantity, // Ensure item total is calculated
+      total: item.price * item.quantity,
     }));
 
     await OrderItem.bulkCreate(items);
@@ -55,7 +55,7 @@ const createOrder = async (req, res) => {
       carrier,
       total,
       orderItems: orderItems.map((item) => ({
-        name: item.name, // Ensure name is included in the frontend request
+        name: item.name,
         quantity: item.quantity,
         price: item.price,
       })),
