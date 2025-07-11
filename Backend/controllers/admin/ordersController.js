@@ -41,11 +41,22 @@ const createOrder = async (req, res) => {
       status: initialStatus,
     });
 
-    const items = orderItems.map((item) => ({
-      orderId: newOrder.id,
-      productId: item.productId,
-      quantity: item.quantity,
-      total: item.price * item.quantity,
+    // Build items - use frontend price if provided, or fetch Product price
+    const items = await Promise.all(orderItems.map(async (item) => {
+      let price = item.price;
+
+      if (price === undefined || price === null) {
+        const product = await Product.findByPk(item.productId);
+        if (!product) throw new Error(`Product with id ${item.productId} not found`);
+        price = product.price;
+      }
+
+      return {
+        orderId: newOrder.id,
+        productId: item.productId,
+        quantity: item.quantity,
+        price
+      };
     }));
 
     await OrderItem.bulkCreate(items);
@@ -54,8 +65,8 @@ const createOrder = async (req, res) => {
       shippingAddress,
       carrier,
       total,
-      orderItems: orderItems.map((item) => ({
-        name: item.name,
+      orderItems: items.map((item) => ({
+        productId: item.productId,
         quantity: item.quantity,
         price: item.price,
       })),
@@ -66,9 +77,10 @@ const createOrder = async (req, res) => {
     res.status(201).json({ message: 'Order created successfully.', order: newOrder });
   } catch (error) {
     console.error('Error creating order:', error);
-    res.status(500).json({ message: 'Error creating order', error });
+    res.status(500).json({ message: 'Error creating order', error: error.message });
   }
 };
+
 
 
 
