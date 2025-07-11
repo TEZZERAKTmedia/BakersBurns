@@ -7,13 +7,23 @@ import imageCompression from 'browser-image-compression';
 let createFFmpeg, fetchFile, ffmpeg;
 
 (async () => {
-  const ffmpegModule = await import('@ffmpeg/ffmpeg');
-  createFFmpeg = ffmpegModule.createFFmpeg;
-  fetchFile = ffmpegModule.fetchFile;
-  ffmpeg = createFFmpeg({ log: true });
+  try {
+    const ffmpegModule = await import('@ffmpeg/ffmpeg');
+    if (!ffmpegModule || !ffmpegModule.createFFmpeg) {
+      console.error('❌ FFmpeg module failed to load or is missing createFFmpeg');
+      return;
+    }
 
-  await ffmpeg.load(); // Load FFmpeg once
+    createFFmpeg = ffmpegModule.createFFmpeg;
+    fetchFile = ffmpegModule.fetchFile;
+
+    ffmpeg = createFFmpeg({ log: true });
+    await ffmpeg.load();
+  } catch (error) {
+    console.error('❌ Error loading FFmpeg:', error);
+  }
 })();
+
 
 const DesktopMediaUploader = ({
   mode = 'view', // Modes: 'view', 'edit', 'add'
