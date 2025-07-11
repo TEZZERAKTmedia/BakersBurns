@@ -4,10 +4,17 @@ import LoadingPage from './loading';
 import imageCompression from 'browser-image-compression';
 
 // ✅ Proper static import for FFmpeg
-import * as FFmpeg from '@ffmpeg/ffmpeg';
-const ffmpeg = FFmpeg.createFFmpeg({ log: true });
-const fetchFile = FFmpeg.fetchFile;
+let ffmpegInstance = null;
+let fetchFileFunc = null;
 
+async function getFFmpeg() {
+  if (!ffmpegInstance) {
+    const { createFFmpeg, fetchFile } = await import('@ffmpeg/ffmpeg');
+    ffmpegInstance = createFFmpeg({ log: true });
+    fetchFileFunc = fetchFile;
+  }
+  return { ffmpeg: ffmpegInstance, fetchFile: fetchFileFunc };
+}
 
 
 const DesktopMediaUploader = ({
@@ -37,6 +44,7 @@ const DesktopMediaUploader = ({
   useEffect(() => {
     const loadFFmpeg = async () => {
       try {
+        const { ffmpeg } = await getFFmpeg();
         if (!ffmpeg.isLoaded()) {
           await ffmpeg.load();
         }
@@ -45,10 +53,10 @@ const DesktopMediaUploader = ({
         console.error('❌ Error loading FFmpeg:', error);
       }
     };
-
+  
     loadFFmpeg();
   }, []);
-
+  
   const handleMediaChange = async (event) => {
     const files = event.target.files;
     if (!files || files.length === 0) {
@@ -112,12 +120,14 @@ const DesktopMediaUploader = ({
       console.error('❌ FFmpeg is not loaded yet.');
       return file;
     }
-
+  
+    const { ffmpeg, fetchFile } = await getFFmpeg();
+  
     const inputName = file.name;
     const outputName = inputName.replace(/\.[^.]+$/, '.webm');
-
+  
     ffmpeg.FS('writeFile', inputName, await fetchFile(file));
-
+  
     await ffmpeg.run(
       '-i', inputName,
       '-c:v', 'libvpx',
@@ -126,12 +136,13 @@ const DesktopMediaUploader = ({
       '-an',
       outputName
     );
-
+  
     const outputData = ffmpeg.FS('readFile', outputName);
     const blob = new Blob([outputData.buffer], { type: 'video/webm' });
-
+  
     return new File([blob], outputName, { type: 'video/webm' });
   };
+  
 
   const handleDragStart = (index) => {
     setDraggedIndex(index);
