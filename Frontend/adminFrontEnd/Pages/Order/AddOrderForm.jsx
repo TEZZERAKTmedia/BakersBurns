@@ -18,11 +18,20 @@ const AddOrderForm = ({ onClose, onOrderCreated }) => {
   const addProductFormRef = useRef(null);
   const [showAddProductButton, setShowAddProductButton] = useState(true);
   const [isAddProductFormOpen, setIsAddProductFormOpen] = useState(false);
+  const [orderTotal, setOrderTotal] = useState(calculateTotal());
+  const [manualOverride, setManualOverride] = useState(false);
+
+
 
   useEffect(() => {
     fetchUsers();
     fetchProducts();
   }, []);
+
+  useEffect(() => {
+    setOrderTotal(calculateTotal());
+  }, [selectedProducts]);
+  
 
   const fetchUsers = async () => {
     try {
@@ -95,7 +104,7 @@ const AddOrderForm = ({ onClose, onOrderCreated }) => {
           price: product.price,
           name: product.name,
         })),
-        total: calculateTotal(),
+        total: orderTotal
       };
       await adminApi.post('/orders/create', orderData);
       onOrderCreated();
@@ -104,6 +113,7 @@ const AddOrderForm = ({ onClose, onOrderCreated }) => {
       console.error('Error creating order:', error);
     }
   };
+  
   
 
   const calculateTotal = () => {
@@ -153,6 +163,22 @@ const AddOrderForm = ({ onClose, onOrderCreated }) => {
                 ))}
             </select>
           </div>
+          <label>
+            <input
+              type="checkbox"
+              checked={manualOverride}
+              onChange={() => setManualOverride(!manualOverride)}
+            />
+            Override Total
+          </label>
+          <input
+            type="number"
+            disabled={!manualOverride}
+            value={orderTotal}
+            onChange={(e) => setOrderTotal(parseFloat(e.target.value) || 0)}
+          />
+
+
 
           <div className="add-order-form-section">
             <label>Tracking Number:</label>

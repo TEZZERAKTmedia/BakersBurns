@@ -4,7 +4,11 @@ import LoadingPage from './loading';
 import imageCompression from 'browser-image-compression';
 
 // ✅ Proper static import for FFmpeg
-import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg';
+import * as FFmpeg from '@ffmpeg/ffmpeg';
+const { createFFmpeg, fetchFile } = FFmpeg;
+
+
+
 
 // ✅ Create one instance
 const ffmpeg = createFFmpeg({ log: true });
