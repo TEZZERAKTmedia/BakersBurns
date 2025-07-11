@@ -92,6 +92,8 @@ const AddOrderForm = ({ onClose, onOrderCreated }) => {
         orderItems: selectedProducts.map((product) => ({
           productId: product.id,
           quantity: product.quantity,
+          price: product.price,
+          name: product.name,
         })),
         total: calculateTotal(),
       };
@@ -102,6 +104,7 @@ const AddOrderForm = ({ onClose, onOrderCreated }) => {
       console.error('Error creating order:', error);
     }
   };
+  
 
   const calculateTotal = () => {
     return selectedProducts.reduce(
