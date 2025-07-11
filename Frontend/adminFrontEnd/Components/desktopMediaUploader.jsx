@@ -5,13 +5,10 @@ import imageCompression from 'browser-image-compression';
 
 // ✅ Proper static import for FFmpeg
 import * as FFmpeg from '@ffmpeg/ffmpeg';
-const { createFFmpeg, fetchFile } = FFmpeg;
+const ffmpeg = FFmpeg.createFFmpeg({ log: true });
+const fetchFile = FFmpeg.fetchFile;
 
 
-
-
-// ✅ Create one instance
-const ffmpeg = createFFmpeg({ log: true });
 
 const DesktopMediaUploader = ({
   mode = 'view',
