@@ -109,26 +109,35 @@ const handleWebhook = async (req, res) => {
       // Add order items for each cart item
       await Promise.all(
         cartItems.map(async (cartItem) => {
-          const product = cartItem.Product || cartItem.product;
-          if (!product) {
-            console.error('Product not found for cart item.');
+          // Always pull the product fresh from the DB (don’t trust include)
+          const productId = cartItem.productId || cartItem.Product?.id;
+          if (!productId) {
+            console.error('Missing productId for cart item:', cartItem.id);
             return;
           }
-
-          product.stock -=cartItem.quantity;
-          if (product.stock < 0 ) {
-            product.stock = 0;
+      
+          const product = await Product.findByPk(productId);
+          if (!product) {
+            console.error(`Product not found in DB for ID: ${productId}`);
+            return;
           }
-           
-          await product.save();
+      
+          // Decrease stock safely
+          const newStock = Math.max(product.stock - cartItem.quantity, 0);
+          await product.update({ stock: newStock });
+      
+          // Record the order item
           await OrderItem.create({
             orderId: order.id,
             productId: product.id,
             quantity: cartItem.quantity,
             price: product.price,
           });
+      
+          console.log(`Updated stock for ${product.name}: ${product.stock} → ${newStock}`);
         })
       );
+      
       console.log(`Order items created for order ID: ${order.id}`);
 
       // Clear guest cart if applicable
