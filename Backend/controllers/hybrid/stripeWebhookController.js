@@ -114,6 +114,13 @@ const handleWebhook = async (req, res) => {
             console.error('Product not found for cart item.');
             return;
           }
+
+          product.stock -=cartItem.quantity;
+          if (product.stock < 0 ) {
+            product.stock = 0;
+          }
+           
+          await product.save();
           await OrderItem.create({
             orderId: order.id,
             productId: product.id,

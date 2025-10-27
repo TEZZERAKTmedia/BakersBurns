@@ -179,27 +179,37 @@ const lockInventory = async (req, res, next) => {
     return res.status(400).json({ message: 'Session ID is required.' });
   }
 
+  const t = await sequelize.transaction();
+
   try {
-    const cartItems = await GuestCart.findAll({ where: { sessionId }, include: [Product] });
+    const cartItems = await GuestCart.findAll({
+      where: { sessionId },
+      include: [Product],
+      transaction: t,
+      lock: t.LOCK.UPDATE, // prevent concurrent modifications
+    });
 
     for (const cartItem of cartItems) {
       const product = cartItem.Product;
-
       if (!product) {
-        return res.status(404).json({ message: `Product with ID ${cartItem.productId} not found` });
+        await t.rollback();
+        return res.status(404).json({ message: `Product ${cartItem.productId} not found.` });
       }
 
       if (product.quantity < cartItem.quantity) {
-        return res.status(400).json({ message: `Not enough quantity for ${product.name}` });
+        await t.rollback();
+        return res.status(400).json({ message: `Not enough stock for ${product.name}.` });
       }
 
       product.quantity -= cartItem.quantity;
-      await product.save();
+      await product.save({ transaction: t });
     }
 
+    await t.commit();
     next();
   } catch (error) {
-    console.error('Error locking inventory:', error.message, error.stack);
+    await t.rollback();
+    console.error('Error locking inventory:', error);
     res.status(500).json({ message: 'Error locking inventory' });
   }
 };

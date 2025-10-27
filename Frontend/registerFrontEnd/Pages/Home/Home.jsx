@@ -14,7 +14,7 @@ import img4 from '../../assets/img4.webp';
 import img5 from '../../assets/img5.webp';
 import img6 from '../../assets/img6.webp';
 
-import Logo from'../../assets/bakers-burns-logo.webp';
+import Logo from'../../assets/logo_light.webp';
 
 // Import other components
 import SocialLinks from '../../Components/navbar/socialLinks';
